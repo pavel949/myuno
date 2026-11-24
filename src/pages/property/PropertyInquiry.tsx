@@ -23,13 +23,13 @@ import { toast } from 'sonner';
 import { useProfile } from '@/hooks/useProfile';
 import { usePropertyWithRentalTerms } from '@/hooks/useProperties';
 import { usePropertyBlockedDates } from '@/hooks/usePropertyAvailability';
-import { usePropertyRateSeasons } from '@/hooks/usePropertyRateSeasons';
+import { usePropertyStayPreview } from '@/hooks/usePropertyStayPreview';
 import { useRareFindBadge } from '@/hooks/useRareFindBadge';
 import { DepositPaymentOptions, type DepositPaymentOptionsHandle } from '@/components/property/DepositPaymentOptions';
 import { PayWhenSelector, type PayWhenChoice } from '@/components/property/PayWhenSelector';
 import type { PaymentMethodId } from '@/hooks/useLastPaymentMethod';
 import { useOrders } from '@/hooks/useOrders';
-import { calculatePricing, buildPricingRulesFromSeasons, type PricingRules, type SeasonalPricingRule } from '@/lib/pricingEngine';
+import type { SeasonalPricingRule } from '@/lib/pricingEngine';
 import { pluralizeNights, pluralizeGuests } from '@/lib/i18n/pluralize';
 import { differenceInDays, format, parseISO, subDays } from 'date-fns';
 import { ru } from 'date-fns/locale';
@@ -39,7 +39,7 @@ import { propertyDetailPricing, propertyDetailHref } from '@/lib/real-estate/pro
 import { propertyCancellationDescription } from '@/lib/propertyCancellationDescription';
 import { getStayRuleErrors } from '@/lib/property/stayRulesValidation';
 import { pickLang } from '@/lib/i18n/pickLang';
-import { buildPropertyInquiryKey, shouldBlockPropertyInquirySubmission } from '@/lib/propertyInquiryGuards';
+import { buildPropertyInquiryKey } from '@/lib/propertyInquiryGuards';
 
 
 export default function PropertyInquiry() {
@@ -82,11 +82,6 @@ export default function PropertyInquiry() {
   type RentalTermsExt = {
     currency?: string | null;
     price_per_night?: number | null;
-    early_booking_discount?: number | null;
-    early_booking_days?: number | null;
-    last_minute_discount?: number | null;
-    last_minute_days?: number | null;
-    custom_length_discounts?: Array<{ min_nights: number; discount_percent: number }>;
     payment_policy?: string | null;
     prepay_percent?: number | null;
     manager_email?: string | null;
@@ -118,8 +113,7 @@ export default function PropertyInquiry() {
   const checkOutParam = searchParams.get('checkOut');
   const guestsParam = searchParams.get('guests');
 
-  // Keep date identity stable across form/loading renders. The date-price
-  // effect must restart only when the URL dates (or explicit retry) change.
+  // Keep date identity stable across form/loading renders.
   const checkIn = useMemo(() => checkInParam ? parseISO(checkInParam) : null, [checkInParam]);
   const checkOut = useMemo(() => checkOutParam ? parseISO(checkOutParam) : null, [checkOutParam]);
   const guests = guestsParam ? parseInt(guestsParam, 10) : 2;
@@ -266,76 +260,23 @@ export default function PropertyInquiry() {
 
   const pricePerNight = offerPricing?.pricePerNight ?? 0;
 
-  // Pull rate seasons (per-property pricing overrides) for the central engine.
-  const { data: rateSeasons } = usePropertyRateSeasons(id);
-
-  // Per-date price overrides from the property calendar (same source the server checks).
-  const [dateOverrides, setDateOverrides] = useState<Record<string, number>>({});
-  const [datePricesLoading, setDatePricesLoading] = useState(false);
-  const [datePricesError, setDatePricesError] = useState(false);
-  const [datePricesRetry, setDatePricesRetry] = useState(0);
-  useEffect(() => {
-    if (!id || !checkIn || !checkOut || differenceInDays(checkOut, checkIn) <= 0) { setDateOverrides({}); setDatePricesLoading(false); setDatePricesError(false); return; }
-    let cancelled = false;
-    setDateOverrides({});
-    setDatePricesLoading(true);
-    setDatePricesError(false);
-    const fmt = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-    (async () => {
-      try {
-        const { data, error } = await supabase.rpc('get_property_date_prices', { _property_id: id, _from: fmt(checkIn), _to: fmt(checkOut) });
-        if (error) throw error;
-        const map: Record<string, number> = {};
-        for (const r of data ?? []) if (r.price_override != null) map[String(r.date)] = Number(r.price_override);
-        if (!cancelled) { setDateOverrides(map); setDatePricesLoading(false); }
-      } catch {
-        if (!cancelled) { setDateOverrides({}); setDatePricesLoading(false); setDatePricesError(true); }
-      }
-    })();
-    return () => { cancelled = true; };
-  }, [id, checkIn, checkOut, datePricesRetry]);
-
-  // Single source of truth for ALL pricing — same engine PropertyBookingCard uses.
-  const pricing = useMemo(() => {
-    const baseRules: PricingRules = rateSeasons && rateSeasons.length > 0
-      ? buildPricingRulesFromSeasons(
-          {
-            price_per_night: pricePerNight,
-            weekly_discount: rentalTerms?.weekly_discount,
-            monthly_discount: rentalTerms?.monthly_discount,
-            early_booking_discount: rentalExt?.early_booking_discount,
-            early_booking_days: rentalExt?.early_booking_days,
-            last_minute_discount: rentalExt?.last_minute_discount,
-            last_minute_days: rentalExt?.last_minute_days,
-            custom_length_discounts: rentalExt?.custom_length_discounts,
-            deposit_amount: rentalTerms?.deposit_amount,
-            deposit_currency: rentalTerms?.deposit_currency || listingCurrency,
-            payment_policy: rentalExt?.payment_policy || 'prepay_10',
-            prepay_percent: rentalExt?.prepay_percent,
-          },
-          rateSeasons,
-        )
-      : {
-          pricePerNight,
-          weeklyDiscount: rentalTerms?.weekly_discount,
-          monthlyDiscount: rentalTerms?.monthly_discount,
-          earlyBookingDiscount: rentalExt?.early_booking_discount,
-          earlyBookingDays: rentalExt?.early_booking_days,
-          lastMinuteDiscount: rentalExt?.last_minute_discount,
-          lastMinuteDays: rentalExt?.last_minute_days,
-          customLengthDiscounts: rentalExt?.custom_length_discounts,
-          seasonalPricing: propertyExt?.seasonal_pricing,
-          depositAmount: rentalTerms?.deposit_amount,
-          depositCurrency: rentalTerms?.deposit_currency || listingCurrency,
-          paymentPolicy: rentalExt?.payment_policy || 'prepay_10',
-          prepayPercent: rentalExt?.prepay_percent,
-        };
-
-    if (!checkIn || !checkOut || nights <= 0 || !pricePerNight) {
-      return calculatePricing(baseRules, new Date(), new Date()); // empty breakdown
-    }
-    return calculatePricing({ ...baseRules, dateOverrides }, checkIn, checkOut);
-  }, [pricePerNight, nights, checkIn, checkOut, rentalTerms, rateSeasons, property, listingCurrency, dateOverrides]);
+  const { pricing, loading: datePricesLoading, failed: datePricesError, ready: datePricingReady, retry: retryDatePrices } =
+    usePropertyStayPreview(supportsShortStay ? id : undefined, checkIn, checkOut, {
+      pricePerNight,
+      weeklyDiscount: rentalTerms?.weekly_discount,
+      monthlyDiscount: rentalTerms?.monthly_discount,
+      earlyBookingDiscount: property?.early_booking_discount ?? undefined,
+      earlyBookingDays: property?.early_booking_days ?? undefined,
+      lastMinuteDiscount: property?.last_minute_discount ?? undefined,
+      lastMinuteDays: property?.last_minute_days ?? undefined,
+      customLengthDiscounts: Array.isArray(property?.custom_length_discounts)
+        ? property.custom_length_discounts as Array<{ min_nights: number; discount_percent: number }> : undefined,
+      seasonalPricing: propertyExt?.seasonal_pricing,
+      depositAmount: rentalTerms?.deposit_amount,
+      depositCurrency: rentalTerms?.deposit_currency || listingCurrency,
+      paymentPolicy: rentalExt?.payment_policy || 'prepay_10',
+      prepayPercent: rentalExt?.prepay_percent ?? undefined,
+    });
 
   const validationErrors = useMemo(() => {
     const errors: string[] = getStayRuleErrors(
@@ -351,7 +292,7 @@ export default function PropertyInquiry() {
   }, [checkIn, checkOut, rentalTerms, guests, language, isRu]);
 
 
-  const datePricingBlocked = shouldBlockPropertyInquirySubmission(datePricesLoading, datePricesError);
+  const datePricingBlocked = !datePricingReady;
   const nameError = showFieldErrors && !formData.name.trim();
   const phoneError = showFieldErrors && !formData.phone.trim();
   const inquiryKey = useMemo(() => id && user?.id && checkIn && checkOut
@@ -505,7 +446,7 @@ export default function PropertyInquiry() {
             {datePricesError && (
               <div role="alert" className="p-3 rounded-none bg-destructive/10 border border-destructive/20 text-sm space-y-2">
                 <p>{t({ ru: 'Не удалось загрузить цены для выбранных дат. Мы не показываем базовую цену как итоговую.', en: 'We could not load pricing for these dates, so the base rate is not presented as a final total.', th: 'ไม่สามารถโหลดราคาสำหรับวันที่เลือกได้ จึงไม่แสดงราคาพื้นฐานเป็นยอดสุดท้าย' })}</p>
-                <Button type="button" variant="outline" size="sm" onClick={() => setDatePricesRetry(value => value + 1)}>{t({ ru: 'Повторить', en: 'Retry', th: 'ลองอีกครั้ง' })}</Button>
+                <Button type="button" variant="outline" size="sm" onClick={retryDatePrices}>{t({ ru: 'Повторить', en: 'Retry', th: 'ลองอีกครั้ง' })}</Button>
               </div>
             )}
 
@@ -548,7 +489,9 @@ export default function PropertyInquiry() {
               {rentalTerms?.deposit_amount && rentalTerms.deposit_amount > 0 && (
                 <div className="flex items-center justify-between text-sm text-muted-foreground">
                   <span>{isRu ? 'Залог (возвратный)' : 'Security deposit (refundable)'}</span>
-                  <span>{formatPrice(rentalTerms.deposit_amount)}</span>
+                  <span className="text-right tabular-nums">
+                    {rentalTerms.deposit_amount.toLocaleString(language)} {rentalTerms.deposit_currency || t({ ru: 'валюта уточняется', en: 'currency to be confirmed', th: 'โปรดยืนยันสกุลเงิน' })}
+                  </span>
                 </div>
               )}
             </div>}
@@ -557,10 +500,10 @@ export default function PropertyInquiry() {
 
             <div className="flex items-center justify-between font-semibold text-lg">
               <span className="flex items-center gap-1.5">
-                {isRu ? 'Итого' : 'Total'}
+                {isRu ? 'Стоимость проживания' : 'Stay total'}
                 {/* B2 — Currency popover so guests on RUB/THB presets understand
                     what bank actually charges. */}
-                <Popover>
+                {isInstantBooking && <Popover>
                   <PopoverTrigger asChild>
                     <button
                       type="button"
@@ -580,7 +523,7 @@ export default function PropertyInquiry() {
                         : 'Shown in your selected currency, but billed in the property currency. Your bank may apply an FX fee.'}
                     </p>
                   </PopoverContent>
-                </Popover>
+                </Popover>}
               </span>
               <span className="flex items-baseline gap-1">
                 {datePricingBlocked ? '—' : formatPrice(pricing.total)}

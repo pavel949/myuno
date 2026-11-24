@@ -35,6 +35,7 @@ FIXTURE_SPECS = (
     ('bookings-list-ui', 'bookings-list-isolated'),
     ('pms-detail-ui', 'pms-detail-isolated'),
     ('calendar-ui', 'calendar-isolated'),
+    ('pricing-calendar-ui', 'pricing-calendar'),
     ('today-ui', 'today-isolated'),
     ('property-browse-ui', 'property-browse-isolated'),
     ('home-search-ui', 'home-search-isolated'),

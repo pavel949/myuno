@@ -385,10 +385,12 @@ Deno.serve(async (req) => {
     const token = authHeader.slice('Bearer '.length).trim();
     const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
     const isServiceRole = serviceRoleKey && token === serviceRoleKey;
+    let callerEmail: string | null = null;
     if (!isServiceRole) {
       const { requireAuth } = await import('../_shared/auth-guard.ts');
       const auth = await requireAuth(req, corsHeaders);
       if (auth instanceof Response) return auth;
+      callerEmail = (auth.user.email ?? '').toLowerCase() || null;
     }
 
     const resendKey = Deno.env.get('RESEND_API_KEY');
@@ -419,8 +421,27 @@ Deno.serve(async (req) => {
       );
     }
 
+    // Signed-in (non-service) callers may only email their own address and
+    // cannot override subjects; template values are HTML-escaped.
+    const requested = (Array.isArray(to) ? to : [to]).map((r) => String(r).toLowerCase());
+    if (!isServiceRole) {
+      if (!callerEmail || requested.some((r) => r !== callerEmail)) {
+        return new Response(
+          JSON.stringify({ success: false, error: 'Forbidden recipient' }),
+          { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+    }
+    const escapeDeep = (v: unknown): unknown => {
+      if (typeof v === 'string') return v.replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]!));
+      if (Array.isArray(v)) return v.map(escapeDeep);
+      if (v && typeof v === 'object') return Object.fromEntries(Object.entries(v as Record<string, unknown>).map(([k, x]) => [k, escapeDeep(x)]));
+      return v;
+    };
+    const safeTemplateData = (isServiceRole ? (template_data ?? {}) : escapeDeep(template_data ?? {})) as Record<string, any>;
+
     // Apply locale
-    const data = { ...template_data, language: locale || template_data.language || 'en' };
+    const data = { ...safeTemplateData, language: locale || safeTemplateData.language || 'en' };
     const { subject, html } = templateFn(data);
 
     const recipients = Array.isArray(to) ? to : [to];
@@ -430,7 +451,7 @@ Deno.serve(async (req) => {
     const emailResponse = await resend.emails.send({
       from: 'myUNO <noreply@resend.dev>',
       to: recipients,
-      subject: subject_override || subject,
+      subject: (isServiceRole && subject_override) || subject,
       html,
     });
 

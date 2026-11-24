@@ -56,8 +56,11 @@ export function CalendarDayEventsSheet({
   const hasBookingOnDate = bookings.some(b => stayOccupiesDate(b, civilDateKey(date)));
 
   const actionButtons = (
-    <div className="grid grid-cols-3 gap-2 w-full">
+    <div className="grid w-full grid-cols-2 gap-2 sm:grid-cols-3">
       {propertyId && <Button variant="outline" size="sm" asChild><Link to={`/mc/rates?property=${propertyId}&view=calendar&date=${civilDateKey(date)}&returnTo=${encodeURIComponent(`/mc/calendar?property=${propertyId}&date=${civilDateKey(date)}`)}`}>{isRu ? 'Изменить цену' : 'Edit price'}</Link></Button>}
+      {propertyId && <Button variant="outline" size="sm" className="h-auto min-h-11 whitespace-normal" asChild>
+        <Link to={`/mc/properties/${encodeURIComponent(propertyId)}/terms`}>{isRu ? 'Срок и условия' : 'Stay length & terms'}</Link>
+      </Button>}
       <Button variant="outline" size="sm" className="gap-1.5"
         onClick={() => { onOpenChange(false); onAddTask(); }}>
         <Plus className="h-4 w-4" />{isRu ? 'Задача' : 'Task'}

@@ -2,7 +2,7 @@ import { createStripeClient } from "../_shared/stripe.ts";
 import { createServiceClient } from "../_shared/supabase.ts";
 import { requireActorRpc } from "../_shared/authz.ts";
 import { requireAuth } from "../_shared/auth-guard.ts";
-import { getCorsHeaders } from "../_shared/cors.ts";
+import { getCorsHeaders, getAllowedOrigin } from "../_shared/cors.ts";
 
 
 Deno.serve(async (req) => {
@@ -29,7 +29,7 @@ Deno.serve(async (req) => {
     if (!company?.stripe_customer_id) throw new Error("No Stripe customer for this company");
 
     const stripe = createStripeClient();
-    const origin = req.headers.get("origin") || Deno.env.get("SITE_URL") || "https://uno.ae";
+    const origin = getAllowedOrigin(req.headers.get("origin"));
 
     const portalSession = await stripe.billingPortal.sessions.create({
       customer: company.stripe_customer_id,

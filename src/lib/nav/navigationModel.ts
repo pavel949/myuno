@@ -81,7 +81,7 @@ export const PRIMARY_NAV = NAV_BY_ROLE;
 //                  (capital workflow first, browse second)
 //  mc_portal  → My Properties · Statements · Documents · Messages · Me
 //                  (read-only owner portal — finance + comms)
-//  owner      → Dashboard · Properties · Calendar · Finance · Messages
+//  owner      → Today · Calendar · Properties · Messages · Menu
 //                  (operator workflow — daily PMS loop)
 //  vendor     → Dashboard · Services · Bookings · Payouts · Profile
 //                  (service-provider workflow — fulfilment + payouts)
@@ -135,6 +135,14 @@ const PATH_ALIASES: Record<string, string[]> = {
   '/me':          ['/me', '/account', '/profile'],
   '/profile':     ['/profile', '/account'],
   '/market':      ['/market'],
+  '/admin/inbox': ['/admin/inbox', '/admin/consultations', '/admin/tickets', '/admin/disputes', '/admin/nb-leads'],
+  '/admin/catalog': ['/admin/catalog', '/admin/review', '/admin/properties', '/admin/newbuilds', '/admin/add'],
+  '/admin/users': ['/admin/users', '/admin/crm', '/admin/providers', '/admin/partner-applications', '/admin/vendor-prospects', '/admin/pm-companies'],
+  '/mc/today':    ['/mc/today', '/mc/bookings-list', '/mc/bookings', '/mc/tasks', '/mc/operations'],
+  '/mc/calendar': ['/mc/calendar', '/mc/rates'],
+  '/mc/messages': ['/mc/messages', '/mc/chat'],
+  '/mc/properties': ['/mc/properties', '/mc/listings'],
+  '/mc/modules':  ['/mc/modules', '/mc/finance'],
   '/property':    ['/property', '/discover/stay', '/discover/buy'],
   '/discover':    ['/discover', '/navigator'],
   '/my-property': [
@@ -157,6 +165,7 @@ const PATH_ALIASES: Record<string, string[]> = {
  */
 export function isBottomBarItemActive(item: NavItem, pathname: string): boolean {
   if (item.exact) return pathname === item.path;
+  if (item.path === '/mc/modules' && pathname === APP_ROUTES.MC) return true;
   if (item.path === '/account' && ['/me/bookings', '/me/requests', '/me/services'].some(path => pathname === path || pathname.startsWith(path + '/'))) return false;
   if (item.path === APP_ROUTES.GOAL_SERVICES && pathname === APP_ROUTES.DISCOVER) return true;
 
@@ -183,7 +192,11 @@ export function getActiveBottomBarItem(
   const matches = getBottomBarItems(role).filter((item) =>
     isBottomBarItemActive(item, pathname),
   );
-  if (matches.length === 0) return null;
+  if (matches.length === 0) {
+    return role === 'owner' && pathname.startsWith(`${APP_ROUTES.MC}/`)
+      ? getBottomBarItems(role).find(item => item.path === APP_ROUTES.MC_MODULES) ?? null
+      : null;
+  }
   return matches.reduce((best, candidate) =>
     candidate.path.length > best.path.length ? candidate : best,
   );
@@ -209,6 +222,8 @@ export interface SidebarNavGroup {
   labelRu: string;
   labelTh?: string;
   defaultOpen?: boolean;
+  /** Quick links are collapsed in the mobile drawer because they also have bottom tabs. */
+  mobileQuickLinks?: boolean;
   items: SidebarNavItem[];
 }
 
@@ -287,7 +302,8 @@ function groupOwnerSidebar(groups: SidebarNavGroup[]): SidebarNavGroup[] {
   const areas = [
     { labelEn: 'Daily work', labelRu: 'Ежедневная работа', labelTh: 'งานประจำวัน', sources: ['Control Tower'], defaultOpen: true },
     { labelEn: 'Properties & rates', labelRu: 'Объекты и тарифы', labelTh: 'ที่พักและราคา', sources: ['Properties', 'Operations'] },
-    { labelEn: 'Finance & sales', labelRu: 'Финансы и продажи', labelTh: 'การเงินและการขาย', sources: ['Finance', 'CRM & Sales'] },
+    { labelEn: 'Finance', labelRu: 'Финансы', labelTh: 'การเงิน', sources: ['Finance'] },
+    { labelEn: 'Sales & CRM', labelRu: 'Продажи и CRM', labelTh: 'การขายและ CRM', sources: ['CRM & Sales'] },
     { labelEn: 'Team & settings', labelRu: 'Команда и настройки', labelTh: 'ทีมงานและการตั้งค่า', sources: ['Team & Settings'] },
   ];
   return areas.map(({ sources, ...area }) => ({
@@ -295,6 +311,44 @@ function groupOwnerSidebar(groups: SidebarNavGroup[]): SidebarNavGroup[] {
     items: groups.filter(group => sources.includes(group.labelEn)).flatMap(group => group.items),
   })).filter(group => group.items.length > 0);
 }
+/**
+ * Keep the same persona-filtered destinations on every viewport. On mobile,
+ * bottom-tab links stay available in a single compact fallback (for screens
+ * where the bottom bar is hidden), not spread across the daily workflow.
+ */
+export function getOwnerSidebarForViewport(groups: SidebarNavGroup[], isMobile: boolean): SidebarNavGroup[] {
+  if (!isMobile) return groups;
+
+  const tabItems = groups.flatMap(group => group.items).filter(item => isBottomBarRoute('owner', item.path));
+  const workflowGroups = groups.map(group => ({
+    ...group,
+    items: group.items.filter(item => !isBottomBarRoute('owner', item.path)),
+  })).filter(group => group.items.length > 0);
+
+  return tabItems.length ? [...workflowGroups, {
+    labelEn: 'Quick links',
+    labelRu: 'Быстрые переходы',
+    labelTh: 'ลิงก์ด่วน',
+    mobileQuickLinks: true,
+    items: tabItems,
+  }] : workflowGroups;
+}
+
+/** Pick the most specific accessible destination, never a sibling or MC root. */
+export function getActiveOwnerSidebarPath(groups: SidebarNavGroup[], pathname: string): string | undefined {
+  const path = pathname.replace(/\/+$/, '');
+  const financeRoutes = [APP_ROUTES.MC_FINANCIALS, APP_ROUTES.MC_REPORTS, APP_ROUTES.MC_BUDGET];
+  const items = groups.flatMap(group => group.items);
+  const match = items
+    .filter(item => item.path === path || (item.path !== '/mc' && path.startsWith(`${item.path}/`)))
+    .sort((a, b) => b.path.length - a.path.length)[0];
+
+  if (match) return match.path;
+  if (financeRoutes.some(route => path === route || path.startsWith(`${route}/`)) &&
+      items.some(item => item.path === APP_ROUTES.MC_FINANCE)) return APP_ROUTES.MC_FINANCE;
+  return undefined;
+}
+
 const OWNER_SIDEBAR = groupOwnerSidebar(OWNER_SIDEBAR_SOURCE);
 
 /**
@@ -363,17 +417,11 @@ export function getOwnerSidebarForRole(
  */
 const ADMIN_SIDEBAR_SOURCE: SidebarNavGroup[] = [
   {
-    labelEn: 'Requests & review', labelRu: 'Заявки и проверка',
+    labelEn: 'Customer requests', labelRu: 'Обращения клиентов',
     items: [
-      { path: '/admin/inbox', labelEn: 'Inbox', labelRu: 'Входящие', icon: MessageSquare, badgeKey: 'pendingContent' },
       { path: '/admin/consultations', labelEn: 'Consultations', labelRu: 'Консультации', icon: MessageCircle },
       { path: '/admin/tickets', labelEn: 'Support tickets', labelRu: 'Тикеты', icon: MessageSquare },
       { path: '/admin/disputes', labelEn: 'Disputes', labelRu: 'Споры', icon: AlertTriangle },
-      { path: '/admin/crm', labelEn: 'CRM', labelRu: 'CRM', icon: UserCheck },
-      { path: '/admin/partner-applications', labelEn: 'Partner applications', labelRu: 'Заявки партнёров', icon: FileCheck },
-      { path: '/admin/vendor-prospects', labelEn: 'Vendor prospects', labelRu: 'Кандидаты в партнёры', icon: Target },
-      { path: '/admin/claims', labelEn: 'POI claims', labelRu: 'Заявки на места', icon: MapPin },
-      { path: '/admin/thai-business', labelEn: 'Thai business moderation', labelRu: 'Модерация тайского бизнеса', icon: ShieldCheck },
     ],
   },
   {
@@ -389,9 +437,17 @@ const ADMIN_SIDEBAR_SOURCE: SidebarNavGroup[] = [
     ],
   },
   {
-    labelEn: 'Partners & transport', labelRu: 'Партнёры и транспорт',
+    labelEn: 'Participants & acquisition', labelRu: 'Участники и привлечение',
     items: [
+      { path: '/admin/crm', labelEn: 'Partner and owner acquisition', labelRu: 'Привлечение партнёров и собственников', labelTh: 'การหาพาร์ทเนอร์และเจ้าของ', icon: UserCheck },
       { path: '/admin/providers', labelEn: 'Partners', labelRu: 'Партнёры', icon: Building2, badgeKey: 'pendingProviders' },
+      { path: '/admin/partner-applications', labelEn: 'Partner applications', labelRu: 'Заявки партнёров', icon: FileCheck },
+      { path: '/admin/vendor-prospects', labelEn: 'Vendor prospects', labelRu: 'Кандидаты в партнёры', icon: Target },
+    ],
+  },
+  {
+    labelEn: 'Transport operations', labelRu: 'Управление транспортом',
+    items: [
       { path: '/admin/transfers', labelEn: 'Transfers', labelRu: 'Трансферы', icon: ArrowLeftRight },
     ],
   },
@@ -460,22 +516,24 @@ const ADMIN_SIDEBAR_SOURCE: SidebarNavGroup[] = [
   },
 ];
 
-// Keep the same five everyday destinations across desktop rail and mobile bar.
-// Specialist routes remain reachable below without competing with daily work.
-const adminDaily: SidebarNavItem[] = ADMIN_NAV.map(item => ({
-  ...item,
-  ...(item.path === APP_ROUTES.ADMIN_OPERATIONS
-    ? { labelEn: 'Requests & orders', labelRu: 'Заявки и заказы', labelTh: 'คำขอและคำสั่งซื้อ' } : {}),
-  ...(item.path === '/admin/review' ? { badgeKey: 'pendingContent' as const } : {}),
-}));
-const adminSecondary: SidebarNavItem[] = [
+// The same primary destinations and labels drive both the desktop rail and mobile bar.
+const adminDaily: SidebarNavItem[] = ADMIN_NAV.map(item => ({ ...item }));
+const adminCatalogueReview: SidebarNavItem[] = [
+  { path: '/admin/review', labelEn: 'Review', labelRu: 'На проверке', labelTh: 'รอตรวจสอบ', icon: FileCheck, badgeKey: 'pendingContent' },
+  { path: '/admin/claims', labelEn: 'POI claims', labelRu: 'Заявки на места', icon: MapPin },
+  { path: '/admin/thai-business', labelEn: 'Thai business moderation', labelRu: 'Модерация тайского бизнеса', icon: ShieldCheck },
+];
+const adminFinance: SidebarNavItem[] = [
   { path: '/admin/finance', labelEn: 'Finance', labelRu: 'Финансы', labelTh: 'การเงิน', icon: BarChart3 },
+];
+const adminSettings: SidebarNavItem[] = [
   { path: '/admin/settings', labelEn: 'Settings', labelRu: 'Настройки', labelTh: 'การตั้งค่า', icon: Settings },
 ];
 const adminGroupThai: Record<string, string> = {
-  'Requests & review': 'คำขอและการตรวจสอบ',
+  'Customer requests': 'คำขอจากลูกค้า',
   'Real estate': 'อสังหาริมทรัพย์',
-  'Partners & transport': 'พาร์ทเนอร์และการขนส่ง',
+  'Participants & acquisition': 'ผู้เข้าร่วมและการสรรหา',
+  'Transport operations': 'การจัดการขนส่ง',
   Verticals: 'ประเภทบริการ',
   'Content & data': 'เนื้อหาและข้อมูล',
   'Growth & analytics': 'การเติบโตและการวิเคราะห์',
@@ -484,12 +542,14 @@ const adminGroupThai: Record<string, string> = {
 };
 const ADMIN_SIDEBAR: SidebarNavGroup[] = [
   { labelEn: 'Daily work', labelRu: 'Ежедневная работа', labelTh: 'งานประจำวัน', defaultOpen: true, items: adminDaily },
-  { labelEn: 'Finance & settings', labelRu: 'Финансы и настройки', labelTh: 'การเงินและการตั้งค่า', defaultOpen: true, items: adminSecondary },
+  { labelEn: 'Catalog review', labelRu: 'Проверка каталога', labelTh: 'การตรวจสอบแคตตาล็อก', defaultOpen: true, items: adminCatalogueReview },
+  { labelEn: 'Finance', labelRu: 'Финансы', labelTh: 'การเงิน', defaultOpen: true, items: adminFinance },
+  { labelEn: 'Settings', labelRu: 'Настройки', labelTh: 'การตั้งค่า', defaultOpen: false, items: adminSettings },
   ...ADMIN_SIDEBAR_SOURCE.map(group => ({
     ...group,
     labelTh: adminGroupThai[group.labelEn] ?? group.labelTh,
     defaultOpen: false,
-    items: group.items.filter(item => ![...adminDaily, ...adminSecondary].some(primary => primary.path === item.path)),
+    items: group.items.filter(item => ![...adminDaily, ...adminCatalogueReview, ...adminFinance, ...adminSettings].some(primary => primary.path === item.path)),
   })).filter(group => group.items.length > 0),
 ];
 

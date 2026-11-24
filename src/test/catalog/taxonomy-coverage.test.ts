@@ -69,8 +69,8 @@ describe('catalog SSOT — categories', () => {
     expect(new Set(ids).size).toBe(ids.length);
   });
 
-  it('runtime SSOT has 14 categories (canonical 16 target tracked in docs/canonical/02)', () => {
-    expect(CATEGORIES).toHaveLength(14);
+  it('runtime fallback has 15 categories including connectivity', () => {
+    expect(CATEGORIES).toHaveLength(15);
   });
 });
 

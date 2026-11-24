@@ -1,6 +1,6 @@
 // Real anonymous Landing, public navigation, search and cards. Synthetic data only; no backend.
 import { build } from 'esbuild';
-import { mkdir, writeFile, readFile, rm } from 'node:fs/promises';
+import { mkdir, writeFile, readFile, rm, copyFile } from 'node:fs/promises';
 import { existsSync, statSync } from 'node:fs';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
@@ -10,8 +10,16 @@ const output =
   process.env.HOME_GALLERY_OUTPUT || '/tmp/browser/homepage-galleries-isolated';
 await mkdir(output, { recursive: true });
 await writeFile(path.join(output, 'fixture-home.svg'), '<svg xmlns="http://www.w3.org/2000/svg" width="640" height="480"><rect width="640" height="480" fill="#dce5e3"/><path d="M80 340V190L320 70l240 120v150" fill="#a7bab5"/><text x="48" y="430" font-size="24" fill="#203333">SYNTHETIC HOME / QA ONLY</text></svg>');
+// Static public assets referenced by absolute path from homepage components
+// (e.g. homeServiceCategories yacht art). The QA browser only serves files in
+// the output folder and aborts everything else, so mirror them here.
+for (const asset of ['yachts/catamaran-53-1.webp']) {
+  await mkdir(path.join(output, path.dirname(asset)), { recursive: true });
+  await copyFile(path.join(root, 'public', asset), path.join(output, asset));
+}
 await rm(path.join(output, 'results.json'), { force: true });
 const virtual = {
+  '@/hooks/usePlatformSocialLinks': `export const usePlatformSocialLinks=()=>({data:{}});`,
   'home-fixture': `
     const params=new URLSearchParams(location.search);export const lang=params.get('lang')||'en';export const state=params.get('state')||'data';
     export const loading=state==='loading',error=state==='error';export const retry=()=>window.fixtureRetries=(window.fixtureRetries||0)+1;
@@ -117,8 +125,11 @@ if (
   )
 )
   throw Error('Production client included');
+// Compile the same stylesheet stack as the actual app entry and Landing.
+const styleSources = ['src/index.css', 'src/styles/cinematic-home.css', 'src/styles/premium-public.css',
+  'src/styles/homepage-refinement.css', 'src/styles/home-reference.css', 'src/styles/home-mobile-polish.css'];
 const css = await Promise.all(
-  ['/src/index.css?direct', '/src/styles/cinematic-home.css?direct', '/src/styles/premium-public.css?direct', '/src/styles/homepage-refinement.css?direct'].map(
+  styleSources.map(file => `/${file}?direct`).map(
     async (file) => {
       const r = await fetch(cssOrigin + file);
       if (!r.ok) throw Error('Missing CSS ' + file);
@@ -127,7 +138,7 @@ const css = await Promise.all(
   ),
 );
 await writeFile(path.join(output, 'fixture.css'), css.join('\n'));
-await writeFile(path.join(output,'source-receipt.json'),JSON.stringify({mode:'Synthetic public data; actual homepage components; no production mutations; local fallback fonts',sources:await Promise.all(['src/pages/Landing.tsx','src/components/home/HomeGallery.tsx','src/components/home/HomeCatalogGalleries.tsx','src/components/home/HomeDiscoveryPreview.tsx','src/components/home/HomeSearchEntry.tsx','src/lib/services/publicServiceCategories.ts','src/styles/cinematic-home.css','src/styles/premium-public.css','src/styles/homepage-refinement.css'].map(async file=>({file,sha256:(await import('node:crypto')).createHash('sha256').update(await readFile(path.join(root,file))).digest('hex')})))},null,2));
+await writeFile(path.join(output,'source-receipt.json'),JSON.stringify({mode:'Synthetic public data; actual homepage components; no production mutations; local fallback fonts',sources:await Promise.all(['src/pages/Landing.tsx','src/components/home/HomeGallery.tsx','src/components/home/HomeCatalogGalleries.tsx','src/components/home/HomeDiscoveryPreview.tsx','src/components/home/HomeDiscoverySearch.tsx','src/components/home/HomeSearchDateRange.tsx','src/lib/propertySearchQuery.ts','src/lib/services/publicServiceCategories.ts',...styleSources].map(async file=>({file,sha256:(await import('node:crypto')).createHash('sha256').update(await readFile(path.join(root,file))).digest('hex')})))},null,2));
 await writeFile(
   path.join(output, 'fixture.html'),
   '<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><link rel="stylesheet" href="/fixture.css"></head><body><div id="root"></div><script type="module" src="/fixture.js"></script></body></html>',

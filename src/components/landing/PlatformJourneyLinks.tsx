@@ -6,7 +6,7 @@ import { pickLang } from '@/lib/i18n/pickLang';
 
 type Journey = 'property' | 'services' | 'experiences';
 const ITEMS = [
-  { id: 'rent', href: `${APP_ROUTES.PROPERTY_SEARCH}?mode=rent`, icon: CalendarDays, ru: 'Арендовать', en: 'Rent a place', th: 'เช่าที่พัก', subRu: 'Даты, гости и предложения жилья', subEn: 'Dates, guests and property listings', subTh: 'วันเข้าพักและจำนวนผู้เข้าพัก' },
+  { id: 'rent', href: APP_ROUTES.PROPERTY_RENT, icon: CalendarDays, ru: 'Арендовать', en: 'Rent a place', th: 'เช่าที่พัก', subRu: 'Даты, гости и предложения жилья', subEn: 'Dates, guests and property listings', subTh: 'วันเข้าพักและจำนวนผู้เข้าพัก' },
   { id: 'buy', href: APP_ROUTES.GOAL_BUY, icon: Building2, ru: 'Купить недвижимость', en: 'Buy property', th: 'ซื้ออสังหาริมทรัพย์', subRu: 'Новостройки и вторичный рынок', subEn: 'New developments and resale', subTh: 'โครงการใหม่และมือสอง' },
   { id: 'sell', href: APP_ROUTES.PROPERTY_SELL, icon: House, ru: 'Продать объект', en: 'Sell a property', th: 'ขายอสังหาริมทรัพย์', subRu: 'Обсудить продажу с командой', subEn: 'Discuss a sale with the team', subTh: 'ปรึกษาทีมงานเรื่องการขาย' },
   { id: 'manage', href: APP_ROUTES.FOR_OWNERS, icon: KeyRound, ru: 'Управлять объектом', en: 'Manage a property', th: 'จัดการอสังหาริมทรัพย์', subRu: 'Аренда, уход и отчётность', subEn: 'Rentals, care and reporting', subTh: 'เช่า ดูแล และรายงาน' },

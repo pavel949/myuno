@@ -42,9 +42,10 @@ const updateProspect = useUpdateProspect();
   const [noteText, setNoteText] = useState('');
 
   const handleStatusChange = (newStatus: string) => {
-    updateProspect.mutate({ 
-      id: prospect.id, 
-      status: newStatus
+    updateProspect.mutate({
+      id: prospect.id,
+      status: newStatus,
+      previous_status: prospect.status,
     });
   };
 
@@ -152,7 +153,7 @@ const updateProspect = useUpdateProspect();
       }
 
       // Mark prospect as converted
-      updateProspect.mutate({ id: prospect.id, status: 'won' });
+      await updateProspect.mutateAsync({ id: prospect.id, status: 'won', previous_status: prospect.status });
 
       toast(isRussian ? 'Контакт добавлен в CRM' : 'Contact added to CRM', {
         description: `${firstName} ${lastName} — ${tags.join(', ')}`,

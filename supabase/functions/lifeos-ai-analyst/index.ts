@@ -7,6 +7,7 @@ import { createClient } from "npm:@supabase/supabase-js@2";
 import { requireAuth } from "../_shared/auth-guard.ts";
 import { withRateLimit, RATE_LIMITS } from "../_shared/rate-limit.ts";
 import { getCorsHeaders } from "../_shared/cors.ts";
+import { requireInternalOrStaff } from "../_shared/authz.ts";
 
 type AnalysisMode = 
   | "scenario_gaps"      // Detect missing/weak coverage per situation
@@ -56,6 +57,8 @@ Deno.serve(async (req) => {
   // Auth required: admin analysis tool
   const authResult = await requireAuth(req, corsHeaders);
   if (authResult instanceof Response) return authResult;
+  const staffGate = await requireInternalOrStaff(req, corsHeaders);
+  if (staffGate instanceof Response) return staffGate;
 
   const startTime = Date.now();
 

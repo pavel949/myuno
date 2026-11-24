@@ -8,19 +8,33 @@ const mocks = vi.hoisted(() => ({ language: 'ru' as 'ru' | 'en' | 'th', scenario
 vi.mock('@/contexts/LanguageContext', () => ({ useLanguage: () => ({ language: mocks.language }) }));
 vi.mock('@/hooks/usePmsToday', () => ({ usePmsToday: () => { const data = todayFixtures(mocks.language, mocks.scenario); if (mocks.unknownGuests) data.arrivals = data.arrivals.map(booking => ({...booking,guests_count:null})); return { ...data, refetch: mocks.refetch }; } }));
 vi.mock('@/integrations/supabase/client', () => ({ supabase: new Proxy({}, { get: () => mocks.database() }) }));
+vi.mock('@/hooks/useBookingStatusHistory', () => ({ useBookingStatusHistory: () => ({ events: [], highlightIds: new Set() }) }));
 vi.mock('@/hooks/useHapticFeedback', () => ({ triggerHaptic: vi.fn() }));
 vi.mock('@/hooks/useSoundEffects', () => ({ playSound: vi.fn() }));
 import PmsTodayPage from '../PmsTodayPage';
-function Boundary() { return <output data-testid="route-boundary">{useLocation().pathname}</output>; }
+function Boundary() {
+  const { pathname, search, hash } = useLocation();
+  return <output data-testid="route-boundary">{pathname}{search}{hash}</output>;
+}
 function mount(entry: string = APP_ROUTES.MC_TODAY) { render(<MemoryRouter initialEntries={[entry]} future={{ v7_startTransition: true, v7_relativeSplatPath: true }}><PmsTodayPage /><Boundary /></MemoryRouter>); }
 beforeEach(() => { vi.clearAllMocks(); mocks.scenario = 'populated'; mocks.unknownGuests = false; });
 afterEach(() => { expect(mocks.database).not.toHaveBeenCalled(); cleanup(); });
 
 describe.each(['ru', 'en'] as const)('isolated Today (%s)', language => {
   beforeEach(() => { mocks.language = language; });
-  it('dispatches booking, request and unit links to the existing property boundary', () => {
+  it('opens the exact stay and its conversation from Today', () => {
     mount();
-    for (const element of [screen.getAllByText(todayFixtures(language).arrivals[0].guest_name ?? '', { selector: 'p' })[0], screen.getByText('synthetic urgent request'), screen.getAllByText(todayFixtures(language).units[0].title)[0]]) {
+    fireEvent.click(screen.getAllByRole('button', { name: /Открыть бронирование|Open booking/ })[0]);
+    const booking = within(screen.getByRole('dialog'));
+    expect(booking.getByRole('link', { name: /переписку с гостем|guest conversation/ }))
+      .toHaveAttribute('href', '/mc/chat/booking/synthetic-booking');
+    expect(booking.getByRole('link', { name: /Календарь и задачи|Property calendar/ }))
+      .toHaveAttribute('href', '/mc/calendar?property=synthetic-property&date=2026-10-17');
+    expect(screen.getByTestId('route-boundary')).toHaveTextContent('/mc/today');
+  });
+  it('keeps property destinations for request and unit rows', () => {
+    mount();
+    for (const element of [screen.getByText('synthetic urgent request'), screen.getAllByText(todayFixtures(language).units[0].title)[0]]) {
       fireEvent.click(element);
       expect(screen.getByTestId('route-boundary')).toHaveTextContent(APP_ROUTES.MC_PROPERTY_DETAIL('synthetic-property'));
     }
@@ -41,7 +55,7 @@ describe.each(['ru', 'en'] as const)('isolated Today (%s)', language => {
     expect(header).toHaveClass('ds-section');
     expect(within(header).getByText(/ · (Phuket|Пхукет)$/)).toBeVisible();
     const navigation = within(header).getByRole('navigation', { name: language === 'ru' ? 'Навигация по операциям' : 'Operational navigation' });
-    expect(within(navigation).getAllByRole('link')).toHaveLength(2);
+    expect(within(navigation).getAllByRole('link')).toHaveLength(3);
     fireEvent.click(within(navigation).getByRole('button', { name: language === 'ru' ? 'Обновить' : 'Refresh' }));
     expect(mocks.refetch).toHaveBeenCalledOnce();
   });
@@ -52,14 +66,16 @@ describe.each(['ru', 'en'] as const)('isolated Today (%s)', language => {
   });
   it('query failure suppresses stale projections and all-clear data', () => {
     mocks.scenario = 'error'; mount();
-    expect(screen.getByRole('alert')).toBeInTheDocument();
+    const alert = screen.getByRole('alert');
+    fireEvent.click(within(alert).getByRole('button', { name: /Retry loading|Повторить загрузку/ }));
+    expect(mocks.refetch).toHaveBeenCalledOnce();
     expect(screen.queryAllByRole('link', { name: /Открыть объект|Open property/ })).toHaveLength(0);
     expect(screen.queryByRole('region', { name: language === 'ru' ? 'Требует внимания' : 'Needs attention' })).not.toBeInTheDocument();
   });
   it('empty fixture has no item destinations', () => {
     mocks.scenario = 'empty'; mount();
     expect(screen.queryAllByRole('link', { name: /Открыть объект|Open property/ })).toHaveLength(0);
-    expect(within(screen.getByRole('navigation')).getAllByRole('link')).toHaveLength(2);
+    expect(within(screen.getByRole('navigation')).getAllByRole('link')).toHaveLength(3);
   });
   it('no-properties destination is the existing properties route', () => {
     mocks.scenario = 'no-properties'; mount();
@@ -70,6 +86,16 @@ describe.each(['ru', 'en'] as const)('isolated Today (%s)', language => {
 
 describe.each(['en', 'ru', 'th'] as const)('Today task links (%s)', language => {
   beforeEach(() => { mocks.language = language; });
+  it('supports section jumping with focus and query preservation', () => {
+    const entry = '/mc/today?keep=yes';
+    mount(entry);
+    const labels = language === 'ru' ? ['Перейти к разделу', 'Заезды'] : language === 'th' ? ['ไปที่ส่วนงาน', 'เช็คอิน'] : ['Jump to a work area', 'Arrivals'];
+    const summary = screen.getByRole('list', { name: labels[0] });
+    expect(within(summary).getAllByRole('link')).toHaveLength(6);
+    fireEvent.click(within(summary).getByRole('link', { name: new RegExp(labels[1]) }));
+    expect(screen.getByRole('heading', { level: 3, name: labels[1] })).toHaveFocus();
+    expect(screen.getByTestId('route-boundary')).toHaveTextContent('/mc/today?keep=yes#today-arrivals');
+  });
   it('routes preparation and CRM tasks with distinct source identity and exact return context', () => {
     const entry = '/mc/today?property=synthetic-property&keep=yes#work';
     mount(entry);
@@ -95,6 +121,7 @@ describe.each(['en', 'ru', 'th'] as const)('Today task links (%s)', language => 
     expect(screen.queryAllByRole('link', { name: /Open task|Открыть задачу|เปิดงาน/ })).toHaveLength(0);
     expect(screen.queryByText('Pre-arrival cleaning')).not.toBeInTheDocument();
     expect(screen.queryByRole('region', { name: /Tasks to act on|Задачи к выполнению|งานที่ต้องดำเนินการ/ })).not.toBeInTheDocument();
+    expect(screen.queryByRole('list', { name: /Jump to a work area|Перейти к разделу|ไปที่ส่วนงาน/ })).not.toBeInTheDocument();
     if (scenario === 'truncated' || scenario === 'unknown-count') expect(screen.getByRole('alert')).toHaveTextContent(language === 'ru' ? 'неполная' : language === 'th' ? 'ไม่ครบถ้วน' : 'incomplete');
   });
 });

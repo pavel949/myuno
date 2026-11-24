@@ -1,8 +1,8 @@
 import { propertyBookingStatus } from '@/lib/propertyBookingPresentation';
 import { Link, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { parseCivilDate } from '@/lib/hotelDates';
-import { PropertyBooking } from '@/hooks/usePropertyBookings';
+import { parseCivilDate, toBangkokDateKey } from '@/lib/hotelDates';
+import type { PropertyBooking } from '@/hooks/usePropertyBookings';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
@@ -13,14 +13,20 @@ import { ResponsiveModal } from '@/components/ui/responsive-modal';
 import { BookingStatusTimeline, BookingStatusTimelineSkeleton } from '@/components/bookings/BookingStatusTimeline';
 import { useBookingStatusHistory } from '@/hooks/useBookingStatusHistory';
 
+type BookingDetail = Pick<PropertyBooking,
+  'id' | 'property_id' | 'check_in' | 'check_out' | 'guest_name' | 'guest_phone' | 'guest_email'
+  | 'guests_count' | 'total_amount' | 'currency' | 'source' | 'external_id' | 'order_id' | 'status' | 'notes'>;
+
 interface BookingDetailSheetProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  booking: PropertyBooking | null;
+  booking: BookingDetail | null;
+  /** Canonical inventory booking ID, independent from the commercial order ID. */
+  inventoryBookingId?: string;
   propertyTitle?: string;
 }
 
-export function BookingDetailSheet({ open, onOpenChange, booking, propertyTitle }: BookingDetailSheetProps) {
+export function BookingDetailSheet({ open, onOpenChange, booking, propertyTitle, inventoryBookingId }: BookingDetailSheetProps) {
   const { language } = useLanguage();
   const isRu = language === 'ru';
   const location = useLocation();
@@ -41,6 +47,7 @@ export function BookingDetailSheet({ open, onOpenChange, booking, propertyTitle 
 
   const nights = differenceInCalendarDays(parseCivilDate(booking.check_out), parseCivilDate(booking.check_in));
   const status = propertyBookingStatus(booking.status);
+  const calendarDate = toBangkokDateKey(booking.check_in);
   const dateLabel = (value: string) => {
     const date = parseCivilDate(value);
     return Number.isFinite(date.getTime()) ? format(date, 'd MMM yyyy', { locale: isRu ? ru : undefined }) : (isRu ? 'Дата неизвестна' : 'Date unavailable');
@@ -136,8 +143,13 @@ export function BookingDetailSheet({ open, onOpenChange, booking, propertyTitle 
 
       {isManagement && booking.property_id && (
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+          {inventoryBookingId && <Button className="min-h-11 h-auto whitespace-normal sm:col-span-2" asChild>
+            <Link to={`/mc/chat/booking/${encodeURIComponent(inventoryBookingId)}`} onClick={() => onOpenChange(false)}>
+              {isRu ? 'Открыть переписку с гостем' : 'Open guest conversation'}
+            </Link>
+          </Button>}
           <Button variant="outline" className="min-h-11 h-auto whitespace-normal" asChild>
-            <Link to={`/mc/calendar?property=${encodeURIComponent(booking.property_id)}`} onClick={() => onOpenChange(false)}>{isRu ? 'Календарь и задачи объекта' : 'Property calendar and tasks'}</Link>
+            <Link to={`/mc/calendar?property=${encodeURIComponent(booking.property_id)}${calendarDate ? `&date=${calendarDate}` : ''}`} onClick={() => onOpenChange(false)}>{isRu ? 'Календарь и задачи объекта' : 'Property calendar and tasks'}</Link>
           </Button>
           <Button variant="outline" className="min-h-11 h-auto whitespace-normal" asChild>
             <Link to={`/mc/properties/${encodeURIComponent(booking.property_id)}`} onClick={() => onOpenChange(false)}>{isRu ? 'Открыть объект' : 'Open property'}</Link>

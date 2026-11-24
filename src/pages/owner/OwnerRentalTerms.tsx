@@ -442,22 +442,22 @@ const isRu = language === 'ru';
         fallbackPath={`/mc/properties/${id}`}
       />
 
-      <form onSubmit={handleSubmit} className="mt-4 pb-24">
+      <form onSubmit={handleSubmit} className="mt-4">
         <Tabs defaultValue="pricing" className="w-full">
-          <TabsList className="w-full grid grid-cols-4 mb-4">
-            <TabsTrigger value="pricing" className="text-xs px-1">
+          <TabsList className="mb-4 grid h-auto w-full grid-cols-2 items-stretch sm:grid-cols-4">
+            <TabsTrigger value="pricing" className="min-h-11 overflow-visible whitespace-normal px-2 leading-snug">
               <DollarSign className="h-3 w-3 mr-1 hidden sm:inline" />
               {isRu ? 'Цены' : 'Pricing'}
             </TabsTrigger>
-            <TabsTrigger value="utilities" className="text-xs px-1">
+            <TabsTrigger value="utilities" className="min-h-11 overflow-visible whitespace-normal px-2 leading-snug">
               <Zap className="h-3 w-3 mr-1 hidden sm:inline" />
               {isRu ? 'Услуги' : 'Utilities'}
             </TabsTrigger>
-            <TabsTrigger value="checkin" className="text-xs px-1">
+            <TabsTrigger value="checkin" className="min-h-11 overflow-visible whitespace-normal px-2 leading-snug">
               <Key className="h-3 w-3 mr-1 hidden sm:inline" />
               {isRu ? 'Заезд' : 'Check-in'}
             </TabsTrigger>
-            <TabsTrigger value="rules" className="text-xs px-1">
+            <TabsTrigger value="rules" className="min-h-11 overflow-visible whitespace-normal px-2 leading-snug">
               <FileText className="h-3 w-3 mr-1 hidden sm:inline" />
               {isRu ? 'Правила' : 'Rules'}
             </TabsTrigger>
@@ -1400,7 +1400,7 @@ const isRu = language === 'ru';
         </Tabs>
 
         {/* Fixed Save Button */}
-        <div className="fixed bottom-0 left-0 right-0 p-4 bg-background border-t">
+        <div className="sticky bottom-[var(--bottom-nav-h)] z-20 mt-6 border-t bg-background py-3">
           <Button type="submit" className="w-full" disabled={updateProperty.isPending}>
             {updateProperty.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             {isRu ? 'Сохранить условия' : 'Save Terms'}

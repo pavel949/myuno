@@ -5,6 +5,9 @@
  */
 import { createServiceClient } from "../_shared/supabase.ts";
 import { getCorsHeaders } from "../_shared/cors.ts";
+import { requireServiceCaller } from "../_shared/internal-secret.ts";
+import { requireAuth } from "../_shared/auth-guard.ts";
+import { requireCompanyMember } from "../_shared/authz.ts";
 
 
 interface TriggerPayload {
@@ -33,6 +36,25 @@ Deno.serve(async (req) => {
     }
 
     const supabase = createServiceClient();
+
+    // Caller must be a verified service caller (DB trigger) or an active
+    // member of the target company; the entity must belong to that company.
+    const isService = (await requireServiceCaller(req, corsHeaders)) === null;
+    if (!isService) {
+      const auth = await requireAuth(req, corsHeaders);
+      if (auth instanceof Response) return auth;
+      const denied = await requireCompanyMember(supabase, auth.user.id, company_id, corsHeaders);
+      if (denied) return denied;
+    }
+    {
+      const entityTable = entity_type === "deal" ? "agent_deals" : "crm_contacts";
+      const { data: ent } = await supabase.from(entityTable).select("id, company_id").eq("id", entity_id).maybeSingle();
+      if (!ent || (ent as { company_id: string | null }).company_id !== company_id) {
+        return new Response(JSON.stringify({ error: "Forbidden" }), {
+          status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+    }
     const results = { matched: 0, executed: 0, errors: 0 };
 
     // 1. Find active workflows matching this trigger
@@ -241,7 +263,7 @@ async function executeAction(
         updates[config.field_name] = config.field_value;
       }
       if (Object.keys(updates).length > 0) {
-        await supabase.from(table).update(updates).eq("id", context.entity_id);
+        await supabase.from(table).update(updates).eq("id", context.entity_id).eq("company_id", context.company_id);
         console.info(`[EXECUTE-CRM-WORKFLOW] Updated ${config.field_name} on ${table}`);
       }
       break;

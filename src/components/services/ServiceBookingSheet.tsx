@@ -104,7 +104,7 @@ export function ServiceBookingSheet({ service, open, onOpenChange, initialDate, 
             <CheckCircle2 className="h-10 w-10 text-primary mx-auto" />
             <p className="font-medium">{L('Заявка отправлена', 'Order sent', 'ส่งคำสั่งซื้อแล้ว')}</p>
             <p className="text-sm text-muted-foreground">
-              {slot ? '' : ''}{L('Специалист подтвердит время приёма. Статус заявки отображается в разделе «Мои заказы».', 'The provider will confirm the time. Track it in My orders.', 'ผู้ให้บริการจะยืนยันเวลา ติดตามได้ใน คำสั่งซื้อของฉัน')}
+              {slot ? '' : ''}{L('Консьерж MyUNO согласует время. Отправка заявки ещё не подтверждает запись. Статус доступен в разделе «Мои заказы».', 'The MyUNO concierge will coordinate the time. Sending a request does not confirm a booking. Track its status in My orders.', 'ทีมคอนเซียร์จ MyUNO จะประสานเวลานัดหมาย การส่งคำขอยังไม่ใช่การยืนยันการจอง ติดตามสถานะได้ใน คำสั่งซื้อของฉัน')}
             </p>
             <p className="text-xs font-mono text-muted-foreground">ID {doneId.slice(0, 8)}</p>
             <Button onClick={() => onOpenChange(false)} className="min-h-[44px]">{L('Готово', 'Done', 'เสร็จ')}</Button>

@@ -1,6 +1,7 @@
 import type { LucideIcon } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { getServiceCatalogStatus, getServiceIcon, type ClusterId, type ServiceStatus } from '@/lib/catalog';
+import { FLAT_SERVICES, type ClusterId, type ServiceStatus } from '@/lib/catalog';
+import { useCatalogFromDB } from '@/lib/catalog/useCatalogFromDB';
 import { pickLang } from '@/lib/i18n/pickLang';
 import { groupCatalogDestinations } from '@/lib/services/catalogServiceGroups';
 import { ClusterAppCard } from '@/components/uno/ClusterAppCard';
@@ -22,16 +23,21 @@ export function GroupedServiceDestinations({ apps, clusterId, idPrefix }: {
   apps: ServiceDestination[]; clusterId: ClusterId; idPrefix: string;
 }) {
   const { language } = useLanguage();
+  const { categories, isFromDB } = useCatalogFromDB();
+  const services = new Map(categories.flatMap(category => category.services).map(service => [service.id, service]));
+  const serviceFor = (app: ServiceDestination) => services.get(app.serviceId) ?? [...services.values()].find(service => service.path === app.path);
+  // Keep curated guide links; a catalogued destination removed by the admin must not reappear.
+  const visibleApps = apps.filter(app => !isFromDB || Boolean(serviceFor(app)) || !FLAT_SERVICES.some(service => service.id === app.serviceId));
   return <div className="space-y-6">
-    {groupCatalogDestinations(apps).map(group => <ServiceCategorySection key={group.id} id={`${idPrefix}-${group.id}`}
+    {groupCatalogDestinations(visibleApps, categories).map(group => <ServiceCategorySection key={group.id} id={`${idPrefix}-${group.id}`}
       title={group.category
         ? pickLang(language, { ru: group.category.labelRu, en: group.category.labelEn, th: group.category.labelTh })
         : pickLang(language, { ru: 'Другие услуги и материалы', en: 'Other services and guides', th: 'บริการและคู่มืออื่น ๆ' })}>
       {group.items.map(app => <ClusterAppCard key={`${app.serviceId}:${app.path}`} clusterId={clusterId}
-        icon={getServiceIcon(app.serviceId, app.fallbackIcon)}
+        icon={serviceFor(app)?.icon ?? app.fallbackIcon}
         title={pickLang(language, { ru: app.labelRu, en: app.label })}
         description={pickLang(language, { ru: app.descRu, en: app.desc })}
-        path={app.path} status={app.statusOverride ?? getServiceCatalogStatus(app.serviceId) ?? 'available'} />)}
+        path={app.path} status={(['soon', 'pro'].includes(serviceFor(app)?.status ?? '') ? serviceFor(app)!.status : app.statusOverride ?? serviceFor(app)?.status ?? 'info')} />)}
     </ServiceCategorySection>)}
   </div>;
 }

@@ -1,0 +1,229 @@
+/* Reference design implementation, isolated from existing DS and marketplaces. */
+.cinematic-home.home-refined { overflow-x: clip; background: hsl(var(--home-ui-canvas)); }
+.cinematic-home.home-refined .home-hero {
+  --home-hero-ink: hsl(var(--home-ui-white)); --home-hero-muted-ink: hsl(var(--home-ui-white) / .92);
+  position: relative; isolation: isolate; overflow: hidden;
+  min-height: 0; height: auto; padding-bottom: 36px;
+  color: hsl(var(--home-ui-white)); background: hsl(var(--home-ui-hero-navy));
+}
+.cinematic-home.home-refined .home-hero-layout {
+  position: relative; display: block; padding-block: 50px 20px;
+}
+.cinematic-home.home-refined .home-hero-media {
+  position: absolute; inset: 0; width: 100%; height: 100%;
+  aspect-ratio: auto; border: 0; border-radius: 0; overflow: hidden;
+  z-index: -1; pointer-events: none;
+}
+.cinematic-home.home-refined .home-hero-media .home-hero-image {
+  position: absolute; inset: 0; width: 100%; height: 100%;
+  object-fit: cover; object-position: center 55%; transform: none;
+  z-index: 0;
+}
+.cinematic-home.home-refined .home-hero-media::after {
+  content: ""; position: absolute; inset: 0; z-index: 1;
+  background: linear-gradient(90deg,hsl(var(--home-ui-overlay-ink) / .9),hsl(var(--home-ui-overlay-ink) / .62) 54%,hsl(var(--home-ui-overlay-ink) / .22));
+}
+.cinematic-home.home-refined .home-hero-copy { max-width: var(--home-ui-copy-max); padding: 0; }
+.cinematic-home.home-refined .home-hero-copy h1 {
+  max-width: var(--home-ui-headline-max); font-size: var(--home-ui-display-desktop);
+  line-height: 1.07; font-weight: 500; letter-spacing: -.035em; color: hsl(var(--home-ui-white));
+}
+.cinematic-home.home-refined .home-hero-copy > p {
+  max-width: var(--home-ui-lead-max); color: hsl(var(--home-ui-white)); font-size: var(--home-ui-lead-fluid);
+  line-height: 1.5; margin: 20px 0 0;
+}
+.cinematic-home.home-refined .home-hero .consumer-header-overlay { color: hsl(var(--home-ui-white)); }
+.cinematic-home.home-refined .home-reference-search {
+  max-width: var(--home-ui-search-max); margin-top: 28px; padding: 20px;
+  background: hsl(var(--home-ui-white)); color: hsl(var(--home-ui-control-navy)); border-radius: 16px;
+  box-shadow: 0 14px 40px hsl(var(--home-ui-shadow-ink) / .16);
+}
+.cinematic-home.home-refined .home-reference-search .home-search {
+  padding: 0; min-height: 0; background: hsl(var(--home-ui-white)); color: hsl(var(--home-ui-control-navy));
+  box-shadow: none;
+}
+.cinematic-home.home-refined .home-reference-search .home-search-submit {
+  min-height: 48px; background: hsl(var(--home-ui-control-navy)); color: hsl(var(--home-ui-white)); border-radius: 10px;
+}
+.cinematic-home.home-refined .home-reference-search .home-search-modes button[aria-pressed=true] {
+  background: hsl(var(--home-ui-control-navy)); color: hsl(var(--home-ui-white));
+}
+.cinematic-home.home-refined .home-hero-secondary { color: hsl(var(--home-ui-white)); }
+.cinematic-home.home-refined .home-reference-directions {
+  display: grid; grid-template-columns: repeat(4,minmax(0,1fr));
+  gap: 16px; padding-block: 30px 10px;
+}
+.cinematic-home.home-refined .home-reference-direction {
+  position: relative; isolation: isolate; display: block;
+  min-width: 0; aspect-ratio: 1.35 / 1; overflow: hidden;
+  border-radius: 16px; background: hsl(var(--home-ui-direction-navy)); color: hsl(var(--home-ui-white));
+}
+.cinematic-home.home-refined .home-reference-direction > img {
+  position: absolute; inset: 0; width: 100%; height: 100%;
+  object-fit: cover; object-position: center; z-index: -2;
+  transition: transform var(--public-motion);
+}
+@media (min-width: 768px) {
+  .cinematic-home.home-refined .home-reference-direction {
+    max-height: 340px;
+    min-height: 215px;
+  }
+  .cinematic-home.home-refined .home-reference-direction:hover > img {
+    transform: scale(1.045);
+  }
+}
+.cinematic-home.home-refined .home-reference-direction-shade {
+  position: absolute; inset: 0; z-index: -1;
+  background: linear-gradient(180deg,hsl(var(--home-ui-card-overlay) / .06) 15%,hsl(var(--home-ui-card-overlay) / .94) 100%);
+}
+.cinematic-home.home-refined .home-reference-direction-content {
+  display: flex; flex-direction: column; align-items: flex-start;
+  justify-content: flex-end; gap: 9px; height: 100%; padding: clamp(16px, 1.6vw, 24px);
+}
+.cinematic-home.home-refined .home-reference-direction-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  flex-shrink: 0;
+  border: 1px solid hsl(var(--home-ui-white) / .24);
+  border-radius: 11px;
+  background: hsl(var(--home-ui-white) / .13);
+  color: hsl(var(--home-ui-white));
+  backdrop-filter: blur(4px);
+}
+.cinematic-home.home-refined .home-reference-direction-content strong {
+  font-size: var(--home-ui-tile-title-large); font-weight: 650; line-height: 1.18; color: hsl(var(--home-ui-white));
+}
+.cinematic-home.home-refined .home-reference-direction-content small {
+  font-size: var(--home-ui-body); line-height: 1.4; color: hsl(var(--home-ui-white));
+}
+.cinematic-home.home-refined .home-locations .home-area-cover { display: block; }
+.cinematic-home.home-refined .home-locations .home-guide-card {
+  border: 0; background: transparent;
+}
+.cinematic-home.home-refined .home-locations .home-area-guide-link {
+  position: relative; display: block;
+}
+.cinematic-home.home-refined .home-locations .home-area-cover {
+  position: relative; aspect-ratio: 1.5; overflow: hidden; border-radius: 14px;
+}
+.cinematic-home.home-refined .home-locations .home-area-cover img {
+  width: 100%; height: 100%; object-fit: cover;
+}
+.cinematic-home.home-refined .home-locations .home-guide-copy { padding: 12px 0; }
+.cinematic-home.home-refined .home-locations .home-rail-viewport {
+  display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: 16px;
+}
+.cinematic-home.home-refined .home-locations .home-guide-card h3 { font-size: var(--home-ui-tile-title-large); }
+.cinematic-home.home-refined .home-rail-viewport { min-width: 0; }
+.cinematic-home.home-refined .home-rail-controls { position: static; }
+@media(max-width: 1199px) {
+  .cinematic-home.home-refined .home-reference-directions { grid-template-columns: repeat(2,minmax(0,1fr)); }
+  .cinematic-home.home-refined .home-locations .home-rail-viewport { grid-template-columns: repeat(2,minmax(0,1fr)); }
+}
+
+/* Mobile styling is owned exclusively by home-mobile-polish.css. */
+
+/*
+ * Dark public-home surfaces must follow semantic theme tokens. The photographic
+ * hero and photo overlays remain dark in both modes; search and catalogue
+ * surfaces follow the selected theme instead of mixing white cards and cream text.
+ */
+.dark .cinematic-home.home-refined {
+  background: hsl(var(--background));
+}
+.dark .cinematic-home.home-refined .home-reference-search,
+.dark .cinematic-home.home-refined .home-reference-search .home-search {
+  background: hsl(var(--card));
+  color: hsl(var(--card-foreground));
+}
+.dark .cinematic-home.home-refined .home-reference-search .home-search {
+  --home-navy: hsl(var(--foreground));
+  --home-ink: hsl(var(--foreground));
+  --home-muted: hsl(var(--muted-foreground));
+}
+.dark .cinematic-home.home-refined .home-reference-search {
+  border-color: hsl(var(--border));
+}
+.dark .cinematic-home.home-refined .home-reference-search .home-field-label {
+  color: hsl(var(--muted-foreground));
+}
+.dark .cinematic-home.home-refined .home-reference-search :is(input, select, [role="combobox"], .home-search-date-trigger, .home-search-secondary summary) {
+  color: hsl(var(--foreground));
+}
+.dark .cinematic-home.home-refined .home-reference-search input::placeholder {
+  color: hsl(var(--muted-foreground));
+  opacity: 1;
+}
+.dark .cinematic-home.home-refined .home-reference-search .home-search-modes button,
+.dark .cinematic-home.home-refined .home-reference-search .home-search-duration button {
+  border-color: hsl(var(--border));
+  background: transparent;
+  color: hsl(var(--foreground));
+}
+.dark .cinematic-home.home-refined .home-reference-search .home-search-modes button[aria-pressed="true"],
+.dark .cinematic-home.home-refined .home-reference-search .home-search-duration button[aria-pressed="true"],
+.dark .cinematic-home.home-refined .home-reference-search .home-search-submit {
+  border-color: hsl(var(--primary));
+  background: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
+}
+.dark .cinematic-home.home-refined .home-reference-search .home-search-submit:hover {
+  background: hsl(var(--primary-hover));
+}
+.dark .cinematic-home.home-refined .home-services .home-service-category-card {
+  background: hsl(var(--card));
+  color: hsl(var(--card-foreground));
+  border-color: hsl(var(--border));
+}
+.dark .cinematic-home.home-refined .home-services .home-service-category-copy h3 {
+  color: hsl(var(--card-foreground));
+}
+.dark .cinematic-home.home-refined .home-services .home-service-lucide-symbol {
+  color: hsl(var(--foreground));
+  background: hsl(var(--muted));
+}
+.dark .cinematic-home.home-refined .home-locations .home-guide-card {
+  background: hsl(var(--card));
+  border-color: hsl(var(--border));
+}
+.dark .cinematic-home.home-refined .home-locations .home-guide-card h3,
+.dark .cinematic-home.home-refined .home-locations .home-guide-pin {
+  color: hsl(var(--foreground));
+}
+
+/* Desktop landing search: dates, guests and CTA share one purposeful row. */
+@media (min-width: 1024px) {
+  .cinematic-home.home-refined .home-reference-search .home-search {
+    display: grid;
+    grid-template-columns: minmax(0, 1.65fr) minmax(0, .75fr) minmax(0, .85fr);
+    gap: 12px 14px;
+    align-items: center;
+  }
+  .cinematic-home.home-refined .home-reference-search .home-search-modes,
+  .cinematic-home.home-refined .home-reference-search .home-search-duration,
+  .cinematic-home.home-refined .home-reference-search .home-search-refine {
+    grid-column: 1 / -1;
+  }
+  .cinematic-home.home-refined .home-reference-search .home-search-dates {
+    grid-column: 1;
+    width: 100%;
+    max-width: none;
+  }
+  .cinematic-home.home-refined .home-reference-search .home-search-guests-inline {
+    grid-column: 2;
+    min-width: 0;
+    width: 100%;
+  }
+  .cinematic-home.home-refined .home-reference-search .home-search-submit {
+    grid-column: 3;
+    min-height: 52px;
+    margin: 0;
+    width: 100%;
+  }
+  .cinematic-home.home-refined .home-reference-search .home-search-refine {
+    justify-self: start;
+  }
+}

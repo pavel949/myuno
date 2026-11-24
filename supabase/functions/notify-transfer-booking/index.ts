@@ -1,3 +1,4 @@
+import { transferCustomerReceiptCopy, transferReceiptLanguage } from './customer-receipt.ts';
 // Trilingual transfer booking notifier (RU/EN/TH)
 // Recipients: Klod operator (WA+email), admin (WA+email), customer (email confirmation in their language)
 // Email delivery via Lovable Emails (send-transactional-email) with built-in retry queue + suppression.
@@ -5,6 +6,8 @@ import { createClient } from 'npm:@supabase/supabase-js@2';
 import { getAdminEmails, getAdminWhatsApp } from '../_shared/admin-config.ts';
 import { NOTIFY_CORS as corsHeaders } from '../_shared/notify-utils.ts';
 import { getTransferMarkupMultiplier } from '../_shared/transfer-commission.ts';
+import { requireServiceCaller } from '../_shared/internal-secret.ts';
+import { requireAuth } from '../_shared/auth-guard.ts';
 
 async function sendEmail(
   templateName: string,
@@ -147,46 +150,32 @@ async function generateConfirmToken(orderId: string): Promise<string> {
   return `${exp}.${sigHex}`;
 }
 
-// Customer "received" email — localized
-const CUSTOMER_RECEIVED = {
-  ru: {
-    subject: (n: string) => `Заявка #${n} принята — ждём подтверждения оператора`,
-    title: 'Спасибо! Заявка на трансфер принята',
-    orderLabel: 'Номер заявки',
-    routeLabel: 'Маршрут',
-    dateLabel: 'Дата',
-    operatorLine: (name: string) => `Оператор <b>${name}</b> свяжется с вами в течение ~30 минут для подтверждения.`,
-    amountLabel: 'Сумма',
-    locale: 'ru-RU',
-  },
-  en: {
-    subject: (n: string) => `Booking #${n} received — awaiting operator confirmation`,
-    title: 'Thank you! Your transfer request has been received',
-    orderLabel: 'Booking number',
-    routeLabel: 'Route',
-    dateLabel: 'Date',
-    operatorLine: (name: string) => `Operator <b>${name}</b> will contact you within ~30 minutes to confirm.`,
-    amountLabel: 'Total',
-    locale: 'en-GB',
-  },
-  th: {
-    subject: (n: string) => `รับคำขอ #${n} แล้ว — รอการยืนยันจากเจ้าหน้าที่`,
-    title: 'ขอบคุณ! เราได้รับคำขอจองรถรับส่งของคุณแล้ว',
-    orderLabel: 'หมายเลขการจอง',
-    routeLabel: 'เส้นทาง',
-    dateLabel: 'วันที่',
-    operatorLine: (name: string) => `เจ้าหน้าที่ <b>${name}</b> จะติดต่อคุณภายในประมาณ 30 นาทีเพื่อยืนยัน`,
-    amountLabel: 'ยอดรวม',
-    locale: 'th-TH',
-  },
-} as const;
-
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response(null, { headers: corsHeaders });
 
   try {
     const p: TransferNotifyPayload = await req.json();
-    const customerLang: Lang = p.customer_language || 'ru';
+    // Only a verified service caller or the signed-in customer who owns this
+    // transfer order may dispatch notifications / enrich the order.
+    {
+      const isService = (await requireServiceCaller(req, corsHeaders)) === null;
+      if (!isService) {
+        const auth = await requireAuth(req, corsHeaders);
+        if (auth instanceof Response) return auth;
+        const { data: own } = await sb()
+          .from('orders')
+          .select('id, customer_user_id, order_number')
+          .eq('id', p?.order_id ?? '')
+          .maybeSingle();
+        if (!own || own.customer_user_id !== auth.user.id ) {
+          return new Response(JSON.stringify({ error: 'Forbidden' }), {
+            status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          });
+        }
+        p.order_number = own.order_number ?? p.order_number;
+      }
+    }
+    const customerLang = transferReceiptLanguage(p.customer_language);
     console.info('[Transfer] notify', p.order_number, 'lang=', customerLang);
 
     // Always produce EN+TH for operator; also produce customer-language version
@@ -363,7 +352,7 @@ Deno.serve(async (req) => {
 
     // Customer "received" — localized
     if (p.customer_email) {
-      const c = CUSTOMER_RECEIVED[customerLang];
+      const c = transferCustomerReceiptCopy(customerLang);
       const localDate = fmtDate(p.scheduled_at, c.locale);
       await sendEmail('transfer-customer-received', p.customer_email, `transfer-cust-recv-${p.order_id}`, {
         subjectText: c.subject(p.order_number),
@@ -374,7 +363,7 @@ Deno.serve(async (req) => {
         routeValue: `${tr.pickup[customerLang]} → ${tr.dropoff[customerLang]}`,
         dateLabel: c.dateLabel,
         dateValue: localDate,
-        operatorLine: c.operatorLine(op?.name || 'Klod').replace(/<\/?b>/g, ''),
+        operatorLine: c.operatorLine,
         amountLabel: c.amountLabel,
         amountValue: `฿${p.total_amount.toLocaleString()}`,
       });

@@ -1,0 +1,14 @@
+const {chromium}=require('playwright'); const fs=require('node:fs'); const assert=require('node:assert/strict');
+fs.mkdirSync('test-results/catalog-mapping',{recursive:true});
+(async()=>{const browser=await chromium.launch({headless:true,...(process.env.CHROMIUM_PATH?{executablePath:process.env.CHROMIUM_PATH}:{}),args:['--no-sandbox']});
+for(const width of [375,390,430,1440]){const page=await browser.newPage({viewport:{width,height:1000}});await page.goto('http://127.0.0.1:4185'); await page.getByRole('button',{name:'Курсы валют'}).click();
+await page.getByRole('combobox').first().click(); await page.getByRole('option',{name:'Финансы',exact:true}).click();
+await page.getByRole('listbox').waitFor({state:'hidden'});
+await page.screenshot({path:`test-results/catalog-mapping/edit-${width}.png`,fullPage:true});
+assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);
+await page.getByRole('button',{name:'Сохранить',exact:true}).click(); await page.getByRole('dialog').waitFor({state:'hidden'});
+await page.getByRole('button',{name:'Курсы валют'}).click(); await page.getByRole('combobox').first().waitFor(); assert.match(await page.getByRole('combobox').first().textContent(),/Финансы/);
+await page.keyboard.press('Escape'); await page.getByRole('dialog').waitFor({state:'hidden'});
+await page.getByRole('button',{name:'Курсы валют'}).click(); await page.getByRole('combobox').first().click(); await page.getByRole('option',{name:'Транспорт',exact:true}).click(); await page.getByRole('button',{name:'Отмена',exact:true}).click();
+await page.getByRole('button',{name:'Курсы валют'}).click(); assert.match(await page.getByRole('combobox').first().textContent(),/Финансы/); await page.keyboard.press('Escape');
+console.log(width,'PASS move/save/reopen/cancel/Escape/no overflow'); await page.close();}await browser.close();})().catch(error=>{console.error(error);process.exit(1)});

@@ -1,7 +1,8 @@
 """Anonymous homepage layout and interaction matrix. Local fixture only; deny backend traffic."""
 import asyncio, json, os, sys, time
+from datetime import datetime, timezone
 from pathlib import Path
-from urllib.parse import urlparse
+from urllib.parse import parse_qsl, urlparse
 from playwright.async_api import async_playwright, expect
 OUTPUT = Path(sys.argv[1])
 WIDTHS = [320,360,375,390,430,768,1440,1920]
@@ -13,6 +14,123 @@ if not os.environ.get('CI') and os.environ.get('HOME_GALLERY_WIDTHS'):
 SHARD=os.environ.get('HOME_GALLERY_SHARD')
 if SHARD not in [None,'en','ru','th']: raise ValueError('Unknown gallery language shard')
 LANGUAGES=[SHARD] if SHARD else ['en','ru','th']
+
+HOME_COPY = {
+    'en': ('Find a home', 'Find a home', 'Rent', 'Number of guests', 'Refine search', 'Choose an area', 'Stay dates',
+           'Explore myUNO', ('Rent a home', 'Buy property', 'Experiences', 'Services'), 'Rawai'),
+    'ru': ('Поиск жилья', 'Найти жильё', 'Аренда', 'Количество гостей', 'Уточнить поиск', 'Выберите район', 'Даты проживания',
+           'Основные направления', ('Снять жильё', 'Купить недвижимость', 'Впечатления', 'Услуги'), 'Равай'),
+    'th': ('ค้นหาที่พัก', 'ค้นหาที่พัก', 'เช่า', 'จำนวนผู้เข้าพัก', 'ปรับการค้นหา', 'เลือกย่าน', 'วันที่เข้าพัก',
+           'สำรวจ myUNO', ('เช่าที่พัก', 'ซื้ออสังหาริมทรัพย์', 'ประสบการณ์', 'บริการ'), 'Rawai'),
+}
+DESTINATIONS = ('/property/rent', '/discover/buy', '/experiences', '/services')
+
+async def check_home_entry(page, lang, width):
+    form_name, search_name, rent_name, guests_name, refine_name, area_name, dates_name, nav_name, titles, area = HOME_COPY[lang]
+    hero = page.locator('.home-hero')
+    search = page.get_by_role('form', name=form_name, exact=True)
+    await expect(page.locator('form.home-search')).to_have_count(1)
+    await expect(hero.get_by_role('form', name=form_name, exact=True)).to_have_count(1)
+    await expect(page.locator('.home-search-entry-button,.premium-plan-links,.home-hero-choice')).to_have_count(0)
+    await expect(search.get_by_role('button', name=rent_name, exact=True)).to_have_attribute('aria-pressed','true')
+    submit = search.get_by_role('button', name=search_name, exact=True)
+    await expect(submit).to_be_visible()
+    await expect(submit).to_have_attribute('type','submit')
+    refine = search.get_by_role('button', name=refine_name, exact=True)
+    await expect(refine).to_have_attribute('aria-expanded','false')
+    await expect(search.get_by_role('combobox')).to_have_count(0)
+    guests = search.get_by_role('spinbutton', name=guests_name, exact=True)
+    await expect(guests).to_be_visible()
+    dates = search.get_by_role('button', name=dates_name, exact=True)
+
+    nav = page.get_by_role('navigation', name=nav_name, exact=True)
+    await expect(nav).to_have_count(1)
+    await expect(page.locator('.home-reference-direction')).to_have_count(4)
+    cards = nav.get_by_role('link')
+    await expect(cards).to_have_count(4)
+    await page.evaluate("window.scrollTo({top: 0, behavior: 'instant'})")
+    layout = await page.evaluate("""
+      () => {
+        const rect = el => el.getBoundingClientRect().toJSON();
+        return {
+          hero: rect(document.querySelector('.home-hero')),
+          heroLayout: rect(document.querySelector('.home-hero-layout')),
+          photo: rect(document.querySelector('.home-hero-media')),
+          panel: rect(document.querySelector('.home-reference-search')),
+          nav: rect(document.querySelector('.home-reference-directions')),
+          controls: ['.home-search-dates','.home-search-guests-inline','.home-search-submit'].map(
+            selector => rect(document.querySelector(selector))
+          ),
+          cards: [...document.querySelectorAll('.home-reference-direction')].map(rect),
+        };
+      }
+    """)
+    hero_box, photo, panel, nav_box, boxes = (layout[k] for k in ('hero','photo','panel','nav','cards'))
+    assert panel['top'] >= hero_box['top'] and panel['bottom'] <= hero_box['bottom']+1, layout
+    frame = layout['heroLayout']
+    assert photo['height'] > 200 and abs(photo['width']-frame['width']) <= 1 and abs(photo['left']-frame['left']) <= 1, layout
+    date_box, guests_box, submit_box = layout['controls']
+    assert submit_box['height'] >= 44 and all(control['width'] >= 44 for control in layout['controls']), layout
+    if width >= 1024:
+        centers = [(control['top']+control['bottom'])/2 for control in layout['controls']]
+        assert max(centers)-min(centers) < 3, layout
+        assert date_box['right'] < guests_box['left'] and guests_box['right'] < submit_box['left'], layout
+    if width < 768:
+        assert date_box['bottom'] < guests_box['top'] and guests_box['bottom'] < submit_box['top'], layout
+    assert nav_box['top'] >= hero_box['bottom']-1 and boxes[0]['top'] < 820, layout
+    columns = 2 if width < 1200 else 4
+    for index, box in enumerate(boxes):
+        assert box['width'] >= 44 and box['height'] >= (44 if width < 768 else 215)-1, layout
+        assert box['left'] >= nav_box['left']-1 and box['right'] <= nav_box['right']+1, layout
+        row, column = divmod(index, columns)
+        assert abs(box['top'] - boxes[row*columns]['top']) < 2, layout
+        assert abs(box['left'] - boxes[column]['left']) < 2, layout
+        if column: assert boxes[index-1]['right'] < box['left'], layout
+        if row: assert boxes[index-columns]['bottom'] < box['top'], layout
+    photo_paths = []
+    for index, destination in enumerate(DESTINATIONS):
+        card = cards.nth(index)
+        await expect(card).to_have_attribute('href', destination)
+        await expect(card.locator('strong')).to_have_text(titles[index])
+        await expect(card.locator('.home-reference-direction-icon svg')).to_have_count(1)
+        image = card.locator('img')
+        await card.scroll_into_view_if_needed()
+        await expect(image).to_have_attribute('alt','')
+        await page.wait_for_function('(el)=>el.complete && el.naturalWidth>0', arg=await image.element_handle(), timeout=5000)
+        photo_paths.append(await image.get_attribute('src'))
+    assert len(set(photo_paths)) == 4, photo_paths
+    await cards.first.focus()
+    for index in range(4):
+        card = cards.nth(index)
+        await expect(card).to_be_focused()
+        if index < 3: await card.press('Tab')
+    for index, destination in enumerate(DESTINATIONS):
+        await cards.nth(index).press('Enter')
+        await expect(page.get_by_test_id('location')).to_have_text(destination)
+        await expect(page.get_by_role('dialog')).to_have_count(0)
+
+    await refine.press('Enter')
+    area_select = search.get_by_role('combobox', name=area_name, exact=True)
+    await expect(area_select).to_be_visible()
+    await area_select.press('Enter')
+    await page.get_by_role('option', name=area, exact=True).click()
+    await guests.fill('3')
+    await dates.press('Enter')
+    calendar = page.get_by_role('dialog')
+    await expect(calendar).to_be_visible()
+    await calendar.locator('[data-day="2027-05-12"] button').press('Enter')
+    await calendar.locator('[data-day="2027-05-15"] button').press('Space')
+    await expect(calendar).to_have_count(0)
+    await submit.press('Enter')
+    await expect(page.get_by_test_id('location')).to_contain_text('/property/search?')
+    parsed = urlparse(await page.get_by_test_id('location').text_content())
+    assert parsed.path == '/property/search'
+    assert sorted(parse_qsl(parsed.query, keep_blank_values=True)) == sorted([
+        ('mode','rent'), ('tenancy','short'), ('district','rawai'),
+        ('checkIn','2027-05-12'), ('checkOut','2027-05-15'), ('guests','3'),
+    ]), parsed
+    await expect(page.get_by_role('dialog')).to_have_count(0)
+    assert await page.evaluate('document.documentElement.scrollWidth <= innerWidth'), f'Search overflow {lang} {width}'
 
 async def main():
     results = []
@@ -55,6 +173,7 @@ async def main():
                 await context.route('**/*', route)
                 page = await context.new_page()
                 page.on('pageerror', lambda error: errors.append(str(error)))
+                await page.clock.set_fixed_time(datetime(2027, 5, 11, 12, tzinfo=timezone.utc))
                 try:
                     await page.goto(f'http://localhost:8080/fixture?lang={lang}', wait_until='domcontentloaded')
                     await expect(page.locator('.home-rail-viewport')).to_have_count(5)
@@ -86,7 +205,7 @@ async def main():
                         if layout['grid']=='grid':
                             grid_sections+=1
                             assert 'home-services' in layout['section'] or 'home-locations' in layout['section'] or width>=1024 and layout['short'],layout
-                            expected=(1 if width<768 else 2) if 'home-services' in layout['section'] else (2 if width<1024 else 4) if 'home-locations' in layout['section'] else 3
+                            expected=(1 if width<=350 else 2) if 'home-services' in layout['section'] else (2 if width<1024 else 4) if 'home-locations' in layout['section'] else 3
                             assert layout['columns']==expected,layout
                             assert geometry['scroll']<=geometry['width']+2,geometry
                             for a,box in enumerate(layout['boxes']):
@@ -139,19 +258,7 @@ async def main():
                             await session.send('Input.dispatchTouchEvent',{'type':'touchEnd','touchPoints':[]})
                             await page.wait_for_function('(el)=>el.scrollLeft>0',arg=await rail.element_handle(),timeout=5000)
                             assert await rail.evaluate('(el)=>el.scrollLeft>0'), 'Swipe did not scroll'
-                    # One task choice layer; no repeated search-shaped routing block.
-                    await expect(page.locator('.home-hero input')).to_have_count(0)
-                    await expect(page.locator('.home-search-entry-button,.premium-plan-links')).to_have_count(0)
-                    choices=page.locator('.home-hero-choice')
-                    await expect(choices).to_have_count(4)
-                    destinations = ['/property/search?mode=rent', '/discover/buy', '/experiences', '/discover/services']
-                    for index,destination in enumerate(destinations):
-                        await expect(choices.nth(index)).to_have_attribute('href', destination)
-                        await choices.nth(index).focus()
-                        await expect(choices.nth(index)).to_be_focused()
-                        await choices.nth(index).press('Enter')
-                        await expect(page.get_by_test_id('location')).to_have_text(destination)
-                        await expect(page.get_by_role('dialog')).to_have_count(0)
+                    await check_home_entry(page, lang, width)
                     await expect(page.locator('.premium-newbuilds .home-rail article')).to_have_count(6)
                     # The rail controls must never intercept the catalogue header action.
                     catalogue = page.locator('.home-properties .home-gallery-heading a')

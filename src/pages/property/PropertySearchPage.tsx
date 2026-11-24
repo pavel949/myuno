@@ -58,8 +58,9 @@ export default function PropertySearchPage() {
   const isRu = language === 'ru';
   const text = useCallback((ru: string, en: string, th: string) => pickLang(language, { ru, en, th }), [language]);
   const [focusResults, setFocusResults] = useState(false);
-  // Start with a compact, editable summary so published offers are not buried.
-  const [criteriaOpen, setCriteriaOpen] = useState(false);
+  const [criteriaOpen, setCriteriaOpen] = useState(() =>
+    searchParamsUrl.get('mode') === 'rent' && searchParamsUrl.get('tenancy') === 'short'
+    && !searchParamsUrl.get('checkIn') && !searchParamsUrl.get('checkOut'));
   const resultsHeadingRef = useRef<HTMLHeadingElement>(null);
   const { districts, projects = [] } = usePropertyQuickFilters();
   useEffect(() => {

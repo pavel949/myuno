@@ -11,6 +11,7 @@ import { Badge } from '@/components/ui/badge';
 import { Plus, Building2, Search } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { toast } from 'sonner';
+import { ProjectUnitIdentityReview } from './ProjectUnitIdentityReview';
 import { ResponsiveModal } from '@/components/ui/responsive-modal';
 
 interface Props {
@@ -117,6 +118,8 @@ export function ProjectUnitsTab({ projectId }: Props) {
           {isRu ? 'Юнит' : 'Unit'}
         </Button>
       </div>
+
+      <ProjectUnitIdentityReview projectId={projectId} />
 
       {/* Units List */}
       {isLoading ? (

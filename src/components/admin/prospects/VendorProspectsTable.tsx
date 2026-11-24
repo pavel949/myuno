@@ -21,7 +21,9 @@ export function VendorProspectsTable() {
   const isDesktop = useIsDesktop();
   const { data: prospects, isLoading, refetch } = useVendorProspects();
   const [search, setSearch] = useState('');
-  const [selectedProspect, setSelectedProspect] = useState<VendorProspect | null>(null);
+  // Store the id, derive the row from live data so the side panel never shows stale status.
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const selectedProspect = prospects?.find(p => p.id === selectedId) ?? null;
 
   const filteredProspects = prospects?.filter(p => 
     p.business_name?.toLowerCase().includes(search.toLowerCase()) ||
@@ -31,7 +33,7 @@ export function VendorProspectsTable() {
   ) || [];
 
   const handleRowClick = (prospect: VendorProspect) => {
-    setSelectedProspect(prospect);
+    setSelectedId(prospect.id);
   };
 
   if (isLoading) {
@@ -137,7 +139,7 @@ export function VendorProspectsTable() {
                       )}
                     </TableCell>
                     <TableCell>
-                      {prospect.ai_score !== null ? (
+                      {prospect.ai_score != null ? (
                         <div className="flex items-center gap-1">
                           <Star className="h-3 w-3 text-warning" />
                           <span>{prospect.ai_score}</span>
@@ -169,7 +171,7 @@ export function VendorProspectsTable() {
           <VendorProspectPanel prospect={selectedProspect} />
         ) : null}
         rightPanelTitle={selectedProspect?.business_name || (isRussian ? 'Детали' : 'Details')}
-        onCloseRightPanel={() => setSelectedProspect(null)}
+        onCloseRightPanel={() => setSelectedId(null)}
       >
         {tableContent}
       </PersistentPanelLayout>
@@ -179,7 +181,7 @@ export function VendorProspectsTable() {
         <VendorProspectDetail
           prospect={selectedProspect}
           open={!!selectedProspect}
-          onClose={() => setSelectedProspect(null)}
+          onClose={() => setSelectedId(null)}
         />
       )}
     </>

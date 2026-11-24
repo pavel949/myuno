@@ -18,6 +18,10 @@ const PIPELINE_STAGES = [
   { status: 'meeting', labelEn: 'Meeting', labelRu: 'Встреча' },
   { status: 'negotiating', labelEn: 'Negotiating', labelRu: 'Переговоры' },
   { status: 'won', labelEn: 'Won', labelRu: 'Выигран' },
+  // Closed-lost columns: without them lost prospects vanished from the board
+  // (while still counted in the total) and could not be dragged out of the funnel.
+  { status: 'lost', labelEn: 'Lost', labelRu: 'Потерян' },
+  { status: 'not_interested', labelEn: 'Not interested', labelRu: 'Не интересно' },
 ] as const;
 
 export function VendorProspectsPipeline() {
@@ -25,7 +29,10 @@ export function VendorProspectsPipeline() {
   const isRussian = language === 'ru';
   const { data: prospects, isLoading, refetch } = useVendorProspects();
   const updateProspect = useUpdateProspect();
-  const [selectedProspect, setSelectedProspect] = useState<VendorProspect | null>(null);
+  // Keep only the id: the detail sheet must re-render from the live query result,
+  // otherwise a status change inside the sheet shows the stale snapshot.
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const selectedProspect = prospects?.find(p => p.id === selectedId) ?? null;
 
   const getProspectsByStatus = (status: string) => {
     return prospects?.filter(p => p.status === status) || [];
@@ -38,9 +45,10 @@ export function VendorProspectsPipeline() {
   const handleDrop = (e: React.DragEvent, newStatus: string) => {
     e.preventDefault();
     const prospectId = e.dataTransfer.getData('prospectId');
-    if (prospectId) {
-      updateProspect.mutate({ id: prospectId, status: newStatus });
-    }
+    if (!prospectId) return;
+    const previous = prospects?.find(p => p.id === prospectId)?.status;
+    if (previous === newStatus) return;
+    updateProspect.mutate({ id: prospectId, status: newStatus, previous_status: previous });
   };
 
   const handleDragOver = (e: React.DragEvent) => {
@@ -111,7 +119,7 @@ export function VendorProspectsPipeline() {
                           key={prospect.id}
                           prospect={prospect}
                           onDragStart={(e) => handleDragStart(e, prospect)}
-                          onClick={() => setSelectedProspect(prospect)}
+                          onClick={() => setSelectedId(prospect.id)}
                         />
                       ))}
                       {stageProspects.length === 0 && (
@@ -134,7 +142,7 @@ export function VendorProspectsPipeline() {
         <VendorProspectDetail
           prospect={selectedProspect}
           open={!!selectedProspect}
-          onClose={() => setSelectedProspect(null)}
+          onClose={() => setSelectedId(null)}
         />
       )}
     </div>

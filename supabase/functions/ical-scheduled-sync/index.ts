@@ -1,6 +1,7 @@
 import { createClient } from '../_shared/supabase.ts';
 import { validateExternalUrlForSSRF } from '../_shared/ssrf-guard.ts';
 import { propertyOrderHoldsInventory } from '../_shared/property-inventory.ts';
+import { requireServiceCaller } from "../_shared/internal-secret.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': 'https://myuno.app',
@@ -534,6 +535,7 @@ Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
+  { const denied = await requireServiceCaller(req, corsHeaders); if (denied) return denied; }
 
   try {
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;

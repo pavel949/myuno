@@ -22,10 +22,13 @@ async def main():
                 await page.goto(f'http://fixture.local/fixture.html?lang={lang}')
                 await expect(page.locator('article')).to_be_visible()
                 await page.wait_for_function('Array.from(document.images).some(i=>i.complete&&i.naturalWidth>0&&Number(getComputedStyle(i).opacity)>0.99&&i.getBoundingClientRect().height>100)')
-                link = page.locator('article a'); await expect(link).to_have_attribute('href', 'https://operator.example/programme')
-                assert await link.count() == 1
+                link = page.locator('article button'); await expect(link).to_be_visible()
+                assert await page.locator('article a').count() == 0
                 assert await page.evaluate('document.documentElement.scrollWidth <= innerWidth'), (lang, width, 'overflow')
                 bounds = await link.bounding_box(); assert bounds['width'] >= 44 and bounds['height'] >= 40, bounds
+                await link.click()
+                await expect(page.get_by_role('dialog')).to_have_attribute('data-entry', 'experience_discovery:concierge')
+                await expect(page.get_by_role('dialog')).to_have_attribute('data-listing', 'synthetic')
                 assert not await page.locator('input,select,form').count()
                 assert not outbound and not errors, (outbound, errors)
                 await page.screenshot(path=str(output/f'{lang}-{width}.png'), full_page=True)

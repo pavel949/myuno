@@ -181,7 +181,7 @@ export default function AdminDevelopers() {
         title={isRu ? 'Застройщики' : 'Developers'}
         subtitle={isRu ? 'Управление реестром застройщиков' : 'Manage developer registry'}
         actions={
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
             <Button variant="outline" disabled={catalogueUnavailable} onClick={() => setBulkLogoOpen(true)}>
               <Upload className="h-4 w-4 mr-2" />
               {isRu ? 'Логотипы' : 'Bulk Logos'}
@@ -200,15 +200,15 @@ export default function AdminDevelopers() {
       />
 
       {/* Stats */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 gap-2 md:grid-cols-4 md:gap-4">
         <Card>
           <CardContent className="p-4">
-            <div className="flex items-center gap-3">
+            <div className="flex flex-wrap items-center gap-2 sm:gap-3">
               <div className="p-2 rounded-none bg-primary/10">
                 <Building2 className="h-5 w-5 text-primary" />
               </div>
               <div>
-                <div className="text-2xl font-bold">{catalogueUnavailable ? '—' : stats.total}</div>
+                <div className="font-display text-2xl font-semibold tabular-nums">{catalogueUnavailable ? '—' : stats.total}</div>
                 <div className="text-sm text-muted-foreground">
                   {isRu ? 'Всего' : 'Total'}
                 </div>
@@ -218,12 +218,12 @@ export default function AdminDevelopers() {
         </Card>
         <Card>
           <CardContent className="p-4">
-            <div className="flex items-center gap-3">
+            <div className="flex flex-wrap items-center gap-2 sm:gap-3">
               <div className="p-2 rounded-none bg-success/10">
                 <CheckCircle className="h-5 w-5 text-success" />
               </div>
               <div>
-                <div className="text-2xl font-bold">{catalogueUnavailable ? '—' : stats.verified}</div>
+                <div className="font-display text-2xl font-semibold tabular-nums">{catalogueUnavailable ? '—' : stats.verified}</div>
                 <div className="text-sm text-muted-foreground">
                   {isRu ? 'Верифицированы' : 'Verified'}
                 </div>
@@ -233,12 +233,12 @@ export default function AdminDevelopers() {
         </Card>
         <Card>
           <CardContent className="p-4">
-            <div className="flex items-center gap-3">
+            <div className="flex flex-wrap items-center gap-2 sm:gap-3">
               <div className="p-2 rounded-none bg-warning/10">
                 <Star className="h-5 w-5 text-warning" />
               </div>
               <div>
-                <div className="text-2xl font-bold">{catalogueUnavailable ? '—' : stats.featured}</div>
+                <div className="font-display text-2xl font-semibold tabular-nums">{catalogueUnavailable ? '—' : stats.featured}</div>
                 <div className="text-sm text-muted-foreground">
                   {isRu ? 'Избранные' : 'Featured'}
                 </div>
@@ -248,12 +248,12 @@ export default function AdminDevelopers() {
         </Card>
         <Card>
           <CardContent className="p-4">
-            <div className="flex items-center gap-3">
+            <div className="flex flex-wrap items-center gap-2 sm:gap-3">
               <div className="p-2 rounded-none bg-accent/10">
                 <Target className="h-5 w-5 text-accent-foreground" />
               </div>
               <div>
-                <div className="text-2xl font-bold">{catalogueUnavailable ? '—' : stats.avgScore}</div>
+                <div className="font-display text-2xl font-semibold tabular-nums">{catalogueUnavailable ? '—' : stats.avgScore}</div>
                 <div className="text-sm text-muted-foreground">
                   {isRu ? 'Ср. скоринг' : 'Avg Score'}
                 </div>
@@ -300,8 +300,7 @@ export default function AdminDevelopers() {
           {filteredDevelopers.map((developer) => (
             <Card 
               key={developer.id} 
-              className="overflow-hidden hover:shadow-md transition-shadow cursor-pointer"
-              onClick={() => handleOpenEdit(developer)}
+              className="flex min-w-0 flex-col overflow-hidden"
             >
               {/* Cover/Logo */}
               <div className="aspect-video bg-muted relative">
@@ -328,13 +327,13 @@ export default function AdminDevelopers() {
                   {developer.is_verified && (
                     <Badge variant="default" className="bg-success">
                       <CheckCircle className="h-3 w-3 mr-1" />
-                      Verified
+                      {isRu ? 'Проверен' : 'Verified'}
                     </Badge>
                   )}
                   {developer.is_featured && (
                     <Badge variant="gold">
                       <Star className="h-3 w-3 mr-1" />
-                      Featured
+                      {isRu ? 'Избранный' : 'Featured'}
                     </Badge>
                   )}
                 </div>
@@ -347,11 +346,11 @@ export default function AdminDevelopers() {
                 )}
               </div>
               
-              <CardContent className="p-4">
-                <div className="flex items-start justify-between">
+              <CardContent className="flex flex-1 flex-col gap-3 p-4">
+                <div className="min-w-0">
                   <div>
-                    <h3 className="font-semibold">
-                      {isRu ? developer.name_ru : developer.name_en}
+                    <h3 className="font-display text-lg font-semibold leading-tight [overflow-wrap:anywhere]">
+                      {isRu ? developer.name_ru || developer.name_en : developer.name_en || developer.name_ru}
                     </h3>
                     {developer.headquarters && (
                       <p className="text-sm text-muted-foreground flex items-center gap-1 mt-1">
@@ -360,18 +359,6 @@ export default function AdminDevelopers() {
                       </p>
                     )}
                   </div>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    aria-label={isRu ? 'Удалить' : 'Delete'}
-                    className="text-destructive hover:text-destructive"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setDeleteConfirmId(developer.id);
-                    }}
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
                 </div>
 
                 <div className="flex flex-wrap gap-2 mt-3">
@@ -392,6 +379,23 @@ export default function AdminDevelopers() {
                     </Badge>
                   )}
                 </div>
+                <div className="mt-auto flex items-center justify-between gap-2 border-t pt-3">
+                  <Button variant="outline" size="sm" onClick={() => handleOpenEdit(developer)}>
+                    {isRu ? 'Редактировать' : 'Edit'}
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    aria-label={isRu ? 'Удалить' : 'Delete'}
+                    className="text-destructive hover:text-destructive"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setDeleteConfirmId(developer.id);
+                    }}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
               </CardContent>
             </Card>
           ))}
@@ -401,7 +405,7 @@ export default function AdminDevelopers() {
       {/* Edit/Create Sheet */}
       <Sheet open={isFormOpen} onOpenChange={setIsFormOpen}>
         <SheetContent className="w-full sm:max-w-xl overflow-y-auto p-0">
-          <SheetHeader className="p-6 pb-0">
+          <SheetHeader className="px-4 pb-0 pt-5 sm:px-6">
             <SheetTitle className="flex items-center gap-2">
               <Building2 className="h-5 w-5" />
               {editingDeveloper 
@@ -411,11 +415,11 @@ export default function AdminDevelopers() {
             </SheetTitle>
           </SheetHeader>
 
-          <Tabs defaultValue="basic" className="p-6 pt-4">
-            <TabsList className="grid w-full grid-cols-3">
-              <TabsTrigger value="basic">{isRu ? 'Основное' : 'Basic'}</TabsTrigger>
-              <TabsTrigger value="details">{isRu ? 'Детали' : 'Details'}</TabsTrigger>
-              <TabsTrigger value="media">{isRu ? 'Медиа' : 'Media'}</TabsTrigger>
+          <Tabs defaultValue="basic" className="p-4 sm:p-6">
+            <TabsList className="grid h-auto w-full grid-cols-3 items-stretch">
+              <TabsTrigger className="min-h-11 overflow-visible whitespace-normal px-2 leading-snug [overflow-wrap:anywhere]" value="basic">{isRu ? 'Основное' : 'Basic'}</TabsTrigger>
+              <TabsTrigger className="min-h-11 overflow-visible whitespace-normal px-2 leading-snug [overflow-wrap:anywhere]" value="details">{isRu ? 'Детали' : 'Details'}</TabsTrigger>
+              <TabsTrigger className="min-h-11 overflow-visible whitespace-normal px-2 leading-snug [overflow-wrap:anywhere]" value="media">{isRu ? 'Медиа' : 'Media'}</TabsTrigger>
             </TabsList>
 
             {/* Basic Info Tab */}

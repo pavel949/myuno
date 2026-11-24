@@ -195,7 +195,7 @@ Deno.serve(async (req) => {
             last_name,
             nationality,
             date_of_birth: date_of_birth ?? null,
-            phone: phone ?? user.phone ?? "",
+            phone: phone ?? (user as { phone?: string | null }).phone ?? "",
             email: email ?? user.email ?? "",
             lead_id: lead_id ?? null,
             kyc_status: "submitted",
@@ -236,6 +236,13 @@ Deno.serve(async (req) => {
 
       if (!buyer) return err("Buyer not found or access denied", 404);
 
+      // Uploads live under "<auth uid>/..." (storage policy); never sign a path
+      // in another user's folder.
+      const passportPath = String(passport_storage_path ?? "");
+      if (!passportPath.startsWith(`${user.id}/`) || passportPath.includes("..")) {
+        return err("Passport file not found or access denied", 403);
+      }
+
       // Get signed URL for the passport image
       const { data: signedUrl } = await sb.storage
         .from("kyc-documents")
@@ -249,7 +256,8 @@ Deno.serve(async (req) => {
       await sb
         .from("buyers" as never)
         .update({ passport_scan_url: passport_storage_path } as never)
-        .eq("id", buyer_id);
+        .eq("id", buyer_id)
+        .eq("created_by_user_id" as never, user.id);
 
       // Run OCR (best-effort — if it fails, kyc_status stays 'submitted')
       let extracted: { passport_number: string | null; expiry: string | null; dob: string | null; nationality: string | null } = {

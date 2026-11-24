@@ -1,29 +1,43 @@
-import { ExternalLink } from 'lucide-react';
+import { useState } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { PUBLIC_LISTING_DETAIL_GRID, PUBLIC_LISTING_DETAIL_RAIL } from '@/components/layout/publicListingDetail';
+import { cn } from '@/lib/utils';
 import { MiniAppLayout } from '@/components/miniapp/MiniAppLayout';
 import { Button } from '@/components/ui/button';
 import { OptimizedImage } from '@/components/ui/optimized-image';
 import { pickLang } from '@/lib/i18n/pickLang';
-import { complexMediaUrl } from '@/lib/real-estate/complexMedia';
+import { ExperienceInquiry } from '@/components/experiences/ExperienceInquiry';
 import type { Experience } from '@/hooks/useExperiences';
 
-/** Editorial catalogue information does not admit a myUNO booking or quote. */
-export function ExperienceDiscoveryDetail({ experience, onBack }: { experience: Experience; onBack: () => void }) {
+/** Editorial information admits a concierge inquiry, never a booking, payment or asserted quote. */
+export function ExperienceDiscoveryDetail({ experience, onBack, initialInquiryOpen = false }: { experience: Experience; onBack: () => void; initialInquiryOpen?: boolean }) {
   const { language } = useLanguage();
   const t = (ru: string, en: string, th: string) => pickLang(language, { ru, en, th });
   const title = (language === 'ru' ? experience.title_ru : experience.title_en) || experience.title_en;
   const description = (language === 'ru' ? experience.description_ru : experience.description_en) || experience.description_en;
-  const source = complexMediaUrl(experience.source_page_url);
-  return <MiniAppLayout title={title} fallbackPath="/experiences" onBack={onBack} showHero={false} showFilter={false} showCategories={false}>
-    <article className="space-y-4">
-      {experience.cover_image && <OptimizedImage src={experience.cover_image} alt={title} width={800} height={450} className="aspect-video w-full" />}
+  const [inquiryOpen, setInquiryOpen] = useState(initialInquiryOpen);
+  const [activeImage, setActiveImage] = useState(0);
+  const images = [experience.cover_image, ...(experience.images || [])].filter((image): image is string => Boolean(image));
+  return <MiniAppLayout pageWidth="detail" title={title} fallbackPath="/experiences" onBack={onBack} showHero={false} showFilter={false} showCategories={false}>
+    <article className={cn("grid gap-4 lg:items-start", PUBLIC_LISTING_DETAIL_GRID)}>
+      <div className="min-w-0 space-y-4">
+      {images.length > 0 && <div className="space-y-2">
+        <OptimizedImage src={images[activeImage] || images[0]} alt={title} width={800} height={450} sizes="(min-width: 1536px) 960px, (min-width: 1024px) 64vw, 100vw" priority className="aspect-video w-full" />
+        {images.length > 1 && <div className="flex gap-2 overflow-x-auto" aria-label={t('Фотографии', 'Photos', 'รูปภาพ')}>
+          {images.map((image, index) => <button key={`${image}-${index}`} type="button" onClick={() => setActiveImage(index)} aria-label={`${t('Фото', 'Photo', 'รูปภาพ')} ${index + 1}`} aria-pressed={activeImage === index} className="h-16 w-20 shrink-0 overflow-hidden border border-border focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary">
+            <img src={image} alt="" className="h-full w-full object-cover" />
+          </button>)}
+        </div>}
+      </div>}
       {experience.location_name && <p className="text-sm text-muted-foreground">{experience.location_name}</p>}
-      <p>{description}</p>
-      <div className="space-y-3 border border-border bg-muted/30 p-4">
-        <h2 className="font-display text-h3">{t('Перед посещением', 'Before you visit', 'ก่อนเข้าชม')}</h2>
-        <p>{t('Это идея для отдыха. Цену, места, ограничения и условия уточняйте непосредственно у оператора. Бронирование и оплата через myUNO для этой карточки пока недоступны.', 'An idea for your day. Confirm prices, availability, restrictions and terms directly with the operator. This listing does not offer booking or payment through myUNO.', 'ไอเดียสำหรับวันพักผ่อน โปรดยืนยันราคา ที่ว่าง ข้อจำกัด และเงื่อนไขกับผู้ให้บริการโดยตรง รายการนี้ยังไม่เปิดให้จองหรือชำระเงินผ่าน myUNO')}</p>
-        {source && <Button asChild variant="outline"><a href={source} target="_blank" rel="noopener noreferrer">{t('Уточнить у оператора', 'Check with the operator', 'สอบถามผู้ให้บริการ')}<ExternalLink className="ml-2 h-4 w-4" aria-hidden="true" /></a></Button>}
+      <p className="ds-reading-copy">{description}</p>
       </div>
+      <aside className={cn("min-w-0 space-y-3 border border-border bg-muted/30 p-4 lg:p-6", PUBLIC_LISTING_DETAIL_RAIL)}>
+        <h2 className="font-display text-h3">{t('Перед посещением', 'Before you visit', 'ก่อนเข้าชม')}</h2>
+        <p>{t('Это идея для отдыха. Консьерж myUNO поможет уточнить программу, доступность и условия. Отправка запроса не подтверждает бронирование; онлайн-оплата для этой карточки недоступна.', 'An idea for your day. myUNO concierge can help check the programme, availability and conditions. An inquiry is not a confirmed booking; online payment is not available for this listing.', 'ไอเดียสำหรับวันพักผ่อน ติดต่อคอนเซียร์จ myUNO เพื่อสอบถามโปรแกรม ที่ว่าง และเงื่อนไข การส่งคำขอไม่ใช่การยืนยันการจอง และยังไม่เปิดให้ชำระเงินออนไลน์')}</p>
+        <Button onClick={() => setInquiryOpen(true)} className="h-auto min-h-11 whitespace-normal">{t('Уточнить места у myUNO', 'Ask myUNO about availability', 'สอบถามที่ว่างกับ myUNO')}</Button>
+      </aside>
     </article>
+    <ExperienceInquiry open={inquiryOpen} onOpenChange={setInquiryOpen} listingId={experience.id} listingTitle={title} entryPoint="experience_discovery:concierge" />
   </MiniAppLayout>;
 }

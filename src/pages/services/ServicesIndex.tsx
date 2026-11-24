@@ -1,3 +1,5 @@
+import { MarketplaceEntry } from '@/components/landing/MarketplaceEntry';
+import { useUrlSearchDraft } from '@/hooks/useUrlSearchDraft';
 import { lazy, Suspense, useEffect, useRef, useState } from 'react';
 import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { ArrowRight, ClipboardList, Search, Wrench, X } from 'lucide-react';
@@ -11,12 +13,6 @@ import { EmptyState } from '@/components/uno/EmptyState';
 import { MarketplaceServiceGrid } from '@/components/services/MarketplaceServiceGrid';
 import { MarketplaceDiscoveryMenu } from '@/components/services/MarketplaceDiscoveryMenu';
 import { MarketplaceFilterSheet } from '@/components/services/MarketplaceFilterSheet';
-import cleaningImage from '@/assets/solutions/cleaning.webp';
-import transferImage from '@/assets/solutions/transfer.webp';
-import legalImage from '@/assets/solutions/legal.webp';
-import healthImage from '@/assets/solutions/massage.webp';
-import familyImage from '@/assets/solutions/pediatr.webp';
-import foodImage from '@/assets/solutions/restaurant.webp';
 import { ServiceFunctionCard } from '@/components/services';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { pickLang } from '@/lib/i18n/pickLang';
@@ -86,6 +82,7 @@ export default function ServicesIndex({ embedded = false }: { embedded?: boolean
     navigate({ pathname: location.pathname, search, hash: location.hash }, { replace, state: location.state });
   };
   const update = (key: 'q' | 'category' | 'situation' | 'browse', value: string, homeCategory?: string) => commit(updateServiceDiscoveryQuery(pendingQuery.current.params, key, value, homeCategory), key === 'q');
+  const [searchDraft, updateSearch] = useUrlSearchDraft(filters.query, value => update('q', value));
   const clear = () => commit(clearServiceDiscoveryQuery(pendingQuery.current.params));
   const selectedCategory = categories.find(item => item.id === category);
   const categoryLabel = child ? homeServiceCategoryLabel(child.id, language) : selectedCategory ? label(selectedCategory) : t('Неизвестная категория', 'Unknown category', 'ไม่พบหมวดหมู่');
@@ -115,10 +112,6 @@ export default function ServicesIndex({ embedded = false }: { embedded?: boolean
       focusResults.current = false;
     }
   }, [category, filters.situation]);
-  const categoryImage = (id: string) => isHomeServiceCategoryId(id) ? cleaningImage : ({
-    'cat-transport': transferImage, 'cat-business-legal': legalImage, 'cat-health-wellness': healthImage,
-    'cat-family-kids': familyImage, 'cat-food-delivery': foodImage,
-  } as Record<string, string>)[id];
   const discoveryFilters = <MarketplaceFilterSheet title={t('Категории и ситуации', 'Categories and situations', 'หมวดหมู่และสถานการณ์')} activeCount={[Boolean(filters.category), Boolean(filters.situation)].filter(Boolean).length}>
 
       <Tabs value={filters.view} onValueChange={value => update('browse', value)} className="space-y-4">
@@ -153,10 +146,11 @@ export default function ServicesIndex({ embedded = false }: { embedded?: boolean
       </TabsContent>
       </Tabs>
   </MarketplaceFilterSheet>;
-  return <div className="premium-services premium-services--marketplace"><Layout pageWidth="catalogue" contentClassName="public-commerce public-commerce--services"
+  return <div className="premium-services premium-services--marketplace"><Layout pageWidth="catalogue" contentClassName={overview && !filtered && !embedded ? "public-commerce public-commerce--services public-commerce--marketplace-overview" : "public-commerce public-commerce--services"}
+    marketplaceIntro={!embedded && overview && !filtered ? <MarketplaceEntry kind="services" /> : undefined}
     title={t('Услуги', 'Services', 'บริการ')}
     subtitle={t('Выберите направление', 'Choose a category', 'เลือกหมวดหมู่')}
-    fallbackPath="/" searchValue={filters.query} onSearchChange={value => update('q', value)}
+    fallbackPath="/" searchValue={searchDraft} onSearchChange={updateSearch}
     searchPlaceholder={t('Поиск услуг…', 'Search services…', 'ค้นหาบริการ…')} showHero={false} showFilter filterButton={discoveryFilters} showEcosystemHint={false}>
     {!embedded && <SEOHead title={t('Услуги на Пхукете', 'Services in Phuket', 'บริการในภูเก็ต')} description={t('Услуги для дома, поездок и повседневных дел.', 'Services for home, travel and everyday life.', 'บริการสำหรับบ้าน การเดินทาง และชีวิตประจำวัน')} />}
 
@@ -175,7 +169,7 @@ export default function ServicesIndex({ embedded = false }: { embedded?: boolean
       title={filters.view === 'categories' ? t('Выберите категорию', 'Choose a category', 'เลือกหมวดหมู่') : t('Что вам нужно сейчас?', 'What do you need today?', 'วันนี้คุณต้องการอะไร?')}
       allLabel={filters.view === 'situations' ? t('Все ситуации', 'All situations', 'ทุกสถานการณ์') : undefined} headingId="service-menu-title" itemAttribute={filters.view === 'categories' ? 'data-category-id' : 'data-situation-code'} testId={filters.view === 'categories' ? 'service-discovery-menu' : 'service-situation-menu'}
       items={filters.view === 'categories'
-        ? [...[...menu.primary, ...menu.more].map(item => ({ id: item.id, label: label(item), icon: item.icon, image: categoryImage(item.id) })), ...(menu.yacht ? [{ id: 'dedicated-yacht-catalogue', label: label(menu.yacht), icon: menu.yacht.icon, href: menu.yacht.path, navigationState: { returnTo } }] : [])]
+        ? [...[...menu.primary, ...menu.more].map(item => ({ id: item.id, label: label(item), icon: item.icon })), ...(menu.yacht ? [{ id: 'dedicated-yacht-catalogue', label: label(menu.yacht), icon: menu.yacht.icon, href: menu.yacht.path, navigationState: { returnTo } }] : [])]
         : situations.map(item => ({ id: item.code, label: pickLang(language, { ru: item.titleRu, en: item.titleEn }) }))}
       onSelect={id => { focusResults.current = true; update(filters.view === 'categories' ? 'category' : 'situation', id); }}
     />}

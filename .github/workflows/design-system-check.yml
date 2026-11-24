@@ -9,7 +9,7 @@ concurrency:
   group: design-system-${{ github.event_name }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 jobs:
-  isolated-ui:
+  isolated-core:
     runs-on: ubuntu-24.04
     timeout-minutes: 40
     env:
@@ -27,10 +27,6 @@ jobs:
           npm ci
           python -m pip install playwright==1.55.0
           python -m playwright install --with-deps chromium
-      - name: Yacht and flower native discovery journeys desktop and mobile
-        run: node scripts/qa/yachts-flowers-ui.mjs
-        env:
-          NODE_OPTIONS: --require ./scripts/qa/local-network-only.cjs
       - name: Guard authored theme sources
         run: |
           npm run design:check
@@ -126,6 +122,58 @@ jobs:
         run: CATALOG_QA_OUTPUT="$GITHUB_WORKSPACE/artifacts/design-system/property-catalogue-entry" node scripts/qa/property-catalog-entry-ui.mjs
         env:
           NODE_OPTIONS: --require ./scripts/qa/local-network-only.cjs
+      - name: Retain synthetic UI evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: design-system-core-${{ github.sha }}
+          path: |
+            artifacts/design-system
+            artifacts/ux-clarity
+          if-no-files-found: warn
+          retention-days: 14
+  isolated-discovery:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    env:
+      VITE_SUPABASE_URL: http://127.0.0.1:54321
+      VITE_SUPABASE_PUBLISHABLE_KEY: isolated-verification-placeholder
+      VITE_SUPABASE_PROJECT_ID: isolated-verification
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Install isolated browser dependencies
+        run: |
+          npm ci
+          python -m pip install playwright==1.55.0
+          python -m playwright install --with-deps chromium
+          npx playwright install chromium
+      - name: Yacht and flower native discovery journeys desktop and mobile
+        run: node scripts/qa/yachts-flowers-ui.mjs
+        env:
+          NODE_OPTIONS: --require ./scripts/qa/local-network-only.cjs
+      - name: Platform social settings and footer with synthetic transport
+        run: SOCIAL_QA_OUTPUT="$GITHUB_WORKSPACE/artifacts/design-system/social-links" node scripts/qa/platform-social-links-ui.mjs
+        env:
+          NODE_OPTIONS: --require ./scripts/qa/local-network-only.cjs
+      - name: Rental landing areas communities and shared search
+        run: node scripts/qa/rental-landing-ui.mjs
+        env:
+          RENTAL_QA_OUTPUT: artifacts/design-system/rental-landing
+          NODE_OPTIONS: --require ./scripts/qa/local-network-only.cjs
+      - name: Four myUNO marketplace entry links and responsive mastheads
+        run: node scripts/qa/marketplace-entry-ui.mjs
+        env:
+          MARKETPLACE_ENTRY_QA_OUTPUT: artifacts/design-system/marketplace-entry
+          NODE_OPTIONS: --require ./scripts/qa/local-network-only.cjs
+      - name: Newbuild discovery evidence areas developers and project selection
+        run: node scripts/qa/newbuild-landing-ui.mjs
+        env:
+          NEWBUILD_QA_OUTPUT: artifacts/design-system/newbuild-landing
+          NODE_OPTIONS: --require ./scripts/qa/local-network-only.cjs
       - name: Changed role landings and operational leaf surfaces
         run: DESIGN_ROLLOUT_OUTPUT="$GITHUB_WORKSPACE/artifacts/design-system/rollout-surfaces" node scripts/qa/design-rollout-surfaces.mjs
         env:
@@ -134,9 +182,23 @@ jobs:
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
-          name: design-system-${{ github.sha }}
+          name: design-system-discovery-${{ github.sha }}
           path: |
             artifacts/design-system
             artifacts/ux-clarity
           if-no-files-found: warn
           retention-days: 14
+  isolated-ui:
+    # Preserve one fail-closed gate while independent fixtures run on separate runners.
+    if: always()
+    needs: [isolated-core, isolated-discovery]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 2
+    steps:
+      - name: Require every isolated browser shard
+        env:
+          CORE_RESULT: ${{ needs.isolated-core.result }}
+          DISCOVERY_RESULT: ${{ needs.isolated-discovery.result }}
+        run: |
+          test "$CORE_RESULT" = success
+          test "$DISCOVERY_RESULT" = success

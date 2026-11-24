@@ -122,7 +122,7 @@ Deno.serve(async (req) => {
       from: `myUNO Developers <${fromEmail}>`,
     });
 
-    console.info(`[devmod-claim-invite] Admin ${user.id} sent claim invite for ${dev.name_en} → ${email}`);
+    console.info(`[devmod-claim-invite] Admin ${user.id} sent claim invite for ${dev.name_en}`);
 
     return new Response(JSON.stringify({
       success: true,

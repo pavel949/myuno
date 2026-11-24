@@ -91,6 +91,8 @@ export const APP_ROUTES = {
 
   // ── Property Hub ──
   PROPERTY: '/property',
+  /** Rental discovery landing; filtered results retain PROPERTY_SEARCH. */
+  PROPERTY_RENT: '/property/rent',
   /** Catalog grid (Airbnb-style); landing lives at PROPERTY */
   PROPERTY_BROWSE: '/property/browse',
   /** Canonical short-term rent path (redirects to PROPERTY_BROWSE with tenancy=short) */
@@ -113,6 +115,7 @@ export const APP_ROUTES = {
 
   // ── Offplan & Developers (under Property Hub) ──
   OFFPLAN: '/property/offplan',
+  OFFPLAN_SEARCH: '/property/offplan/search',
   OFFPLAN_DETAIL: (id: string) => `/property/offplan/${id}`,
   DEVELOPERS: '/property/developers',
   DEVELOPER_DETAIL: (id: string) => `/property/developers/${id}`,
@@ -459,6 +462,7 @@ export const APP_ROUTES = {
   MC_PROJECTS: '/mc/projects',
   MC_PROPERTY_IMPORT: '/mc/properties/import',
   MC_TODAY: '/mc/today',
+  MC_MODULES: '/mc/modules',
   MC_CALENDAR: '/mc/calendar',
   MC_CONTACTS: '/mc/contacts',
   MC_CONTACT_DETAIL: (id: string) => `/mc/contacts/${id}`,

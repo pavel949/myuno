@@ -82,7 +82,9 @@ function PropertyListingCardBase({
 
   const surface = useMemo(() => surfaceFromProperty(property, mode), [property, mode]);
   const title = isRu ? surface.titleRu : surface.titleEn;
-  const images = [...(property.images || []), ...(property.cover_image ? [property.cover_image] : [])];
+  const images = [...new Set([property.cover_image, ...(property.images || [])]
+    .filter((image): image is string => typeof image === 'string' && image.trim().length > 0)
+    .map(image => image.trim()))];
 
   const viewIds = useMemo(() => normalizeViewTypes(property.view_type), [property.view_type]);
   const primaryViewLabel =
@@ -277,7 +279,12 @@ function PropertyListingCardBase({
 
         {/* Row 3: Price */}
         <div className="pt-0.5 sm:pt-1">
-          {!multipleRates && <p className="text-base leading-snug text-foreground">
+          {totalPrice && nights && mode !== 'buy' && (
+            <p className="mb-1 text-base font-semibold leading-snug text-foreground">
+              {isRu ? 'Ориентировочно' : language === 'th' ? 'ประมาณ' : 'Estimated'}: {formatPrice(totalPrice)}
+            </p>
+          )}
+          {!multipleRates && <p className={cn('leading-snug', totalPrice ? 'text-sm text-muted-foreground' : 'text-base text-foreground')}>
             {mode === 'buy' ? (
               <span className="font-semibold">
                 {salePrice !== null ? formatPrice(salePrice) : priceOnRequest}
@@ -292,11 +299,6 @@ function PropertyListingCardBase({
             )}
           </p>}
           {mode === 'rent' && <PropertyRentalRateSummary property={property} />}
-          {totalPrice && nights && mode !== 'buy' && (
-            <p className="text-sm text-muted-foreground mt-1 underline decoration-muted-foreground/50">
-              {isRu ? 'Ориентировочно' : language === 'th' ? 'ประมาณ' : 'Estimated'}: {formatPrice(totalPrice)}
-            </p>
-          )}
         </div>
 
         <div onClick={event => event.stopPropagation()}><PropertyOfferLinks property={property} mode={mode} search={location.search} focused={focusedOffer} /></div>

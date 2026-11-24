@@ -82,6 +82,98 @@ export function stageImport({ source, rows, current = [], previousBatch, now = n
   if (result.review.length) result.status = 'review';
   return result;
 }
+/** Private preview only. The existing physical sales bridge supplies the identity, never the source file. */
+export function stagePurchaseOfferPreview({ source, rows, canonicalUnits = [], currentOffers = [], now = new Date().toISOString() }) {
+  if (!Array.isArray(rows) || !Array.isArray(canonicalUnits) || !Array.isArray(currentOffers) ||
+      !rows.every(row => row && typeof row === 'object' && !Array.isArray(row))) {
+    throw new Error('Purchase offer preview requires parsed rows and canonical identity arrays');
+  }
+  const validInstant = value => typeof value === 'string' && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{3})?Z$/.test(value) &&
+    Number.isFinite(Date.parse(value)) && new Date(value).toISOString() === (value.length === 20 ? value.slice(0, -1) + '.000Z' : value);
+  if (!validInstant(now)) throw new Error('Invalid preview date');
+  const bangkok = new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Bangkok', year: 'numeric', month: '2-digit', day: '2-digit' });
+  const dateParts = Object.fromEntries(bangkok.formatToParts(new Date(now)).map(part => [part.type, part.value]));
+  const day = [dateParts.year, dateParts.month, dateParts.day].join('-');
+  const errors = validateSource(source);
+  if (!source?.effectiveDate && source?.ownerConfirmedCurrentAt &&
+      (!validInstant(source.ownerConfirmedCurrentAt) || Date.parse(source.ownerConfirmedCurrentAt) > Date.parse(now))) {
+    errors.push('invalid_owner_confirmation_date');
+  }
+  if (source?.type !== 'price_availability') errors.push('invalid_offer_source_type');
+  if (!['partial', 'complete'].includes(source?.coverage)) errors.push('unknown_coverage');
+  if (source?.effectiveDate && source.effectiveDate > day) errors.push('future_effective_date');
+  if (source?.validUntil != null) {
+    const date = normalizeSourceDate(source.validUntil);
+    if (date.status !== 'valid') errors.push('invalid_source_validity');
+    else if (date.value < day) errors.push('expired_source');
+  }
+  if (!rows.length) errors.push('empty_source_requires_review');
+  const keyOf = (...parts) => JSON.stringify(parts);
+  const validKey = value => typeof value === 'string' && value.length > 0 && value.trim() === value;
+  const grouped = (list, getKey) => {
+    const index = new Map();
+    for (const entry of list) {
+      const key = getKey(entry);
+      if (!index.has(key)) index.set(key, []);
+      index.get(key).push(entry);
+    }
+    return index;
+  };
+  const unitKey = u => keyOf(u.projectId, u.unitCode);
+  const variantKey = o => keyOf(o.projectId, o.unitCode, o.ownership, o.offerKey);
+  const baselineKey = o => keyOf(o.propertyId, o.ownership, o.offerKey);
+  const byUnit = grouped(canonicalUnits, unitKey);
+  const byPhysicalId = grouped(canonicalUnits, u => u.propertyId);
+  const quotes = grouped(currentOffers, baselineKey);
+  const importsByUnit = grouped(rows, unitKey);
+  const importsByVariant = grouped(rows, variantKey);
+  const preview = { format: 'purchase-offer-preview-v1', checkedAt: now, errors, proposals: [], review: [], missing: [],
+    publicationEnabled: false, lastKnownGoodRetained: true };
+  const seen = new Set();
+  for (const row of rows) {
+    const reasons = [...errors];
+    const code = unitKey(row);
+    const matches = byUnit.get(code) ?? [];
+    const unit = matches[0];
+    if (!validKey(row.unitCode) || row.projectId !== source?.projectId) reasons.push('unmatched_unit');
+    if (matches.length !== 1 || !validKey(unit?.propertyId) || !validKey(unit?.id) || unit.propertyProjectId !== row.projectId ||
+        (byPhysicalId.get(unit?.propertyId)?.length ?? 0) !== 1) reasons.push('unmapped_or_ambiguous_canonical_property');
+    if (!['leasehold', 'freehold'].includes(row.ownership) || !validKey(row.offerKey)) reasons.push('unknown_offer_identity');
+    if (importsByVariant.get(variantKey(row)).length > 1) reasons.push('duplicate_offer_variant');
+    if (!['available', 'reserved', 'sold', 'unavailable', 'unknown'].includes(row.availability)) reasons.push('unknown_availability');
+    if (new Set(importsByUnit.get(code).map(o => o.availability)).size > 1) reasons.push('conflicting_unit_availability');
+    if (!['THB', 'USD', 'EUR'].includes(row.currency) || row.priceUnit !== 'total') reasons.push('invalid_price_units');
+    if (!['quoted', 'not_offered'].includes(row.offerStatus)) reasons.push('unknown_offer_status');
+    if (row.offerStatus === 'quoted' && (!Number.isFinite(row.amount) || row.amount <= 0)) reasons.push('invalid_price_amount');
+    if (row.offerStatus === 'not_offered' && row.amount !== null) reasons.push('not_offered_requires_null_price');
+    if (!['base', 'promotion'].includes(row.priceKind)) reasons.push('unknown_or_unseparated_price_kind');
+    const promo = row.priceKind === 'promotion' ? normalizeSourceDate(row.promoValidUntil) : null;
+    if (promo && (promo.status !== 'valid' || promo.value < day)) reasons.push('invalid_or_expired_promotion');
+    const candidate = { propertyId: unit?.propertyId, projectUnitId: unit?.id, projectId: row.projectId, unitCode: row.unitCode,
+      ownership: row.ownership, offerKey: row.offerKey, amount: row.amount, currency: row.currency, priceUnit: row.priceUnit,
+      priceKind: row.priceKind, offerStatus: row.offerStatus, promoValidUntil: promo?.value ?? null };
+    const key = baselineKey(candidate);
+    const known = quotes.get(key) ?? [];
+    const prior = known[0];
+    if (known.length > 1 || (prior && prior.projectId !== row.projectId)) reasons.push('ambiguous_existing_offer');
+    if (prior && prior.currency !== row.currency) reasons.push('currency_changed');
+    if (prior?.amount > 0 && row.amount > 0 && Math.abs(row.amount / prior.amount - 1) > 0.25) reasons.push('large_price_change');
+    if (unit && row.projectId === source?.projectId) seen.add(key);
+    if (reasons.length) {
+      preview.review.push({ unitCode: row.unitCode, ownership: row.ownership, offerKey: row.offerKey, reasons: [...new Set(reasons)] });
+      continue;
+    }
+    const previous = prior && Object.fromEntries(Object.keys(candidate).map(field => [field, prior[field]]));
+    if (!previous || canonical(candidate) !== canonical(previous) || row.availability !== prior.availability) {
+      preview.proposals.push({ offer: candidate, unitAvailabilityObserved: row.availability,
+        sourceRevision: source.revision, effectiveDate: source.effectiveDate ?? null, expectedVersion: prior?.version ?? null });
+    }
+  }
+  preview.missing = currentOffers.filter(offer => offer.projectId === source?.projectId && !seen.has(baselineKey(offer)))
+    .map(offer => ({ propertyId: offer.propertyId, ownership: offer.ownership, offerKey: offer.offerKey }));
+  return { ...preview, status: errors.length || preview.review.length ? 'review' : 'staged' };
+}
+
 export function undoBatch(batch, current) {
   // Offline rollback plan only. Concurrent edits block undo, including replays.
   return batch.changes.map(change => {

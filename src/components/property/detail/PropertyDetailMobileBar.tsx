@@ -3,7 +3,7 @@
  * Shows price + "Reserve / Select dates / Book now" or "Request consultation" for sale listings.
  */
 import { useLayoutEffect, useRef } from 'react';
-import { Calendar as CalendarIcon } from 'lucide-react';
+import { Calendar as CalendarIcon, MessageCircle } from 'lucide-react';
 import { format } from 'date-fns';
 import { ru } from 'date-fns/locale';
 import { DateRange } from 'react-day-picker';
@@ -30,6 +30,7 @@ interface PropertyDetailMobileBarProps {
   dateRange?: DateRange;
   guestCount: number;
   onOpenDatePicker: () => void;
+  onOpenPropertyEnquiry?: () => void;
 }
 
 export function PropertyDetailMobileBar({
@@ -48,6 +49,7 @@ export function PropertyDetailMobileBar({
   dateRange,
   guestCount,
   onOpenDatePicker,
+  onOpenPropertyEnquiry,
 }: PropertyDetailMobileBarProps) {
   const { language } = useLanguage();
   const { formatPrice } = useCurrency();
@@ -99,7 +101,12 @@ export function PropertyDetailMobileBar({
                 <p className="text-[11px] text-muted-foreground mt-0.5">{ownershipLabel}</p>
               )}
             </div>
-            <MessageHostButton
+            {onOpenPropertyEnquiry ? <Button type="button" onClick={onOpenPropertyEnquiry} className="h-auto min-h-11 shrink-0 whitespace-normal">
+              <MessageCircle className="size-4 shrink-0" aria-hidden="true" />
+              {isSaleListing
+                ? pickLang(language, { en: 'Request consultation', ru: 'Запросить консультацию', th: 'ขอคำปรึกษา' })
+                : pickLang(language, { en: 'Request rental', ru: 'Запросить аренду', th: 'สอบถามการเช่า' })}
+            </Button> : <MessageHostButton
               propertyId={propertyId}
               propertyTitle={titleEn ?? undefined}
               propertyTitleRu={titleRu ?? undefined}
@@ -107,7 +114,7 @@ export function PropertyDetailMobileBar({
               className="flex-shrink-0"
               labelRu={isSaleListing ? 'Запросить консультацию' : 'Запросить аренду'}
               labelEn={isSaleListing ? 'Request consultation' : pickLang(language, { en: 'Request rental', ru: 'Запросить аренду', th: 'สอบถามการเช่า' })}
-            />
+            />}
           </>
         ) : (
           <>
@@ -144,7 +151,11 @@ export function PropertyDetailMobileBar({
               onClick={handleReserve}
             >
               <CalendarIcon className="w-4 h-4 shrink-0" />
-              {dateRange?.from && dateRange?.to ? (isRu ? 'Расчёт и заявка' : 'Cost & booking request') : (isRu ? 'Рассчитать стоимость' : 'Calculate stay cost')}
+              {dateRange?.from && dateRange?.to
+                ? instantBooking
+                  ? pickLang(language, { ru: 'Проверить условия брони', en: 'Review booking', th: 'ตรวจสอบการจอง' })
+                  : pickLang(language, { ru: 'Расчёт и заявка', en: 'Cost & booking request', th: 'ราคาและคำขอจอง' })
+                : pickLang(language, { ru: 'Рассчитать стоимость', en: 'Calculate stay cost', th: 'คำนวณราคา' })}
             </Button>
             </div>
           </>

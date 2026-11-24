@@ -15,6 +15,7 @@ interface TransferSuccessProps {
 
 export function TransferSuccess({ language, formData, createdOrderNumber }: TransferSuccessProps) {
   const navigate = useNavigate();
+  const tr = (en: string, ru: string, th: string) => language === 'ru' ? ru : language === 'th' ? th : en;
 
   return (
     <AppLayout showBottomNav={false}>
@@ -23,20 +24,18 @@ export function TransferSuccess({ language, formData, createdOrderNumber }: Tran
           <Check className="w-12 h-12 text-success" />
         </div>
         <h2 className="text-2xl font-display font-bold mb-2 text-center">
-          {language === 'ru' ? 'Трансфер забронирован!' : 'Transfer Booked!'}
+          {tr('Transfer request saved', 'Заявка на трансфер сохранена', 'บันทึกคำขอรถรับส่งแล้ว')}
         </h2>
         {createdOrderNumber && (
           <p className="text-lg font-semibold text-primary mb-2">#{createdOrderNumber}</p>
         )}
         <p className="text-muted-foreground text-center max-w-sm mb-2">
-          {language === 'ru'
-            ? `Рейс ${formData.flightNumber} • ${formData.arrivalDate}`
-            : `Flight ${formData.flightNumber} • ${formData.arrivalDate}`}
+          {tr('Flight', 'Рейс', 'เที่ยวบิน')} {formData.flightNumber} • {formData.arrivalDate}
         </p>
-        <div className="flex items-center gap-2 mb-2">
-          <Badge variant="secondary" className="bg-success/10 text-success">
+        <div className="flex flex-wrap justify-center items-center gap-2 mb-2">
+          <Badge variant="secondary" className="bg-warning/10 text-warning text-center">
             <Shield className="w-3 h-3 mr-1" />
-            {language === 'ru' ? 'Подтверждено' : 'Confirmed'}
+            {tr('Awaiting myUNO confirmation', 'Ожидает подтверждения myUNO', 'รอการยืนยันจาก myUNO')}
           </Badge>
           {formData.paymentMethod === 'concierge_advance' && (
             <Badge variant="secondary" className="bg-warning/10 text-warning">
@@ -48,9 +47,11 @@ export function TransferSuccess({ language, formData, createdOrderNumber }: Tran
 
         {formData.paymentMethod === 'concierge_advance' && (
           <p className="text-sm text-muted-foreground text-center max-w-sm mb-4">
-            {language === 'ru'
-              ? 'Мы оплатим за вас. После трансфера вы вернёте сумму удобным способом.'
-              : "We'll pay for you. Return the amount after the transfer."}
+            {tr(
+              'Please confirm payment arrangements with myUNO.',
+              'Способ и условия оплаты необходимо подтвердить с myUNO.',
+              'โปรดยืนยันวิธีและเงื่อนไขการชำระเงินกับ myUNO',
+            )}
           </p>
         )}
 
@@ -62,7 +63,7 @@ export function TransferSuccess({ language, formData, createdOrderNumber }: Tran
               </div>
               <div>
                 <p className="text-xs text-muted-foreground">
-                  {language === 'ru' ? 'Имя на табличке' : 'Name on sign'}
+                  {tr('Name on sign', 'Имя на табличке', 'ชื่อบนป้าย')}
                 </p>
                 <p className="font-semibold text-lg">{formData.meetingSignName || formData.name}</p>
               </div>
@@ -73,7 +74,7 @@ export function TransferSuccess({ language, formData, createdOrderNumber }: Tran
               </div>
               <div>
                 <p className="text-xs text-muted-foreground">
-                  {language === 'ru' ? 'Адрес назначения' : 'Destination'}
+                  {tr('Destination', 'Адрес назначения', 'จุดหมายปลายทาง')}
                 </p>
                 <p className="font-medium">{formData.destinationAddress}</p>
               </div>
@@ -82,16 +83,18 @@ export function TransferSuccess({ language, formData, createdOrderNumber }: Tran
         )}
 
         <p className="text-muted-foreground text-center max-w-sm mb-8">
-          {language === 'ru'
-            ? 'Водитель встретит вас с табличкой у выхода из терминала.'
-            : 'Driver will meet you with a sign at the terminal exit.'}
+          {tr(
+            'Your request is saved, but the trip is not confirmed yet. Check My Bookings for its status; myUNO will arrange the meeting details.',
+            'Заявка сохранена. Поездка ещё не подтверждена. Проверьте её статус в «Мои брони»; детали встречи согласует myUNO.',
+            'บันทึกคำขอแล้ว การเดินทางยังไม่ได้รับการยืนยัน ดูสถานะได้ที่การจองของฉัน โดย myUNO จะประสานรายละเอียดจุดนัดพบ',
+          )}
         </p>
-        <div className="flex gap-3">
+        <div className="flex flex-wrap justify-center gap-3">
           <Button variant="outline" onClick={() => navigate(APP_ROUTES.TRANSPORT)}>
-            {language === 'ru' ? 'К транспорту' : 'Browse More'}
+            {tr('Browse More', 'К транспорту', 'ดูบริการเดินทาง')}
           </Button>
           <Button onClick={() => navigate(APP_ROUTES.BOOKINGS)}>
-            {language === 'ru' ? 'Мои брони' : 'My Bookings'}
+            {tr('My Bookings', 'Мои брони', 'การจองของฉัน')}
           </Button>
         </div>
       </div>

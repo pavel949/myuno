@@ -140,13 +140,18 @@ Deno.serve(async (req) => {
 
       // Add default values (table-specific)
       const processedBatch = batch.map((record: Record<string, any>) => {
+        // Never let imported rows choose identity, authorship or verification state.
+        const PROTECTED = ['id', 'created_by', 'created_by_uno_team', 'uno_team_creator_id', 'owner_id', 'user_id',
+          'linked_user_id', 'owner_user_id', 'is_verified', 'verified_at', 'verified_by', 'approved_at', 'approved_by',
+          'is_featured', 'deleted_at', 'deleted_by'];
+        const clean = Object.fromEntries(Object.entries(record).filter(([k]) => !PROTECTED.includes(k)));
         const base: Record<string, any> = {
-          ...record,
+          ...clean,
           created_at: record.created_at ?? new Date().toISOString(),
           updated_at: new Date().toISOString(),
         };
         if (table === 'crm_contacts') {
-          base.created_by = record.created_by ?? user.id;
+          base.created_by = user.id;
         } else {
           base.is_active = record.is_active ?? true;
           base.created_by_uno_team = true;

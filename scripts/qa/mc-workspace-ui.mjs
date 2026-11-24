@@ -40,7 +40,7 @@ const result = await build({
 import React,{useState} from 'react';import {createRoot} from 'react-dom/client';import {MemoryRouter,useLocation} from 'react-router-dom';import {QueryClient,QueryClientProvider} from '@tanstack/react-query';
 import {TopBar} from '${root}/src/components/nav/TopBar.tsx';import {SideRail} from '${root}/src/components/nav/SideRail.tsx';import {SidebarProvider} from '${root}/src/components/ui/sidebar.tsx';
 import OwnerModulesPage from '${root}/src/pages/owner/OwnerModulesPage.tsx';
-function Fixture(){const loc=useLocation();return <SidebarProvider><SideRail role="owner"/><div className="min-w-0 flex-1"><TopBar role="owner"/><OwnerModulesPage/><output hidden data-testid="route-boundary">{loc.pathname}</output></div></SidebarProvider>;}
+function Fixture(){const loc=useLocation();return <SidebarProvider><SideRail role="owner"/><div className="min-w-0 flex-1"><TopBar role="owner"/><main><OwnerModulesPage/></main><output hidden data-testid="route-boundary">{loc.pathname}</output></div></SidebarProvider>;}
 createRoot(document.getElementById('root')).render(<QueryClientProvider client={new QueryClient()}><MemoryRouter initialEntries={['/mc/modules']} future={{v7_startTransition:true,v7_relativeSplatPath:true}}><Fixture/></MemoryRouter></QueryClientProvider>);`, loader:'tsx',resolveDir:root },
   bundle:true,outfile:path.join(output,'fixture.js'),jsx:'automatic',format:'esm',metafile:true,
   define:{'process.env.NODE_ENV':'"production"','import.meta.env.DEV':'false'},

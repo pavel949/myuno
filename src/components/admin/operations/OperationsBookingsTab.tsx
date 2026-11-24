@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -6,8 +6,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Search, Calendar, Clock, CheckCircle, XCircle, AlertCircle, Eye, Package } from 'lucide-react';
-import { useQuery } from '@tanstack/react-query';
+import { Search, ChevronRight, Clock, CheckCircle, XCircle, AlertCircle, Eye, Package } from 'lucide-react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { format } from 'date-fns';
 import { ORDER_STATUS_CONFIG } from '@/types/orders';
@@ -17,14 +17,21 @@ import { useSearchParams } from 'react-router-dom';
 import { applyOrderQueue, parseOrderQueue, parseQueuePage } from '@/lib/adminDashboardQueues';
 import { pickLang } from '@/lib/i18n/pickLang';
 
+const orderStatusCards = [
+  { status: 'pending', icon: AlertCircle, color: 'text-warning' },
+  { status: 'confirmed', icon: Clock, color: 'text-info' },
+  { status: 'completed', icon: CheckCircle, color: 'text-success' },
+  { status: 'cancelled', icon: XCircle, color: 'text-destructive' },
+] as const;
+
 export function OperationsBookingsTab() {
   const { t, language } = useLanguage();
   const [params, setParams] = useSearchParams();
   const queue = parseOrderQueue(params);
   const page = parseQueuePage(params, 'order_page');
   const pageSize = 100;
-
-
+  const listHeading = useRef<HTMLHeadingElement>(null);
+  const queryClient = useQueryClient();
 
   const searchQuery = queue.search;
   const statusFilter = queue.status;
@@ -76,11 +83,26 @@ export function OperationsBookingsTab() {
 
   const profileMap = new Map(profiles?.map((p) => [p.id, p]) || []);
 
-  const stats = {
-    pending: orders?.filter((o) => o.status === 'pending').length || 0,
-    confirmed: orders?.filter((o) => o.status === 'confirmed').length || 0,
-    completed: orders?.filter((o) => o.status === 'completed').length || 0,
-    cancelled: orders?.filter((o) => o.status === 'cancelled').length || 0,
+  const statusCounts = useQuery({
+    queryKey: ['admin-order-status-counts', queue.createdBefore],
+    queryFn: async () => Promise.all(orderStatusCards.map(async ({ status }) => {
+      const response = await applyOrderQueue(
+        supabase.from('orders').select('id', { count: 'exact', head: true }),
+        { status, createdBefore: queue.createdBefore },
+      );
+      return response.error ? null : response.count;
+    })),
+  });
+
+  const openStatus = (status: typeof orderStatusCards[number]['status']) => {
+    setParams(previous => {
+      const next = new URLSearchParams(previous);
+      next.set('status', status);
+      next.delete('order_page');
+      next.delete('q');
+      return next;
+    });
+    listHeading.current?.focus();
   };
 
   const filteredOrders = orders?.filter((o) => {
@@ -109,54 +131,51 @@ export function OperationsBookingsTab() {
     <div className="space-y-4">
       {error && <div role="alert" className="border border-destructive p-4">
         {pickLang(language, { en: 'Could not load orders. Counts and results are unavailable.', ru: 'Не удалось загрузить заказы. Счётчики и результаты недоступны.', th: 'โหลดคำสั่งซื้อไม่สำเร็จ จำนวนและผลลัพธ์ไม่พร้อมใช้งาน' })}
-        <Button variant="outline" disabled={isFetching} onClick={() => refetch()}>{pickLang(language, { en: 'Retry', ru: 'Повторить', th: 'ลองอีกครั้ง' })}</Button>
+        <Button variant="outline" disabled={isFetching} onClick={() => { void refetch(); void statusCounts.refetch(); }}>{pickLang(language, { en: 'Retry', ru: 'Повторить', th: 'ลองอีกครั้ง' })}</Button>
       </div>}
-      {queue.createdBefore && <p className="text-sm text-muted-foreground">{pickLang(language, { en: 'Created before', ru: 'Созданы до', th: 'สร้างก่อน' })}: <time>{queue.createdBefore}</time></p>}
-      {/* Stats */}
-      {!error && !isLoading && <p className="text-xs text-muted-foreground">{pickLang(language,{en:'Status counts below describe the loaded page, not the entire queue.',ru:'Счётчики статусов ниже относятся к загруженной странице, а не ко всей очереди.',th:'จำนวนตามสถานะด้านล่างเป็นของหน้าที่โหลด ไม่ใช่ทั้งคิว'})}</p>}
-      {!error && !isLoading && <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <Card>
-          <CardContent className="p-4 flex items-center gap-3">
-            <AlertCircle className="h-8 w-8 text-warning" />
-            <div>
-              <p className="text-2xl font-bold">{stats.pending}</p>
-              <p className="text-sm text-muted-foreground">{t('admin.orders.stats.pending')}</p>
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-4 flex items-center gap-3">
-            <Clock className="h-8 w-8 text-info" />
-            <div>
-              <p className="text-2xl font-bold">{stats.confirmed}</p>
-              <p className="text-sm text-muted-foreground">{t('admin.orders.stats.confirmed')}</p>
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-4 flex items-center gap-3">
-            <CheckCircle className="h-8 w-8 text-success" />
-            <div>
-              <p className="text-2xl font-bold">{stats.completed}</p>
-              <p className="text-sm text-muted-foreground">{t('admin.orders.stats.completed')}</p>
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-4 flex items-center gap-3">
-            <XCircle className="h-8 w-8 text-destructive" />
-            <div>
-              <p className="text-2xl font-bold">{stats.cancelled}</p>
-              <p className="text-sm text-muted-foreground">{t('admin.orders.stats.cancelled')}</p>
-            </div>
-          </CardContent>
-        </Card>
-      </div>}
+      {queue.createdBefore && (
+        <p className="text-sm text-muted-foreground">
+          {pickLang(language, { en: 'Created before', ru: 'Созданы до', th: 'สร้างก่อน' })}{' '}
+          <time dateTime={queue.createdBefore}>
+            {new Intl.DateTimeFormat(language, {
+              dateStyle: 'medium', timeStyle: 'short', timeZone: 'Asia/Bangkok',
+            }).format(new Date(queue.createdBefore))} (ICT)
+          </time>
+        </p>
+      )}
+      <div className="grid grid-cols-2 gap-2 sm:grid-cols-4 sm:gap-3">
+        {orderStatusCards.map(({ status, icon: Icon, color }, index) => {
+          const selected = statusFilter === status;
+          return (
+            <Button
+              key={status}
+              type="button"
+              variant="secondary"
+              aria-label={`${statusCounts.data?.[index] ?? "—"} ${t(`admin.orders.stats.${status}`)}`}
+              aria-pressed={selected}
+              onClick={() => openStatus(status)}
+              className="h-auto min-h-20 min-w-0 flex-col items-start gap-1 whitespace-normal bg-card p-3 text-left aria-pressed:border-primary aria-pressed:bg-primary/5"
+            >
+              <span className="flex w-full items-center gap-2">
+                <Icon aria-hidden="true" className={`h-4 w-4 shrink-0 ${color}`} />
+                <span className="text-xl font-semibold tabular-nums">{statusCounts.data?.[index] ?? '—'}</span>
+                <ChevronRight aria-hidden="true" className="ml-auto h-4 w-4 shrink-0 text-muted-foreground" />
+              </span>
+              <span className="min-w-0 text-sm leading-tight [overflow-wrap:anywhere]">{t(`admin.orders.stats.${status}`)}</span>
+            </Button>
+          );
+        })}
+      </div>
+      {statusCounts.data?.some(count => count === null) && (
+        <p className="text-xs text-muted-foreground">
+          {pickLang(language, { en: 'Some counts are unavailable.', ru: 'Некоторые счётчики недоступны.', th: 'จำนวนบางรายการไม่พร้อมใช้งาน' })}
+        </p>
+      )}
 
       {/* Filters */}
       <Card>
         <CardHeader className="pb-3">
-          <CardTitle className="flex items-center gap-2">
+          <CardTitle ref={listHeading} tabIndex={-1} className="flex scroll-mt-36 items-center gap-2 focus:outline-none">
             <Package className="h-5 w-5" />
             {t('admin.orders.title')}
 
@@ -174,7 +193,7 @@ export function OperationsBookingsTab() {
               />
             </div>
             <Select value={statusFilter} onValueChange={value => updateFilter('status', value)}>
-              <SelectTrigger className="w-[180px]">
+              <SelectTrigger className="w-full sm:w-[180px]">
                 <SelectValue placeholder={t('admin.orders.status')} />
               </SelectTrigger>
               <SelectContent>
@@ -201,87 +220,118 @@ export function OperationsBookingsTab() {
             </div>
 
           ) : (
-            <div className="rounded-none border overflow-x-auto">
-              <Table className="min-w-[720px]">
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>{t('admin.orders.col.orderNumber')}</TableHead>
-                    <TableHead>{t('admin.orders.col.type')}</TableHead>
-                    <TableHead>{t('admin.orders.col.customer')}</TableHead>
-                    <TableHead>{t('admin.orders.col.date')}</TableHead>
-                    <TableHead>{t('admin.orders.col.amount')}</TableHead>
-                    <TableHead>{t('admin.orders.col.status')}</TableHead>
-                    <TableHead className="w-[50px]"></TableHead>
+            <>
+              <div className="grid gap-2 md:hidden">
+                {filteredOrders?.map(order => {
+                  const status = (order.status || 'pending') as OrderStatus;
+                  const style = ORDER_STATUS_CONFIG[status] || ORDER_STATUS_CONFIG.pending;
+                  return (
+                    <Button
+                      key={order.id}
+                      type="button"
+                      variant="secondary"
+                      className="h-auto min-h-14 justify-between gap-2 whitespace-normal bg-card p-3 text-left"
+                      onClick={() => setSelectedOrderId(order.id)}
+                    >
+                      <span className="min-w-0 flex-1 [overflow-wrap:anywhere]">
+                        <span className="block">{getCustomerDisplay(order).name}</span>
+                        <span className="block text-xs text-muted-foreground">
+                          {order.order_number || order.id.slice(0, 8)} · {order.order_type}
+                        </span>
+                      </span>
+                      <Badge className={`${style.bgColor} ${style.color} min-w-0 border-0 [overflow-wrap:anywhere]`}>
+                        {t(`admin.orders.statusLabel.${status}`)}
+                      </Badge>
+                      <ChevronRight aria-hidden="true" className="h-4 w-4 shrink-0" />
+                    </Button>
+                  );
+                })}
+                {!filteredOrders?.length && (
+                  <p className="py-6 text-center text-muted-foreground">{t('admin.orders.empty')}</p>
+                )}
+              </div>
+              <div className="hidden rounded-none border overflow-x-auto md:block">
+                <Table className="min-w-[720px]">
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>{t('admin.orders.col.orderNumber')}</TableHead>
+                      <TableHead>{t('admin.orders.col.type')}</TableHead>
+                      <TableHead>{t('admin.orders.col.customer')}</TableHead>
+                      <TableHead>{t('admin.orders.col.date')}</TableHead>
+                      <TableHead>{t('admin.orders.col.amount')}</TableHead>
+                      <TableHead>{t('admin.orders.col.status')}</TableHead>
+                      <TableHead className="w-[50px]"></TableHead>
 
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredOrders?.map((order) => {
-                    const customer = getCustomerDisplay(order);
-                    const status = (order.status || 'pending') as OrderStatus;
-                    const statusCfg = ORDER_STATUS_CONFIG[status] || ORDER_STATUS_CONFIG.pending;
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {filteredOrders?.map((order) => {
+                      const customer = getCustomerDisplay(order);
+                      const status = (order.status || 'pending') as OrderStatus;
+                      const statusCfg = ORDER_STATUS_CONFIG[status] || ORDER_STATUS_CONFIG.pending;
 
-                    return (
-                      <TableRow
-                        key={order.id}
-                        className="cursor-pointer hover:bg-muted/50"
-                        onClick={() => setSelectedOrderId(order.id)}
-                      >
-                        <TableCell className="font-mono text-xs font-medium">
-                          {order.order_number || order.id.slice(0, 8)}
-                        </TableCell>
-                        <TableCell className="capitalize text-sm">
-                          {order.order_type}
-                        </TableCell>
-                        <TableCell>
-                          <div className="text-sm font-medium">{customer.name}</div>
-                          {customer.phone && (
-                            <div className="text-xs text-muted-foreground">{customer.phone}</div>
-                          )}
-                        </TableCell>
-                        <TableCell className="text-sm">
-                          {order.start_at
-                            ? format(new Date(order.start_at), 'dd.MM.yyyy HH:mm')
-                            : order.created_at
-                            ? format(new Date(order.created_at), 'dd.MM.yyyy HH:mm')
-                            : t('admin.orders.noDate')}
-                        </TableCell>
-                        <TableCell className="font-medium">
-                          {order.total_amount?.toLocaleString()} {order.currency || 'THB'}
-                        </TableCell>
-                        <TableCell>
-                          <Badge className={`${statusCfg.bgColor} ${statusCfg.color} border-0`}>
-                            {t(`admin.orders.statusLabel.${status}`)}
-                          </Badge>
+                      return (
+                        <TableRow
+                          key={order.id}
+                          className="cursor-pointer hover:bg-muted/50"
+                          onClick={() => setSelectedOrderId(order.id)}
+                        >
+                          <TableCell className="font-mono text-xs font-medium">
+                            {order.order_number || order.id.slice(0, 8)}
+                          </TableCell>
+                          <TableCell className="capitalize text-sm">
+                            {order.order_type}
+                          </TableCell>
+                          <TableCell>
+                            <div className="text-sm font-medium">{customer.name}</div>
+                            {customer.phone && (
+                              <div className="text-xs text-muted-foreground">{customer.phone}</div>
+                            )}
+                          </TableCell>
+                          <TableCell className="text-sm">
+                            {order.start_at
+                              ? format(new Date(order.start_at), 'dd.MM.yyyy HH:mm')
+                              : order.created_at
+                              ? format(new Date(order.created_at), 'dd.MM.yyyy HH:mm')
+                              : t('admin.orders.noDate')}
+                          </TableCell>
+                          <TableCell className="font-medium">
+                            {order.total_amount?.toLocaleString()} {order.currency || 'THB'}
+                          </TableCell>
+                          <TableCell>
+                            <Badge className={`${statusCfg.bgColor} ${statusCfg.color} border-0`}>
+                              {t(`admin.orders.statusLabel.${status}`)}
+                            </Badge>
 
-                        </TableCell>
-                        <TableCell>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-8 w-8 min-h-[44px] min-w-[44px]"
-                            aria-label="View"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setSelectedOrderId(order.id);
-                            }}
-                          >
-                            <Eye className="h-4 w-4" />
-                          </Button>
+                          </TableCell>
+                          <TableCell>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8 min-h-[44px] min-w-[44px]"
+                              aria-label="View"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setSelectedOrderId(order.id);
+                              }}
+                            >
+                              <Eye className="h-4 w-4" />
+                            </Button>
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })}
+                    {(!filteredOrders || filteredOrders.length === 0) && (
+                      <TableRow>
+                        <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
+                          {t('admin.orders.empty')}
                         </TableCell>
                       </TableRow>
-                    );
-                  })}
-                  {(!filteredOrders || filteredOrders.length === 0) && (
-                    <TableRow>
-                      <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
-                        {t('admin.orders.empty')}
-                      </TableCell>
-                    </TableRow>
-                  )}
-                </TableBody>
-              </Table>
-            </div>
+                    )}
+                  </TableBody>
+                </Table>
+              </div>
+            </>
           )}
           {orders && orders.length >= 1000 && (
             <p className="text-xs text-muted-foreground mt-2 text-center">
@@ -295,7 +345,11 @@ export function OperationsBookingsTab() {
       <AdminOrderDetailSheet
         orderId={selectedOrderId}
         onClose={() => setSelectedOrderId(null)}
-        onStatusChanged={() => refetch()}
+        onStatusChanged={() => {
+          void refetch();
+          void queryClient.invalidateQueries({ queryKey: ['admin-order-status-counts'] });
+          void queryClient.invalidateQueries({ queryKey: ['operations-overview'] });
+        }}
       />
     </div>
   );

@@ -1,3 +1,5 @@
+import { requireInternalOrStaff } from "../_shared/authz.ts";
+import { validateExternalUrlForSSRF } from "../_shared/ssrf-guard.ts";
 // Deno.serve used (native edge runtime)
 import { createClient } from "../_shared/supabase.ts";
 import { getCorsHeaders } from "../_shared/cors.ts";
@@ -478,7 +480,11 @@ async function scrapeUrls(urls: string[], firecrawlApiKey?: string): Promise<Rec
 
   const results: Record<string, { title: string; content: string; metadata: Record<string, unknown> }> = {};
 
-  for (const url of urls) {
+  for (const url of urls.slice(0, 10)) {
+    if (!validateExternalUrlForSSRF(String(url)).allowed) {
+      console.warn('[INTAKE] Blocked non-public URL');
+      continue;
+    }
     try {
       const response = await fetch('https://api.firecrawl.dev/v1/scrape', {
         method: 'POST',
@@ -917,6 +923,17 @@ Deno.serve(async (req) => {
         JSON.stringify({ error: "Authentication required" }),
         { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
+    }
+
+    // Intake sessions and scraping are admin tools.
+    const staffGate = await requireInternalOrStaff(req, corsHeaders);
+    if (staffGate instanceof Response) return staffGate;
+    if (sessionId) {
+      const { data: existingSession } = await supabase
+        .from('ai_intake_sessions').select('admin_id').eq('id', sessionId).maybeSingle();
+      if (existingSession && existingSession.admin_id && existingSession.admin_id !== userId) {
+        return new Response(JSON.stringify({ error: "Forbidden" }), { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      }
     }
 
     // Set global config for AI calls (used in extractFieldsWithAI)

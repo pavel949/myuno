@@ -17,7 +17,7 @@ export async function sendWhatsApp(msg: WhatsAppMessage): Promise<boolean> {
   const token = Deno.env.get("ULTRAMSG_TOKEN");
 
   if (!instance || !token) {
-    console.info("[WhatsApp] UltraMSG not configured. Message:", msg.body);
+    console.info("[WhatsApp] UltraMSG not configured; message not sent.");
     return false;
   }
 

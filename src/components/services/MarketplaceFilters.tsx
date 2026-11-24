@@ -29,7 +29,7 @@ export function MarketplaceFilters({ filters, params, districts, currencies, onC
       <label className="marketplace-today"><input type="checkbox" aria-label={t('Есть свободное время сегодня', 'Free request slots today', 'มีเวลาว่างวันนี้')} checked={filters.todayOnly} onChange={event => onChange('today', event.target.checked ? '1' : '')} /><span>{t('Есть свободное время сегодня', 'Free request slots today', 'มีเวลาว่างวันนี้')}</span></label>
       {filters.active && <Button variant="ghost" onClick={onClear}>{t('Сбросить фильтры предложений', 'Clear offer filters', 'ล้างตัวกรองข้อเสนอ')}</Button>}
     </div>
-    <p className="text-sm text-muted-foreground">{t('Цены сравниваются в выбранной валюте без конвертации. Доступность проверяется по графику; время подтверждает исполнитель.', 'Prices are compared in the selected currency without conversion. Slots are checked against the schedule; the provider confirms the time.', 'เปรียบเทียบราคาในสกุลเงินที่เลือกโดยไม่แปลงค่า ผู้ให้บริการจะยืนยันเวลา')}</p>
+    <p className="text-sm text-muted-foreground">{t('Цены сравниваются в выбранной валюте без конвертации. Доступность проверяется по графику; время согласует консьерж MyUNO.', 'Prices are compared in the selected currency without conversion. Slots are checked against the schedule; the MyUNO concierge coordinates the time.', 'เปรียบเทียบราคาในสกุลเงินที่เลือกโดยไม่แปลงค่า ทีมคอนเซียร์จ MyUNO จะประสานเวลานัดหมาย')}</p>
     {filters.invalid && <p role="alert">{t('Проверьте дату и диапазон цены: минимум не должен превышать максимум.', 'Check the date and price range: minimum cannot exceed maximum.', 'ตรวจสอบวันที่และช่วงราคา ราคาต่ำสุดต้องไม่เกินราคาสูงสุด')}</p>}
   </fieldset>;
 }

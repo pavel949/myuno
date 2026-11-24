@@ -42,7 +42,7 @@ const updateProspect = useUpdateProspect();
   const location = prospect.district || prospect.address || prospect.city;
 
   const handleStatusChange = (newStatus: string) => {
-    updateProspect.mutate({ id: prospect.id, status: newStatus });
+    updateProspect.mutate({ id: prospect.id, status: newStatus, previous_status: prospect.status });
   };
 
   const handleScore = async () => {

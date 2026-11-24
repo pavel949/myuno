@@ -51,3 +51,43 @@ export function requireInternalSecret(
 
   return null; // Allowed
 }
+
+/**
+ * Async variant for cron / database-webhook endpoints. Accepts the internal
+ * secret, the exact service-role key, or a bearer token that the auth server
+ * itself accepts as a service-role credential (covers rotated/vault-stored
+ * keys). Unsigned or forged JWT claims are never trusted.
+ */
+export async function requireServiceCaller(
+  req: Request,
+  corsHeaders: Record<string, string>
+): Promise<Response | null> {
+  if (requireInternalSecretQuiet(req)) return null;
+  const authHeader = req.headers.get("Authorization") || "";
+  const token = authHeader.startsWith("Bearer ") ? authHeader.slice(7).trim() : "";
+  const url = Deno.env.get("SUPABASE_URL");
+  if (token && url) {
+    try {
+      const r = await fetch(`${url}/auth/v1/admin/users?page=1&per_page=1`, {
+        headers: { apikey: token, Authorization: `Bearer ${token}` },
+      });
+      await r.body?.cancel();
+      if (r.ok) return null;
+    } catch {
+      // fall through to 401
+    }
+  }
+  return new Response(
+    JSON.stringify({ error: "Unauthorized" }),
+    { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+  );
+}
+
+function requireInternalSecretQuiet(req: Request): boolean {
+  const authHeader = req.headers.get("Authorization") || "";
+  const serviceRole = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+  if (serviceRole && timingSafeEqual(authHeader, `Bearer ${serviceRole}`)) return true;
+  const expected = Deno.env.get("INTERNAL_SECRET");
+  const got = req.headers.get("X-Internal-Secret");
+  return Boolean(expected && got && timingSafeEqual(got, expected));
+}

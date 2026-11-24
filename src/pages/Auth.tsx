@@ -278,6 +278,7 @@ export default function Auth() {
       const { error, data } = await withTimeout(signUp({
         email: normalisedEmail, password, fullName,
         phone: normalisedPhone,
+        referralCode: referralCode || undefined,
       }), 15000);
 
       if (error) {

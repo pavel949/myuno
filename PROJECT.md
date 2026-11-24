@@ -96,7 +96,7 @@ One primary Space/property unless approved otherwise; cross-space membership exp
 
 **Services Marketplace:** `Services → Category → Provider/Offering → Availability → Price → REQUEST|BOOK|BOOK+PAY → Confirmation → My Services`. Existing/partial verticals include transport, vehicles, tours, yachts, flowers, beauty/spa, cleaning, fitness, restaurants/events. Code/route existence ≠ readiness. Verify real providers, approved offerings, safe fields, price, availability, commerce mode, mapping, fulfilment, settlement where applicable, and admin editing. No fake fallback catalogue.
 
-Experience editorial discovery (`attributes.discovery_only`) may publish verified operator information before commercial onboarding. It displays source-backed photography/descriptions and direct operator information, without inherited tariff variants, myUNO booking/payment forms or claims of partnership, price, availability or commission. Public approval is editorial publication, not provider verification or commercial readiness.
+Experience editorial discovery (`attributes.discovery_only`) may publish verified concierge-mediated information before commercial onboarding. It displays source-backed photography/descriptions and direct concierge-mediated information, without inherited tariff variants, myUNO booking/payment forms or claims of partnership, price, availability or commission. Public approval is editorial publication, not provider verification or commercial readiness.
 
 **Concierge:** human escalation/orchestration only when structured Marketplace cannot safely fulfil. Concierge may maintain a case/orchestration record for conversation, requirements, coordination and resolution, but that record must not become a competing booking, payment, inventory or service-order authority. When a structured service is selected, return the transaction to the canonical Marketplace/service workflow.
 
@@ -158,6 +158,14 @@ UI `paid` is not payment truth. Manual/off-platform payment requires authorized 
 ## 13. UX Principles
 Trusted infrastructure, not noisy marketplace. Task first. One obvious primary action. Next **safe** action, not every action. Exceptions before dashboards. Progressive disclosure. Information density may be high; control density low. Mobile-first 375px. RU/EN resilient. Status not color-only. Loading/empty/error distinct. Failed data never zero/all-clear. No page-level overflow. Project Card ≠ Unit Card. Respect public/private boundaries. Admin/content tooling is production-grade. UNKNOWN remains unknown.
 
+### Property pricing workspace
+
+`/mc/rates` opens the selected property's price calendar. Two dates select an inclusive range in either order, while date fields support cross-month edits. Calendar cells show the nightly amount before discounts, fees and rate plan adjustments. Base rates, stay discounts, and seasons are accessible through price settings. The property selector uses the existing workspace access list. Calendar saves use the checked, price-only writer and never write occupancy or historical booking totals.
+
+### Short-stay journey
+
+Public search carries dates and guest count into the listing and booking entry. Request-to-book uses the existing enquiry and never claims a reservation or charge. Tracking links to the guest's trip only when an actor-bound read resolves the exact inventory record for a confirmed order. Today surfaces incoming enquiries and opens the exact existing inventory booking from arrivals, departures or current stays. The price editor hands off to the same property and Bangkok civil date for availability and booking details.
+
 ## 14. Engineering Rules
 Small reviewable tranches. Never combine auth cutover, schema redesign, money changes and broad UX redesign.
 
@@ -206,3 +214,6 @@ Canonical docs describe approved architecture. Convergence/audit docs are eviden
 Passing tests is evidence, **not automatic approval**. Never start the next critical tranche automatically. Critical reports state files/migrations/functions, behavior changed, canonical logic unchanged, tests/counts, production evidence, blockers, rollback, SHA, GO/NO-GO.
 
 **Final rule:** when speed conflicts with canonical integrity, preserve canonical truth. When documentation conflicts with evidence, preserve evidence and update documentation.
+
+### Service navigation situation mapping (2026-11-18)
+Public service situation filters consume `catalog_life_map` service identities and active `life_situations` through `useCatalogFromDB`. Existing generated deterministic service UUIDs remain canonical; explicit slug aliases do not create duplicate entities. Admin LifeOS mapping edits invalidate catalogue caches. A successful empty mapping is authoritative; static situation tags are degraded loading/error fallback only. Menu parent placement is edited in Master Catalogue; this is distinct from property/project relations and experience topics.

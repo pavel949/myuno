@@ -34,7 +34,8 @@ try:
                 tablist = page.get_by_role('tablist')
                 tablist.wait_for()
                 tabs = tablist.get_by_role('tab')
-                assert tabs.count() == 5
+                assert tabs.count() == 6
+                expect(tablist.get_by_role('tab', name='Социальные сети' if language == 'ru' else 'Social networks', exact=True)).to_have_count(1)
                 for tab in tabs.all():
                     box = tab.bounding_box()
                     assert box and box['x'] >= 0 and box['x'] + box['width'] <= width + 1

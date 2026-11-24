@@ -405,7 +405,7 @@ const BouquetDetail = () => {
         </div>
 
         {/* Sticky Bottom Bar */}
-        <div className="fixed bottom-0 left-0 right-0 p-4 bg-background/80 border-t border-border z-50">
+        <div data-chat-occlusion-target className="fixed bottom-0 left-0 right-0 p-4 bg-background/80 border-t border-border z-50">
           <div className="flex items-center gap-3 max-w-[1536px] mx-auto">
             {quantity === 0 ? (
               <>

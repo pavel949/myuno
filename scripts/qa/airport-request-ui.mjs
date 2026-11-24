@@ -76,6 +76,7 @@ const bundle = await build({
       builder.onLoad({ filter: /.*/, namespace: 'fixture' }, args => ({ contents: modules[args.path], loader: 'tsx', resolveDir: process.cwd() }));
     },
   }],
+  loader: { '.webp': 'dataurl' },
   tsconfig: 'tsconfig.app.json',
 });
 assert(!Object.keys(bundle.metafile.inputs).some(file => file === 'src/integrations/supabase/client.ts'));
@@ -101,6 +102,22 @@ const motionComplete = async page => expect(page.locator('[aria-current="step"]'
 async function screenshot(page, name) {
   await motionComplete(page);
   assert(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), `Page overflow: ${name}`);
+  await expect.poll(() => page.locator('.airport-booking__image').evaluate(image => image.complete && image.naturalWidth > 0)).toBe(true);
+  const layout = await page.locator('.airport-booking').evaluate(root => {
+    const hero = root.querySelector('.airport-booking__hero');
+    const image = root.querySelector('.airport-booking__image');
+    const workspace = root.querySelector('.airport-booking__workspace').getBoundingClientRect();
+    const summary = root.querySelector('.airport-booking__summary').getBoundingClientRect();
+    return {
+      desktop: innerWidth >= 1024,
+      fullWidth: hero.clientWidth >= innerWidth - 24,
+      imageLoaded: image.complete && image.naturalWidth > 0,
+      sideBySide: summary.left >= workspace.right,
+      singleColumn: Math.abs(summary.left - workspace.left) < 2,
+    };
+  });
+  assert(layout.fullWidth && layout.imageLoaded, `Airport hero did not fill the viewport: ${name}`);
+  assert(layout.desktop ? layout.sideBySide : layout.singleColumn, `Unexpected booking columns: ${name}`);
   await page.screenshot({ path: join(output, `${name}.png`), fullPage: true, animations: 'disabled' });
 }
 const flightDate = new Date(Date.now() + 3 * 86_400_000).toISOString().slice(0, 10);
@@ -150,6 +167,9 @@ async function fastTrack(page, direction, width, simulateFailure) {
   await page.getByLabel('Flight number').fill('TG123');
   await page.getByLabel('Flight date').fill(flightDate);
   await page.getByLabel('Flight time').fill('12:00');
+  for (const label of ['Flight number', 'Flight date', 'Flight time']) {
+    await expect(page.getByLabel(label)).toHaveAttribute('aria-invalid', 'false');
+  }
   await screenshot(page, `fasttrack-flight-${width}`);
   await page.getByRole('button', { name: 'Continue' }).click();
   await page.getByLabel('First name (Latin)').fill('Sample');

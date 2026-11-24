@@ -1,12 +1,7 @@
 /**
  * @module useBusinessHealthScore
- * Aggregates key business metrics into a 0-100 health score.
- * Formula: 5 pillars × 20 points each:
- *   1. Deals Moving (active deals with recent activity)
- *   2. Tasks On Time (non-overdue / total active)
- *   3. Occupancy (current month)
- *   4. Revenue Trend (MoM growth)
- *   5. Response Time (open service requests under control)
+ * Operational score: four pillars, at most 20 points each.
+ * Unreconciled financial records are not a revenue or health signal.
  */
 import { useMemo } from 'react';
 import { useDashboardMetrics, type DashboardKPI, type DashboardOps } from './useDashboardMetrics';
@@ -22,7 +17,7 @@ export interface HealthPillar {
 }
 
 export interface BusinessHealthResult {
-  score: number;
+  score: number | null;
   pillars: HealthPillar[];
   isLoading: boolean;
   urgentCount: number;
@@ -36,15 +31,15 @@ function pillarStatus(percent: number): 'good' | 'warning' | 'critical' {
 }
 
 export function useBusinessHealthScore(): BusinessHealthResult {
-  const { data, isLoading } = useDashboardMetrics();
+  const { data, isLoading, isError } = useDashboardMetrics();
   const { allProperties } = useMyProperties();
   const kpi = data?.kpi as DashboardKPI | null | undefined;
   const ops = data?.ops as DashboardOps | null | undefined;
   const propertyCount = allProperties?.length ?? 0;
 
   return useMemo(() => {
-    if (!kpi || !ops) {
-      return { score: 0, pillars: [], isLoading, urgentCount: 0, onTrackCount: 0 };
+    if (isError || kpi?.occupancyRate == null || !ops) {
+      return { score: null, pillars: [], isLoading, urgentCount: 0, onTrackCount: 0 };
     }
 
     // 1. Deals Moving — healthy when ≈ 1 active deal per 3 properties.
@@ -62,15 +57,7 @@ export function useBusinessHealthScore(): BusinessHealthResult {
     const occPercent = kpi.occupancyRate;
     const occScore = Math.round((Math.min(100, occPercent) / 100) * 20);
 
-    // 4. Revenue Trend (MoM)
-    const revGrowth = kpi.revenuePrev > 0
-      ? Math.round(((kpi.revenue - kpi.revenuePrev) / kpi.revenuePrev) * 100)
-      : kpi.revenue > 0 ? 100 : 0;
-    const revPercent = Math.min(100, Math.max(0, 50 + revGrowth)); // normalize around 50
-    const revScore = Math.round((revPercent / 100) * 20);
-
-    // 5. Service Health — open requests normalised per property (≈ 0.5 req/property = healthy).
-    //    Solo MC: each open request still costs 20%, capped at 0%.
+    // 4. Service Health — outstanding requests relative to properties.
     const serviceDenominator = Math.max(propertyCount, 1);
     const requestRatio = ops.openServiceRequests / serviceDenominator;
     const servicePercent = ops.openServiceRequests === 0
@@ -81,8 +68,7 @@ export function useBusinessHealthScore(): BusinessHealthResult {
     const pillars: HealthPillar[] = [
       { key: 'deals', labelEn: 'Deals', labelRu: 'Сделки', score: dealsScore, percent: dealsPercent, status: pillarStatus(dealsPercent) },
       { key: 'tasks', labelEn: 'Tasks', labelRu: 'Задачи', score: tasksScore, percent: onTimePercent, status: pillarStatus(onTimePercent) },
-      { key: 'occupancy', labelEn: 'Occupancy', labelRu: 'Загрузка', score: occScore, percent: occPercent, status: pillarStatus(occPercent) },
-      { key: 'revenue', labelEn: 'Revenue', labelRu: 'Выручка', score: revScore, percent: revPercent, status: pillarStatus(revPercent) },
+      { key: 'occupancy', labelEn: 'Booked nights', labelRu: 'Забронированные ночи', score: occScore, percent: occPercent, status: pillarStatus(occPercent) },
       { key: 'service', labelEn: 'Service', labelRu: 'Сервис', score: serviceScore, percent: servicePercent, status: pillarStatus(servicePercent) },
     ];
 
@@ -91,5 +77,5 @@ export function useBusinessHealthScore(): BusinessHealthResult {
     const onTrackCount = pillars.filter(p => p.status === 'good').length;
 
     return { score: totalScore, pillars, isLoading, urgentCount, onTrackCount };
-  }, [kpi, ops, isLoading, propertyCount]);
+  }, [kpi, ops, isLoading, isError, propertyCount]);
 }

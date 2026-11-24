@@ -10,9 +10,11 @@ afterEach(cleanup);
 
 describe('public canonical project units', () => {
   it('renders a selected project unit and carries its physical property id to the callback', () => {
-    state.units = [{ id: 'unit-1', property_id: 'property-1', name: 'A-101', name_ru: null, unit_type: 'condo', area_sqm: 42, bedrooms: 1, bathrooms: 1, price: 3000000, price_per_sqm: null, currency: 'THB', floor_from: 1, floor_to: 1, floor_plan_url: null, views: null, features: null, total_units: 1, available_units: 1, status: 'available' }];
+    state.units = [{ id: 'unit-1', property_id: 'property-1', name: 'A-101', name_ru: null, unit_type: 'condo', area_sqm: 42, bedrooms: 1, bathrooms: 1, price: 3000000, price_per_sqm: null, currency: 'THB', floor_from: 1, floor_to: 1, floor_plan_url: '/assets/approved-plan.pdf', views: null, features: null, total_units: 1, available_units: 1, status: 'available' }];
     const onSelectUnit = vi.fn();
     render(<DevelopmentUnitsSection developmentId="project-1" onSelectUnit={onSelectUnit} />);
+    expect(screen.getByRole('link', { name: 'Open plan (new tab): A-101' })).toHaveAttribute('href', '/assets/approved-plan.pdf');
+    expect(screen.queryByText(/3,000,000/)).not.toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: 'Ask about this unit' }));
     expect(onSelectUnit).toHaveBeenCalledWith(expect.objectContaining({ id: 'unit-1', property_id: 'property-1' }));
   });

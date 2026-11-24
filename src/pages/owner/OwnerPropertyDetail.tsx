@@ -124,6 +124,16 @@ export default function OwnerPropertyDetail() {
 
       <PropertyDetailHeader property={property} isRu={isRu} />
 
+      <div className="mb-4 flex flex-wrap gap-2">
+        <Button className="whitespace-normal leading-snug" onClick={() => navigate(`/mc/properties/${id}/editor`)}>
+          <Settings className="h-4 w-4 mr-2" />
+          {isRu ? 'Редактировать объект' : 'Edit Property'}
+        </Button>
+        <Button variant="outline" onClick={() => navigate(`/mc/properties/${id}/guidebook`)}>
+          {isRu ? 'Гид по объекту' : 'Guidebook'}
+        </Button>
+      </div>
+
       {/* Internal info bar — rich data for MC only */}
       <Card className="mb-4">
         <CardContent className="p-4">
@@ -137,7 +147,7 @@ export default function OwnerPropertyDetail() {
             {property.floor && <span className="text-muted-foreground">{isRu ? `Этаж ${property.floor}` : `Floor ${property.floor}`}</span>}
             {property.unit_number && <span className="text-muted-foreground">#{property.unit_number}</span>}
             {property.price_per_night != null && Number(property.price_per_night) > 0 && (
-              <span className="flex items-center gap-1 font-medium text-success">
+              <span className="flex items-center gap-1 font-semibold text-primary tabular-nums">
                 <Coins className="h-3.5 w-3.5 shrink-0" />
                 {formatCurrencyAmount(Number(property.price_per_night), listingCurrency, true)}/{isRu ? 'ночь' : 'night'}
               </span>
@@ -173,62 +183,52 @@ export default function OwnerPropertyDetail() {
         />
       </div>
 
-      <div className="flex gap-2 mb-6">
-        <Button className="flex-1" onClick={() => navigate(`/mc/properties/${id}/editor`)}>
-          <Settings className="h-4 w-4 mr-2" />
-          {isRu ? 'Редактировать объект' : 'Edit Property'}
-        </Button>
-        <Button variant="outline" onClick={() => navigate(`/mc/properties/${id}/guidebook`)}>
-          {isRu ? 'Гайдбук' : 'Guidebook'}
-        </Button>
-      </div>
-
       {/* === UNIFIED TABS === */}
       <Tabs defaultValue="overview" className="w-full">
-        <TabsList className="w-full flex overflow-x-auto">
-          <TabsTrigger value="overview" className="text-xs">
+        <TabsList className="grid h-auto w-full grid-cols-2 items-stretch gap-1 sm:grid-cols-4 xl:grid-cols-8">
+          <TabsTrigger value="overview" className="min-h-11 min-w-0 gap-1 overflow-visible whitespace-normal px-2 text-left leading-snug [overflow-wrap:anywhere]">
             <Eye className="h-3.5 w-3.5 mr-1 hidden sm:inline" />
             {isRu ? 'Обзор' : 'Overview'}
           </TabsTrigger>
-          <TabsTrigger value="operations" className="text-xs">
+          <TabsTrigger value="operations" className="min-h-11 min-w-0 gap-1 overflow-visible whitespace-normal px-2 text-left leading-snug [overflow-wrap:anywhere]">
             <Wrench className="h-3.5 w-3.5 mr-1 hidden sm:inline" />
             {isRu ? 'Операции' : 'Ops'}
             {((serviceRequests?.length || 0) + (inspections?.length || 0)) > 0 && (
-              <Badge variant="secondary" className="ml-1 text-[10px] px-1">
+              <Badge variant="secondary" className="shrink-0 tabular-nums">
                 {(serviceRequests?.length || 0) + (inspections?.length || 0)}
               </Badge>
             )}
           </TabsTrigger>
-          <TabsTrigger value="documents" className="text-xs">
+          <TabsTrigger value="documents" className="min-h-11 min-w-0 gap-1 overflow-visible whitespace-normal px-2 text-left leading-snug [overflow-wrap:anywhere]">
             <FileText className="h-3.5 w-3.5 mr-1 hidden sm:inline" />
             {isRu ? 'Документы' : 'Docs'}
             {(documents?.length || 0) > 0 && (
-              <Badge variant="secondary" className="ml-1 text-[10px] px-1">{documents?.length}</Badge>
+              <Badge variant="secondary" className="shrink-0 tabular-nums">{documents?.length}</Badge>
             )}
           </TabsTrigger>
-          <TabsTrigger value="notes" className="text-xs">
+          <TabsTrigger value="notes" className="min-h-11 min-w-0 gap-1 overflow-visible whitespace-normal px-2 text-left leading-snug [overflow-wrap:anywhere]">
             <StickyNote className="h-3.5 w-3.5 mr-1 hidden sm:inline" />
             {isRu ? 'Заметки' : 'Notes'}
             {(notes?.length || 0) > 0 && (
-              <Badge variant="secondary" className="ml-1 text-[10px] px-1">{notes?.length}</Badge>
+              <Badge variant="secondary" className="shrink-0 tabular-nums">{notes?.length}</Badge>
             )}
           </TabsTrigger>
-          <TabsTrigger value="terms" className="text-xs">
+          <TabsTrigger value="terms" className="min-h-11 min-w-0 gap-1 overflow-visible whitespace-normal px-2 text-left leading-snug [overflow-wrap:anywhere]">
             <Handshake className="h-3.5 w-3.5 mr-1 hidden sm:inline" />
             {isRu ? 'Условия' : 'Terms'}
             {(termsList?.length || 0) > 0 && (
-              <Badge variant="secondary" className="ml-1 text-[10px] px-1">{termsList?.length}</Badge>
+              <Badge variant="secondary" className="shrink-0 tabular-nums">{termsList?.length}</Badge>
             )}
           </TabsTrigger>
-          <TabsTrigger value="owners" className="text-xs">
+          <TabsTrigger value="owners" className="min-h-11 min-w-0 gap-1 overflow-visible whitespace-normal px-2 text-left leading-snug [overflow-wrap:anywhere]">
             <Users className="h-3.5 w-3.5 mr-1 hidden sm:inline" />
             {isRu ? 'Собственник' : 'Owner'}
           </TabsTrigger>
-          <TabsTrigger value="listings" className="text-xs">
+          <TabsTrigger value="listings" className="min-h-11 min-w-0 gap-1 overflow-visible whitespace-normal px-2 text-left leading-snug [overflow-wrap:anywhere]">
             <Tag className="h-3.5 w-3.5 mr-1 hidden sm:inline" />
             {isRu ? 'Листинги' : 'Listings'}
           </TabsTrigger>
-          <TabsTrigger value="deals" className="text-xs">
+          <TabsTrigger value="deals" className="min-h-11 min-w-0 gap-1 overflow-visible whitespace-normal px-2 text-left leading-snug [overflow-wrap:anywhere]">
             <Briefcase className="h-3.5 w-3.5 mr-1 hidden sm:inline" />
             {isRu ? 'Сделки' : 'Deals'}
           </TabsTrigger>

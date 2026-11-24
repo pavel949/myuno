@@ -5,31 +5,63 @@
   --home-search-overlap: 0rem;
   --home-soft-border: color-mix(in srgb, hsl(var(--primary)) 12%, transparent);
 }
-/* Content-driven hero keeps the four goal cards visible without a repeated search layer. */
-.home-refined .home-hero {
-  height: auto;
-  min-height: 0;
-  padding-bottom: calc(var(--home-search-overlap) + 2rem);
+/* A task-first front door. The editorial photograph supports the choices;
+   it no longer controls the text contrast or the mobile fold. */
+.cinematic-home.home-refined .home-hero {
+
+
+
+
+  padding-block-end: 2rem;
+
+
 }
-.home-refined .home-hero-copy { padding-top: clamp(1.5rem, 3vw, 3rem); }
-.home-refined .home-hero-copy h1 {
+.home-refined .home-hero .consumer-header-overlay {
+  color: var(--home-hero-ink);
+  border-bottom: 1px solid hsl(var(--media-foreground) / .2);
+}
+.home-refined .home-hero .consumer-header-overlay .consumer-nav a[aria-current="page"],
+.home-refined .home-hero .consumer-header-overlay .consumer-partner-menu[open] summary {
+  color: var(--home-hero-ink);
+}
+.home-refined .home-hero-layout {
+  display: grid;
+  gap: clamp(1rem, 3vw, 3rem);
+  grid-template-columns: minmax(0, 1fr);
+  align-items: stretch;
+  padding-block-start: 1.25rem;
+}
+.home-refined .home-hero .home-hero-copy { min-width: 0; padding-block: 0; }
+.home-refined .home-hero .home-hero-copy h1 {
   max-width: var(--public-width-hero);
   font-size: var(--public-editorial-display-size);
   line-height: 1.1;
   letter-spacing: -.02em;
   font-weight: 400;
   text-shadow: none;
+  color: var(--home-hero-ink);
 }
-.home-refined .home-hero-copy p {
+.home-refined .home-hero .home-hero-copy > p {
   max-width: var(--public-width-summary);
-  font-size: var(--type-body-lg-size);
-  line-height: 1.6;
-  margin-top: 1.25rem;
+  font-size: var(--public-body-size);
+  line-height: 1.5;
+  margin-top: .75rem;
+  color: var(--home-hero-muted-ink);
   text-wrap: pretty;
 }
-/* Generated destination mood art, not a property photograph. Keep the sunlit coast clear beside readable copy. */
-.home-refined .home-hero-shade {
-  background: linear-gradient(90deg, hsl(var(--brand-navy) / .66), hsl(var(--brand-navy) / .32) 48%, hsl(var(--brand-navy) / .02) 83%), linear-gradient(180deg, hsl(var(--brand-navy) / .22), transparent 35%);
+.home-refined .home-hero-media {
+  overflow: hidden;
+  position: relative;
+  min-width: 0;
+  aspect-ratio: 3 / 1;
+  border-radius: var(--radius);
+  background: hsl(var(--muted));
+}
+.home-refined .home-hero-media .home-hero-image { object-position: center 54%; z-index: auto; }
+@media (min-width: 900px) {
+  .home-refined .home-hero-layout { grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); padding-block-start: 2rem; }
+  .home-refined .home-hero-media { aspect-ratio: auto; }
+  .home-refined .home-hero-media .home-hero-image { object-position: 64% center; }
 }
 .home-refined .home-search-wrap { margin-top: calc(-1 * var(--home-search-overlap)) !important; }
 .home-refined .home-search-entry { max-width: none; }
@@ -156,17 +188,11 @@
   :is(.home-refined,.premium-personal-discovery) .home-properties .home-section-heading > .home-text-link { padding-right: 0; }
 }
 @media(max-width:1023px) {
-  .home-refined .home-hero { min-height: 0; }
-  .home-refined .home-hero-copy { padding-top: 2rem; }
-  .home-refined .home-hero-copy h1 { font-size: var(--public-editorial-display-size); max-width: var(--public-width-hero); }
   .home-refined .home-locations .home-rail-viewport { grid-template-columns: repeat(2,minmax(0,1fr)); }
 }
 @media(max-width:767px) {
   .home-refined { --home-search-overlap: 0rem; }
-  .home-refined .home-hero { height: auto; min-height: 0; padding-bottom: 1.5rem; }
-  .home-refined .home-hero-copy { padding-top: 1.5rem; }
-  .home-refined .home-hero-copy h1 { font-size: var(--public-editorial-display-size); line-height: 1.12; letter-spacing: -.018em; }
-  .home-refined .home-hero-copy p { font-size: var(--public-body-size); margin-top: 1rem; max-width: var(--public-width-summary); }
+  .cinematic-home.home-refined .home-hero { padding-block-end: 1.5rem; }
   .home-refined .home-search-entry-button { min-height: 5.5rem; padding: 1rem; gap: .75rem; }
   .home-refined .home-search-symbol { display: none; }
   .home-refined .home-search-entry-copy strong { font-size: var(--public-body-size); line-height: 1.4; }
@@ -209,8 +235,8 @@
 }
 .home-refined .home-hero-primary { background: hsl(var(--primary)); color: hsl(var(--primary-foreground)); }
 .home-refined .home-hero-primary:hover { background: hsl(var(--primary-hover)); }
-.home-refined .home-hero-secondary { border: 0; color: hsl(var(--primary-foreground)); padding: .25rem 0; min-height: 2.75rem; text-decoration: underline; text-underline-offset: .25rem; justify-content: flex-start; }
-.home-refined .home-hero-secondary:hover { background: hsl(var(--primary-foreground) / .12); }
+.home-refined .home-hero-secondary { border: 0; background: transparent; color: var(--home-hero-ink); padding: .25rem 0; min-height: 2.75rem; text-decoration: underline; text-underline-offset: .25rem; justify-content: flex-start; }
+.home-refined .home-hero-secondary:hover { background: hsl(var(--media-foreground) / .08); }
 .home-audience { padding-top: var(--public-section-gap); }
 .home-audience-grid {
   display: grid;
@@ -254,20 +280,19 @@
 
 /* First-screen conversion: make the next action explicit before broad discovery. */
 .home-refined .home-hero-choices { max-width: var(--public-width-hero); margin-top: 1.5rem; }
-.home-refined .home-hero-choices-label { margin: 0 0 .625rem; color: hsl(var(--primary-foreground) / .82); font-size: var(--public-caption-size); letter-spacing: .08em; text-transform: uppercase; }
+.home-refined .home-hero-choices .home-hero-choices-label { margin: 0 0 .625rem; color: var(--home-hero-muted-ink); font-size: var(--public-caption-size); letter-spacing: .08em; text-transform: uppercase; }
 /* 2×2: the hero column is width-capped, so four columns leave ~170px cells
    that split RU labels ("недвижим|ость") at every desktop width. */
 .home-refined .home-hero-choice-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .625rem; }
-.home-refined .home-hero-choice { display: flex; align-items: flex-start; gap: .625rem; min-height: 4.75rem; padding: .75rem .75rem; border: 1px solid hsl(var(--primary-foreground) / .28); background: hsl(var(--primary)); color: hsl(var(--primary-foreground)); text-decoration: none; transition: background var(--public-motion), border-color var(--public-motion), transform var(--public-motion); }
-.home-refined .home-hero-choice:hover { border-color: hsl(var(--primary-foreground) / .7); background: hsl(var(--primary)); }
+.home-refined .home-hero-choice { display: flex; align-items: flex-start; gap: .625rem; min-height: 4.75rem; padding: .75rem .75rem; border: 1px solid hsl(var(--primary)); border-radius: var(--radius); background: hsl(var(--primary)); color: hsl(var(--primary-foreground)); text-decoration: none; transition: background var(--public-motion), border-color var(--public-motion), transform var(--public-motion); }
+.home-refined .home-hero-choice:hover { border-color: hsl(var(--primary-hover)); background: hsl(var(--primary-hover)); }
 .home-refined .home-hero-choice-icon { display: inline-flex; align-items: center; justify-content: center; flex: 0 0 2.25rem; width: 2.25rem; height: 2.25rem; border-radius: var(--radius); background: hsl(var(--primary-foreground) / .14); }
 .home-refined .home-hero-choice-copy { display: flex; min-width: 0; flex: 1; flex-direction: column; gap: .2rem; }
 .home-refined .home-hero-choice-copy strong { hyphens: auto; font-size: var(--public-label-size); font-weight: 600; line-height: 1.25; }
 .home-refined .home-hero-choice-copy small { display: block; color: hsl(var(--primary-foreground) / .9); font-size: var(--public-caption-size); line-height: 1.35; }
 .home-refined .home-hero-choice > svg { flex: 0 0 auto; margin-top: .125rem; }
-.home-refined .home-hero-help { display: inline-flex; align-items: center; gap: .5rem; min-height: 2.75rem; margin-top: .5rem; color: hsl(var(--primary-foreground) / .9); font-size: var(--public-caption-size); text-decoration: underline; text-underline-offset: .25rem; }
-.home-refined .home-hero-help:hover { color: hsl(var(--primary-foreground)); }
-.home-refined .home-hero-secondary { background: transparent; }
+.home-refined .home-hero-help { display: inline-flex; align-items: center; gap: .5rem; min-height: 2.75rem; margin-top: .5rem; color: var(--home-hero-ink); font-size: var(--public-caption-size); text-decoration: underline; text-underline-offset: .25rem; }
+.home-refined .home-hero-help:hover { color: var(--home-hero-muted-ink); }
 .home-life-group { display: grid; gap: 0; }
 .home-partners-group { margin-top: 3.5rem; padding-block: 3.5rem 1rem; background: var(--home-surface); }
 .home-group-heading { margin-bottom: 1.5rem; }
@@ -282,15 +307,20 @@
   .home-partners-group { margin-top: 2.5rem; padding-block: 2.5rem .5rem; }
   .home-group-heading h2 { font-size: var(--type-h3-size); }
 }
-/* Phones: two columns leave ~90px for the label, which chops long RU words
-   ("недвижим|ость") and clamps the description to a meaningless stub. One
-   full-width row per goal keeps every label and description whole. */
+/* Reserve the full width of each phone tile for translated text. */
 @media(max-width: 519px) {
-  .home-refined .home-hero-choice-grid { grid-template-columns: minmax(0, 1fr); gap: .375rem; }
-  .home-refined .home-hero-choice { align-items: center; min-height: 3.75rem; padding: .5rem .75rem; }
-  .home-refined .home-hero-choice > svg { margin-top: 0; }
+  .home-refined .home-hero-choice {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-content: start;
+    align-items: center;
+    gap: .375rem;
+    min-height: 0;
+    padding: .625rem;
+  }
+  .home-refined .home-hero-choice-copy { grid-row: 2; grid-column: 1 / -1; overflow-wrap: anywhere; }
+  .home-refined .home-hero-choice > svg { grid-column: 2; grid-row: 1; margin-top: 0; }
 }
-
 /* Homepage-only hierarchy. Shared catalogue cards and workspaces keep their contracts. */
 .home-refined .home-listing { display: flex; flex-direction: column; }
 .home-refined .home-listing > a { height: auto; flex: none; }
@@ -318,12 +348,6 @@
 /* Editorial category photographs deliberately override the inherited text-only service treatment. */
 .home-refined .home-service-category-card--photo .home-service-category-art { display: flex; }
 .home-refined .premium-newbuilds.home-container { width: calc(100% - var(--public-gutter) * 2); max-width: var(--public-width-wide); }
-
-.home-refined .home-hero-image { object-position: center 52%; }
-@media (max-width: 640px) {
-  .home-refined .home-hero-image { object-position: 69% center; }
-  .home-refined .home-hero-shade { background: linear-gradient(180deg, hsl(var(--brand-navy) / .62), hsl(var(--brand-navy) / .52) 33%, hsl(var(--brand-navy) / .18) 57%, hsl(var(--brand-navy) / .62)); }
-}
 
 /* Empty photo previews still offer concrete, truthful routes into the catalogue. */
 .home-discovery-paths { display: flex; flex-wrap: wrap; gap: .75rem 1.5rem; margin-top: 1rem; }

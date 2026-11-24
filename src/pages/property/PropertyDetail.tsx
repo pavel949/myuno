@@ -2,10 +2,10 @@ import { PropertyRentalRateSummary } from '@/components/property/PropertyRentalR
 import '@/styles/public-commerce.css';
 import '@/styles/premium-public.css';
 import { PropertyJourneyNav, PropertyAreaGuide } from '@/components/property/PropertyJourney';
-import React, { useState, useMemo } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { useParams, useNavigate, useSearchParams, useLocation, Link } from 'react-router-dom';
 import {
-  ChevronLeft, MapPin, Star, BedDouble, Bath, Users, Maximize,
+  ChevronLeft, MapPin, Star, BedDouble, Bath, Users, Maximize, MessageCircle,
   Share2, Home, Sofa, Building2, Shield,
 } from 'lucide-react';
 import { format } from 'date-fns';
@@ -51,6 +51,7 @@ import { HostProfileSection } from '@/components/property/HostProfileSection';
 import { PropertyLocationMap } from '@/components/property/PropertyLocationMap';
 import { SimilarProperties } from '@/components/property/SimilarProperties';
 import { PropertyQuestionButton } from '@/components/property/PropertyQuestionButton';
+import { PropertyMarketEnquiry, type PropertyEnquiryIntent } from '@/components/property/PropertyMarketEnquiry';
 import { ReviewsSection } from '@/components/reviews/ReviewsSection';
 import { PhotoLightbox } from '@/components/property/PhotoLightbox';
 import {
@@ -117,6 +118,8 @@ export default function PropertyDetail() {
   const [showAllPhotos, setShowAllPhotos] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
   const [dateSheetOpen, setDateSheetOpen] = useState(false);
+  const [openedEnquiry, setOpenedEnquiry] = useState<{ identity: string; locationKey: string }>();
+  useEffect(() => setOpenedEnquiry(undefined), [location.key]);
   const [editedDates, setEditedDates] = useState<{ id?: string; value?: DateRange }>();
   const [editedGuests, setEditedGuests] = useState<{ id?: string; value: number }>();
 
@@ -143,6 +146,7 @@ export default function PropertyDetail() {
   const property = sameRecordId(propertyData?.id, id) ? propertyData : undefined;
   const managementCompanyQuery = useManagementCompanyById(property?.management_company_id);
   const rentalTerms = property?.rentalTerms;
+  const instantBooking = Boolean(property?.instant_booking || rentalTerms?.instant_booking);
   const knownCapacities = [rentalTerms?.max_guests, property?.max_guests].filter((value): value is number => typeof value === 'number' && value >= 1);
   const initialGuestContext = readPropertyGuestContext(searchParams.toString(), knownCapacities.length ? Math.min(...knownCapacities) : undefined);
   const dateRange = editedDates?.id === id ? editedDates.value : initialGuestContext.dateRange;
@@ -233,6 +237,16 @@ export default function PropertyDetail() {
   const pricing = propertyDetailPricing(property, rentalTerms, searchParams.get('mode'), searchParams.get('tenancy'));
   const isSaleListing = pricing.mode === 'buy';
   const requiresRentalRequest = !pricing.canQuoteShortStay;
+  const longerTenancies = (['medium', 'long'] as const).filter(tenancy => property.tenancy_modes?.includes(tenancy));
+  const selectedLongerTenancy = longerTenancies.find(tenancy => tenancy === pricing.requestedTenancy);
+  // Do not convert a short-stay pricing/loading issue into a long-stay enquiry.
+  const internalEnquiry: PropertyEnquiryIntent | null = !pricing.hasOffer ? null
+    : isSaleListing ? { mode: 'buy' }
+      : selectedLongerTenancy || (requiresRentalRequest && !property.tenancy_modes?.includes('short') && longerTenancies.length > 0)
+        ? { mode: 'rent', tenancy: selectedLongerTenancy ?? (longerTenancies.length === 1 ? longerTenancies[0] : undefined) }
+        : null;
+  const enquiryIdentity = internalEnquiry ? `${property.id}:${internalEnquiry.mode}:${internalEnquiry.mode === 'rent' ? internalEnquiry.tenancy ?? '' : ''}` : null;
+  const openPropertyEnquiry = enquiryIdentity ? () => setOpenedEnquiry({ identity: enquiryIdentity, locationKey: location.key }) : undefined;
   const pricePerNight = pricing.pricePerNight;
   const listingCurrency = property.currency?.trim().toUpperCase() ?? '';
   const priceOnRequest = isRu ? 'Цена по запросу' : 'Price on request';
@@ -478,7 +492,7 @@ export default function PropertyDetail() {
               <PropertyDetailHighlights
                 propertyType={property.property_type}
                 viewLabels={viewLabels}
-                instantBooking={rentalTerms?.instant_booking}
+                instantBooking={instantBooking}
                 project={property.project}
                 floor={property.floor}
                 unitNumber={property.unit_number}
@@ -786,7 +800,12 @@ export default function PropertyDetail() {
                       </>
                     )}
                     {ownershipLabel && <p className="text-sm">{ownershipLabel}</p>}
-                    <MessageHostButton
+                    {openPropertyEnquiry ? <Button type="button" className="h-auto min-h-11 w-full whitespace-normal" onClick={openPropertyEnquiry}>
+                      <MessageCircle className="size-4 shrink-0" aria-hidden="true" />
+                      {isSaleListing
+                        ? pickLang(language, { en: 'Request consultation', ru: 'Запросить консультацию', th: 'ขอคำปรึกษา' })
+                        : pickLang(language, { en: 'Request rental', ru: 'Запросить аренду', th: 'สอบถามการเช่า' })}
+                    </Button> : <MessageHostButton
                       propertyId={id || 'prop-1'}
                       propertyTitle={property.title_en}
                       propertyTitleRu={property.title_ru}
@@ -795,7 +814,7 @@ export default function PropertyDetail() {
                       fullWidth
                       labelRu={isSaleListing ? 'Запросить консультацию' : 'Запросить аренду'}
                       labelEn={isSaleListing ? 'Request consultation' : 'Request rental'}
-                    />
+                    />}
                     <div className="rounded-none border border-border/60 bg-muted/20 px-3 py-2.5 text-xs text-muted-foreground leading-snug">
                       <p>
                         {isRu
@@ -821,6 +840,7 @@ export default function PropertyDetail() {
                     propertyId={id || 'prop-1'}
                     pricePerNight={pricePerNight ?? 0}
                     rentalTerms={rentalTerms}
+                    instantBooking={instantBooking}
                     currency={listingCurrency}
                     earlyBookingDiscount={property?.early_booking_discount ?? undefined}
                     earlyBookingDays={property?.early_booking_days ?? undefined}
@@ -868,11 +888,17 @@ export default function PropertyDetail() {
           titleEn={property.title_en}
           titleRu={property.title_ru}
           managerPhone={rentalTerms?.manager_phone}
-          instantBooking={rentalTerms?.instant_booking}
+          instantBooking={instantBooking}
           dateRange={dateRange}
           guestCount={guestCount}
           onOpenDatePicker={() => { if (pricing.canQuoteShortStay) setDateSheetOpen(true); }}
+          onOpenPropertyEnquiry={openPropertyEnquiry}
         />}
+
+        {internalEnquiry && openedEnquiry && openedEnquiry.identity === enquiryIdentity && openedEnquiry.locationKey === location.key && (
+          <PropertyMarketEnquiry key={enquiryIdentity} propertyId={property.id} title={propertyTitle}
+            intent={internalEnquiry} onClose={() => setOpenedEnquiry(undefined)} />
+        )}
 
         {/* Mobile Date Picker Sheet */}
         {pricing.canQuoteShortStay && <PropertyDetailDateSheet

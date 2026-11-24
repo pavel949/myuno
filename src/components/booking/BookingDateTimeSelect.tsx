@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useId, useState } from 'react';
 import { Calendar } from '@/components/ui/calendar';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
@@ -20,6 +20,7 @@ interface BookingDateTimeSelectProps {
   disabledDays?: Date[];
   showCalendarInline?: boolean;
   showQuickDates?: boolean;
+  timeContext?: { label: string; hint: string };
 }
 
 const DEFAULT_TIMES = ['09:00', '10:00', '11:00', '12:00', '14:00', '15:00', '16:00', '17:00', '18:00'];
@@ -35,8 +36,10 @@ export function BookingDateTimeSelect({
   disabledDays = [],
   showCalendarInline = false,
   showQuickDates = true,
+  timeContext,
 }: BookingDateTimeSelectProps) {
   const { language } = useLanguage();
+  const timeId = useId();
   const [calendarOpen, setCalendarOpen] = useState(false);
 
   const quickDates = [
@@ -125,10 +128,11 @@ export function BookingDateTimeSelect({
       </div>
 
       {/* Time Selection */}
-      <div>
-        <Label className="text-sm font-medium mb-3 block">
-          {language === 'ru' ? 'Время' : 'Time'}
-        </Label>
+      <div role="group" aria-labelledby={timeId} aria-describedby={timeContext ? `${timeId}-hint` : undefined}>
+        <p id={timeId} className="text-sm font-medium mb-3">
+          {timeContext?.label ?? (language === 'ru' ? 'Время' : 'Time')}
+        </p>
+        {timeContext && <p id={`${timeId}-hint`} className="mb-3 text-sm text-muted-foreground">{timeContext.hint}</p>}
         <div className="grid grid-cols-4 sm:grid-cols-5 gap-2">
           {availableTimes.map((t) => (
             <Button
@@ -136,6 +140,7 @@ export function BookingDateTimeSelect({
               type="button"
               variant={time === t ? 'default' : 'outline'}
               size="sm"
+              aria-pressed={time === t}
               onClick={() => onTimeChange(t)}
               className="text-sm"
             >

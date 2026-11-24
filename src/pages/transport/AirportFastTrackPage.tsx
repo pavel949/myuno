@@ -20,6 +20,7 @@ import { z } from 'zod';
 import { bangkokTodayISO, toBangkokDateKey } from '@/lib/hotelDates';
 import { BookingField } from '@/components/booking/BookingField';
 import { BookingStepProgress, type BookingStep } from '@/components/booking/BookingStepProgress';
+import { AirportBookingLayout } from '@/components/booking/AirportBookingLayout';
 import { FLIGHT_NUMBER_PATTERN, PHUKET_TIME_ZONE, REQUEST_EMAIL_PATTERN, isRequestPhone, phuketScheduledTime } from '@/lib/services/airportRequestValidation';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -88,7 +89,7 @@ export default function AirportFastTrackPage() {
   const [specialNotes, setSpecialNotes] = useState('');
   const [passengers, setPassengers] = useState<PassengerData[]>([{ ...emptyPassenger }]);
   const [selectedAddons, setSelectedAddons] = useState<Set<string>>(new Set());
-  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [validatedStep, setValidatedStep] = useState<'passenger' | 'review' | null>(null);
   const [step, setStep] = useState<'service' | 'passenger' | 'review'>('service');
   const [showUpsell, setShowUpsell] = useState(false);
   const [submissionError, setSubmissionError] = useState(false);
@@ -191,7 +192,7 @@ export default function AirportFastTrackPage() {
     });
   };
 
-  const validateStep = (targetStep: 'passenger' | 'review'): boolean => {
+  const getValidationErrors = (targetStep: 'passenger' | 'review') => {
     const newErrors: Record<string, string> = {};
 
     if (!selectedService || !Number.isFinite(pricing.total) || pricing.total < 0) newErrors.service = tr('Select a service', 'Выберите услугу', 'เลือกบริการ');
@@ -223,8 +224,14 @@ export default function AirportFastTrackPage() {
       }
     }
 
-    setErrors(newErrors);
-    const firstError = Object.keys(newErrors)[0];
+    return newErrors;
+  };
+
+  const errors = validatedStep ? getValidationErrors(validatedStep) : {};
+
+  const validateStep = (targetStep: 'passenger' | 'review'): boolean => {
+    const firstError = Object.keys(getValidationErrors(targetStep))[0];
+    setValidatedStep(targetStep);
     if (firstError) {
       const target = firstError.startsWith('passenger_') || firstError.startsWith('contact') ? 'passenger' : 'service';
       setStep(target);
@@ -363,25 +370,46 @@ export default function AirportFastTrackPage() {
   }
 
   return (
-    <AppLayout title="Fast Track" showBottomNav={false}>
-      <div className="ds-frame ds-frame-article pb-32">
-        {/* Back button */}
-        <div className="px-4 pt-3">
-          <Button variant="ghost" size="sm" className="min-h-11 gap-1 -ml-2" disabled={isSubmitting} onClick={handleBack}>
+    <AppLayout title="Fast Track" showBottomNav={false} usePageContainer={false}>
+      <AirportBookingLayout
+        variant="fast-track"
+        title="Fast Track"
+        airport={tr('Phuket Airport (HKT)', 'Аэропорт Пхукета (HKT)', 'สนามบินภูเก็ต (HKT)')}
+        back={
+          <Button variant="ghost" size="sm" className="min-h-11 gap-1" disabled={isSubmitting} onClick={handleBack}>
             <ChevronLeft className="w-4 h-4" />
             {tr('Back', 'Назад', 'ย้อนกลับ')}
           </Button>
-        </div>
-
-        <div className="border-b bg-card px-4 py-4">
-          <h1 className="text-xl font-display font-bold">Fast Track</h1>
-          <p className="text-sm text-muted-foreground">{tr('Phuket Airport (HKT)', 'Аэропорт Пхукета (HKT)', 'สนามบินภูเก็ต (HKT)')}</p>
-          <BookingStepProgress steps={fastTrackSteps} currentStep={currentStep} />
-        </div>
-        <div ref={stepRef} tabIndex={-1} className="pt-4">
+        }
+        progress={<BookingStepProgress steps={fastTrackSteps} currentStep={currentStep} />}
+        summary={<>
+          {cutoffViolated && step !== 'service' && <p role="alert" className="text-sm text-destructive">{tr(`Request at least ${cutoffHours} hours ahead`, `Подайте заявку минимум за ${cutoffHours} ч`, `ส่งคำขอล่วงหน้าอย่างน้อย ${cutoffHours} ชั่วโมง`)}</p>}
+          <div>
+            <p className="text-xs text-muted-foreground">{isRu ? 'Итого' : 'Total'}</p>
+            {selectedService ? <span className="text-2xl font-semibold tabular-nums">{formatPrice(pricing.total, selectedService.currency)}</span> : <span className="text-sm font-medium text-muted-foreground">{isRu ? "Выберите услугу" : "Select a service"}</span>}
+          </div>
+          {submissionError && <p role="alert" className="text-sm text-destructive">{tr(
+            'We could not verify receipt. Open My Bookings or contact myUNO before sending again.',
+            'Не удалось подтвердить получение. Проверьте «Мои бронирования» или свяжитесь с myUNO перед повторной отправкой.',
+            'ยืนยันการรับคำขอไม่ได้ โปรดตรวจสอบการจองของฉันหรือติดต่อ myUNO ก่อนส่งอีกครั้ง',
+          )} <a className="underline" href="/bookings">{tr('My bookings', 'Мои бронирования', 'การจองของฉัน')}</a></p>}
+          {step === 'review' ? (
+            <Button onClick={handleSubmit} className="text-base font-semibold" disabled={cutoffViolated || isSubmitting || showUpsell || submissionError}>
+              {isSubmitting
+                ? tr('Sending…', 'Отправка…', 'กำลังส่ง…')
+                : tr('Send request', 'Отправить заявку', 'ส่งคำขอ')}
+            </Button>
+          ) : (
+            <Button onClick={handleNext} className="text-base font-semibold" disabled={isSubmitting}>
+              {tr('Continue', 'Далее', 'ถัดไป')}
+            </Button>
+          )}
+        </>}
+      >
+        <div ref={stepRef} tabIndex={-1} className="scroll-mt-24 focus:outline-none">
         {/* ═══ Step 1: Service (white-label — no supplier names) ═══ */}
         {step === 'service' && (
-          <div className="px-4 space-y-5">
+          <div className="space-y-5">
             {/* Direction */}
             <div className="space-y-2">
               <Label>{isRu ? 'Направление' : 'Direction'}</Label>
@@ -441,7 +469,7 @@ export default function AirportFastTrackPage() {
               <h2 className="font-semibold">{tr('Select a service', 'Выберите услугу', 'เลือกบริการ')}</h2>
               {errors.service && <p role="alert" className="text-sm text-destructive">{errors.service}</p>}
               {directionServices.length === 0 && availableBundles.length === 0 && <p className="text-sm text-muted-foreground">{tr('No Fast Track packages are listed for this direction.', 'Для этого направления нет опубликованных пакетов Fast Track.', 'ไม่มีแพ็กเกจ Fast Track ที่แสดงสำหรับเส้นทางนี้')}</p>}
-              <div className="space-y-3">
+              <div className="airport-booking__service-options">
                 {directionServices.map(service => {
                   const includes = getIncludes(service);
                   const isSelected = selectedServiceId === service.id;
@@ -595,7 +623,7 @@ export default function AirportFastTrackPage() {
 
         {/* ═══ Step 2: Passengers ═══ */}
         {step === 'passenger' && (
-          <div className="px-4 space-y-5">
+          <div className="space-y-5">
             {passengers.map((pax, i) => (
               <div key={i} className="p-4 rounded-none border bg-card space-y-3">
                 <div className="flex items-center justify-between">
@@ -673,7 +701,7 @@ export default function AirportFastTrackPage() {
 
         {/* ═══ Step 3: Review — white-label, no supplier name shown ═══ */}
         {step === 'review' && selectedService && (
-          <div className="px-4 space-y-4">
+          <div className="space-y-4">
             <div className="p-4 rounded-none border bg-card space-y-3">
               <div className="flex items-center gap-2 mb-1">
                 <Shield className="w-4 h-4 text-primary" />
@@ -729,34 +757,7 @@ export default function AirportFastTrackPage() {
           </div>
         )}
         </div>
-      </div>
-
-      {/* Bottom bar — always visible */}
-      <div className="fixed bottom-0 left-0 right-0 bg-background border-t p-4 z-40" style={{ paddingBottom: 'max(env(safe-area-inset-bottom, 16px), 16px)' }}>
-        {cutoffViolated && step !== 'service' && <p role="alert" className="text-sm text-destructive mb-2">{tr(`Request at least ${cutoffHours} hours ahead`, `Подайте заявку минимум за ${cutoffHours} ч`, `ส่งคำขอล่วงหน้าอย่างน้อย ${cutoffHours} ชั่วโมง`)}</p>}
-        <div className="ds-frame ds-frame-article flex flex-wrap items-center justify-between gap-2 mb-2">
-          <div>
-            <p className="text-xs text-muted-foreground">{isRu ? 'Итого' : 'Total'}</p>
-            {selectedService ? <span className="font-mono tabular-nums">{formatPrice(pricing.total, selectedService.currency)}</span> : <span className="text-sm font-medium text-muted-foreground">{isRu ? "Выберите услугу" : "Select a service"}</span>}
-          </div>
-          {submissionError && <p role="alert" className="basis-full text-sm text-destructive">{tr(
-            'We could not verify receipt. Open My Bookings or contact myUNO before sending again.',
-            'Не удалось подтвердить получение. Проверьте «Мои бронирования» или свяжитесь с myUNO перед повторной отправкой.',
-            'ยืนยันการรับคำขอไม่ได้ โปรดตรวจสอบการจองของฉันหรือติดต่อ myUNO ก่อนส่งอีกครั้ง',
-          )} <a className="underline" href="/bookings">{tr('My bookings', 'Мои бронирования', 'การจองของฉัน')}</a></p>}
-          {step === 'review' ? (
-            <Button onClick={handleSubmit} className="px-8" disabled={cutoffViolated || isSubmitting || showUpsell || submissionError}>
-              {isSubmitting
-                ? tr('Sending…', 'Отправка…', 'กำลังส่ง…')
-                : tr('Send request', 'Отправить заявку', 'ส่งคำขอ')}
-            </Button>
-          ) : (
-            <Button onClick={handleNext} className="px-8" disabled={isSubmitting}>
-              {tr('Continue', 'Далее', 'ถัดไป')}
-            </Button>
-          )}
-        </div>
-      </div>
+      </AirportBookingLayout>
 
       {/* Transfer Upsell Overlay */}
       {showUpsell && (

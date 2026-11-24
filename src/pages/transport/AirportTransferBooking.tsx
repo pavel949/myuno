@@ -20,6 +20,7 @@ import { pickClosest } from '@/lib/geo';
 import { useGeolocation } from '@/hooks/useGeolocation';
 import { AnimatePresence } from 'framer-motion';
 import { BookingStepProgress, type BookingStep } from '@/components/booking/BookingStepProgress';
+import { AirportBookingLayout } from '@/components/booking/AirportBookingLayout';
 import { StepRoute } from '@/components/transport/booking-steps/StepRoute';
 import { StepVehicle } from '@/components/transport/booking-steps/StepVehicle';
 import { StepDetails } from '@/components/transport/booking-steps/StepDetails';
@@ -583,114 +584,29 @@ export default function AirportTransferBooking() {
     : undefined;
 
   return (
-    <AppLayout showBottomNav={false}>
-      <div className="ds-frame ds-frame-article">
-      {/* Header */}
-      <div className="px-4 pt-4 pb-2 bg-background border-b border-border/50">
-        <div className="flex items-center gap-3 mb-3">
+    <AppLayout showBottomNav={false} usePageContainer={false}>
+      <AirportBookingLayout
+        variant="transfer"
+        title={tr('Airport transfer', 'Трансфер из аэропорта и в аэропорт', 'รถรับส่งสนามบิน')}
+        airport={tr('Phuket Airport (HKT)', 'Аэропорт Пхукета (HKT)', 'สนามบินภูเก็ต (HKT)')}
+        back={
           <button
             type="button"
             aria-label={tr('Back', 'Назад', 'ย้อนกลับ')}
             disabled={isSubmitting || !!pendingCheckout || orderUnverified}
             onClick={() => step > 0 ? moveToStep(step - 1) : navigate(APP_ROUTES.TRANSPORT)}
-            className="w-11 h-11 flex items-center justify-center rounded-full bg-muted/50 text-foreground hover:bg-muted transition-colors"
+            className="inline-flex items-center justify-center gap-1 text-sm font-medium transition-colors disabled:opacity-50"
           >
-            <ChevronLeft className="w-5 h-5" />
+            <ChevronLeft className="w-4 h-4" />
+            {tr('Back', 'Назад', 'ย้อนกลับ')}
           </button>
-          <div className="flex-1">
-            <h1 className="text-lg font-display font-bold">
-              {tr('Airport transfer', 'Трансфер из аэропорта и в аэропорт', 'รถรับส่งสนามบิน')}
-            </h1>
-            <p className="text-xs text-muted-foreground">Phuket (HKT)</p>
-          </div>
-          
-        </div>
-
-        <BookingStepProgress steps={transferSteps} currentStep={step} className="py-2" />
-      </div>
-
-      {/* Steps */}
-      <div ref={stepRef} tabIndex={-1} className="px-4 py-4">
-        {quoteFailed && <div className="mb-4 space-y-2">
-          <p role="alert" className="text-sm text-destructive">{tr('Could not load transfer rates.', 'Не удалось загрузить тарифы трансфера.', 'โหลดราคาค่ารถรับส่งไม่สำเร็จ')}</p>
-          <Button type="button" variant="outline" onClick={() => {
-            if (vehicleError) void refetchVehicles();
-            if (destinationsError) void refetchDestinations();
-            if (nightRateStatus === 'error') setNightRateRetry(retry => retry + 1);
-          }}>{tr('Try again', 'Повторить', 'ลองอีกครั้ง')}</Button>
-        </div>}
-        {attemptedStep === 0 && getTransferRouteIssues(formData).length > 0 && <p role="alert" className="mb-3 text-sm text-destructive">
-          {tr('Select a terminal and enter the pickup or drop-off address.', 'Выберите терминал и укажите адрес подачи или назначения.', 'เลือกอาคารผู้โดยสารและกรอกที่อยู่รับหรือส่ง')}
-        </p>}
-        {step === 1 && !vehicleError && vehicleTypes.length === 0 && <p role="status" className="text-sm text-muted-foreground">
-          {tr('No vehicle options are listed.', 'Нет опубликованных вариантов автомобилей.', 'ไม่มีตัวเลือกรถที่แสดง')}
-        </p>}
-        <AnimatePresence mode="wait">
-          {step === 0 && (
-            <StepRoute
-              key="step-0"
-              formData={formData}
-              setFormData={setFormData}
-              language={language}
-              destinations={destinations}
-              geoSupported={geoSupported && formData.direction === 'to-airport'}
-              geoLoading={geoLoading}
-              isReverseGeocoding={isReverseGeocoding}
-              onUseCurrentLocation={handleUseCurrentLocation}
-              onDestinationCoords={setDestinationCoords}
-              onPickupCoords={setPickupCoords}
-            />
-          )}
-          {step === 1 && (
-            <StepVehicle
-              key="step-1"
-              formData={formData}
-              setFormData={setFormData}
-              language={language}
-              vehicleTypes={vehicleTypes}
-              routeBasePrice={routeBasePrice}
-              showPrice={quoteReady}
-            />
-          )}
-          {step === 2 && (
-            <StepDetails
-              key="step-2"
-              formData={formData}
-              setFormData={setFormData}
-              language={language}
-              meetingSignManuallyEditedRef={meetingSignManuallyEdited}
-              maxPassengers={maxPassengers}
-              errors={attemptedStep === 2 ? Object.fromEntries(detailIssues.map(key => [key, fieldMessages[key]])) : {}}
-            />
-          )}
-          {step === 3 && quoteReady && !pendingCheckout && !orderUnverified && (
-            <StepPayment
-              key="step-3"
-              formData={formData}
-              setFormData={setFormData}
-              language={language}
-              basePrice={basePrice}
-              nightSurcharge={nightSurcharge}
-              totalPrice={totalPrice}
-              selectedVehicleLabel={selectedVehicleLabel}
-              selectedDestinationDuration={selectedDestination?.duration_minutes}
-            />
-          )}
-        </AnimatePresence>
-      </div>
-
-      {orderUnverified && <p role="alert" className="px-4 py-2 text-sm text-destructive">{tr('We could not verify receipt. Check My Bookings before sending again.', 'Не удалось подтвердить получение. Проверьте «Мои бронирования» перед повторной отправкой.', 'ยืนยันการรับคำขอไม่ได้ โปรดตรวจสอบการจองของฉันก่อนส่งอีกครั้ง')} <a href="/bookings" className="underline">{tr('My bookings', 'Мои бронирования', 'การจองของฉัน')}</a></p>}
-      {checkoutError && <p role="alert" className="px-4 py-2 text-sm text-destructive">{tr('Your order exists. Retry card payment for the same order.', 'Заказ уже создан. Повторите оплату картой для этого заказа.', 'สร้างคำสั่งซื้อแล้ว ลองชำระคำสั่งซื้อเดิมอีกครั้ง')}</p>}
-      {/* Sticky CTA */}
-      <div
-        className="sticky bottom-0 left-0 right-0 bg-background/95 border-t border-border/50 z-50"
-        style={{ paddingBottom: 'max(env(safe-area-inset-bottom, 16px), 16px)' }}
-      >
-        <div className="px-4 pt-3 pb-2">
-          <div className="flex items-center justify-between gap-3 mb-2">
+        }
+        progress={<BookingStepProgress steps={transferSteps} currentStep={step} />}
+        summary={<>
+          <div className="flex items-center justify-between gap-3">
             <div className="flex-1 min-w-0">
               {formData.destinationAddress ? (
-                <p className="text-xs text-muted-foreground truncate">
+                <p className="text-xs text-muted-foreground break-words">
                   {formData.destinationAddress}
                   {selectedDestination?.duration_minutes && ` · ~${selectedDestination.duration_minutes} ${language === 'ru' ? 'мин' : 'min'}`}
                 </p>
@@ -699,7 +615,7 @@ export default function AirportTransferBooking() {
                   {language === 'ru' ? 'Выберите маршрут' : 'Select route'}
                 </p>
               )}
-              <p className="text-lg font-bold tabular-nums whitespace-nowrap">{pendingCheckout ? `฿${pendingCheckout.amount.toLocaleString()}` : quoteReady ? `฿${totalPrice.toLocaleString()}` : loadingQuote
+              <p className="text-2xl font-semibold tabular-nums whitespace-nowrap">{pendingCheckout ? `฿${pendingCheckout.amount.toLocaleString()}` : quoteReady ? `฿${totalPrice.toLocaleString()}` : loadingQuote
                 ? transferFareLabel(null, language)
                 : transferFareLabel(null, language)}</p>
             </div>
@@ -710,7 +626,7 @@ export default function AirportTransferBooking() {
             )}
           </div>
 
-          {!quoteReady && <p role="status" className="text-sm text-muted-foreground mb-2">{tr('The fare is not confirmed. Choose another vehicle or route and check the price.', 'Тариф пока не подтверждён. Выберите другой автомобиль или маршрут и проверьте стоимость.', 'โปรดตรวจสอบราคาโดยเลือกเส้นทางหรือรถคันอื่น')}</p>}
+          {!quoteReady && <p role="status" className="text-sm text-muted-foreground">{tr('The fare is not confirmed. Choose another vehicle or route and check the price.', 'Тариф пока не подтверждён. Выберите другой автомобиль или маршрут и проверьте стоимость.', 'โปรดตรวจสอบราคาโดยเลือกเส้นทางหรือรถคันอื่น')}</p>}
           {!isLastStep ? (
             <Button
               type="button"
@@ -739,10 +655,80 @@ export default function AirportTransferBooking() {
                     : (language === 'ru' ? `Забронировать • ฿${totalPrice.toLocaleString()}` : `Book • ฿${totalPrice.toLocaleString()}`)}
             </Button>
           )}
+        </>}
+      >
+        <div ref={stepRef} tabIndex={-1} className="scroll-mt-24 focus:outline-none">
+          {quoteFailed && <div className="mb-4 space-y-2">
+            <p role="alert" className="text-sm text-destructive">{tr('Could not load transfer rates.', 'Не удалось загрузить тарифы трансфера.', 'โหลดราคาค่ารถรับส่งไม่สำเร็จ')}</p>
+            <Button type="button" variant="outline" onClick={() => {
+              if (vehicleError) void refetchVehicles();
+              if (destinationsError) void refetchDestinations();
+              if (nightRateStatus === 'error') setNightRateRetry(retry => retry + 1);
+            }}>{tr('Try again', 'Повторить', 'ลองอีกครั้ง')}</Button>
+          </div>}
+          {attemptedStep === 0 && getTransferRouteIssues(formData).length > 0 && <p role="alert" className="mb-3 text-sm text-destructive">
+            {tr('Select a terminal and enter the pickup or drop-off address.', 'Выберите терминал и укажите адрес подачи или назначения.', 'เลือกอาคารผู้โดยสารและกรอกที่อยู่รับหรือส่ง')}
+          </p>}
+          {step === 1 && !vehicleError && vehicleTypes.length === 0 && <p role="status" className="text-sm text-muted-foreground">
+            {tr('No vehicle options are listed.', 'Нет опубликованных вариантов автомобилей.', 'ไม่มีตัวเลือกรถที่แสดง')}
+          </p>}
+          <AnimatePresence mode="wait">
+            {step === 0 && (
+              <StepRoute
+                key="step-0"
+                formData={formData}
+                setFormData={setFormData}
+                language={language}
+                destinations={destinations}
+                geoSupported={geoSupported && formData.direction === 'to-airport'}
+                geoLoading={geoLoading}
+                isReverseGeocoding={isReverseGeocoding}
+                onUseCurrentLocation={handleUseCurrentLocation}
+                onDestinationCoords={setDestinationCoords}
+                onPickupCoords={setPickupCoords}
+              />
+            )}
+            {step === 1 && (
+              <StepVehicle
+                key="step-1"
+                formData={formData}
+                setFormData={setFormData}
+                language={language}
+                vehicleTypes={vehicleTypes}
+                routeBasePrice={routeBasePrice}
+                showPrice={quoteReady}
+              />
+            )}
+            {step === 2 && (
+              <StepDetails
+                key="step-2"
+                formData={formData}
+                setFormData={setFormData}
+                language={language}
+                meetingSignManuallyEditedRef={meetingSignManuallyEdited}
+                maxPassengers={maxPassengers}
+                errors={attemptedStep === 2 ? Object.fromEntries(detailIssues.map(key => [key, fieldMessages[key]])) : {}}
+              />
+            )}
+            {step === 3 && quoteReady && !pendingCheckout && !orderUnverified && (
+              <StepPayment
+                key="step-3"
+                formData={formData}
+                setFormData={setFormData}
+                language={language}
+                basePrice={basePrice}
+                nightSurcharge={nightSurcharge}
+                totalPrice={totalPrice}
+                selectedVehicleLabel={selectedVehicleLabel}
+                selectedDestinationDuration={selectedDestination?.duration_minutes}
+              />
+            )}
+          </AnimatePresence>
         </div>
-      </div>
 
-      </div>
+        {orderUnverified && <p role="alert" className="px-4 py-2 text-sm text-destructive">{tr('We could not verify receipt. Check My Bookings before sending again.', 'Не удалось подтвердить получение. Проверьте «Мои бронирования» перед повторной отправкой.', 'ยืนยันการรับคำขอไม่ได้ โปรดตรวจสอบการจองของฉันก่อนส่งอีกครั้ง')} <a href="/bookings" className="underline">{tr('My bookings', 'Мои бронирования', 'การจองของฉัน')}</a></p>}
+        {checkoutError && <p role="alert" className="px-4 py-2 text-sm text-destructive">{tr('Your order exists. Retry card payment for the same order.', 'Заказ уже создан. Повторите оплату картой для этого заказа.', 'สร้างคำสั่งซื้อแล้ว ลองชำระคำสั่งซื้อเดิมอีกครั้ง')}</p>}
+      </AirportBookingLayout>
       <InlineAuthGate
         open={authGateOpen}
         onOpenChange={setAuthGateOpen}

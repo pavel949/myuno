@@ -3,6 +3,7 @@ import asyncio,json,shutil,sys,re
 from pathlib import Path
 from urllib.parse import urlparse,urlencode
 from playwright.async_api import async_playwright
+from computed_text_contrast import assert_computed_contrast
 
 OUT=Path(sys.argv[1]);BASELINE='--baseline' in sys.argv
 ROLES=['public','pms','admin']
@@ -63,9 +64,38 @@ async def main():
     metrics=await page.evaluate("""(role)=>{const style=e=>{const s=getComputedStyle(e);return {color:s.color,background:s.backgroundColor,font:s.fontFamily,fontSize:parseFloat(s.fontSize),width:e.getBoundingClientRect().width}};const frame=document.querySelector(role==='public'?'.home-hero-copy':role==='admin'?'[data-testid=dashboard-work-area]>div':'.ds-frame')||document.querySelector('#root>div');const fr=frame.getBoundingClientRect();const section=document.querySelector(role==='public'?'.home-gallery-heading':'.ds-section');const sectionStyle=section?getComputedStyle(section):null;return{section:sectionStyle?{gap:sectionStyle.gap,bottom:sectionStyle.marginBottom,effectiveGap:section.nextElementSibling?section.nextElementSibling.getBoundingClientRect().top-section.getBoundingClientRect().bottom:null,outerPadding:getComputedStyle(section.parentElement).paddingTop}:null,frame:{inset:role==='public'?fr.left:parseFloat(getComputedStyle(frame).paddingLeft),width:fr.width},body:style(document.body),heading:style(document.querySelector('h1')),primary:style(document.querySelector('[data-ds-primary]')),probe:style(document.querySelector('[data-testid=ds-probes]')),statuses:Array.from(document.querySelectorAll('[data-ds-status]')).map(e=>({status:e.dataset.dsStatus,...style(e)})),overflow:document.documentElement.scrollWidth>innerWidth}}""",role)
     assert not metrics['overflow'],'page overflow'
     if role=='public':
-     hero=await page.evaluate("""()=>{const grid=document.querySelector('.home-hero-choice-grid'),cards=[...document.querySelectorAll('.home-hero-choice')];return{grid:grid&&getComputedStyle(grid).display,cards:cards.map(el=>({display:getComputedStyle(el).display,height:el.getBoundingClientRect().height,overflow:el.scrollWidth>el.clientWidth}))}}""")
-     assert hero['grid']=='grid' and len(hero['cards'])==4,{'heroStylesMissing':hero}
-     assert all(c['display']=='flex' and c['height']>=44 and not c['overflow'] for c in hero['cards']),{'heroChoiceGeometry':hero}
+     if variant=='normal' and state=='normal':
+      targets=[
+       ('#home-title > span',2,'text'),
+       ('.home-hero-copy > p',1,'text'),
+       ('.home-reference-search .home-search-submit',1,'text'),
+       ('.home-reference-search .home-search-refine',1,'text'),
+       ('.home-reference-search .home-search-modes button',2,'text'),
+       ('.home-reference-direction-content strong',4,'text'),
+       ('.home-reference-direction-content small',4,'text'),
+       ('.home-hero .home-hero-secondary',1,'text'),
+      ]
+      if width<=820:
+       targets.append(('.home-hero .consumer-menu > svg',1,'icon'))
+      else:
+       targets.extend([
+        ('.home-hero .consumer-utilities .consumer-icon > svg',1,'icon'),
+        ('.home-hero .consumer-nav a',4,'text'),
+        ('.home-hero .consumer-partner-menu > summary',1,'text'),
+        ('.home-hero .consumer-login',1,'text'),
+       ])
+      row['textContrast']=await assert_computed_contrast(page,targets)
+     hero=await page.evaluate("""()=>{const grid=document.querySelector('.home-reference-directions'),cards=[...document.querySelectorAll('.home-reference-direction')];return{grid:grid&&getComputedStyle(grid).display,cards:cards.map(el=>({href:el.getAttribute('href'),rect:el.getBoundingClientRect().toJSON(),overflow:el.scrollWidth>el.clientWidth||el.scrollHeight>el.clientHeight})),searches:document.querySelectorAll('.home-hero form.home-search').length}}""")
+     assert hero['grid']=='grid' and len(hero['cards'])==4 and hero['searches']==1,{'heroStylesMissing':hero}
+     assert [c['href'] for c in hero['cards']]==['/property/rent','/discover/buy','/experiences','/services'],{'directionDestinations':hero}
+     assert all(c['rect']['height']>=44 and c['rect']['width']>=44 and not c['overflow'] for c in hero['cards']),{'heroChoiceGeometry':hero}
+     boxes=[c['rect'] for c in hero['cards']]
+     columns=2 if width<1200 else 4
+     for i, box in enumerate(boxes):
+      grid_row, column=divmod(i,columns)
+      assert abs(box['top']-boxes[grid_row*columns]['top'])<2 and abs(box['left']-boxes[column]['left'])<2,{'directionGrid':hero}
+      if column:assert boxes[i-1]['right']<=box['left'],{'directionOverlap':hero}
+      if grid_row:assert boxes[i-columns]['bottom']<=box['top'],{'directionOverlap':hero}
     if role in ['pms','admin']:
      h1token=await page.evaluate('parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--type-h1-size"))*parseFloat(getComputedStyle(document.documentElement).fontSize)')
      assert abs(metrics['heading']['fontSize']-h1token)<.1,{'canonicalH1':h1token,'actual':metrics['heading']}

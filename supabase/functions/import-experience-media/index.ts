@@ -1,5 +1,6 @@
 // Deno.serve used (native edge runtime)
 import { createClient } from "npm:@supabase/supabase-js@2";
+import { requireInternalOrStaff } from "../_shared/authz.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': 'https://myuno.app',
@@ -10,6 +11,7 @@ Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
+  { const gate = await requireInternalOrStaff(req, corsHeaders); if (gate instanceof Response) return gate; }
 
   try {
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;

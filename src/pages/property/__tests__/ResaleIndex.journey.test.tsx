@@ -1,4 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { webcrypto } from 'node:crypto';
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { MemoryRouter, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 import ResaleIndex from '../ResaleIndex';
@@ -6,15 +7,19 @@ import ResaleDetail from '../ResaleDetail';
 
 const state = vi.hoisted(() => ({
   language: 'en', failed: false, detailFailed: false, loading: false,
-  filters: {} as Record<string, unknown>, retry: vi.fn(),
+  filters: {} as Record<string, unknown>, retry: vi.fn(), rpc: vi.fn(),
   properties: [] as Record<string, unknown>[],
 }));
 vi.mock('@/contexts/LanguageContext', () => ({ useLanguage: () => ({ language: state.language }) }));
 vi.mock('@/contexts/CurrencyContext', () => ({ useCurrency: () => ({ formatPrice: (amount: number) => `THB ${amount}` }) }));
 vi.mock('@/contexts/LocationContext', () => ({ useLocation: () => ({ currentCity: { default_currency: 'THB' } }) }));
 vi.mock('@/components/seo', () => ({ SEOHead: () => null, createRealEstateListingSchema: () => ({}) }));
-vi.mock('@/components/leads/UniversalLeadForm', () => ({ UniversalLeadForm: () => null }));
-vi.mock('@/components/ui/responsive-modal', () => ({ ResponsiveModal: () => null }));
+vi.mock('@/contexts/AuthContext', () => ({ useAuth: () => ({ user: null }) }));
+vi.mock('@/integrations/supabase/client', () => ({ supabase: { rpc: state.rpc } }));
+vi.mock('@/components/ui/responsive-modal', () => ({
+  ResponsiveModal: ({ open, title, children }: { open: boolean; title: string; children: React.ReactNode }) =>
+    open ? <section role="dialog" aria-label={title}>{children}</section> : null,
+}));
 vi.mock('@/hooks/useResaleProperties', () => ({
   useResaleProperties: (filters: Record<string, unknown>) => {
     state.filters = filters;
@@ -38,11 +43,13 @@ function choose(label: string, value: string | RegExp) {
 const location = () => new URL(screen.getByTestId('location').textContent!, 'https://myuno.app');
 
 beforeEach(() => {
+  window.sessionStorage.clear();
+  state.rpc.mockReset();
   state.language = 'en'; state.failed = false; state.detailFailed = false; state.loading = false; state.retry.mockClear();
   state.properties = [{ id: 'unit', title: 'Garden resale', title_ru: 'Вторичная квартира', asking_price: 6000000, currency: 'THB', zone: 'Rawai', property_type: 'condo', media: [], title_type: 'freehold', condition: 'good' }];
   Element.prototype.hasPointerCapture = vi.fn(() => false); Element.prototype.setPointerCapture = vi.fn(); Element.prototype.releasePointerCapture = vi.fn(); Element.prototype.scrollIntoView = vi.fn();
 });
-afterEach(cleanup);
+afterEach(() => { cleanup(); vi.unstubAllGlobals(); });
 
 describe('resale catalogue journey', () => {
   it('hydrates shared area/type/tab/budget without replacing bookmark context', () => {
@@ -129,4 +136,43 @@ it('keeps cards and detail usable with an explicit fallback when their photograp
   fireEvent.error(screen.getByAltText('Garden resale'));
   expect(screen.getByRole('img', { name: 'Photo unavailable' })).toBeVisible();
   expect(screen.getByRole('heading', { name: 'Garden resale' })).toBeVisible();
+});
+
+describe('resale viewing intake', () => {
+  function fillViewingForm() {
+    fireEvent.click(screen.getByRole('button', { name: 'Request Viewing' }));
+    fireEvent.change(screen.getByLabelText('Name'), { target: { value: 'Synthetic Buyer' } });
+    fireEvent.change(screen.getByLabelText('Phone or WhatsApp'), { target: { value: '+66000000000' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Send request' }));
+  }
+
+  it('sends the exact resale context to the existing inbox writer and shows the returned ID', async () => {
+    vi.stubGlobal('crypto', webcrypto);
+    state.rpc.mockResolvedValue({ data: '11111111-1111-4111-8111-111111111111', error: null });
+    mount('/property/resale/unit');
+    fillViewingForm();
+    expect(await screen.findByText('Request ID 11111111-1111-4111-8111-111111111111')).toBeVisible();
+    expect(state.rpc).toHaveBeenCalledOnce();
+    expect(state.rpc).toHaveBeenCalledWith('submit_consultation_request', {
+      payload: expect.objectContaining({
+        request_type: 'property_tour',
+        entry_point: '/property/resale/unit',
+        vertical_metadata: { marketplace: 'resale', resale_listing_id: 'unit', intent: 'viewing' },
+        notes: 'Resale viewing: /property/resale/unit',
+      }),
+    });
+  });
+
+  it('blocks an uncertain replay against the legacy writer after reopening the page', async () => {
+    vi.stubGlobal('crypto', webcrypto);
+    state.rpc.mockRejectedValue(new Error('Synthetic lost response'));
+    const first = mount('/property/resale/unit');
+    fillViewingForm();
+    expect(await screen.findByRole('alert')).toHaveTextContent('previous request status is unknown');
+    first.unmount();
+    mount('/property/resale/unit');
+    fillViewingForm();
+    expect(await screen.findByRole('alert')).toHaveTextContent('previous request status is unknown');
+    expect(state.rpc).toHaveBeenCalledOnce();
+  });
 });

@@ -42,14 +42,14 @@ export default function MCProjectsPage() {
 
   return (
     <div className="space-y-6 p-4 md:p-6 max-w-7xl mx-auto">
-      <div className="flex items-center justify-between gap-4">
+      <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
-            <HardHat className="h-6 w-6 text-primary" />
+          <h1 className="flex items-start gap-2 font-display text-2xl font-semibold leading-tight text-foreground sm:text-3xl">
+            <HardHat className="h-6 w-6 shrink-0 text-primary" />
             {isRu ? 'Проекты (Новостройки)' : 'Projects (New Builds)'}
           </h1>
           <p className="text-sm text-muted-foreground mt-1">
-            {isRu ? 'Управление вашими проектами и новостройками' : 'Manage your development projects'}
+            {isRu ? 'Ваши проекты и их страницы в каталоге новостроек' : 'Your developments and their public catalogue pages'}
           </p>
         </div>
         <Button onClick={() => navigate(APP_ROUTES.DEVELOPER_PORTAL_PROJECT_NEW)} className="gap-2">
@@ -111,7 +111,7 @@ function ProjectCard({
   return (
     <button
       onClick={() => navigate(APP_ROUTES.OFFPLAN_DETAIL(project.id))}
-      className="text-left rounded-none border bg-card overflow-hidden shadow-sm hover:shadow-md transition-shadow"
+      className="group flex flex-col overflow-hidden border bg-card text-left transition-colors hover:border-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
     >
       {project.cover_image ? (
         <img src={project.cover_image} alt="" className="w-full h-40 object-cover" />
@@ -120,10 +120,10 @@ function ProjectCard({
           <HardHat className="h-10 w-10 text-muted-foreground/30" />
         </div>
       )}
-      <div className="p-4 space-y-2">
-        <div className="flex items-center justify-between gap-2">
-          <h3 className="font-semibold text-foreground line-clamp-1">
-            {isRu ? project.name_ru : project.name_en}
+      <div className="flex flex-1 flex-col gap-3 p-4">
+        <div className="flex flex-wrap items-start gap-2">
+          <h3 className="min-w-0 font-display text-lg font-semibold leading-tight text-foreground [overflow-wrap:anywhere]">
+            {isRu ? project.name_ru || project.name_en : project.name_en || project.name_ru}
           </h3>
           {statusLabel(project.project_status)}
         </div>
@@ -138,6 +138,7 @@ function ProjectCard({
 
           </p>
         )}
+        <span className="mt-auto border-t pt-3 text-sm font-semibold text-primary">{isRu ? 'Смотреть в каталоге' : 'View in catalogue'}</span>
       </div>
     </button>
   );

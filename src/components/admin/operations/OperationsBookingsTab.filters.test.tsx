@@ -1,6 +1,6 @@
 import React from 'react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { MemoryRouter, useLocation, useNavigate } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { OperationsBookingsTab } from './OperationsBookingsTab';
@@ -38,45 +38,51 @@ afterEach(()=>{cleanup();state.error=false;state.many=false;state.noCount=false;
 describe('actual operations order queue URL',()=>{
   it('opens exact nondeleted pending cutoff records and restores filters through reset and history',async()=>{
     setup();
-    expect(await screen.findByText('Older order')).toBeInTheDocument();
-    expect(screen.queryByText('Newer order')).not.toBeInTheDocument();
-    expect(screen.queryByText('Deleted order')).not.toBeInTheDocument();
+    expect(await within(await screen.findByRole('table')).findByText('Older order')).toBeInTheDocument();
+    expect(screen.queryAllByText('Newer order')).toHaveLength(0);
+    expect(screen.queryAllByText('Deleted order')).toHaveLength(0);
     expect(state.reads).toContainEqual({column:'deleted_at',value:null});
     expect(state.reads).toContainEqual({column:'status',value:'pending'});
     expect(state.reads).toContainEqual({column:'created_at',value:'2026-10-19T00:00:00.000Z'});
     fireEvent.click(screen.getByRole('button',{name:'Reset filters'}));
-    expect(await screen.findByText('Newer order')).toBeInTheDocument();
+    expect(await within(await screen.findByRole('table')).findByText('Newer order')).toBeInTheDocument();
     expect(screen.getByTestId('location')).toHaveTextContent('?tab=bookings&source=dashboard');
     fireEvent.click(screen.getByRole('button',{name:'Back fixture'}));
-    await waitFor(()=>expect(screen.queryByText('Newer order')).not.toBeInTheDocument());
+    await waitFor(()=>expect(screen.queryAllByText('Newer order')).toHaveLength(0));
     expect(screen.getByTestId('location')).toHaveTextContent('created_before=');
     fireEvent.click(screen.getByRole('button',{name:'Forward fixture'}));
-    expect(await screen.findByText('Newer order')).toBeInTheDocument();
+    expect(await within(await screen.findByRole('table')).findByText('Newer order')).toBeInTheDocument();
   });
   it('shows source failure with retry and does not report no matching records or zero stats',async()=>{
     state.error=true;setup();
     expect(await screen.findByRole('alert')).toHaveTextContent('Could not load orders');
-    expect(screen.queryByText('admin.orders.stats.pending')).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: '— admin.orders.stats.pending' })).toBeInTheDocument();
     state.error=false;
     fireEvent.click(screen.getByRole('button',{name:'Retry'}));
-    expect(await screen.findByText('Older order')).toBeInTheDocument();
+    expect(await within(await screen.findByRole('table')).findByText('Older order')).toBeInTheDocument();
     expect(screen.queryByRole('alert')).not.toBeInTheDocument();
   });
   it('keeps all exact-count records reachable through URL pages',async()=>{
     state.many=true;setup();
-    expect(await screen.findByText('Queue order 99')).toBeInTheDocument();
-    expect(screen.queryByText('Queue order 100')).not.toBeInTheDocument();
+    expect(await within(await screen.findByRole('table')).findByText('Queue order 99')).toBeInTheDocument();
+    expect(screen.queryAllByText('Queue order 100')).toHaveLength(0);
     expect(screen.getByText(/^Matching orders:/)).toHaveTextContent('Matching orders: 101');
     fireEvent.click(screen.getByRole('button',{name:'Next'}));
-    expect(await screen.findByText('Queue order 100')).toBeInTheDocument();
+    expect(await within(await screen.findByRole('table')).findByText('Queue order 100')).toBeInTheDocument();
     expect(screen.getByTestId('location')).toHaveTextContent('order_page=1');
     expect(screen.getByRole('button',{name:'Next'})).toBeDisabled();
-    fireEvent.click(screen.getByRole('button',{name:'Previous'}));
-    expect(await screen.findByText('Queue order 99')).toBeInTheDocument();
+    const pending = screen.getByRole('button', { name: '101 admin.orders.stats.pending' });
+    expect(pending).toHaveAttribute('aria-pressed', 'true');
+    fireEvent.click(pending);
+    expect(screen.getByRole('heading', { name: 'admin.orders.title' })).toHaveFocus();
+    expect(screen.getByTestId('location')).not.toHaveTextContent('order_page=');
+    expect(screen.getByTestId('location')).toHaveTextContent('created_before=');
+    expect(screen.getByTestId('location')).toHaveTextContent('source=dashboard');
+    expect(await within(await screen.findByRole('table')).findByText('Queue order 99')).toBeInTheDocument();
   }, 15000); // Three real 100-row table renders can exceed the default 5s on the shared Windows executor.
   it('shows an unavailable exact count and disables unproven next pages',async()=>{
     state.noCount=true;setup();
-    expect(await screen.findByText('Older order')).toBeInTheDocument();
+    expect(await within(await screen.findByRole('table')).findByText('Older order')).toBeInTheDocument();
     expect(screen.getByText(/^Matching orders:/)).toHaveTextContent('Count unavailable');
     expect(screen.getByRole('button',{name:'Next'})).toBeDisabled();
   });

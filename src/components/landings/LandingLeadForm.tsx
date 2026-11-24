@@ -123,6 +123,7 @@ export function LandingLeadForm(props: LandingLeadFormProps) {
   const [timeline, setTimeline] = useState<CapitalTimeline | ''>('');
   const [message, setMessage] = useState('');
   const [submitted, setSubmitted] = useState(false);
+  const [receiptId, setReceiptId] = useState<string | null>(null);
 
   const isPending = localPending || capitalMutation.isPending || submitLead.isPending;
   const canSubmit = name.trim().length > 0 && phone.trim().length > 0 && !isPending;
@@ -162,6 +163,7 @@ export function LandingLeadForm(props: LandingLeadFormProps) {
               .join('\n') || undefined,
         });
         if (!receipt || typeof receipt.id !== 'string' || !receipt.id.trim()) throw new Error('Unconfirmed request receipt');
+        setReceiptId(receipt.id);
       }
       setSubmitted(true);
       onSubmitStateChange?.('saved');
@@ -179,6 +181,7 @@ export function LandingLeadForm(props: LandingLeadFormProps) {
           <h3 className="text-lg font-semibold">
             {t({ ru: 'Заявка сохранена', en: 'Request saved', th: 'บันทึกคำขอแล้ว' })}
           </h3>
+          {receiptId && <p className="text-sm break-all" data-request-source="consultation_requests">{t({ ru: 'Номер заявки', en: 'Request reference', th: 'หมายเลขคำขอ' })}: <span>{receiptId}</span></p>}
           <p className="text-sm text-muted-foreground">
             {t(
               successText ?? {

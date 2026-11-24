@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { isInboxRequestId } from '@/lib/adminInbox';
 import { sanitizeSearchTerm } from '@/lib/sanitizeSearch';
 import { getLeadSourceFilterValues, getLeadVerticalFilterValues } from '@/lib/leadVerticalConfig';
 import type { ConsultationRequest, ConsultationStatus, ConsultationRequestType } from './useConsultationRequests';
@@ -13,13 +14,30 @@ export interface ConsultationFilters {
   search?: string;
 }
 
-export function useAdminConsultations(filters?: ConsultationFilters) {
+export function useAdminConsultations(filters?: ConsultationFilters, selection?: { requestId: string; actorId: string | undefined }) {
   const queryClient = useQueryClient();
 
+  const refreshConsultation = (id: string) => queryClient.invalidateQueries({
+    predicate: ({ queryKey: [family, , source, requestId] }) =>
+      family === 'admin-consultations' ||
+      (family === 'admin-inbox' && source === 'consultation_requests') ||
+      (family === 'admin-inbox-request' && source === 'consultation_requests' && requestId === id),
+  });
+
   // Fetch all consultation requests (admin only)
-  const { data: consultations, isLoading, refetch } = useQuery({
-    queryKey: ['admin-consultations', filters],
+  const { data: consultations, isLoading, isError, refetch } = useQuery({
+    queryKey: selection
+      ? ['admin-consultations', 'request', selection.actorId, selection.requestId]
+      : ['admin-consultations', filters],
+    enabled: !selection || (!!selection.actorId && isInboxRequestId(selection.requestId)),
     queryFn: async () => {
+      if (selection) {
+        if (!selection.actorId || !isInboxRequestId(selection.requestId)) throw new Error('Invalid consultation selection');
+        const { data, error } = await supabase.from('consultation_requests').select('*').eq('id', selection.requestId).maybeSingle();
+        if (error) throw error;
+        if (data && data.id !== selection.requestId) throw new Error('Consultation identity mismatch');
+        return data ? [data as unknown as ConsultationRequest] : [];
+      }
       let query = supabase
         .from('consultation_requests')
         .select('*')
@@ -72,8 +90,8 @@ export function useAdminConsultations(filters?: ConsultationFilters) {
       if (error) throw error;
       return data;
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['admin-consultations'] });
+    onSuccess: (_data, { id }) => {
+      void refreshConsultation(id);
       toast.success('Статус обновлён');
     },
     onError: () => {
@@ -94,8 +112,8 @@ export function useAdminConsultations(filters?: ConsultationFilters) {
       if (error) throw error;
       return data;
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['admin-consultations'] });
+    onSuccess: (_data, { id }) => {
+      void refreshConsultation(id);
       toast.success('Заметка сохранена');
     },
     onError: () => {
@@ -111,6 +129,7 @@ export function useAdminConsultations(filters?: ConsultationFilters) {
   return {
     consultations,
     isLoading,
+    isError,
     refetch,
     updateStatus,
     updateNotes,

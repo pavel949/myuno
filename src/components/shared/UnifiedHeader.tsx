@@ -1,5 +1,4 @@
 import React, { memo, ReactNode } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { Search } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { BackButton } from '@/components/uno/BackButton';
@@ -13,9 +12,13 @@ import {
 
 interface UnifiedHeaderProps {
   title: string;
+  /** The page owns an H1 when it renders an entry masthead. */
+  hideHeading?: boolean;
   subtitle?: string;
   badge?: ReactNode;
   showBack?: boolean;
+  /** A marketplace masthead already owns navigation and the page title. */
+  compactOverview?: boolean;
   fallbackPath?: string;
   onBack?: () => void;
   searchPlaceholder?: string;
@@ -32,9 +35,11 @@ interface UnifiedHeaderProps {
 
 export const UnifiedHeader = memo(function UnifiedHeader({
   title,
+  hideHeading = false,
   subtitle,
   badge,
   showBack = true,
+  compactOverview = false,
   fallbackPath = '/',
   onBack,
   searchPlaceholder = 'Search...',
@@ -47,37 +52,27 @@ export const UnifiedHeader = memo(function UnifiedHeader({
   className,
   containerClassName,
 }: UnifiedHeaderProps) {
-  const navigate = useNavigate();
-
   const isSearchInteractive = !!onSearchChange;
   const isSearchClickable = !!onSearchClick && !isSearchInteractive;
   const shouldBindSearchValue = isSearchInteractive || isSearchClickable;
 
   return (
     <div className={cn(ECOSYSTEM_STICKY_SURFACE, className)}>
-      <div className={cn(ECOSYSTEM_PAGE_CONTAINER, "py-2.5", containerClassName)}>
-        {/* Top row: back, title, badge, right action */}
-        <div className="flex items-center gap-3 mb-2">
-          {showBack && (
-            <BackButton fallbackPath={fallbackPath} onClick={onBack} variant="ghost" size="sm" />
-          )}
-          
+      <div data-marketplace-toolbar={compactOverview ? '' : undefined}
+        className={cn(ECOSYSTEM_PAGE_CONTAINER, 'grid min-w-0 grid-cols-[minmax(0,1fr)_auto] items-center gap-x-2', compactOverview ? 'py-3' : 'gap-y-2 py-2.5', containerClassName)}>
+        {!compactOverview && <div className="col-start-1 row-start-1 flex min-w-0 items-center gap-3">
+          {showBack && <BackButton fallbackPath={fallbackPath} onClick={onBack} variant="ghost" size="sm" />}
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2">
-              <h1 className={ECOSYSTEM_HEADER_TITLE}>{title}</h1>
+              {!hideHeading && <h1 className={ECOSYSTEM_HEADER_TITLE}>{title}</h1>}
               {badge}
             </div>
-            {subtitle && (
-              <p className={ECOSYSTEM_HEADER_SUBTITLE}>{subtitle}</p>
-            )}
+            {!hideHeading && subtitle && <p className={ECOSYSTEM_HEADER_SUBTITLE}>{subtitle}</p>}
           </div>
-          
-          {rightAction}
-        </div>
-        
-        {/* Search row */}
-        {(isSearchInteractive || isSearchClickable) && <div className="relative">
-          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4.5 w-4.5 text-muted-foreground pointer-events-none" />
+        </div>}
+        {/* Preserve the mounted input when its first keystroke switches from overview to results. */}
+        {(isSearchInteractive || isSearchClickable) && <div className={cn('relative min-w-0', compactOverview ? 'col-start-1 row-start-1' : 'col-span-2 row-start-2')}>
+          <Search aria-hidden="true" className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4.5 w-4.5 text-muted-foreground pointer-events-none" />
           <Input
             aria-label={searchPlaceholder}
             type="search"
@@ -86,19 +81,15 @@ export const UnifiedHeader = memo(function UnifiedHeader({
             onChange={isSearchInteractive ? (e) => onSearchChange(e.target.value) : undefined}
             onClick={isSearchClickable ? onSearchClick : undefined}
             readOnly={isSearchClickable}
-            className={cn(
-              "ux-search-control pl-10 pr-4 text-sm",
-              isSearchClickable && "cursor-pointer"
-            )}
+            className={cn("ux-search-control pl-10 pr-4 text-sm", isSearchClickable && "cursor-pointer")}
           />
-          
-          {/* Search results dropdown */}
           {isSearching && searchResults && (
             <div className="absolute top-full left-0 right-0 mt-2 bg-card border border-border rounded-none [box-shadow:var(--shadow-elevation-4)] z-50 overflow-hidden max-h-[60vh] overflow-y-auto">
               {searchResults}
             </div>
           )}
         </div>}
+        {rightAction && <div className="col-start-2 row-start-1 justify-self-end">{rightAction}</div>}
       </div>
     </div>
   );

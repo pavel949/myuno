@@ -24,8 +24,8 @@ const EXISTING_ADMIN_PATHS = `
 
 describe('task-first platform navigation', () => {
   it('foregrounds the same five destinations in the sidebar and mobile bar', () => {
-    expect(ADMIN_NAV.map(item => item.labelEn)).toEqual(['Today', 'Orders', 'Review', 'Catalog', 'Participants']);
-    expect(SIDEBAR_NAV.admin[0].items.map(item => item.labelEn)).toEqual(['Today', 'Requests & orders', 'Review', 'Catalog', 'Participants']);
+    expect(ADMIN_NAV.map(item => item.labelEn)).toEqual(['Today', 'Inbox', 'Orders', 'Catalog', 'Participants']);
+    expect(SIDEBAR_NAV.admin[0].items.map(item => item.labelEn)).toEqual(['Today', 'Inbox', 'Orders', 'Catalog', 'Participants']);
     expect(SIDEBAR_NAV.admin[0].items.map(item => item.path)).toEqual(ADMIN_NAV.map(item => item.path));
     expect(SIDEBAR_NAV.admin[0].defaultOpen).toBe(true);
     for (const item of ADMIN_NAV) {
@@ -40,8 +40,15 @@ describe('task-first platform navigation', () => {
     expect(new Set(paths).size).toBe(paths.length);
     // Duplicate water editor is hidden from the rail, not removed: legacy action=new survives.
     expect(readFileSync('src/components/layout/routes/adminRoutes.tsx','utf8')).toContain('path="/admin/activities" element={<Pages.AdminActivities />}');
-    expect(SIDEBAR_NAV.admin[1].items.map(item => item.path)).toEqual(['/admin/finance', '/admin/settings']);
-    expect(SIDEBAR_NAV.admin.slice(2).every(group => !group.defaultOpen)).toBe(true);
+    expect(SIDEBAR_NAV.admin[0].items.find(item => item.path === '/admin/inbox')?.badgeKey).toBeUndefined();
+    const groupFor = (path: string) => SIDEBAR_NAV.admin.find(group => group.items.some(item => item.path === path))!;
+    expect(groupFor('/admin/finance').labelEn).toBe('Finance');
+    expect(groupFor('/admin/settings').labelEn).toBe('Settings');
+    expect(groupFor('/admin/review').labelEn).toBe('Catalog review');
+    expect(groupFor('/admin/review').items.find(i => i.path === '/admin/review')?.badgeKey).toBe('pendingContent');
+    expect(groupFor('/admin/crm').labelEn).toBe('Participants & acquisition');
+    expect(groupFor('/admin/crm').items.find(i => i.path === '/admin/crm')?.labelEn).toBe('Partner and owner acquisition');
+    expect(SIDEBAR_NAV.admin.slice(3).every(group => !group.defaultOpen)).toBe(true);
     expect(SIDEBAR_NAV.admin.every(group => group.labelTh)).toBe(true);
     const verticals = SIDEBAR_NAV.admin.find(group => group.labelEn === 'Verticals')!;
     expect(verticals.items.map(item => item.labelRu)).toEqual([...verticals.items.map(item => item.labelRu)].sort((a, b) => a.localeCompare(b, 'ru')));
@@ -57,7 +64,9 @@ describe('task-first platform navigation', () => {
   it('selects Today only at the exact root and never alongside another daily destination', () => {
     expect(getActiveBottomBarItem('admin', '/admin')?.labelEn).toBe('Today');
     for (const [path, label] of [
-      ['/admin/operations', 'Orders'], ['/admin/review', 'Review'],
+      ['/admin/operations', 'Orders'], ['/admin/review', 'Catalog'],
+      ['/admin/inbox', 'Inbox'], ['/admin/consultations', 'Inbox'], ['/admin/nb-leads', 'Inbox'],
+      ['/admin/crm', 'Participants'],
       ['/admin/catalog', 'Catalog'], ['/admin/users/synthetic', 'Participants'],
     ]) {
       expect(getActiveBottomBarItem('admin', path)?.labelEn).toBe(label);

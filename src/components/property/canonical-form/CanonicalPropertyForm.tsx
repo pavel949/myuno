@@ -539,7 +539,7 @@ export function CanonicalPropertyForm({
       <Tabs value={activeTab} onValueChange={setActiveTab} className="min-w-0">
         {/* Sticky tab bar — full width, bold labels */}
         <div className="sticky top-0 z-20 bg-background border-b border-border mb-6">
-          <TabsList aria-label={isRu ? 'Разделы объекта' : 'Property sections'} className="flex h-auto justify-start gap-0 overflow-x-auto rounded-none border-0 bg-transparent p-0 shadow-none scrollbar-none -mb-px">
+          <TabsList aria-label={isRu ? 'Разделы объекта' : 'Property sections'} className="flex h-auto justify-start gap-0 overflow-x-auto rounded-none border-0 bg-transparent p-0 shadow-none -mb-px">
             {tabs.map((tab) => {
               const status = getTabStatus(tab.id);
               const isActive = activeTab === tab.id;
@@ -549,14 +549,14 @@ export function CanonicalPropertyForm({
                   value={tab.id}
                   aria-label={isRu ? tab.labelRu : tab.labelEn}
                   className={cn(
-                    "relative flex flex-none items-center gap-2 overflow-visible px-4 py-3.5 text-sm font-medium whitespace-nowrap transition-colors border-b-2 -mb-px data-[state=active]:shadow-none",
+                    "relative flex flex-none items-center gap-2 overflow-visible px-3 py-3 text-sm font-medium whitespace-nowrap transition-colors border-b-2 -mb-px data-[state=active]:shadow-none",
                     isActive
                       ? "border-primary text-primary"
                       : "border-transparent text-muted-foreground hover:text-foreground hover:border-border"
                   )}
                 >
                   <tab.icon className={cn("h-4 w-4 shrink-0", isActive ? "text-primary" : "text-muted-foreground")} />
-                  <span className="hidden sm:inline">{isRu ? tab.labelRu : tab.labelEn}</span>
+                  <span className="inline">{isRu ? tab.labelRu : tab.labelEn}</span>
                   {/* Completion indicator */}
                   {status === 'complete' && !isActive && (
                     <Check className="h-3 w-3 text-success shrink-0" />

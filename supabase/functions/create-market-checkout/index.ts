@@ -12,7 +12,7 @@ Deno.serve(
     async build(raw, user, origin, supabaseAdmin) {
       const {
         items = [],
-        delivery_fee = 0,
+        delivery_fee: clientDeliveryFee = 0,
         total_amount = 0,
         currency = "THB",
         recipient_name,
@@ -34,6 +34,32 @@ Deno.serve(
         (items as Array<{ id: string; price: number }>).map((i) => ({ id: i.id, price: i.price })),
         "create-market-checkout",
       );
+
+      // Server-authoritative delivery charge: never below the configured fee.
+      const subtotalServer = (items as Array<{ price: number; quantity: number }>)
+        .reduce((sum, it) => sum + Number(it.price) * Number(it.quantity), 0);
+      let minimumFee = 0;
+      if (delivery_type === "international") {
+        const { data: zone } = await supabaseAdmin
+          .from("marketplace_international_shipping")
+          .select("zone_code, base_fee, is_active")
+          .eq("zone_code", shipping_zone ?? "")
+          .eq("is_active", true)
+          .maybeSingle();
+        if (!zone) throw new Error("Unknown shipping zone");
+        minimumFee = Number(zone.base_fee) || 0;
+      } else {
+        const { data: zones } = await supabaseAdmin
+          .from("marketplace_delivery_settings")
+          .select("base_fee, free_delivery_threshold, is_default, is_active")
+          .eq("is_active", true);
+        const list = (zones ?? []) as Array<{ base_fee: number; free_delivery_threshold: number | null; is_default: boolean }>;
+        const def = list.find((z) => z.is_default) ?? list[0];
+        if (!def) minimumFee = 100;
+        else if (def.free_delivery_threshold && subtotalServer >= Number(def.free_delivery_threshold)) minimumFee = 0;
+        else minimumFee = Number(def.base_fee) || 0;
+      }
+      const delivery_fee = Math.max(Number(clientDeliveryFee) || 0, minimumFee);
 
       const cur = String(currency).toLowerCase();
       const deliveryName = delivery_type === "international"

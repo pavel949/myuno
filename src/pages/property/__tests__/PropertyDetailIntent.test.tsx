@@ -8,6 +8,10 @@ import { publicJourneyState } from '@/lib/real-estate/publicJourney';
 import { CompareProvider } from '@/components/property/PropertyCompare';
 import { propertyDetailHref, propertyDetailMode, propertySaleAskingPrice } from '@/lib/real-estate/propertyDetailIntent';
 const state = vi.hoisted(() => ({ property: { id: 'unit', currency: 'THB' as string | null, sale_currency: undefined as string | undefined, price_period: undefined as string | undefined, price_per_month: null as number | null, price_per_year: null as number | null, is_verified: false, district: 'Bang Tao', rating: 0, project: { id: 'complex', name_en: 'Complex', name_ru: '' }, title_en: 'Dual home', title_ru: 'Квартира', listing_type: 'rent', listing_modes: ['rent','sale'], is_for_sale: true, sale_price: 5000000 as number | null, price: 2000, price_per_night: 2000, property_type: 'condo', tenancy_modes: [] as string[], images: [], amenities: [], rentalTerms: { manager_name: undefined as string | undefined, price_per_night: 2000 as number | undefined, deposit_amount: 1000, included_services: [], extra_services: [] } } }));
+vi.mock('@/components/property/PropertyMarketEnquiry', () => ({
+  PropertyMarketEnquiry: ({ propertyId, intent }: { propertyId: string; intent: { mode: string; tenancy?: string } }) =>
+    <output data-testid="internal-enquiry">{JSON.stringify({ propertyId, ...intent })}</output>,
+}));
 vi.mock('@/hooks/useProperties', () => ({ usePropertyWithRentalTerms: () => ({ data: state.property, isLoading: false }) }));
 vi.mock('@/contexts/LanguageContext', () => ({ useLanguage: () => ({ language: 'en' }) }));
 vi.mock('@/contexts/CurrencyContext', () => ({ useCurrency: () => ({ formatPrice: (v: number) => String(v) }) }));
@@ -54,13 +58,15 @@ describe('actual property detail purchase/rental intent', () => {
     state.property.tenancy_modes = ['medium'];
     mount('rent');
     expect(screen.getByTestId('mobile-intent')).toHaveAttribute('data-long-stay', 'true');
-    expect(screen.getByRole('button', { name: 'Request rental' })).toBeVisible();
+    fireEvent.click(screen.getByRole('button', { name: 'Request rental' }));
+    expect(screen.getByTestId('internal-enquiry')).toHaveTextContent('{"propertyId":"unit","mode":"rent","tenancy":"medium"}');
     expect(screen.queryByRole('button', { name: 'Book rental' })).toBeNull();
   });
   it.each(['medium', 'long'])('keeps supported %s intent on a dual rental offer', tenancy => {
     state.property.tenancy_modes = ['short', tenancy];
     mount(`rent&tenancy=${tenancy}`);
-    expect(screen.getByRole('button', { name: 'Request rental' })).toBeVisible();
+    fireEvent.click(screen.getByRole('button', { name: 'Request rental' }));
+    expect(screen.getByTestId('internal-enquiry')).toHaveTextContent(JSON.stringify({ propertyId: 'unit', mode: 'rent', tenancy }));
     expect(screen.queryByRole('button', { name: 'Book rental' })).toBeNull();
     expect(propertyDetailHref('unit', 'rent', `?tenancy=${tenancy}`)).toContain(`tenancy=${tenancy}`);
   });
@@ -129,6 +135,21 @@ describe('actual property detail purchase/rental intent', () => {
   });
   it('keeps a dual-listed unit in the rental CTA from Rent', () => { mount('rent'); expect(screen.getByRole('button', { name: 'Book rental' })).toBeInTheDocument(); expect(screen.queryByRole('button', { name: 'Request consultation' })).not.toBeInTheDocument(); expect(screen.getByTestId('mobile-intent')).toHaveTextContent('rent'); expect(screen.getByTestId('complex-mode')).toHaveTextContent('rent'); });
   it('shows its sale CTA from Buy', () => { mount('buy'); expect(screen.getByRole('button', { name: 'Request consultation' })).toBeInTheDocument(); expect(screen.queryByRole('button', { name: 'Book rental' })).not.toBeInTheDocument(); expect(screen.getByTestId('mobile-intent')).toHaveTextContent('buy'); expect(screen.getByTestId('complex-mode')).toHaveTextContent('buy'); });
+  it('opens purchase enquiry for the exact visible listing and clears it on mode navigation', () => {
+    mount('buy&tenancy=long');
+    fireEvent.click(screen.getByRole('button', { name: 'Request consultation' }));
+    expect(screen.getByTestId('internal-enquiry')).toHaveTextContent('{"propertyId":"unit","mode":"buy"}');
+    fireEvent.click(screen.getByRole('button', { name: 'New URL' }));
+    expect(screen.queryByTestId('internal-enquiry')).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Book rental' })).toBeVisible();
+  });
+  it('does not infer a medium/long stay from a missing short-stay quote', () => {
+    state.property.tenancy_modes = ['short'];
+    state.property.currency = null;
+    mount('rent&tenancy=long');
+    fireEvent.click(screen.getByRole('button', { name: 'Request rental' }));
+    expect(screen.queryByTestId('internal-enquiry')).not.toBeInTheDocument();
+  });
   it('rejects a rental URL intent on a sale-only unit', () => { state.property.listing_type = 'sale'; state.property.listing_modes = ['sale']; mount('rent'); expect(screen.getByRole('button', { name: 'Request consultation' })).toBeInTheDocument(); });
   it('rejects a purchase intent on a rental-only unit', () => { state.property.is_for_sale = false; state.property.listing_modes = ['rent']; mount('buy'); expect(screen.getByRole('button', { name: 'Book rental' })).toBeInTheDocument(); });
   it('keeps inquiry for an eligible legacy sale without displaying the rental amount as its asking price', () => { state.property.sale_price = null; mount('buy'); expect(screen.getByRole('button', { name: 'Request consultation' })).toBeInTheDocument(); expect(screen.getAllByText('Price on request')).toHaveLength(2); });

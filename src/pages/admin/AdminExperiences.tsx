@@ -2,9 +2,10 @@ import React, { useState, useMemo } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useAdminExperienceCategories } from '@/hooks/useExperienceCategories';
 import { useAdminCheck } from '@/hooks/useAdmin';
 import { useAdminExperiences, AdminExperience } from '@/hooks/useAdminExperiences';
-import { ExperienceType, EXPERIENCE_CATEGORIES } from '@/hooks/useExperiences';
+import { ExperienceType } from '@/hooks/useExperiences';
 import { experienceDifficultyOptions } from '@/components/filters';
 
 import { PageContainer } from '@/components/uno/PageContainer';
@@ -58,7 +59,7 @@ type ExperiencePayload = {
   description_ru: string | null;
   category: string;
   difficulty: string;
-  duration_minutes: number;
+  duration_minutes: number | null;
   price: number | null;
   price_per: string;
   currency: string;
@@ -71,6 +72,7 @@ type ExperiencePayload = {
   equipment_included: boolean;
   is_certified: boolean;
   is_active: boolean;
+  status: string;
   is_featured: boolean;
   external_link: string | null;
   booking_url: string | null;
@@ -99,6 +101,7 @@ const getEmptyFormData = (defaultCurrency = 'USD') => ({
   equipment_included: false,
   is_certified: false,
   is_active: true,
+  status: 'draft',
   is_featured: false,
   external_link: '',
   booking_url: '',
@@ -113,6 +116,7 @@ export default function AdminExperiences() {
   const { code: cityCurrencyCode, symbol: curSym } = useCityCurrency();
   const { isAdmin, isLoading: adminLoading } = useAdminCheck();
   const isRu = language === 'ru';
+  const categoryCatalogue = useAdminExperienceCategories();
   const importMedia = useImportExperienceMedia();
 
   const [filterProviderId, setFilterProviderId] = useState<string>('');
@@ -161,7 +165,7 @@ export default function AdminExperiences() {
       description_ru: item.description_ru || '',
       category: item.category || 'islands',
       difficulty: item.difficulty || 'easy',
-      duration_minutes: String(item.duration_minutes || 240),
+      duration_minutes: item.duration_minutes == null ? '' : String(item.duration_minutes),
       price: String(item.price || ''),
       price_per: item.price_per || 'person',
       currency: item.currency || cityCurrencyCode,
@@ -174,6 +178,7 @@ export default function AdminExperiences() {
       equipment_included: item.equipment_included || false,
       is_certified: item.is_certified || false,
       is_active: item.is_active ?? true,
+      status: item.status || 'draft',
       is_featured: item.is_featured || false,
       external_link: item.external_link || '',
       booking_url: (item as AdminExperience & ExperienceExt).booking_url || '',
@@ -198,7 +203,7 @@ export default function AdminExperiences() {
         description_ru: formData.description_ru.trim() || null,
         category: formData.category,
         difficulty: formData.difficulty,
-        duration_minutes: parseInt(formData.duration_minutes) || 240,
+        duration_minutes: formData.duration_minutes.trim() ? parseInt(formData.duration_minutes) || null : null,
         price: parseFloat(formData.price) || null,
         price_per: formData.price_per,
         currency: formData.currency,
@@ -211,6 +216,7 @@ export default function AdminExperiences() {
         equipment_included: formData.equipment_included,
         is_certified: formData.is_certified,
         is_active: formData.is_active,
+        status: formData.status,
         is_featured: formData.is_featured,
         external_link: formData.external_link || null,
         booking_url: formData.booking_url || null,
@@ -492,16 +498,29 @@ export default function AdminExperiences() {
                     </Select>
                   </div>
                   <div>
-                    <Label>Category</Label>
+                    <Label>{isRu ? 'Категория' : 'Category'}</Label>
+                    {categoryCatalogue.error && <p role="alert" className="text-sm text-destructive">{isRu ? 'Категории не загрузились. Сохранённая категория не изменена.' : 'Categories could not load. The saved category is unchanged.'}</p>}
                     <Select value={formData.category} onValueChange={(v) => setFormData(prev => ({ ...prev, category: v }))}>
                       <SelectTrigger><SelectValue /></SelectTrigger>
                       <SelectContent>
-                        {EXPERIENCE_CATEGORIES.filter(c => c.id !== 'all').map(cat => (
-                          <SelectItem key={cat.id} value={cat.id}>{cat.icon} {cat.labelEn}</SelectItem>
+                        {categoryCatalogue.categories.map(cat => (
+                          <SelectItem key={cat.id} value={cat.slug}>{cat.icon} {isRu ? cat.name_ru : cat.name_en}{!cat.is_active ? (isRu ? ' · скрыта' : ' · hidden') : ''}</SelectItem>
                         ))}
+                        {formData.category && !categoryCatalogue.categories.some(cat => cat.slug === formData.category) && <SelectItem value={formData.category}>{formData.category}</SelectItem>}
                       </SelectContent>
                     </Select>
                   </div>
+                </div>
+
+                <div>
+                  <Label htmlFor="experience-publication">{isRu ? 'Публикация' : 'Publication'}</Label>
+                  <select id="experience-publication" className="flex h-10 w-full border border-input bg-background px-3 text-sm"
+                    value={formData.status} onChange={e => setFormData(prev => ({ ...prev, status: e.target.value }))}>
+                    <option value="draft">{isRu ? 'Черновик' : 'Draft'}</option>
+                    <option value="published">{isRu ? 'Опубликовано' : 'Published'}</option>
+                    {!['draft', 'published'].includes(formData.status) && <option value={formData.status}>{formData.status}</option>}
+                  </select>
+                  <p className="mt-1 text-xs text-muted-foreground">{isRu ? 'Публикуйте только проверенные предложения. Для показа также нужны активность и одобрение.' : 'Publish only verified offers. Visibility also requires active and approved status.'}</p>
                 </div>
 
                 <div><Label>Provider</Label><ProviderSelector value={formData.provider_id} onChange={(v) => setFormData(prev => ({ ...prev, provider_id: v }))} /></div>

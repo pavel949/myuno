@@ -1,10 +1,14 @@
+import { ProjectInstallmentDraft } from '@/components/admin/projects/ProjectInstallmentDraft';
+import { ProjectGalleryOrder } from '@/components/property/ProjectGalleryOrder';
+import { projectGalleryField, publicProjectMediaUrl } from '@/lib/real-estate/projectEditorialMedia';
 import { assertAdminRows } from '@/lib/assertAdminRows';
 import { pickLang } from '@/lib/i18n/pickLang';
 import React, { useState, useMemo } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAdminCheck } from '@/hooks/useAdmin';
 import { 
-  useAdminPropertyProjects, 
+  invalidateProjectCatalog,
+  useAdminPropertyProjects,
   useCreatePropertyProject, 
   useUpdatePropertyProject,
   PropertyProject,
@@ -126,8 +130,7 @@ export default function AdminProjects() {
           ? `AI обогатил ${data.enriched} из ${data.total} проектов` 
           : `AI enriched ${data.enriched} of ${data.total} projects`
       );
-      queryClient.invalidateQueries({ queryKey: ['admin-property-projects'] });
-      queryClient.invalidateQueries({ queryKey: ['offplan-projects'] });
+      void invalidateProjectCatalog(queryClient);
     } catch (err) {
       console.error('Enrich error:', err);
       toast.error(isRu ? 'Ошибка обогащения данных' : 'Enrichment failed');
@@ -186,9 +189,9 @@ export default function AdminProjects() {
         .in('id', Array.from(selectedIds))
         .select('id,developer_id,needs_review');
       if (error) throw error;
+      if (data?.length) void invalidateProjectCatalog(queryClient, data.map(({ id }) => id));
       assertAdminRows(data, selectedIds, row => row.developer_id === bulkDeveloperId && row.needs_review === false);
       toast.success(isRu ? `Назначен застройщик: ${selectedIds.size}` : `Developer assigned: ${selectedIds.size}`);
-      queryClient.invalidateQueries({ queryKey: ['admin-property-projects'] });
       clearSelection();
       setBulkDeveloperId('');
     } catch (e) {
@@ -208,9 +211,9 @@ export default function AdminProjects() {
         .in('id', Array.from(selectedIds))
         .select('id,is_approved,needs_review');
       if (error) throw error;
+      if (data?.length) void invalidateProjectCatalog(queryClient, data.map(({ id }) => id));
       assertAdminRows(data, selectedIds, row => row.is_approved === true && row.needs_review === false);
       toast.success(isRu ? `Одобрено: ${selectedIds.size}` : `Approved: ${selectedIds.size}`);
-      queryClient.invalidateQueries({ queryKey: ['admin-property-projects'] });
       clearSelection();
     } catch (e) {
       toast.error(e instanceof Error ? e.message : 'Bulk approve failed');
@@ -290,6 +293,7 @@ export default function AdminProjects() {
       total_units: project.total_units,
       cover_image: project.cover_image || '',
       images: project.images || [],
+      gallery_urls: project.gallery_urls,
       video_url: project.video_url || '',
       amenities: project.amenities || [],
       infrastructure: project.infrastructure || [],
@@ -343,12 +347,22 @@ export default function AdminProjects() {
       return;
     }
 
+    if (formData.video_url?.trim() && !publicProjectMediaUrl(formData.video_url, 'video') && formData.video_url !== editingProject?.video_url) {
+      toast.error(pickLang(language, { ru: 'Укажите публичную ссылку YouTube или Vimeo', en: 'Enter a public YouTube or Vimeo link', th: 'ใส่ลิงก์สาธารณะของ YouTube หรือ Vimeo' }));
+      return;
+    }
     const payload = {
       ...formData,
       ...juristicData,
       cam_fee_per_sqm: juristicData.cam_fee_per_sqm ? parseFloat(juristicData.cam_fee_per_sqm) : null,
       cam_payment_day: juristicData.cam_payment_day ? parseInt(juristicData.cam_payment_day) : null,
     };
+    if (editingProject) {
+      if ((payload.cover_image ?? '') === (editingProject.cover_image ?? '')) delete payload.cover_image;
+      if ((payload.video_url ?? '') === (editingProject.video_url ?? '')) delete payload.video_url;
+      if (JSON.stringify(payload.images ?? []) === JSON.stringify(editingProject.images ?? [])) delete payload.images;
+      if (JSON.stringify(payload.gallery_urls ?? null) === JSON.stringify(editingProject.gallery_urls ?? null)) delete payload.gallery_urls;
+    }
 
     try {
       if (editingProject) {
@@ -387,6 +401,15 @@ export default function AdminProjects() {
 
   const updateFormField = (field: string, value: unknown) => {
     setFormData(prev => ({ ...prev, [field]: value }));
+  };
+
+  const galleryField = projectGalleryField(editingProject ?? {});
+  const gallery = formData[galleryField] ?? [];
+  const updateGallery = (images: string[]) => {
+    setFormData(prev => ({
+      ...prev,
+      [galleryField]: images,
+    }));
   };
 
   if (adminLoading) {
@@ -440,7 +463,7 @@ export default function AdminProjects() {
         />
 
         {/* Search + Moderation filter */}
-        <div className="mb-4 space-y-3">
+        <div className="mb-5 space-y-4 border bg-card p-4 sm:p-5">
           <div className="relative max-w-md">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
@@ -455,9 +478,9 @@ export default function AdminProjects() {
             <legend className="mb-2 text-sm font-medium">{pickLang(language, { en: "Review queue", ru: "Очередь проверки", th: "คิวตรวจสอบ" })}</legend>
             <div className="flex gap-2 flex-wrap">
               {PROJECT_REVIEW_FILTERS.map(review => (
-                <Button key={review} size="sm" className="min-h-11" variant={moderationFilter === review ? 'default' : 'outline'}
+                <Button key={review} size="sm" className="min-h-11 whitespace-normal px-3 text-left leading-snug" variant={moderationFilter === review ? 'default' : 'outline'}
                   aria-pressed={moderationFilter === review} onClick={() => setFilters({ filter: review })}>
-                  {reviewLabels[review]}{' '}<span className="ml-2 font-mono">{reviewCount(review)}</span>
+                  {reviewLabels[review]}{' '}<span className="tabular-nums">{reviewCount(review)}</span>
                 </Button>
               ))}
             </div>
@@ -489,9 +512,9 @@ export default function AdminProjects() {
               <span className="text-sm font-medium">
                 {isRu ? `Выбрано: ${selectedIds.size}` : `Selected: ${selectedIds.size}`}
               </span>
-              <div className="flex items-center gap-2 flex-1 min-w-[260px]">
+              <div className="flex w-full min-w-0 flex-wrap items-center gap-2 sm:flex-1">
                 <Select value={bulkDeveloperId} onValueChange={setBulkDeveloperId}>
-                  <SelectTrigger className="h-9 w-[260px]">
+                  <SelectTrigger className="min-w-0 flex-1">
                     <SelectValue placeholder={isRu ? 'Назначить застройщика…' : 'Assign developer…'} />
                   </SelectTrigger>
                   <SelectContent>
@@ -555,7 +578,7 @@ export default function AdminProjects() {
                   <div className="absolute top-2 left-2 z-10" onClick={(e) => e.stopPropagation()}>
                     <Checkbox
                       checked={isSelected}
-                      aria-label={`${pickLang(language, { en: "Select", ru: "Выбрать", th: "เลือก" })} ${isRu ? project.name_ru : project.name_en}`}
+                      aria-label={`${pickLang(language, { en: "Select", ru: "Выбрать", th: "เลือก" })} ${(isRu ? project.name_ru || project.name_en : project.name_en || project.name_ru)}`}
                       onCheckedChange={() => toggleSelect(project.id)}
                       className="bg-background/80"
                     />
@@ -589,13 +612,13 @@ export default function AdminProjects() {
                 </div>
                 
                 <CardContent className="p-4 cursor-pointer" onClick={() => handleOpenEdit(project)}>
-                  <h3 className="font-semibold truncate">
-                    {isRu ? project.name_ru : project.name_en}
+                  <h3 className="font-display text-lg font-semibold leading-tight [overflow-wrap:anywhere]">
+                    {(isRu ? project.name_ru || project.name_en : project.name_en || project.name_ru)}
                   </h3>
                   
                   {project.address ? (
-                    <p className="text-sm text-muted-foreground flex items-center gap-1 mt-1">
-                      <MapPin className="h-3 w-3" />
+                    <p className="mt-2 flex items-start gap-2 break-words text-sm text-muted-foreground">
+                      <MapPin className="mt-0.5 h-4 w-4 shrink-0" />
                       {project.address}
                     </p>
                   ) : (
@@ -626,14 +649,14 @@ export default function AdminProjects() {
                     )}
                   </div>
                 </CardContent>
-                <div className="px-4 pb-3 flex gap-2 border-t pt-2">
+                <div className="flex flex-wrap gap-2 border-t p-3">
                   <Button asChild size="sm" variant="ghost" className="flex-1" onClick={(e) => e.stopPropagation()}>
                     <Link to={`/admin/newbuilds/projects/${project.id}/documents`}>
                       <FileText className="h-3.5 w-3.5 mr-1" />
                       {isRu ? 'Документы' : 'Documents'}
                     </Link>
                   </Button>
-                  <Button size="sm" variant="ghost" className="flex-1" onClick={(e) => { e.stopPropagation(); handleOpenEdit(project); }}>
+                  <Button size="sm" variant="outline" className="flex-1" onClick={(e) => { e.stopPropagation(); handleOpenEdit(project); }}>
                     <Edit className="h-3.5 w-3.5 mr-1" />
                     {pickLang(language, { en: "Review details", ru: "Проверить", th: "ตรวจสอบข้อมูล" })}
                   </Button>
@@ -646,7 +669,7 @@ export default function AdminProjects() {
         {/* Edit/Create Sheet */}
         <Sheet open={isFormOpen} onOpenChange={setIsFormOpen}>
           <SheetContent className="w-full sm:max-w-2xl overflow-y-auto p-0">
-            <SheetHeader className="p-6 pb-0">
+            <SheetHeader className="px-4 pb-0 pt-5 sm:px-6">
               <SheetTitle className="flex items-center gap-2">
                 <Building2 className="h-5 w-5" />
                 {editingProject 
@@ -656,21 +679,24 @@ export default function AdminProjects() {
               </SheetTitle>
             </SheetHeader>
 
-            <Tabs defaultValue="basic" className="p-6 pt-4">
-              <TabsList className="grid w-full grid-cols-5">
-                <TabsTrigger value="basic">
+            <Tabs defaultValue="basic" className="p-4 sm:p-6">
+              <TabsList className="grid h-auto w-full grid-cols-2 items-stretch sm:grid-cols-3">
+                <TabsTrigger value="basic" className="min-h-11 overflow-visible whitespace-normal px-2 leading-snug [overflow-wrap:anywhere]">
                   {isRu ? 'Основное' : 'Basic'}
                 </TabsTrigger>
-                <TabsTrigger value="units">
+                <TabsTrigger value="units" className="min-h-11 overflow-visible whitespace-normal px-2 leading-snug [overflow-wrap:anywhere]">
                   {isRu ? 'Юниты' : 'Units'}
                 </TabsTrigger>
-                <TabsTrigger value="media">
+                <TabsTrigger value="media" className="min-h-11 overflow-visible whitespace-normal px-2 leading-snug [overflow-wrap:anywhere]">
                   {isRu ? 'Медиа' : 'Media'}
                 </TabsTrigger>
-                <TabsTrigger value="amenities">
+                <TabsTrigger value="amenities" className="min-h-11 overflow-visible whitespace-normal px-2 leading-snug [overflow-wrap:anywhere]">
                   {isRu ? 'Удобства' : 'Amenities'}
                 </TabsTrigger>
-                <TabsTrigger value="juristic">
+                <TabsTrigger value="installments" className="min-h-11 overflow-visible whitespace-normal px-2 leading-snug [overflow-wrap:anywhere]">
+                  {pickLang(language, { en: 'Installments', ru: 'Рассрочка', th: 'ผ่อนชำระ' })}
+                </TabsTrigger>
+                <TabsTrigger value="juristic" className="min-h-11 overflow-visible whitespace-normal px-2 leading-snug [overflow-wrap:anywhere]">
                   {isRu ? 'УК' : 'Mgmt'}
                 </TabsTrigger>
               </TabsList>
@@ -762,8 +788,9 @@ export default function AdminProjects() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label>{isRu ? 'Видео URL' : 'Video URL'}</Label>
+                  <Label htmlFor="project-video-url">{pickLang(language, { ru: 'Ссылка на видео', en: 'Video URL', th: 'ลิงก์วิดีโอ' })}</Label>
                   <Input
+                    id="project-video-url"
                     value={formData.video_url || ''}
                     onChange={(e) => updateFormField('video_url', e.target.value)}
                     placeholder="https://youtube.com/..."
@@ -797,12 +824,21 @@ export default function AdminProjects() {
                 <div className="space-y-2">
                   <Label>{isRu ? 'Галерея' : 'Gallery'}</Label>
                   <AirbnbStyleImageUpload
-                    value={formData.images || []}
-                    onChange={(imgs) => updateFormField('images', imgs)}
+                    value={gallery}
+                    onChange={updateGallery}
                     maxImages={20}
                     folder="projects"
                   />
+                  <ProjectGalleryOrder images={gallery} cover={formData.cover_image} language={language}
+                    onChange={updateGallery} onCover={(image) => updateFormField('cover_image', image)} />
                 </div>
+                {editingProject && (
+                  <Button variant="outline" asChild>
+                    <Link to={`/admin/newbuilds/projects/${editingProject.id}/documents`} target="_blank" rel="noopener noreferrer">
+                      {pickLang(language, { ru: 'Документы и источники (новая вкладка)', en: 'Documents and sources (opens in new tab)', th: 'เอกสารและแหล่งข้อมูล (เปิดในแท็บใหม่)' })}
+                    </Link>
+                  </Button>
+                )}
               </TabsContent>
 
               {/* Amenities Tab */}
@@ -849,6 +885,11 @@ export default function AdminProjects() {
                     {isRu ? 'Через запятую' : 'Comma-separated'}
                   </p>
                 </div>
+              </TabsContent>
+
+              <TabsContent value="installments" className="mt-4 data-[state=inactive]:hidden" forceMount>
+                <ProjectInstallmentDraft key={isFormOpen ? editingProject?.id ?? 'new-project' : 'closed'} language={language}
+                  projectId={editingProject?.id} currentTemplate={editingProject && 'payment_plan_template' in editingProject ? editingProject.payment_plan_template : undefined} />
               </TabsContent>
 
               {/* Juristic / Management Tab */}

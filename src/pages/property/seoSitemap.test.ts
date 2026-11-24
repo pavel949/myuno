@@ -12,7 +12,6 @@ const redirectTargets = [
   '/property/invest',
   '/newbuilds/projects',
   '/newbuilds/developers',
-  '/property/offplan',
 ];
 
 describe('public property SEO contract', () => {
@@ -24,12 +23,14 @@ describe('public property SEO contract', () => {
   });
 
   it('does not publish known redirect targets and keeps canonical replacements unique', () => {
+    const locs = [...sitemap.matchAll(/<loc>([^<]+)<\/loc>/g)].map(match => match[1]);
     for (const target of redirectTargets) {
-      expect(sitemap).not.toContain(`https://www.myuno.app${target}`);
+      expect(locs).not.toContain(`https://www.myuno.app${target}`);
     }
 
-    const locs = [...sitemap.matchAll(/<loc>([^<]+)<\/loc>/g)].map(match => match[1]);
     expect(new Set(locs).size).toBe(locs.length);
     expect(locs).toContain('https://www.myuno.app/property/developers');
+    expect(locs).toContain('https://www.myuno.app/property/offplan');
+    expect(locs).not.toContain('https://www.myuno.app/property/offplan/search');
   });
 });

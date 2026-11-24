@@ -1,0 +1,46 @@
+{
+  "rows": [
+    {
+      "cmd": "ALL",
+      "policyname": "listings_admin_full",
+      "qual": "has_role(auth.uid(), 'admin'::app_role)",
+      "roles": "{authenticated}",
+      "with_check": "has_role(auth.uid(), 'admin'::app_role)"
+    },
+    {
+      "cmd": "DELETE",
+      "policyname": "listings_provider_delete",
+      "qual": "(provider_id IN ( SELECT providers.id\n   FROM providers\n  WHERE (providers.user_id = auth.uid())))",
+      "roles": "{authenticated}",
+      "with_check": null
+    },
+    {
+      "cmd": "INSERT",
+      "policyname": "listings_provider_insert",
+      "qual": null,
+      "roles": "{authenticated}",
+      "with_check": "((provider_id IN ( SELECT providers.id\n   FROM providers\n  WHERE (providers.user_id = auth.uid()))) AND ((is_verified IS NULL) OR (is_verified = false)) AND ((approval_status IS NULL) OR (approval_status = 'pending'::text)))"
+    },
+    {
+      "cmd": "SELECT",
+      "policyname": "listings_provider_select",
+      "qual": "(provider_id IN ( SELECT providers.id\n   FROM providers\n  WHERE (providers.user_id = auth.uid())))",
+      "roles": "{authenticated}",
+      "with_check": null
+    },
+    {
+      "cmd": "UPDATE",
+      "policyname": "listings_provider_update",
+      "qual": "(provider_id IN ( SELECT providers.id\n   FROM providers\n  WHERE (providers.user_id = auth.uid())))",
+      "roles": "{authenticated}",
+      "with_check": "((provider_id IN ( SELECT providers.id\n   FROM providers\n  WHERE (providers.user_id = auth.uid()))) AND ((is_verified IS NULL) OR (is_verified = false) OR (is_verified = ( SELECT listings_1.is_verified\n   FROM listings listings_1\n  WHERE (listings_1.id = listings_1.id)))) AND ((approval_status IS NULL) OR (approval_status = ( SELECT listings_1.approval_status\n   FROM listings listings_1\n  WHERE (listings_1.id = listings_1.id))) OR (approval_status = 'pending'::text)))"
+    },
+    {
+      "cmd": "SELECT",
+      "policyname": "listings_public_read",
+      "qual": "((is_active = true) AND ((approval_status = 'approved'::text) OR (approval_status IS NULL)))",
+      "roles": "{anon,authenticated}",
+      "with_check": null
+    }
+  ]
+}

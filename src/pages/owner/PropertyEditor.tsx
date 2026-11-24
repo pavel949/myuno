@@ -680,17 +680,9 @@ export default function PropertyEditor() {
         title={publishedRevision ? pickLang(language, { en: 'Edit proposed changes', ru: 'Редактировать предлагаемые изменения', th: 'แก้ไขข้อเสนอการเปลี่ยนแปลง' }) : (isRu ? 'Редактировать объект' : 'Edit Property')}
         showBack
         fallbackPath={`/mc/properties/${id}`}
-        subtitle={
-          saveState === 'saving'
-            ? (isRu ? 'Сохранение...' : 'Saving...')
-            : saveState === 'unsaved'
-              ? (isRu ? 'Не сохранено' : 'Unsaved changes')
-              : saveState === 'saved'
-                ? `${isRu ? 'Сохранено' : 'Saved'}${lastSaved ? ` · ${lastSaved.toLocaleTimeString()}` : ''}`
-                : property.title
-        }
+        subtitle={isRu ? property.title_ru || property.title : property.title}
         actions={
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             {property.approval_status === 'approved' && !managedEmployee && (
               <Button
                 variant={property.is_active ? "outline" : "default"}
@@ -711,7 +703,7 @@ export default function PropertyEditor() {
               </Button>
             )}
             {managedEmployee && <Button size="sm" className="whitespace-normal h-auto min-h-11" disabled={isSubmitting} onClick={() => void handleSubmit(true)}>{pickLang(language, { en: 'Submit for review', ru: 'Отправить на проверку', th: 'ส่งตรวจสอบ' })}</Button>}
-            <Button variant="outline" size="sm" onClick={() => setShowPreview(!showPreview)}>
+            <Button variant="outline" size="sm" aria-expanded={showPreview} onClick={() => setShowPreview(!showPreview)}>
               <Eye className="h-4 w-4 mr-1" />
               {showPreview ? (isRu ? 'Скрыть' : 'Hide') : (isRu ? 'Превью' : 'Preview')}
             </Button>
@@ -719,7 +711,7 @@ export default function PropertyEditor() {
         }
       />
 
-      {publishedRevision && <div role="status" className="mb-4 space-y-2 border p-3 text-sm">
+      {publishedRevision && <div role="status" className="mb-4 space-y-2 border border-l-4 border-l-primary bg-card p-4 text-sm">
         <p className="font-medium">{pickLang(language, { en: 'Proposed changes to a published listing', ru: 'Предлагаемые изменения опубликованного объявления', th: 'ข้อเสนอแก้ไขประกาศที่เผยแพร่แล้ว' })}</p>
         <p>{pickLang(language, { en: 'Saving creates a proposal. The published listing keeps its current content until these changes are reviewed and approved.', ru: 'Сохранение создаёт предложение. Опубликованное объявление сохраняет прежние данные, пока изменения не проверят и не одобрят.', th: 'การบันทึกจะสร้างข้อเสนอ ประกาศยังคงแสดงข้อมูลเดิมจนกว่าการแก้ไขจะผ่านการตรวจสอบและอนุมัติ' })}</p>
         {revisionSaveBlocked && <div role="alert" className="space-y-2 text-destructive">
@@ -737,7 +729,7 @@ export default function PropertyEditor() {
 
       {/* Autosave status bar */}
       {saveState !== 'idle' && (
-        <div className={`flex items-center gap-2 text-xs px-1 py-1.5 rounded-none mb-2 ${
+        <div role="status" className={`mb-4 flex items-center gap-2 border bg-card px-3 py-2 text-sm font-medium ${
           saveState === 'saving' ? 'text-muted-foreground' :
           saveState === 'unsaved' ? 'text-warning' :
           saveState === 'saved' ? 'text-success' :
@@ -763,7 +755,7 @@ export default function PropertyEditor() {
         ? "grid gap-8 lg:grid-cols-[minmax(0,1fr),300px] xl:grid-cols-[minmax(0,1fr),340px]" 
         : ""
       } onBlurCapture={handleBlurAutosave}>
-        <div className="min-w-0">
+        <div className={showPreview ? "order-2 min-w-0 lg:order-none" : "min-w-0"}>
           {formData && (
             <CanonicalPropertyForm
               mode="owner"
@@ -788,7 +780,7 @@ export default function PropertyEditor() {
 
         {/* Live Preview Sidebar */}
         {showPreview && formData && (
-          <div className="hidden lg:block sticky top-20 h-fit">
+          <div className="order-1 min-w-0 lg:sticky lg:top-20 lg:order-none lg:h-fit">
             <div className="text-sm font-medium mb-3 text-muted-foreground">
               {isRu ? 'Как будет выглядеть в поиске:' : 'Search result preview:'}
             </div>

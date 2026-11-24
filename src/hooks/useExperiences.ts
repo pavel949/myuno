@@ -1,6 +1,7 @@
 import { useMemo, useCallback } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { isClosedExperience } from '@/lib/taxonomies/experienceDiscovery';
 import { CACHE_PROFILES } from '@/lib/queryConfig';
 import type { Json } from '@/integrations/supabase/types';
 
@@ -74,6 +75,9 @@ export interface Experience {
   slug: string | null;
   status: string | null;
   booking_model: BookingModel;
+  catalog_kind?: string | null;
+  location_type?: string | null;
+  operating_status?: string | null;
 }
 
 // ====== CATEGORIES ======
@@ -182,6 +186,9 @@ const transformExperience = (raw: Record<string, unknown>): Experience => {
     exclusions: parseJsonArray(get('exclusions') as Json) as string[],
     slug: raw.slug as string | null,
     status: get('status') as string | null,
+    catalog_kind: get('catalog_kind') as string | null,
+    location_type: get('location_type') as string | null,
+    operating_status: get('operating_status') as string | null,
     booking_model: (get('booking_model') as BookingModel) || 'group',
   };
 };
@@ -194,7 +201,7 @@ const fetchExperiences = async (options: UseExperiencesOptions): Promise<Experie
     .eq('vertical', 'experience')
     .eq('is_active', true);
 
-  if (options.publishedOnly) query = query.eq('attributes->>status', 'published');
+  if (options.publishedOnly) query = query.eq('approval_status', 'approved').eq('attributes->>status', 'published');
 
   // Filter by type via attributes
   if (options.type && options.type !== 'all') {
@@ -224,7 +231,8 @@ const fetchExperiences = async (options: UseExperiencesOptions): Promise<Experie
 
   const { data, error } = await query;
   if (error) throw error;
-  return (data || []).map((item) => transformExperience(item as Record<string, unknown>));
+  const rows = (data || []).map((item) => transformExperience(item as Record<string, unknown>));
+  return options.publishedOnly ? rows.filter(item => !isClosedExperience(item.operating_status)) : rows;
 };
 
 const fetchExperienceById = async (id: string): Promise<Experience | null> => {
@@ -233,10 +241,14 @@ const fetchExperienceById = async (id: string): Promise<Experience | null> => {
     .select('*')
     .eq('id', id)
     .eq('vertical', 'experience')
+    .eq('is_active', true)
+    .eq('approval_status', 'approved')
+    .eq('attributes->>status', 'published')
     .maybeSingle();
 
   if (error) throw error;
-  return data ? transformExperience(data as Record<string, unknown>) : null;
+  const experience = data ? transformExperience(data as Record<string, unknown>) : null;
+  return experience && !isClosedExperience(experience.operating_status) ? experience : null;
 };
 
 // ====== HOOKS ======

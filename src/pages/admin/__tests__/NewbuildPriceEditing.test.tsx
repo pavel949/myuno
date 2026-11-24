@@ -8,7 +8,8 @@ import OffplanDetail from '@/pages/property/OffplanDetail';
 import { OffplanProjectCard } from '@/components/property/OffplanProjectCard';
 import { HomeNewbuildsPreview } from '@/components/home/HomeDiscoveryPreview';
 import { useOffplanProjects } from '@/hooks/useOffplanProjects';
-const state = vi.hoisted(() => ({ row: {} as Record<string, unknown>, writes: [] as Array<Record<string, unknown>> }));
+const state = vi.hoisted(() => ({ row: {} as Record<string, unknown>, writes: [] as Array<Record<string, unknown>>, suppressWrite: false, success: vi.fn(), error: vi.fn() }));
+vi.mock('sonner', () => ({ toast: { success: state.success, error: state.error } }));
 vi.mock('@/contexts/LanguageContext', () => ({ useLanguage: () => ({ language: 'ru' }) }));
 vi.mock('@/contexts/CurrencyContext', () => ({ useCurrency: () => ({ formatPrice: () => 'UNEXPECTED CONVERSION', currency: 'USD' }) }));
 vi.mock('@/contexts/LocationContext', () => ({ useLocation: () => ({ currentCity: { default_currency: 'USD' } }) }));
@@ -34,6 +35,7 @@ vi.mock('@/integrations/supabase/client', () => ({ supabase: { from: (table: str
     maybeSingle: () => { single = true; return query; },
     update: (value: Record<string, unknown>) => { updates = value; return query; },
     then: (resolve: (value: unknown) => unknown, reject: (reason: unknown) => unknown) => {
+      if (updates && state.suppressWrite) return Promise.resolve({ data: [], error: null }).then(resolve, reject);
       if (updates) { state.writes.push({ ...updates }); state.row = { ...state.row, ...updates }; }
       const data = table === 'property_projects' ? single ? { ...state.row } : [{ ...state.row }] : [];
       return Promise.resolve({ data, error: null }).then(resolve, reject);
@@ -45,7 +47,7 @@ function PublicCard() {
   const { data } = useOffplanProjects();
   return data?.[0] ? <OffplanProjectCard project={data[0]} /> : null;
 }
-afterEach(cleanup);
+afterEach(() => { state.suppressWrite = false; vi.clearAllMocks(); cleanup(); });
 describe('existing CMS → canonical public starting price', () => {
   it('saves a THB starting price, refreshes card/detail/home, and respects a cleared price', async () => {
     state.row = { id: 'project', name_en: 'Synthetic price editing fixture', name_ru: 'Изолированный проект', price_from: 8_000_000, price_from_thb: 99_000_000, district: 'Bang Tao', is_active: true, is_approved: true, public_listing_enabled: true, developer_id: null, amenities: [], created_at: '2026-01-01', construction_progress: 65, units_available: 17, project_status: 'completed', completion_date: '2027-01-01', roi_projected: 9 };
@@ -73,5 +75,14 @@ describe('existing CMS → canonical public starting price', () => {
     await waitFor(() => expect(state.writes[state.writes.length - 1]).toEqual({ price_from: null }));
     await waitFor(() => expect(screen.getAllByText('Цена уточняется')).toHaveLength(3));
     expect(screen.queryByText(/99\s000\s000 THB/)).toBeNull();
+
+    state.suppressWrite = true;
+    state.success.mockClear();
+    fireEvent.click(screen.getByRole('button', { name: 'Edit' }));
+    fireEvent.change(screen.getByLabelText('Цена от (THB)'), { target: { value: '9200000' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Сохранить' }));
+    await waitFor(() => expect(state.error).toHaveBeenCalledWith(expect.stringMatching(/Not all selected changes were confirmed/)));
+    expect(state.success).not.toHaveBeenCalled();
+    expect(state.row.price_from).toBeNull();
   });
 });

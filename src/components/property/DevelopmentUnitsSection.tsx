@@ -1,3 +1,6 @@
+import { projectPublicDocumentUrl } from '@/lib/real-estate/projectPublicDocumentUrl';
+import { QueryRecovery } from '@/components/shared/QueryRecovery';
+import { pickLang } from '@/lib/i18n/pickLang';
 import { publicNewbuildUnit } from '@/lib/real-estate/publicNewbuildPresentation';
 /**
  * DevelopmentUnitsSection — public presentation of canonical project_units.
@@ -9,7 +12,6 @@ import { Button } from '@/components/ui/button';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useProjectUnits, type ProjectUnit } from '@/hooks/useProjectUnits';
 import { Skeleton } from '@/components/ui/skeleton';
-import { cn } from '@/lib/utils';
 
 interface DevelopmentUnitsSectionProps {
   developmentId: string;
@@ -26,36 +28,48 @@ const VIEW_LABELS: Record<string, { en: string; ru: string }> = {
 export function DevelopmentUnitsSection({ developmentId, onSelectUnit }: DevelopmentUnitsSectionProps) {
   const { language } = useLanguage();
   const isRu = language === 'ru';
-  const { data: units, isLoading } = useProjectUnits(developmentId);
+  const { data: units, isLoading, isError, refetch } = useProjectUnits(developmentId);
 
   if (isLoading) {
     return <div className="space-y-3">{[1, 2].map(i => <Skeleton key={i} className="h-24 rounded-none" />)}</div>;
   }
 
-  if (!units || units.length === 0) return null;
+  if (isError) return <QueryRecovery onRetry={refetch} />;
+
+  if (!units || units.length === 0) return (
+    <p className="py-3 text-sm text-muted-foreground">
+      {pickLang(language, { ru: 'Конкретные объекты пока не опубликованы.', en: 'No individual units have been published yet.', th: 'ยังไม่มีการเผยแพร่ยูนิตรายห้อง' })}
+    </p>
+  );
 
   return (
     <div className="space-y-3">
-      <h3 className="font-semibold text-base">{isRu ? 'Планировки' : 'Floor plans'}</h3>
       {units.map(sourceUnit => {
         const unit = publicNewbuildUnit(sourceUnit);
         const name = (isRu && unit.name_ru) ? unit.name_ru : unit.name;
-        const isSoldOut = unit.status === 'sold_out';
+        const planUrl = projectPublicDocumentUrl(unit.floor_plan_url);
+        const planLabel = pickLang(language, { ru: 'Открыть план (новая вкладка)', en: 'Open plan (new tab)', th: 'เปิดแปลน (แท็บใหม่)' });
         return (
-          <div key={unit.id} className={cn('border rounded-none p-3 space-y-2', isSoldOut ? 'opacity-60 border-border/30' : 'border-border/50')}>
+          <div key={unit.id} className="space-y-2 rounded-none border border-border/50 p-3">
             <div className="flex items-start justify-between gap-3">
               <div>
                 <h4 className="font-medium text-sm">{name}</h4>
                 <div className="flex items-center gap-2 text-xs text-muted-foreground mt-0.5">
-                  <span className="flex items-center gap-0.5"><Maximize2 className="w-3 h-3" />{unit.area_sqm} м²</span>
+                  {Number.isFinite(unit.area_sqm) && unit.area_sqm > 0 && <span className="flex items-center gap-0.5"><Maximize2 className="w-3 h-3" />{unit.area_sqm} m²</span>}
                   {unit.bedrooms != null && unit.bedrooms > 0 && <span className="flex items-center gap-0.5"><BedDouble className="w-3 h-3" />{unit.bedrooms}</span>}
                   {unit.bathrooms != null && <span className="flex items-center gap-0.5"><Bath className="w-3 h-3" />{unit.bathrooms}</span>}
                   {unit.floor_from != null && unit.floor_to != null && <span className="flex items-center gap-0.5"><Layers className="w-3 h-3" />{unit.floor_from}-{unit.floor_to} {isRu ? 'эт.' : 'fl.'}</span>}
                 </div>
               </div>
-              {onSelectUnit && !isSoldOut && <Button type="button" size="sm" variant="outline" onClick={() => onSelectUnit(sourceUnit)}>{isRu ? 'Спросить' : 'Ask about this unit'}</Button>}
+              {onSelectUnit && <Button type="button" size="sm" variant="outline" className="min-h-11" onClick={() => onSelectUnit(sourceUnit)}>
+                {pickLang(language, { ru: 'Спросить', en: 'Ask about this unit', th: 'สอบถามยูนิตนี้' })}
+              </Button>}
             </div>
-            {unit.price != null && <p className="text-sm font-medium">{unit.price.toLocaleString()} {unit.currency ?? 'THB'}</p>}
+            {planUrl && <Button asChild variant="link" className="min-h-11 px-0">
+              <a href={planUrl} target="_blank" rel="noopener noreferrer" aria-label={`${planLabel}: ${name}`}>
+                {planLabel}
+              </a>
+            </Button>}
             {unit.views && unit.views.length > 0 && <div className="flex gap-1 flex-wrap">{unit.views.map(v => <Badge key={v} variant="outline" className="text-[10px]">{VIEW_LABELS[v]?.[isRu ? 'ru' : 'en'] || v}</Badge>)}</div>}
           </div>
         );

@@ -10,6 +10,7 @@ const output = process.env.SHARED_SURFACES_OUTPUT || '/tmp/browser/shared-surfac
 await mkdir(output,{recursive:true});
 const virtual={
  '@/contexts/LanguageContext':`export const useLanguage=()=>({language:new URLSearchParams(location.search).get('lang')||'ru'});`,
+ '@/components/shared/ExploreVerticalsSheet':`export const ExploreVerticalsSheet=({trigger})=>trigger;`,
  '@/hooks/useFeedbackSettings':`export const getFeedbackSettings=()=>({hapticEnabled:false,soundEnabled:false,typingSoundEnabled:false});`,
  '@/integrations/supabase/client':`throw Error('Production database forbidden');`,
 };
@@ -17,6 +18,7 @@ await build({alias:radixOverlayAliases,stdin:{contents:`
 import React from 'react'; import {createRoot} from 'react-dom/client'; import {MemoryRouter} from 'react-router-dom';
 import {useForm} from 'react-hook-form';
 import {PageShell} from '@/components/page/PageShell'; import {PageHeader} from '@/components/page/PageHeader';
+import {CrossSellSection} from '@/components/crosssell/CrossSellSection';
 import {Button} from '@/components/ui/button'; import {Input} from '@/components/ui/input';
 import {Card,CardHeader,CardContent} from '@/components/ui/card';import{Surface}from'@/components/ui/surface';import{PageSection}from'@/components/page/PageSection';
 import {Form,FormField,FormItem,FormLabel,FormControl,FormMessage} from '@/components/ui/form';
@@ -29,6 +31,7 @@ const labels={save:ru?'Сохранить изменения':'Save changes', ex
 function App(){const form=useForm({defaultValues:{email:''}}); return <PageShell><PageHeader title={labels.title} subtitle={ru?'Проверьте информацию перед сохранением.':'Review information before saving.'} actions={[{label:labels.save,variant:'primary',onClick:()=>{}},{label:labels.extra,mobileHidden:false,onClick:()=>{}},{label:labels.hidden,onClick:()=>{}}]}/>
 <Form {...form}><form onSubmit={form.handleSubmit(()=>{})} className="max-w-md space-y-4"><FormField control={form.control} name="email" rules={{required:labels.error}} render={({field})=><FormItem><FormLabel>{labels.email}</FormLabel><FormControl><Input {...field}/></FormControl><FormMessage/></FormItem>}/><Button type="submit">Validate</Button><Button disabled>Disabled</Button></form></Form>
 <span hidden data-testid="canonical-body-family" style={{fontFamily:"var(--font-body)"}}>Canonical body family probe</span><div style={{fontSize:31,fontFamily:"var(--font-display)"}}><Button data-testid="canonical-button-size">Canonical button type</Button><Button variant="destructive" data-testid="canonical-danger-action">Synthetic destructive action</Button></div><Card data-testid="canonical-card"><CardHeader data-testid="canonical-card-header">Canonical card</CardHeader><CardContent>Shared spacing</CardContent></Card>
+<div data-testid="related-offers"><CrossSellSection currentVertical="experiences" /></div>
 <PageSection surface title="Canonical section"><span data-testid="canonical-section">Shared section spacing</span></PageSection>
 <Surface variant="inset" data-testid="canonical-inset">Inset surface</Surface>
 <div className="mt-6 flex flex-wrap gap-3">

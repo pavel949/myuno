@@ -10,6 +10,7 @@ import {
   Briefcase, DoorOpen, Gauge, Info, ChevronRight, Zap
 } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
+import { PUBLIC_LISTING_DETAIL_FRAME, PUBLIC_LISTING_DETAIL_GRID, PUBLIC_LISTING_DETAIL_MEDIA, PUBLIC_LISTING_DETAIL_RAIL } from '@/components/layout/publicListingDetail';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Button } from '@/components/ui/button';
 import { DetailPageSkeleton } from '@/components/ui/page-skeletons';
@@ -50,26 +51,28 @@ export default function VehicleDetail() {
 
   if (isLoading) {
     return (
-      <AppLayout showBottomNav={false}>
-        <DetailPageSkeleton />
+      <AppLayout showBottomNav={false} usePageContainer={false}>
+        <div className={PUBLIC_LISTING_DETAIL_FRAME}><DetailPageSkeleton /></div>
       </AppLayout>
     );
   }
 
   if (!vehicle) {
     return (
-      <AppLayout showBottomNav={false}>
-        <div className="flex flex-col items-center justify-center py-20 text-center px-6">
-          <Settings2 className="w-16 h-16 text-muted-foreground mb-4" />
-          <h2 className="text-xl font-semibold mb-2">
-            {isRu ? 'Транспорт не найден' : 'Vehicle not found'}
-          </h2>
-          <p className="text-muted-foreground mb-6">
-            {isRu ? 'Возможно, он был удалён или недоступен' : 'It may have been removed or is unavailable'}
-          </p>
-          <Button onClick={() => navigate('/transport')}>
-            {isRu ? 'Назад к каталогу' : 'Back to catalog'}
-          </Button>
+      <AppLayout showBottomNav={false} usePageContainer={false}>
+        <div className={PUBLIC_LISTING_DETAIL_FRAME}>
+          <div className="flex flex-col items-center justify-center py-20 text-center px-6">
+            <Settings2 className="w-16 h-16 text-muted-foreground mb-4" />
+            <h2 className="text-xl font-semibold mb-2">
+              {isRu ? 'Транспорт не найден' : 'Vehicle not found'}
+            </h2>
+            <p className="text-muted-foreground mb-6">
+              {isRu ? 'Возможно, он был удалён или недоступен' : 'It may have been removed or is unavailable'}
+            </p>
+            <Button onClick={() => navigate('/transport')}>
+              {isRu ? 'Назад к каталогу' : 'Back to catalog'}
+            </Button>
+          </div>
         </div>
       </AppLayout>
     );
@@ -99,10 +102,10 @@ export default function VehicleDetail() {
   const localizedFeatures = getLocalizedFeatures(filteredFeatures, lang);
 
   return (
-    <AppLayout showBottomNav={false}>
-      <div className="pb-28">
+    <AppLayout showBottomNav={false} usePageContainer={false}>
+      <div className={cn(PUBLIC_LISTING_DETAIL_FRAME, "pb-28 lg:pb-12")} data-listing-detail="vehicle">
         {/* Sticky Header */}
-        <div className="sticky top-0 z-20 flex items-center justify-between px-4 py-3 bg-background/90 border-b border-border/50">
+        <div className="sticky top-0 z-20 flex items-center justify-between px-4 py-3 bg-background/90 border-b border-border/50 lg:static lg:px-0">
           <BackButton fallbackPath="/transport" variant="ghost" />
           <div className="flex items-center gap-1.5">
             <FavoriteButton
@@ -125,7 +128,7 @@ export default function VehicleDetail() {
 
         {/* Image Gallery */}
         <div className="relative bg-muted">
-          <div className="aspect-[16/10] md:aspect-[2/1] overflow-hidden">
+          <div className={cn("aspect-[16/10] md:aspect-[2/1] overflow-hidden", PUBLIC_LISTING_DETAIL_MEDIA)} data-listing-media>
             <OptimizedImage
               src={images[activeImage]}
               alt={name}
@@ -141,7 +144,7 @@ export default function VehicleDetail() {
                   key={i}
                   onClick={() => setActiveImage(i)}
                   className={cn(
-                    "w-16 h-12 rounded-none overflow-hidden flex-shrink-0 border-2 transition-all",
+                    "w-16 h-12 rounded-none overflow-hidden flex-shrink-0 border-2 transition-all lg:w-24 lg:h-16",
                     activeImage === i ? "border-primary shadow-sm" : "border-transparent opacity-50 hover:opacity-80"
                   )}
                 >
@@ -152,14 +155,15 @@ export default function VehicleDetail() {
           )}
         </div>
 
-        <div className="max-w-3xl mx-auto">
-          <div className="px-4 space-y-6 pt-5">
+        <div className={cn(PUBLIC_LISTING_DETAIL_GRID, "lg:mt-6")}>
+          <div className="ds-listing-mobile-body min-w-0">
+            <div className="px-4 space-y-6 pt-5 lg:px-0 lg:pt-0">
 
             {/* Title block */}
             <div>
               <div className="flex items-start justify-between gap-3">
                 <div className="flex-1 min-w-0">
-                  <h1 className="text-xl md:text-2xl font-display font-bold text-foreground">{name}</h1>
+                  <h1 className="text-xl md:text-2xl font-display font-bold text-foreground lg:text-3xl lg:break-words">{name}</h1>
                   <p className="text-sm text-muted-foreground mt-0.5">
                     {isRu ? categoryConfig.labelRu : categoryConfig.labelEn}
                     {vehicle.year_built && ` • ${vehicle.year_built}`}
@@ -281,7 +285,7 @@ export default function VehicleDetail() {
             {description && (
               <div>
                 <h2 className="text-base font-semibold mb-2">{isRu ? 'Описание' : 'Description'}</h2>
-                <p className="text-sm text-muted-foreground leading-relaxed">{description}</p>
+                <p className="text-sm text-muted-foreground leading-relaxed ds-reading-copy lg:text-base lg:break-words">{description}</p>
               </div>
             )}
 
@@ -330,46 +334,52 @@ export default function VehicleDetail() {
                 <FaqItem q={isRu ? 'Как происходит доставка?' : 'How does delivery work?'} a={isRu ? 'Мы доставим транспорт к вашему отелю или вилле бесплатно в пределах основных районов Пхукета. Доставка занимает 30–60 минут.' : 'We deliver the vehicle to your hotel or villa for free within main Phuket areas. Delivery takes 30–60 minutes.'} />
               </div>
             </div>
-          </div>
-
-          {/* Related */}
-          <div className="mt-6">
-            <RelatedServicesSection currentVertical="transport" />
-          </div>
-        </div>
-
-        {/* Sticky Bottom CTA */}
-        <div className="fixed bottom-0 left-0 right-0 z-50 bg-background/95 border-t border-border/50" style={{ paddingBottom: 'max(env(safe-area-inset-bottom, 16px), 16px)' }}>
-          <div className="max-w-3xl mx-auto flex items-center gap-3 px-4 py-3">
-            <div className="flex-1 min-w-0">
-              <p className="text-[10px] text-muted-foreground uppercase tracking-wider">{isRu ? 'От' : 'From'}</p>
-              <p className="text-lg font-bold text-foreground">
-                {currencySymbol}{vehicle.price_per_day?.toLocaleString() || 0}
-                <span className="text-xs font-normal text-muted-foreground ml-0.5">/{isRu ? 'день' : 'day'}</span>
-              </p>
             </div>
-            <Button variant="outline" size="icon" className="shrink-0" aria-label={isRu ? 'Позвонить' : 'Call'}>
-              <Phone className="w-4 h-4" />
-            </Button>
-            <Button variant="outline" size="icon" className="shrink-0" aria-label={isRu ? 'Написать' : 'Message'}>
-              <MessageCircle className="w-4 h-4" />
-            </Button>
-            <Button
-              className="flex-1 h-11 rounded-none font-semibold"
-              onClick={() => navigate(`/transport/booking/${id}`, {
-                state: {
-                  vehicle: {
-                    nameEn: vehicle.name_en,
-                    nameRu: vehicle.name_ru,
-                    pricePerDay: vehicle.price_per_day,
-                    image: images[0],
+
+            {/* Related */}
+            <div className="mt-6">
+              <RelatedServicesSection currentVertical="transport" />
+            </div>
+          </div>
+
+          {/* Mobile bottom action; the same controls occupy the desktop booking rail. */}
+          <div
+            data-chat-occlusion-target
+            data-listing-booking-rail
+            className={cn("fixed bottom-0 left-0 right-0 z-50 bg-background/95 border-t border-border/50 lg:inset-x-auto lg:bottom-auto lg:border lg:bg-card lg:!pb-0 lg:shadow-sm", PUBLIC_LISTING_DETAIL_RAIL)}
+            style={{ paddingBottom: 'max(env(safe-area-inset-bottom, 16px), 16px)' }}
+          >
+            <div className="ds-listing-mobile-body ds-listing-actions-inset flex items-center gap-3 py-3 lg:grid lg:grid-cols-[minmax(0,1fr)_auto_auto] lg:gap-2 lg:p-5">
+              <div className="flex-1 min-w-0">
+                <p className="text-xs text-muted-foreground uppercase tracking-wider">{isRu ? 'От' : 'From'}</p>
+                <p className="text-lg font-bold text-foreground lg:text-2xl lg:break-words">
+                  {currencySymbol}{vehicle.price_per_day?.toLocaleString() || 0}
+                  <span className="text-xs font-normal text-muted-foreground ml-0.5">/{isRu ? 'день' : 'day'}</span>
+                </p>
+              </div>
+              <Button variant="outline" size="icon" className="shrink-0" aria-label={isRu ? 'Позвонить' : 'Call'}>
+                <Phone className="w-4 h-4" />
+              </Button>
+              <Button variant="outline" size="icon" className="shrink-0" aria-label={isRu ? 'Написать' : 'Message'}>
+                <MessageCircle className="w-4 h-4" />
+              </Button>
+              <Button
+                className="flex-1 h-11 rounded-none font-semibold lg:col-span-full lg:mt-2 lg:min-h-11 lg:h-auto lg:whitespace-normal lg:py-2"
+                onClick={() => navigate(`/transport/booking/${id}`, {
+                  state: {
+                    vehicle: {
+                      nameEn: vehicle.name_en,
+                      nameRu: vehicle.name_ru,
+                      pricePerDay: vehicle.price_per_day,
+                      image: images[0],
+                    }
                   }
-                }
-              })}
-            >
-              <Calendar className="w-4 h-4 mr-2" />
-              {isRu ? 'Забронировать' : 'Reserve'}
-            </Button>
+                })}
+              >
+                <Calendar className="w-4 h-4 mr-2" />
+                {isRu ? 'Забронировать' : 'Reserve'}
+              </Button>
+            </div>
           </div>
         </div>
       </div>
@@ -383,8 +393,8 @@ function SpecCard({ icon: Icon, label, value }: { icon: typeof Users; label: str
   return (
     <div className="flex flex-col items-center p-3 rounded-none bg-card border border-border/50 text-center">
       <Icon className="w-5 h-5 text-primary mb-1.5" />
-      <span className="text-sm font-bold text-foreground">{value}</span>
-      <span className="text-[10px] text-muted-foreground mt-0.5">{label}</span>
+      <span className="text-sm font-bold text-foreground lg:break-words lg:max-w-full">{value}</span>
+      <span className="text-xs text-muted-foreground mt-0.5">{label}</span>
     </div>
   );
 }

@@ -1,9 +1,10 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient, type QueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 import type { ProjectLifecycleStatus } from '@/lib/real-estate/canonicalModel';
 import { applyProjectCatalogFilters, applyProjectCatalogSort, createProjectCatalogQuery } from './projectCatalogQuery';
+import { invalidateProjectPriceReaders } from '@/lib/real-estate/invalidateProjectPriceReaders';
 import { normalizeProjectFacilityIds } from '@/lib/propertyAttributeRegistry';
 
 function withNormalizedProjectAmenities<T extends { amenities?: string[] | null }>(row: T): T {
@@ -31,6 +32,7 @@ export interface PropertyProject {
   total_units?: number;
   cover_image?: string;
   images?: string[];
+  gallery_urls?: string[] | null;
   video_url?: string;
   amenities?: string[];
   infrastructure?: string[];
@@ -72,6 +74,7 @@ export interface CreatePropertyProjectData {
   total_units?: number;
   cover_image?: string;
   images?: string[];
+  gallery_urls?: string[] | null;
   video_url?: string;
   amenities?: string[];
   infrastructure?: string[];
@@ -154,6 +157,23 @@ export function usePropertyProject(id?: string, publicOnly = false) {
   });
 }
 
+const projectCollectionKeys = [
+  'property-projects', 'admin-property-projects', 'public-property-projects', 'my-property-projects',
+  'admin-nb-projects', 'project-districts', 'newbuild-locations', 'admin-newbuilds-kpi', 'developer-projects',
+];
+
+export function invalidateProjectCatalog(queryClient: QueryClient, projectIds?: Iterable<string>) {
+  const ids = projectIds ? new Set(projectIds) : undefined;
+  return Promise.all([
+    invalidateProjectPriceReaders(queryClient),
+    queryClient.invalidateQueries({
+      predicate: ({ queryKey: [family, id] }) =>
+        (typeof family === 'string' && projectCollectionKeys.includes(family)) ||
+        (family === 'property-project' && (!ids || (typeof id === 'string' && ids.has(id)))),
+    }),
+  ]);
+}
+
 export function useCreatePropertyProject() {
   const queryClient = useQueryClient();
   const { user } = useAuth();
@@ -174,11 +194,8 @@ export function useCreatePropertyProject() {
       if (error) throw error;
       return data as PropertyProject;
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['property-projects'] });
-      queryClient.invalidateQueries({ queryKey: ['admin-property-projects'] });
-      queryClient.invalidateQueries({ queryKey: ['public-property-projects'] });
-      queryClient.invalidateQueries({ queryKey: ['my-property-projects'] });
+    onSuccess: (data) => {
+      void invalidateProjectCatalog(queryClient, [data.id]);
       toast.success('Project created successfully');
     },
     onError: () => {
@@ -203,11 +220,7 @@ export function useUpdatePropertyProject() {
       return data as PropertyProject;
     },
     onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: ['property-projects'] });
-      queryClient.invalidateQueries({ queryKey: ['admin-property-projects'] });
-      queryClient.invalidateQueries({ queryKey: ['public-property-projects'] });
-      queryClient.invalidateQueries({ queryKey: ['my-property-projects'] });
-      queryClient.invalidateQueries({ queryKey: ['property-project', data.id] });
+      void invalidateProjectCatalog(queryClient, [data.id]);
       toast.success('Project updated successfully');
     },
     onError: () => {

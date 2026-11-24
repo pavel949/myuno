@@ -5,6 +5,11 @@ import { buildServiceCategoryUrl, clearServiceDiscoveryQuery, readServiceDiscove
 const categories = serviceDiscoveryCategories(CATEGORIES);
 const blank = { query: '', category: '', situation: '' };
 describe('canonical service projections and URL state', () => {
+  it('keeps literal search words separate from category reset tokens', () => {
+    const start = new URLSearchParams('ref=fixture&category=cat-home-services');
+    expect(updateServiceDiscoveryQuery(start, 'q', 'all').toString()).toBe('ref=fixture&category=cat-home-services&q=all');
+    expect(updateServiceDiscoveryQuery(start, 'category', 'all').toString()).toBe('ref=fixture');
+  });
   it('preserves service IDs and destinations across modes, deduplicated by ID', () => {
     const rows = projectServiceDiscovery(categories, blank);
     expect(new Set(rows.map(row => row.service.id)).size).toBe(rows.length);
@@ -19,6 +24,8 @@ describe('canonical service projections and URL state', () => {
     const menu = serviceDiscoveryMenu(CATEGORIES);
     expect(menu.primary.slice(0, 3).map(item => item.id)).toEqual(['cat-home-services', 'cat-transport', 'cat-business-legal']);
     expect(new Set(menu.primary.map(item => item.id))).toEqual(new Set(categories.filter(item => item.id !== 'cat-emergency').map(item => item.id)));
+    expect(menu.primary[5].id).toBe('cat-pet-services');
+    expect(menu.primary[6].id).toBe('cat-connectivity');
     expect(menu.more.map(item => item.id)).toEqual(['cat-emergency']);
     expect(menu.yacht).toBe(CATEGORIES.flatMap(item => item.services).find(item => item.id === 'yacht'));
     expect(menu.yacht?.path).toBe('/yachts');

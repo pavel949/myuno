@@ -59,6 +59,7 @@ import {
 } from '@/components/landings/LandingPrimitives';
 import { ConciergeHelpSheet } from '@/components/concierge/ConciergeHelpSheet';
 import { GoalStrip } from '@/components/landings/GoalStrip';
+import { FooterSocialLinks } from '@/components/layout/FooterSocialLinks';
 import { LegalCopyright } from '@/components/legal/LegalEntityInfo';
 
 type Bi = { ru: string; en: string; th?: string };
@@ -857,6 +858,7 @@ export default function WelcomeLanding() {
             </Link>
           </div>
 
+          <div className="mt-8 flex justify-center text-left"><FooterSocialLinks /></div>
           <nav
             aria-label={isRu ? 'Юридическая информация и поддержка' : 'Legal and support'}
             className="mt-10 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 font-sans text-caption text-muted-foreground"

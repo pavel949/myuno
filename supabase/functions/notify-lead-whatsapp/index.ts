@@ -113,8 +113,7 @@
          console.error("WhatsApp API error:", waError);
        }
      } else {
-       console.info("WhatsApp credentials not configured. Message to send:");
-       console.info(message);
+       console.info("WhatsApp credentials not configured; message not sent.");
      }
  
      // Also send email notification via Resend as backup

@@ -25,6 +25,9 @@ import { YachtExperienceSelect } from '@/components/yachts/YachtExperienceSelect
 import { useYachtExperiences } from '@/hooks/useYachtExperiences';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { redirectToAuth } from '@/lib/auth/redirectToAuth';
+import { bangkokTodayDate, civilDateKey, parseCivilDate, toBangkokDateKey } from '@/lib/hotelDates';
+import { pickLang } from '@/lib/i18n/pickLang';
+import { getYachtPreferredTimes } from '@/lib/yachtPreferredTimes';
 
 type CharterType = 'half_day' | 'full_day' | 'sunset' | 'overnight';
 
@@ -59,7 +62,7 @@ export default function YachtBooking() {
   const { createOrder, isCreating } = useOrders();
   const { createCheckout, isProcessing: isStripeProcessing } = useStripeUnifiedCheckout();
   const { yacht, isLoading } = useYacht(id || '');
-  const { checkYachtAvailability, isChecking, lastResult } = useAvailabilityCheck();
+  const { checkYachtAvailability, isChecking } = useAvailabilityCheck();
   const { data: yachtExperiences = [] } = useYachtExperiences();
   const { platformFeePercent } = useSystemSettings();
 
@@ -79,10 +82,8 @@ export default function YachtBooking() {
 
   // Initialize state with bookNowData if available
   const [date, setDate] = useState<Date | undefined>(() => {
-    if (bookNowData?.date) {
-      return new Date(bookNowData.date);
-    }
-    return undefined;
+    const key = toBangkokDateKey(bookNowData?.date);
+    return key ? parseCivilDate(key) : undefined;
   });
   const [time, setTime] = useState<string>(() => bookNowData?.time || '');
   const [guests, setGuests] = useState(() => bookNowData?.guests || 2);
@@ -99,9 +100,9 @@ export default function YachtBooking() {
   // Auth redirect - must be after all hooks
   useEffect(() => {
     if (!authLoading && !user) {
-      redirectToAuth(navigate, { from: `/yachts/${id}/booking` });
+      redirectToAuth(navigate, { from: location.pathname + location.search + location.hash });
     }
-  }, [authLoading, user, navigate, id]);
+  }, [authLoading, user, navigate, location.pathname, location.search, location.hash]);
 
   // Loading state
   if (isLoading || authLoading) {
@@ -136,6 +137,7 @@ export default function YachtBooking() {
 
   // Booking mode & deposit calculation
   const isInstant = yacht.booking_flow === 'instant';
+  const t = (ru: string, en: string, th: string) => pickLang(language, { ru, en, th });
   const depositPercent = yacht.deposit_percent ?? 50;
 
   // Calculate experiences total
@@ -156,15 +158,7 @@ export default function YachtBooking() {
   const depositAmount = Math.round(total * depositPercent / 100);
   const balanceAmount = total - depositAmount;
 
-  const defaultTimesMap: Record<CharterType, string[]> = {
-    half_day: ['09:00', '14:00'],
-    full_day: ['08:00', '09:00', '10:00'],
-    sunset: ['16:00', '16:30', '17:00'],
-    overnight: ['10:00', '12:00'],
-  };
-  const availableTimes = yacht.departure_times?.length 
-    ? yacht.departure_times 
-    : (defaultTimesMap[charterType] || defaultTimesMap.full_day);
+  const suggestedTimes = getYachtPreferredTimes(yacht, charterType);
 
   const yachtName = language === 'ru' ? yacht.name_ru : yacht.name_en;
   const yachtLocation = language === 'ru' 
@@ -174,27 +168,25 @@ export default function YachtBooking() {
   const charterDuration = CHARTER_DURATIONS[charterType];
 
   const handleSubmit = async () => {
-    if (!date || !time || !contactData.name || !contactData.phone || !yacht) return;
+    if (!date || !suggestedTimes.includes(time) || !contactData.name || !contactData.phone) return;
     if (isSubmittingRef.current) return;
     isSubmittingRef.current = true;
 
     try {
     // Check availability before booking
-    const scheduledAt = new Date(date);
-    const [hours, minutes] = time.split(':').map(Number);
-    scheduledAt.setHours(hours, minutes);
-    
-    const endAt = new Date(scheduledAt);
-    endAt.setHours(endAt.getHours() + charterDuration);
+    const scheduledAt = new Date(`${civilDateKey(date)}T${time}:00+07:00`);
+    if (scheduledAt.getTime() <= Date.now()) {
+      setAvailabilityError(t('Выберите время, которое ещё не прошло на Пхукете.', 'Choose a time that has not passed in Phuket.', 'เลือกเวลาที่ยังไม่ผ่านในภูเก็ต'));
+      return;
+    }
+    const endAt = new Date(scheduledAt.getTime() + charterDuration * 60 * 60 * 1000);
 
     const availability = await checkYachtAvailability(yacht.id, scheduledAt, endAt);
     
     if (!availability.available) {
-      setAvailabilityError(
-        language === 'ru' 
-          ? 'Яхта недоступна на выбранную дату. Пожалуйста, выберите другое время.'
-          : 'Yacht is not available for the selected date. Please choose another time.'
-      );
+      setAvailabilityError(availability.error
+        ? t('Проверка доступности не ответила. Повторите попытку.', 'Availability could not be checked. Try again.', 'ตรวจสอบที่ว่างไม่ได้ โปรดลองอีกครั้ง')
+        : t('В календаре myUNO есть конфликт на это время. Выберите другое.', 'The myUNO calendar shows a conflict. Choose another time.', 'ปฏิทิน myUNO ระบุว่าช่วงเวลานี้ทับซ้อน โปรดเลือกเวลาอื่น'));
       return;
     }
     
@@ -350,7 +342,7 @@ export default function YachtBooking() {
     );
   }
 
-  const canSubmit = date && time && contactData.name && contactData.phone;
+  const canSubmit = Boolean(date && suggestedTimes.includes(time) && contactData.name && contactData.phone);
 
   return (
     <AppLayout>
@@ -420,10 +412,18 @@ export default function YachtBooking() {
           <BookingDateTimeSelect
             date={date}
             time={time}
-            onDateChange={setDate}
-            onTimeChange={setTime}
-            availableTimes={availableTimes}
-            minDate={new Date()}
+            onDateChange={next => { setDate(next); setAvailabilityError(null); }}
+            onTimeChange={next => { setTime(next); setAvailabilityError(null); }}
+            availableTimes={suggestedTimes}
+            minDate={bangkokTodayDate()}
+            timeContext={{
+              label: t('Желаемое время по Пхукету', 'Preferred time in Phuket', 'เวลาที่ต้องการในภูเก็ต'),
+              hint: suggestedTimes.length === 0
+                ? t('У яхты пока нет настроенного расписания.', 'This yacht has no configured schedule yet.', 'เรือลำนี้ยังไม่ได้ตั้งค่าตารางเวลา')
+                : isInstant
+                  ? t('myUNO проверит выбранное время перед оформлением.', 'myUNO checks the selected time before checkout.', 'myUNO จะตรวจสอบเวลาที่เลือกก่อนดำเนินการ')
+                  : t('Время подтвердит команда myUNO после заявки.', 'The myUNO team confirms the time after your request.', 'ทีม myUNO จะยืนยันเวลาหลังได้รับคำขอ'),
+            }}
           />
 
           {/* Guests */}

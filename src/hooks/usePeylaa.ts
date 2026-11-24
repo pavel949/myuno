@@ -326,7 +326,7 @@ export function useSubmitPeylaaLead() {
         ? `${lead.preferred_bedrooms.join(',')} BR`
         : null;
 
-      // 1. Attribution + RLN (best-effort, must not block lead capture)
+      // 1. Internal attribution (best-effort, must not block lead capture)
       let attributionId: string | null = null;
       try {
         const result = await recordAttribution({

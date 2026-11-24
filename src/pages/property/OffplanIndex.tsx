@@ -7,11 +7,12 @@ import '@/styles/public-commerce.css';
  * Server filters + OFFPLAN-style client filters (offplan_catalog JSON when present)
  */
 
-import React, { useMemo, useEffect } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import React, { lazy, Suspense, useMemo, useEffect } from 'react';
+import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import {
   Building2,
-  TrendingUp,
+  List,
+  Map,
   SlidersHorizontal,
   X,
   Search,
@@ -37,26 +38,27 @@ import {
   SheetClose,
 } from '@/components/ui/sheet';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { useOffplanProjects, useProjectDistricts, type ProjectStatus } from '@/hooks/useOffplanProjects';
+import { useOffplanProjects, useProjectDistricts } from '@/hooks/useOffplanProjects';
 import { useDevelopers } from '@/hooks/useDevelopers';
 import { OffplanProjectCard } from '@/components/property/OffplanProjectCard';
 import { CopyPublicSearchLink } from '@/components/property/CopyPublicSearchLink';
 import {
   applyOffplanUiFilters,
-  activeOffplanFilterCount,
-  collectFacetOptions,
-  countByRec,
 } from '@/lib/offplan/filters';
 import {
   defaultOffplanUiFilterState,
   type OffplanUiFilterState,
-  type RecLabel,
   type OffplanSortKey,
 } from '@/lib/offplan/types';
 import { BUDGET_OPTIONS, SORT_OPTIONS, filterByBudget } from '@/lib/offplan/catalogFacets';
+import { parseOffplanMapViewport, serializeOffplanMapViewport } from '@/lib/offplan/mapState';
+
+const OffplanProjectMap = lazy(() => import('@/components/property/OffplanProjectMap'));
+const SORTS: OffplanSortKey[] = ['score', 'price_asc', 'price_desc'];
 
 export default function OffplanIndex() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { language } = useLanguage();
   const isRu = language === 'ru';
 
@@ -64,8 +66,9 @@ export default function OffplanIndex() {
   const selectedDistrict = params.get('district') || '';
   const selectedDeveloper = params.get('developer') || '';
   const sortParam = params.get('sort') as OffplanSortKey | null;
-  const SORTS: OffplanSortKey[] = ['score', 'price_asc', 'price_desc'];
-  const ui: OffplanUiFilterState = {
+  const mapView = params.get('view') === 'map';
+  const viewport = parseOffplanMapViewport(params.get('mapViewport'));
+  const ui: OffplanUiFilterState = useMemo(() => ({
     ...defaultOffplanUiFilterState(),
     q: params.get('q') || '',
     fDev: params.get('developerName') || '',
@@ -73,15 +76,16 @@ export default function OffplanIndex() {
     fOwn: params.get('own') || '',
     fBeach: params.get('beach') || '',
     fSort: sortParam && SORTS.includes(sortParam) ? sortParam : 'score',
-  };
+  }), [params, sortParam]);
   const budget = params.get('budget') || '';
   const unavailableFacets = ['year', 'own', 'beach', 'rec', 'seg', 'risk', 'mgmt', 'focus'].some(key => !!params.get(key)) || !!sortParam && ['completion', 'yield', 'beach', 'risk', 'rating'].includes(sortParam);
   const queryIssue = unavailableFacets ? 'unsupported' as const : (budget && !BUDGET_OPTIONS.some(option => option.value === budget) || sortParam && !SORTS.includes(sortParam)) ? 'invalid' as const : undefined;
-  const updateFilters = (changes: Record<string, string>) => setParams(previous => {
-    const next = new URLSearchParams(previous);
+  const updateFilters = (changes: Record<string, string>, replace = true) => {
+    const next = new URLSearchParams(params);
     Object.entries(changes).forEach(([key, value]) => value ? next.set(key, value) : next.delete(key));
-    return next;
-  }, { replace: true });
+    if (next.toString() === params.toString()) return;
+    navigate({ pathname: location.pathname, search: next.toString(), hash: location.hash }, { replace, state: location.state, preventScrollReset: true });
+  };
   const setSelectedDistrict = (value: string) => updateFilters({ district: value });
   const setSelectedDeveloper = (value: string) => updateFilters({ developer: value });
 
@@ -136,7 +140,7 @@ export default function OffplanIndex() {
   const seoDescription = isRu
     ? 'Опубликованные проекты Пхукета. Начальные цены требуют уточнения; поиск по району и застройщику.'
     : 'Published Phuket projects. Starting prices require confirmation; search by district and developer.';
-  const canonicalUrl = 'https://www.myuno.app/property/offplan';
+  const canonicalUrl = 'https://www.myuno.app/property/offplan/search';
   const breadcrumbSchema = createBreadcrumbSchema([
     { name: 'Property', url: 'https://www.myuno.app/property' },
     { name: pickLang(language, {"ru": "Новостройки", "en": "Off-Plan", "th": "โครงการใหม่"}), url: canonicalUrl },
@@ -281,6 +285,14 @@ export default function OffplanIndex() {
           <span role="status" className="text-sm text-muted-foreground">
             {queryIssue ? pickLang(language, { ru: 'Проверьте параметры', en: 'Check filters', th: 'ตรวจสอบตัวกรอง' }) : isLoading ? pickLang(language, { ru: 'Загрузка…', en: 'Loading…', th: 'กำลังโหลด…' }) : isError ? pickLang(language, { ru: 'Каталог недоступен', en: 'Catalogue unavailable', th: 'ไม่สามารถโหลดแคตตาล็อก' }) : <>{displayedProjects.length} {pickLang(language, { ru: 'результатов', en: 'results', th: 'ผลลัพธ์' })}</>}
           </span>
+          <div role="group" aria-label={pickLang(language, { ru: 'Вид каталога', en: 'Catalogue view', th: 'มุมมองแคตตาล็อก' })} className="flex gap-1">
+            <Button type="button" variant={mapView ? 'outline' : 'default'} aria-pressed={!mapView} onClick={() => updateFilters({ view: '' }, false)} className="min-h-11 gap-2">
+              <List aria-hidden="true" className="size-4" />{pickLang(language, { ru: 'Список', en: 'List', th: 'รายการ' })}
+            </Button>
+            <Button type="button" variant={mapView ? 'default' : 'outline'} aria-pressed={mapView} onClick={() => updateFilters({ view: 'map' }, false)} className="min-h-11 gap-2">
+              <Map aria-hidden="true" className="size-4" />{pickLang(language, { ru: 'Карта', en: 'Map', th: 'แผนที่' })}
+            </Button>
+          </div>
           <Select value={ui.fSort} onValueChange={(v) => updateFilters({ sort: v === 'score' ? '' : v })}>
             <SelectTrigger className="h-9 w-auto min-w-[11rem]" aria-label={pickLang(language, { ru: 'Сортировка', en: 'Sort', th: 'เรียงลำดับ' })}><SelectValue /></SelectTrigger>
             <SelectContent>
@@ -314,10 +326,22 @@ export default function OffplanIndex() {
             )}
           </div>
         ) : (
-          <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
-            {displayedProjects.map((project) => (
-              <OffplanProjectCard key={project.id} project={project} variant="grid" />
-            ))}
+          <div className="space-y-5">
+            {mapView && (
+              <Suspense fallback={<p role="status">{pickLang(language, { ru: 'Загружаем карту…', en: 'Loading map…', th: 'กำลังโหลดแผนที่…' })}</p>}>
+                <OffplanProjectMap projects={displayedProjects} viewport={viewport} selectedId={params.get('mapProject')}
+                  onSelect={id => updateFilters({ mapProject: id })}
+                  onViewport={next => {
+                    const serialized = serializeOffplanMapViewport(next);
+                    if (serialized) updateFilters({ mapViewport: serialized });
+                  }} />
+              </Suspense>
+            )}
+            <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
+              {displayedProjects.map((project) => (
+                <OffplanProjectCard key={project.id} project={project} variant="grid" />
+              ))}
+            </div>
           </div>
         )}
 

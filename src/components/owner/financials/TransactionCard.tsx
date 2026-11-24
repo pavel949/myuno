@@ -10,6 +10,8 @@ import {
 import { ArrowUpCircle, ArrowDownCircle, Calendar, MoreVertical, Trash2, Edit, Paperclip } from 'lucide-react';
 import { format } from 'date-fns';
 import { ru } from 'date-fns/locale';
+import { parseCivilDate } from '@/lib/hotelDates';
+import { formatPropertyRate } from '@/lib/owner/propertyRateDisplay';
 import type { PropertyFinancialFull } from '@/hooks/usePropertyFinancials';
 
 interface TransactionCardProps {
@@ -23,6 +25,7 @@ interface TransactionCardProps {
 
 export function TransactionCard({ item, isRu, getCategoryLabel, onEdit, onDelete, onViewReceipt }: TransactionCardProps) {
   const isIncome = item.transaction_type === 'income';
+  const isExpense = item.transaction_type === 'expense';
   const hasReceipt = !!item.receipt_url;
 
   return (
@@ -59,15 +62,15 @@ export function TransactionCard({ item, isRu, getCategoryLabel, onEdit, onDelete
                   </p>
                 )}
               </div>
-              <p className={`font-bold whitespace-nowrap ${isIncome ? 'text-success' : 'text-destructive'}`}>
-                {isIncome ? '+' : '-'}฿{item.amount.toLocaleString()}
+              <p className={`font-bold whitespace-nowrap ${isIncome ? 'text-success' : isExpense ? 'text-destructive' : 'text-foreground'}`}>
+                {formatPropertyRate(item.amount, item.currency, isRu)}
               </p>
             </div>
             
             <div className="flex items-center gap-2 mt-2 flex-wrap">
               <Badge variant="outline" className="text-xs">
                 <Calendar className="h-3 w-3 mr-1" />
-                {format(new Date(item.transaction_date), 'd MMM yyyy', { locale: isRu ? ru : undefined })}
+                {format(parseCivilDate(item.transaction_date), 'd MMM yyyy', { locale: isRu ? ru : undefined })}
               </Badge>
               
               {item.property && (
@@ -89,16 +92,15 @@ export function TransactionCard({ item, isRu, getCategoryLabel, onEdit, onDelete
               )}
             </div>
 
-            {/* Bible-v2 §00 H06: audit marker on money-moving rows.
-                tx_id · ledger_entry_id (via reference_id) · UTC timestamp. */}
+            {/* Audit the record and its declared reference. A reference_id alone does not identify a ledger entry. */}
             <p className="font-mono text-[10px] text-muted-foreground/70 mt-2 tracking-wide">
               <span title={item.id}>tx · {item.id.slice(0, 8)}</span>
               <span className="mx-1.5 opacity-50">·</span>
               <span title={item.reference_id ?? undefined}>
-                ledger · {item.reference_id ? item.reference_id.slice(0, 8) : '—'}
+                {item.reference_type || (isRu ? 'источник' : 'source')} · {item.reference_id ? item.reference_id.slice(0, 8) : '—'}
               </span>
               <span className="mx-1.5 opacity-50">·</span>
-              <span>{new Date(item.transaction_date).toISOString().slice(0, 10)} UTC</span>
+              <span>{item.transaction_date}</span>
             </p>
           </div>
 

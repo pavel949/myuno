@@ -1,6 +1,8 @@
 /** One pending nonce per mounted intent; session storage retains uncertain retries. */
 import { z } from 'zod';
 
+export const OFFPLAN_BUYER_ENTRY = 'offplan_buyer';
+
 class IntakeInputError extends Error {}
 class IntakeRecoveryError extends Error {}
 const contactSchema = z.object({
@@ -34,7 +36,7 @@ type RpcClient = { rpc(name: 'submit_consultation_request', args: { payload: nev
 type Store = Pick<Storage, 'getItem' | 'setItem' | 'removeItem'>;
 type Pending = { key: string; fingerprint: string; receipt?: string; storageKey: string };
 const stable = (value: unknown): string => value === null || typeof value !== 'object' ? JSON.stringify(value) : Array.isArray(value) ? '[' + value.map(stable).join(',') + ']' : '{' + Object.keys(value).sort().map(key => JSON.stringify(key) + ':' + stable((value as IntakePayload)[key])).join(',') + '}';
-export function createConsultationIntakeAttempt(options: { storage?: Store; crypto?: Crypto } = {}) {
+export function createConsultationIntakeAttempt(options: { storage?: Store; crypto?: Crypto; allowUncertainRetry?: boolean } = {}) {
   let pending: Pending | undefined;
   let inFlight: Promise<{ id: string; shouldDispatch: boolean }> | undefined;
   return {
@@ -57,6 +59,8 @@ export function createConsultationIntakeAttempt(options: { storage?: Store; cryp
       }
       const saved = storage.getItem(storageKey);
       if (saved) {
+        // Legacy writers do not recognize the nonce. Do not replay an uncertain insert.
+        if (options.allowUncertainRetry === false) throw new IntakeRecoveryError('The previous request outcome is uncertain.');
         const parsed = JSON.parse(saved) as Pending;
         if (parsed.fingerprint !== fingerprint) throw new IntakeRecoveryError('The previous request outcome is uncertain; retry its original details.');
         if (!/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(parsed.key)) throw new Error('The pending intake recovery record is invalid.');

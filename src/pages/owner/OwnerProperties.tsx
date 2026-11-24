@@ -5,10 +5,10 @@ import { useState, useMemo, useCallback } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useNavigate } from 'react-router-dom';
-import { useMyProperties, type UnifiedProperty } from '@/hooks/useMyProperties';
+import { confirmPropertyWrite, type PropertyWriteReceipt } from '@/lib/propertyWriteReceipt';
+import { useMyProperties } from '@/hooks/useMyProperties';
 import { PageContainer } from '@/components/uno/PageContainer';
 import { PageHeader } from '@/components/uno/PageHeader';
-import { BackButton } from '@/components/uno/BackButton';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -17,7 +17,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { PropertyCard, PropertyCardSkeleton } from '@/components/property/PropertyCard';
 import { PropertyMapView } from '@/components/property/PropertyMapView';
 import {
-  Home, Plus, Download, Building2, Search, X, Filter, Map, List,
+  Home, Plus, Download, Search, X, Filter, Map as MapIcon, List,
   CheckSquare, Trash2, ToggleLeft, ToggleRight, FileSpreadsheet, FolderSync, XCircle,
   ChevronDown, ChevronRight, Archive,
 } from 'lucide-react';
@@ -37,16 +37,8 @@ import {
 import { motion, AnimatePresence } from 'framer-motion';
 
 import { toast } from 'sonner';
-import { PROPERTY_TYPES } from '@/lib/propertyTaxonomy';
+import { getPropertyTypeLabel, normalizeDistrictId, normalizePropertyType, PHUKET_DISTRICTS } from '@/lib/propertyTaxonomy';
 
-/** Localize a raw property_type string from the DB into RU/EN labels. */
-function localizePropertyType(raw: string, isRu: boolean): string {
-  const normalized = raw.toLowerCase().trim();
-  const match = PROPERTY_TYPES.find(t => t.id === normalized);
-  if (match) return isRu ? match.labelRu : match.labelEn;
-  // Fallback: capitalize first letter
-  return raw.charAt(0).toUpperCase() + raw.slice(1);
-}
 /** Fetch complex & project names for filter labels */
 function usePropertyLookups(complexIds: string[], projectIds: string[]) {
   const { user } = useAuth();
@@ -117,7 +109,7 @@ export default function OwnerProperties() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const isRu = language === 'ru';
-const queryClient = useQueryClient();
+  const queryClient = useQueryClient();
   const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
 
   // Filters
@@ -127,7 +119,7 @@ const queryClient = useQueryClient();
   const [selectedProject, setSelectedProject] = useState<string | null>(null);
   const [selectedType, setSelectedType] = useState<string | null>(null);
   const [selectedAssetClass, setSelectedAssetClass] = useState<'all' | 'residential' | 'commercial' | 'land'>('all');
-  const [showFilters, setShowFilters] = useState(true);
+  const [showFilters, setShowFilters] = useState(false);
 
   // Bulk selection
   const [selectionMode, setSelectionMode] = useState(false);
@@ -141,40 +133,44 @@ const queryClient = useQueryClient();
   const [reassignTargetId, setReassignTargetId] = useState<string>('');
   const [showInactiveSection, setShowInactiveSection] = useState(true);
 
-  const { allProperties, isLoading } = useMyProperties();
-  const activeOnly = useMemo(() => (allProperties || []).filter((p) => p.is_active), [allProperties]);
+  const { allProperties, isLoading, error, refetch, isFetching } = useMyProperties();
 
   // Extract unique filter values
   const { districts, complexIds, projectIds, propertyTypes } = useMemo(() => {
-    const dists = new Set<string>();
+    const dists = new Map<string, string>(PHUKET_DISTRICTS.map(d => [d.id, isRu ? d.labelRu : d.labelEn]));
     const compIds = new Set<string>();
     const projIds = new Set<string>();
     const types = new Set<string>();
-    activeOnly.forEach(p => {
-      if (p.district) dists.add(p.district);
+    allProperties.forEach(p => {
+      const rawDistrict = p.district?.trim();
+      if (rawDistrict) {
+        const district = normalizeDistrictId(rawDistrict);
+        if (!dists.has(district)) dists.set(district, rawDistrict);
+      }
       if (p.complex_id) compIds.add(p.complex_id);
       if (p.project_id) projIds.add(p.project_id);
-      if (p.property_type) types.add(p.property_type);
+      if (p.property_type) types.add(normalizePropertyType(p.property_type));
     });
     return {
-      districts: Array.from(dists).sort(),
+      districts: [...dists].map(([value, label]) => ({ value, label })).sort((a, b) => a.label.localeCompare(b.label, language)),
       complexIds: Array.from(compIds),
       projectIds: Array.from(projIds),
       propertyTypes: Array.from(types).sort(),
     };
-  }, [activeOnly]);
+  }, [allProperties, isRu, language]);
 
   const { complexNames, projectNames } = usePropertyLookups(complexIds, projectIds);
 
   // Apply filters (search, district, type, etc.)
   const filteredProperties = useMemo(() => {
     if (!allProperties) return [];
+    const search = searchId.trim().toLowerCase();
     return allProperties.filter(p => {
-      if (searchId && !p.property_id.toLowerCase().includes(searchId.toLowerCase()) && !p.title.toLowerCase().includes(searchId.toLowerCase())) return false;
-      if (selectedDistrict && p.district !== selectedDistrict) return false;
+      if (search && ![p.property_id, p.title, p.title_ru].some(value => value?.toLowerCase().includes(search))) return false;
+      if (selectedDistrict && normalizeDistrictId(p.district || '') !== selectedDistrict) return false;
       if (selectedComplex && p.complex_id !== selectedComplex) return false;
       if (selectedProject && p.project_id !== selectedProject) return false;
-      if (selectedType && p.property_type !== selectedType) return false;
+      if (selectedType && normalizePropertyType(p.property_type || '') !== selectedType) return false;
       if (selectedAssetClass !== 'all') {
         const ac = (p as { asset_class?: string }).asset_class || 'residential';
         if (ac !== selectedAssetClass) return false;
@@ -187,7 +183,8 @@ const queryClient = useQueryClient();
   const activeProperties = useMemo(() => filteredProperties.filter(p => p.is_active), [filteredProperties]);
   const inactiveProperties = useMemo(() => filteredProperties.filter(p => !p.is_active), [filteredProperties]);
 
-  const hasActiveFilters = !!(searchId || selectedDistrict || selectedComplex || selectedProject || selectedType || selectedAssetClass !== 'all');
+  const filterCount = [selectedDistrict, selectedComplex, selectedProject, selectedType, selectedAssetClass !== 'all'].filter(Boolean).length;
+  const hasActiveFilters = !!searchId || filterCount > 0;
 
   const clearFilters = () => {
     setSearchId('');
@@ -208,12 +205,12 @@ const queryClient = useQueryClient();
   }, []);
 
   const toggleSelectAll = useCallback(() => {
-    if (selectedIds.size === activeProperties.length) {
+    if (activeProperties.every(p => selectedIds.has(p.property_id))) {
       setSelectedIds(new Set());
     } else {
       setSelectedIds(new Set(activeProperties.map(p => p.property_id)));
     }
-  }, [activeProperties, selectedIds.size]);
+  }, [activeProperties, selectedIds]);
 
   const exitSelectionMode = () => {
     setSelectionMode(false);
@@ -227,65 +224,64 @@ const queryClient = useQueryClient();
     queryClient.invalidateQueries({ queryKey: ['properties'] });
   };
 
-  // --- Bulk handlers ---
-  const handleBulkToggleActive = async (activate: boolean) => {
-    setBulkProcessing(true);
-    const ids = Array.from(selectedIds);
-    const { error } = await supabase.from('properties').update({ is_active: activate }).in('id', ids);
-    setBulkProcessing(false);
-    if (error) {
-      toast.error(isRu ? 'Ошибка' : 'Error', {
-        description: error.message,
+  const reportPropertyWrite = (receipt: PropertyWriteReceipt, success: string) => {
+    if (receipt.kind === 'complete') {
+      toast(success);
+    } else if (receipt.kind === 'partial') {
+      toast.error(isRu ? 'Изменена только часть объектов' : 'Only some properties changed', {
+        description: isRu
+          ? `Подтверждено: ${receipt.confirmed} из ${receipt.requested}. Проверьте обновлённый список перед повтором.`
+          : `Confirmed: ${receipt.confirmed} of ${receipt.requested}. Check the refreshed list before retrying.`,
       });
     } else {
-      toast(isRu ? `${ids.length} объектов ${activate ? 'активированы' : 'деактивированы'}` : `${ids.length} properties ${activate ? 'activated' : 'deactivated'}`);
-      invalidateAll();
-      exitSelectionMode();
+      toast.error(isRu ? 'Изменение не подтверждено' : 'Change not confirmed', {
+        description: isRu
+          ? 'Проверьте обновлённый список и доступ к объектам перед повтором.'
+          : 'Check the refreshed list and access to these properties before retrying.',
+      });
     }
+    invalidateAll();
+  };
+
+  // --- Bulk handlers ---
+  const handleBulkToggleActive = async (activate: boolean) => {
+    if (bulkProcessing || selectedIds.size === 0) return;
+    setBulkProcessing(true);
+    const receipt = await confirmPropertyWrite([...selectedIds], ids =>
+      supabase.from('properties').update({ is_active: activate }).in('id', ids).is('deleted_at', null).select('id'));
+    setBulkProcessing(false);
+    reportPropertyWrite(receipt, isRu ? `Обновлено объектов: ${receipt.confirmed}` : `Updated ${receipt.confirmed} properties`);
+    exitSelectionMode();
   };
 
   const handleBulkDelete = async () => {
+    if (bulkProcessing || selectedIds.size === 0 || !user) return;
     setBulkProcessing(true);
-    const ids = Array.from(selectedIds);
-    const { error } = await supabase
+    const receipt = await confirmPropertyWrite([...selectedIds], ids => supabase
       .from('properties')
-      .update({ deleted_at: new Date().toISOString(), deleted_by: user?.id ?? null, is_active: false } as never)
-      .in('id', ids);
+      .update({ deleted_at: new Date().toISOString(), deleted_by: user.id, is_active: false } as never)
+      .in('id', ids).is('deleted_at', null).select('id'));
     setBulkProcessing(false);
     setBulkDeleteOpen(false);
-    if (error) {
-      toast.error(isRu ? 'Ошибка удаления' : 'Delete failed', {
-        description: error.message,
-      });
-    } else {
-      toast(isRu ? `${ids.length} объектов удалено` : `${ids.length} properties deleted`);
-      invalidateAll();
-      exitSelectionMode();
-    }
+    reportPropertyWrite(receipt, isRu ? `Архивировано объектов: ${receipt.confirmed}` : `Archived ${receipt.confirmed} properties`);
+    exitSelectionMode();
   };
 
   const handleBulkReassign = async () => {
-    if (!reassignTargetId) return;
+    if (bulkProcessing || !reassignTargetId || selectedIds.size === 0) return;
     setBulkProcessing(true);
-    const ids = Array.from(selectedIds);
     const updatePayload = reassignType === 'complex'
       ? { complex_id: reassignTargetId }
       : { project_id: reassignTargetId };
-    const { error } = await supabase.from('properties').update(updatePayload).in('id', ids);
+    const receipt = await confirmPropertyWrite([...selectedIds], ids =>
+      supabase.from('properties').update(updatePayload).in('id', ids).is('deleted_at', null).select('id'));
     setBulkProcessing(false);
     setBulkReassignOpen(false);
     setReassignTargetId('');
-    if (error) {
-      toast.error(isRu ? 'Ошибка' : 'Error', {
-        description: error.message,
-      });
-    } else {
-      toast(isRu ? `${ids.length} объектов обновлено` : `${ids.length} properties updated`);
-      invalidateAll();
-      queryClient.invalidateQueries({ queryKey: ['property-complexes-lookup'] });
-      queryClient.invalidateQueries({ queryKey: ['property-projects-lookup'] });
-      exitSelectionMode();
-    }
+    reportPropertyWrite(receipt, isRu ? `Обновлено объектов: ${receipt.confirmed}` : `Updated ${receipt.confirmed} properties`);
+    queryClient.invalidateQueries({ queryKey: ['property-complexes-lookup'] });
+    queryClient.invalidateQueries({ queryKey: ['property-projects-lookup'] });
+    exitSelectionMode();
   };
 
   const handleBulkExport = () => {
@@ -329,49 +325,27 @@ const queryClient = useQueryClient();
   const handleDuplicate = (id: string) => navigate(`/mc/properties/new?cloneFrom=${id}`);
 
   const handleToggleActive = async (id: string, activate: boolean) => {
-    const { error } = await supabase.from('properties').update({ is_active: activate }).eq('id', id);
-    if (error) {
-      toast.error(isRu ? 'Ошибка' : 'Error');
-    } else {
-      toast(activate ? (isRu ? 'Объект активирован' : 'Property activated') : (isRu ? 'Объект деактивирован' : 'Property deactivated'));
-      invalidateAll();
-    }
+    const receipt = await confirmPropertyWrite([id], ([target]) =>
+      supabase.from('properties').update({ is_active: activate }).eq('id', target).is('deleted_at', null).select('id'));
+    reportPropertyWrite(receipt, activate
+      ? (isRu ? 'Объект активирован' : 'Property activated')
+      : (isRu ? 'Объект деактивирован' : 'Property deactivated'));
   };
 
   const handleDelete = async () => {
-    if (!deleteTarget) return;
-    const { error } = await supabase
+    if (!deleteTarget || !user) return;
+    const receipt = await confirmPropertyWrite([deleteTarget], ([id]) => supabase
       .from('properties')
-      .update({ deleted_at: new Date().toISOString(), deleted_by: user?.id ?? null, is_active: false } as never)
-      .eq('id', deleteTarget);
-    if (error) {
-      toast.error(isRu ? 'Ошибка удаления' : 'Delete failed', {
-        description: error.message,
-      });
-    } else {
-      toast(isRu ? 'Объект удалён' : 'Property deleted');
-      invalidateAll();
-    }
+      .update({ deleted_at: new Date().toISOString(), deleted_by: user.id, is_active: false } as never)
+      .eq('id', id).is('deleted_at', null).select('id'));
+    reportPropertyWrite(receipt, isRu ? 'Объект архивирован' : 'Property archived');
     setDeleteTarget(null);
   };
 
   return (
     <PageContainer>
-      <BackButton />
-      <PageHeader
-        title={isRu ? 'Мои объекты' : 'My Properties'}
-        subtitle={isRu ? 'Управление недвижимостью' : 'Property management'}
-      />
+      <PageHeader title={isRu ? 'Мои объекты' : 'My Properties'} />
 
-      {/* Workspace badge */}
-      <div className="flex items-center gap-2 mb-4">
-        <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-none bg-primary/8 text-primary">
-          <Building2 className="h-4 w-4" />
-          <span className="text-sm font-medium">{isRu ? 'Рабочее место УК' : 'MC Workspace'}</span>
-        </div>
-      </div>
-
-      {/* Action buttons: full-width primary on small screens — avoids flex-1 + nowrap clipping (see Button base styles) */}
       <div className="flex flex-wrap gap-2 mb-4">
         <Button
           className="w-full sm:flex-1 sm:min-w-[12rem] whitespace-normal min-h-10 h-auto py-2.5 overflow-visible text-center leading-snug"
@@ -398,16 +372,14 @@ const queryClient = useQueryClient();
               variant="outline"
               size="icon"
               className="h-9 w-9 min-h-[44px] min-w-[44px] shrink-0"
-              aria-label={isRu ? 'Переключить вид' : 'Toggle view'}
+              aria-label={viewMode === 'list' ? (isRu ? 'Показать на карте' : 'Show map') : (isRu ? 'Показать список' : 'Show list')}
               onClick={() => setViewMode(viewMode === 'list' ? 'map' : 'list')}
             >
-              {viewMode === 'list' ? <Map className="h-4 w-4" /> : <List className="h-4 w-4" />}
+              {viewMode === 'list' ? <MapIcon className="h-4 w-4" /> : <List className="h-4 w-4" />}
             </Button>
           </>
         )}
       </div>
-
-      <ManagedPropertyDrafts />
 
       {/* Filters */}
       {allProperties && allProperties.length > 0 && (
@@ -420,96 +392,92 @@ const queryClient = useQueryClient();
                 placeholder={isRu ? 'Поиск по ID или названию...' : 'Search by ID or name...'}
                 value={searchId}
                 onChange={(e) => setSearchId(e.target.value)}
-                className="pl-9 h-9"
+                aria-label={isRu ? 'Поиск объектов' : 'Search properties'}
+                className="h-11 pl-9 pr-12"
               />
               {searchId && (
-                <button onClick={() => setSearchId('')} className="absolute right-3 top-1/2 -translate-y-1/2" aria-label={isRu ? 'Очистить' : 'Clear'}>
+                <button onClick={() => setSearchId('')} type="button" className="absolute inset-y-0 right-0 grid w-11 place-items-center" aria-label={isRu ? 'Очистить' : 'Clear'}>
                   <X className="h-3.5 w-3.5 text-muted-foreground" />
                 </button>
               )}
             </div>
             <Button
               variant={showFilters ? 'default' : 'outline'}
-              size="icon"
-              className="h-9 w-9 min-h-[44px] min-w-[44px] shrink-0"
+              className="shrink-0 gap-2 px-3"
+              aria-expanded={showFilters}
+              aria-controls="property-filters"
               aria-label={isRu ? 'Фильтры' : 'Filters'}
               onClick={() => setShowFilters(!showFilters)}
             >
               <Filter className="h-4 w-4" />
+              {isRu ? 'Фильтры' : 'Filters'}{filterCount > 0 && ` (${filterCount})`}
             </Button>
           </div>
 
-          {showFilters && (
-            <div className="space-y-2">
-              <FilterRow label={isRu ? 'Класс объекта' : 'Asset Class'}>
-                {([
-                  { id: 'all', en: 'All', ru: 'Все' },
-                  { id: 'residential', en: 'Residential', ru: 'Жилая' },
-                  { id: 'commercial', en: 'Commercial', ru: 'Коммерческая' },
-                  { id: 'land', en: 'Land', ru: 'Земля' },
-                ] as const).map((ac) => (
-                  <FilterChip
-                    key={ac.id}
-                    label={isRu ? ac.ru : ac.en}
-                    active={selectedAssetClass === ac.id}
-                    onClick={() => setSelectedAssetClass(ac.id)}
-                  />
-                ))}
-              </FilterRow>
-              {districts.length > 0 && (
-                <FilterRow label={isRu ? 'Район' : 'District'}>
-                  {districts.map(d => (
-                    <FilterChip key={d} label={d} active={selectedDistrict === d} onClick={() => setSelectedDistrict(selectedDistrict === d ? null : d)} />
-                  ))}
-                </FilterRow>
-              )}
-              {propertyTypes.length > 0 && (
-                <FilterRow label={isRu ? 'Тип' : 'Type'}>
-                  {propertyTypes.map(t => (
-                    <FilterChip key={t} label={localizePropertyType(t, isRu)} active={selectedType === t} onClick={() => setSelectedType(selectedType === t ? null : t)} />
-                  ))}
-                </FilterRow>
-              )}
-              {complexIds.length > 0 && (
-                <FilterRow label={isRu ? 'Комплекс' : 'Complex'}>
-                  {complexIds.map(id => {
-                    const info = complexNames[id];
-                    const label = info ? (isRu && info.name_ru ? info.name_ru : info.name) : id.slice(0, 8);
-                    return <FilterChip key={id} label={label} active={selectedComplex === id} onClick={() => setSelectedComplex(selectedComplex === id ? null : id)} />;
-                  })}
-                </FilterRow>
-              )}
-              {projectIds.length > 0 && (
-                <FilterRow label={isRu ? 'Проект' : 'Project'}>
-                  {projectIds.map(id => {
-                    const info = projectNames[id];
-                    const label = info ? (isRu ? info.name_ru : info.name_en) : id.slice(0, 8);
-                    return <FilterChip key={id} label={label} active={selectedProject === id} onClick={() => setSelectedProject(selectedProject === id ? null : id)} />;
-                  })}
-                </FilterRow>
-              )}
-              {hasActiveFilters && (
-                <button onClick={clearFilters} className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors">
-                  <X className="h-3 w-3" />
-                  {isRu ? 'Сбросить фильтры' : 'Clear filters'}
-                </button>
-              )}
-            </div>
-          )}
-
-          {hasActiveFilters && (
-            <p className="text-xs text-muted-foreground">
-              {isRu ? `Найдено: ${activeProperties.length} активных, ${inactiveProperties.length} неактивных` : `Found: ${activeProperties.length} active, ${inactiveProperties.length} inactive`}
+          <div id="property-filters" hidden={!showFilters}>
+            {showFilters && <div className="grid gap-3 border bg-card p-3 sm:grid-cols-2 lg:grid-cols-3">
+              <PropertyFilter
+                label={isRu ? 'Район' : 'District'}
+                allLabel={isRu ? 'Все районы' : 'All districts'}
+                value={selectedDistrict} onChange={setSelectedDistrict} options={districts}
+              />
+              <PropertyFilter
+                label={isRu ? 'Класс объекта' : 'Asset class'}
+                allLabel={isRu ? 'Все классы' : 'All asset classes'}
+                value={selectedAssetClass === 'all' ? null : selectedAssetClass}
+                onChange={value => setSelectedAssetClass((value ?? 'all') as typeof selectedAssetClass)}
+                options={[
+                  { value: 'residential', label: isRu ? 'Жилая' : 'Residential' },
+                  { value: 'commercial', label: isRu ? 'Коммерческая' : 'Commercial' },
+                  { value: 'land', label: isRu ? 'Земля' : 'Land' },
+                ]}
+              />
+              {propertyTypes.length > 0 && <PropertyFilter
+                label={isRu ? 'Тип' : 'Type'} allLabel={isRu ? 'Все типы' : 'All types'}
+                value={selectedType} onChange={setSelectedType}
+                options={propertyTypes.map(type => ({ value: type, label: getPropertyTypeLabel(type, isRu ? 'ru' : 'en') }))}
+              />}
+              {complexIds.length > 0 && <PropertyFilter
+                label={isRu ? 'Комплекс' : 'Complex'} allLabel={isRu ? 'Все комплексы' : 'All complexes'}
+                value={selectedComplex} onChange={setSelectedComplex}
+                options={complexIds.map(id => ({ value: id, label: (isRu && complexNames[id]?.name_ru) || complexNames[id]?.name || id.slice(0, 8) }))}
+              />}
+              {projectIds.length > 0 && <PropertyFilter
+                label={isRu ? 'Проект' : 'Project'} allLabel={isRu ? 'Все проекты' : 'All projects'}
+                value={selectedProject} onChange={setSelectedProject}
+                options={projectIds.map(id => ({ value: id, label: (isRu && projectNames[id]?.name_ru) || projectNames[id]?.name_en || id.slice(0, 8) }))}
+              />}
+            </div>}
+          </div>
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <p role="status" className="text-sm text-muted-foreground">
+              {isRu
+                ? `Активные: ${activeProperties.length} · Неактивные: ${inactiveProperties.length}`
+                : `Active: ${activeProperties.length} · Inactive: ${inactiveProperties.length}`}
+              {selectedDistrict && ` · ${districts.find(d => d.value === selectedDistrict)?.label ?? selectedDistrict}`}
             </p>
-          )}
+            {hasActiveFilters && <Button variant="ghost" size="sm" onClick={clearFilters}>
+              {isRu ? 'Сбросить' : 'Reset filters'}
+            </Button>}
+          </div>
         </div>
       )}
+
+      {error && <div role="alert" className="mb-4 flex flex-wrap items-center gap-2 border p-3">
+        <p>{isRu ? 'Список объектов загружен не полностью.' : 'The property list could not be fully loaded.'}</p>
+        <Button variant="outline" size="sm" disabled={isFetching} onClick={() => void refetch()}>
+          {isRu ? 'Повторить' : 'Retry'}
+        </Button>
+      </div>}
+
+      <ManagedPropertyDrafts />
 
       {/* Select all row (active list only) */}
       {selectionMode && activeProperties.length > 0 && (
         <div className="flex items-center gap-3 mb-3 px-1">
           <Checkbox
-            checked={selectedIds.size === activeProperties.length && activeProperties.length > 0}
+            aria-label={isRu ? 'Выбрать все видимые активные объекты' : 'Select all visible active properties'}
+            checked={activeProperties.every(p => selectedIds.has(p.property_id))}
             onCheckedChange={toggleSelectAll}
           />
           <span className="text-sm text-muted-foreground">
@@ -526,7 +494,7 @@ const queryClient = useQueryClient();
             <PropertyCardSkeleton key={i} variant="list" />
           ))}
         </div>
-      ) : !allProperties?.length ? (
+      ) : error && !allProperties.length ? null : !allProperties.length ? (
         <Card>
           <CardContent className="p-8 text-center">
             <Home className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
@@ -549,7 +517,7 @@ const queryClient = useQueryClient();
             <p className="text-muted-foreground">
               {isRu ? 'Ничего не найдено' : 'No properties match your filters'}
             </p>
-            <Button variant="link" onClick={clearFilters} className="mt-2">
+            <Button variant="ghost" onClick={clearFilters} className="mt-2">
               {isRu ? 'Сбросить фильтры' : 'Clear filters'}
             </Button>
           </CardContent>
@@ -590,6 +558,7 @@ const queryClient = useQueryClient();
               {selectionMode && (
                 <div className="pt-4 pl-1 shrink-0">
                   <Checkbox
+                    aria-label={property.title}
                     checked={selectedIds.has(property.property_id)}
                     onCheckedChange={() => toggleSelection(property.property_id)}
                   />
@@ -605,7 +574,7 @@ const queryClient = useQueryClient();
                     )}
                     {!property.lat && !property.lng && (
                       <Badge variant="secondary" className="w-fit text-[10px] text-muted-foreground bg-muted/90 truncate">
-                        <Map className="h-3 w-3 mr-0.5 opacity-70" />
+                        <MapIcon className="h-3 w-3 mr-0.5 opacity-70" />
                         {isRu ? 'Нет координат' : 'No coords'}
                       </Badge>
                     )}
@@ -635,6 +604,7 @@ const queryClient = useQueryClient();
             <Card className="mt-8 border-dashed border-muted-foreground/30">
               <button
                 type="button"
+                aria-expanded={showInactiveSection}
                 onClick={() => setShowInactiveSection(!showInactiveSection)}
                 className="w-full flex items-center gap-2 p-4 text-left hover:bg-muted/30 transition-colors rounded-none"
               >
@@ -658,7 +628,7 @@ const queryClient = useQueryClient();
                             )}
                             {!property.lat && !property.lng && (
                               <Badge variant="secondary" className="w-fit text-[10px] text-muted-foreground bg-muted/90 truncate">
-                                <Map className="h-3 w-3 mr-0.5 opacity-70" />
+                                <MapIcon className="h-3 w-3 mr-0.5 opacity-70" />
                                 {isRu ? 'Нет координат' : 'No coords'}
                               </Badge>
                             )}
@@ -909,31 +879,23 @@ function BulkReassignDialog({
   );
 }
 
-// --- Sub-components ---
-
-function FilterRow({ label, children }: { label: string; children: React.ReactNode }) {
+function PropertyFilter({ label, allLabel, value, options, onChange }: {
+  label: string;
+  allLabel: string;
+  value: string | null;
+  options: { value: string; label: string }[];
+  onChange: (value: string | null) => void;
+}) {
   return (
-    <div className="space-y-1">
-      <span className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">{label}</span>
-      <div className="flex flex-wrap gap-1.5">
-        {children}
-      </div>
+    <div className="min-w-0 space-y-1">
+      <p className="text-sm font-medium">{label}</p>
+      <Select value={value || 'all'} onValueChange={next => onChange(next === 'all' ? null : next)}>
+        <SelectTrigger aria-label={label}><SelectValue /></SelectTrigger>
+        <SelectContent>
+          <SelectItem value="all">{allLabel}</SelectItem>
+          {options.map(option => <SelectItem key={option.value} value={option.value}>{option.label}</SelectItem>)}
+        </SelectContent>
+      </Select>
     </div>
-  );
-}
-
-function FilterChip({ label, active, onClick }: { label: string; active: boolean; onClick: () => void }) {
-  return (
-    <button
-      onClick={onClick}
-      className={cn(
-        'px-2.5 py-1 rounded-full text-xs font-medium border transition-all',
-        active
-          ? 'bg-primary text-primary-foreground border-primary'
-          : 'bg-card border-border text-foreground hover:border-primary/50'
-      )}
-    >
-      {label}
-    </button>
   );
 }

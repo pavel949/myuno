@@ -1,0 +1,58 @@
+name: Experience catalogue and publication acceptance
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'src/pages/experiences/**'
+      - 'src/pages/admin/*Experience*'
+      - 'src/hooks/useExperiences.ts'
+      - 'src/lib/taxonomies/experienceDiscovery.ts'
+      - 'src/lib/__tests__/experiencePublication.postgres.test.ts'
+      - 'scripts/qa/fixtures/experience-security/**'
+      - 'scripts/qa/experiences-journey-ui.*'
+      - '.github/workflows/experience-publication.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: experience-publication-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+jobs:
+  isolated-acceptance:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      VITE_SUPABASE_URL: http://127.0.0.1:54321
+      VITE_SUPABASE_PUBLISHABLE_KEY: isolated-verification-placeholder
+      VITE_SUPABASE_PROJECT_ID: isolated-verification
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: 22
+          cache: npm
+      - name: Install isolated test tools
+        id: tools
+        run: |
+          npm ci
+          sudo apt-get update
+          sudo apt-get install -y postgresql
+          for binary in /usr/lib/postgresql/*/bin/postgres; do dirname "$binary" >> "$GITHUB_PATH"; break; done
+          python3 -m pip install playwright
+          python3 -m playwright install --with-deps chromium
+      - name: Verify real PostgreSQL roles against synthetic records
+        run: npx vitest run src/lib/__tests__/experiencePublication.postgres.test.ts
+      - name: Verify catalogue and actual admin desktop and mobile
+        if: ${{ !cancelled() && steps.tools.outcome == 'success' }}
+        run: node scripts/qa/experiences-journey-ui.mjs
+      - name: Upload exact-head experience evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: experience-acceptance-${{ github.event.pull_request.head.sha || github.sha }}
+          path: artifacts/ux-clarity/experiences-journey/
+          if-no-files-found: warn
+          retention-days: 14

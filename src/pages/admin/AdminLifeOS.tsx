@@ -64,9 +64,9 @@ export default function AdminLifeOS() {
     },
     { 
       id: 'quality', 
-      label: isRussian ? 'Качество' : 'Quality', 
+      label: isRussian ? 'Проверка связей' : 'Link checks',
       icon: ShieldCheck,
-      description: isRussian ? 'Доверие' : 'Trust'
+      description: isRussian ? 'Структура' : 'Structure'
     },
     { 
       id: 'audit', 
@@ -112,8 +112,9 @@ export default function AdminLifeOS() {
               key={tab.id}
               value={tab.id}
               className="gap-2 data-[state=active]:bg-background"
+              aria-label={tab.label}
             >
-              <tab.icon className="h-4 w-4" />
+              <tab.icon className="h-4 w-4" aria-hidden="true" />
               <span className="hidden sm:inline">{tab.label}</span>
             </TabsTrigger>
           ))}

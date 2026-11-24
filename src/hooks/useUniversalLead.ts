@@ -1,5 +1,6 @@
+import { observeLeadNotification } from '@/lib/leadNotification';
 import { useRef } from 'react';
-import { createConsultationIntakeAttempt, consultationIntakeErrorCopy } from '@/lib/consultationIntake';
+import { createConsultationIntakeAttempt, consultationIntakeErrorCopy, OFFPLAN_BUYER_ENTRY } from '@/lib/consultationIntake';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -91,19 +92,21 @@ export function useUniversalLead() {
       if (!attempt) throw new Error('Intake recovery is unavailable.');
       const receipt = await attempt.submit(supabase, payload, user?.id);
       const data = { id: receipt.id };
+      const sendFromBrowser = receipt.shouldDispatch && input.entry_point !== OFFPLAN_BUYER_ENTRY;
 
       // Trigger WhatsApp notification for specific verticals. Non-blocking, but a
       // silent failure means Pavel never hears about a new lead — log it (with the
       // lead id) so the failure is detectable instead of vanishing.
-      if (receipt.shouldDispatch && data && WHATSAPP_NOTIFICATION_VERTICALS.includes(input.vertical_id)) {
+      if (sendFromBrowser && WHATSAPP_NOTIFICATION_VERTICALS.includes(input.vertical_id)) {
         supabase.functions.invoke('notify-lead-whatsapp', {
           body: { leadId: data.id },
         }).catch((e) => logger.error(`[useUniversalLead] notify-lead-whatsapp failed for lead ${data.id}:`, e));
       }
 
-      // Notify admin about new lead via email (non-blocking, logged on failure).
-      if (receipt.shouldDispatch && data) {
-        supabase.functions.invoke('notify-admin-order', {
+      // Observe a bounded notification attempt after the durable save. Provider acceptance
+      // is not delivery; failure must never turn a saved enquiry into an intake error.
+      if (sendFromBrowser) {
+        const notificationStatus = await observeLeadNotification(() => supabase.functions.invoke('notify-admin-order', {
           body: {
             order_id: data.id,
             order_number: `LEAD-${data.id.slice(0, 8).toUpperCase()}`,
@@ -113,9 +116,13 @@ export function useUniversalLead() {
             customer_name: input.name,
             customer_email: input.email,
             customer_phone: input.phone,
-            notes: input.notes || `Lead: ${input.request_type} via ${input.entry_point}`,
+            notes: [`Lead: ${input.request_type} via ${input.entry_point}`, input.notes].filter(Boolean).join('\n'),
           },
-        }).catch((e) => logger.error(`[useUniversalLead] notify-admin-order failed for lead ${data.id}:`, e));
+        }));
+        if (notificationStatus !== 'accepted') {
+          // The receipt remains successful. Do not invite a duplicate enquiry.
+          logger.error(`[useUniversalLead] admin notification unconfirmed for lead ${data.id}`);
+        }
       }
 
       // Trigger auto lead scoring (non-blocking, logged on failure).

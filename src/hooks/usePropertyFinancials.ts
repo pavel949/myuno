@@ -4,6 +4,8 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useActiveCompany } from '@/hooks/useActiveCompany';
 import { getAccessiblePropertyIds as getAccessiblePropertyIdsShared } from '@/lib/getAccessiblePropertyIds';
 import { toast } from 'sonner';
+import { bangkokTodayISO } from '@/lib/hotelDates';
+import { financeOverviewMonths, readFinanceRecordPages, summarizeFinanceRecords } from '@/lib/finance/mcFinanceOverview';
 
 export interface PropertyFinancialFull {
   id: string;
@@ -246,6 +248,53 @@ export function usePropertyFinancialsCount(propertyId?: string) {
   });
 }
 
+/**
+ * MC finance overview's dated operational records. This does not read or claim
+ * reconciliation, and it never treats an absent active company as all companies.
+ */
+export function useMcFinanceOverview() {
+  const { user } = useAuth();
+  const { activeCompany, isLoading, isVerifying, error: companyError, refetch: refetchCompany } = useActiveCompany();
+  const companyId = activeCompany?.company_id ?? null;
+  const asOf = bangkokTodayISO();
+  const ready = Boolean(user && companyId && !isLoading && !isVerifying && !companyError);
+  const query = useQuery({
+    queryKey: ['property-financials-full', 'mc-overview', user?.id, companyId, asOf],
+    enabled: ready,
+    queryFn: async ({ signal }) => {
+      if (!user || !companyId) return null;
+      const { allIds } = await getAccessiblePropertyIdsShared({ userId: user.id, activeCompanyId: companyId });
+      if (!allIds.length) return null;
+      const [{ start }] = financeOverviewMonths(asOf);
+      const rows = await readFinanceRecordPages(async (afterId) => {
+        let request = supabase
+          .from('property_financials')
+          .select('id, transaction_type, transaction_date, amount, currency, category', { count: 'exact' })
+          .in('property_id', allIds)
+          .in('transaction_type', ['income', 'expense'])
+          .gte('transaction_date', start)
+          .lte('transaction_date', asOf)
+          .order('id')
+          .limit(500)
+          .abortSignal(signal);
+        if (afterId) request = request.gt('id', afterId);
+        const { data, error, count } = await request;
+        if (error) throw error;
+        return { rows: data ?? [], remaining: count };
+      });
+      return summarizeFinanceRecords(rows, asOf);
+    },
+  });
+
+  return {
+    months: ready && !query.isError ? query.data : undefined,
+    asOf,
+    isLoading: isLoading || isVerifying || (ready && query.isPending),
+    isError: Boolean(companyError) || (ready && query.isError),
+    retry: companyError ? refetchCompany : query.refetch,
+  };
+}
+
 export function useFinancialStats(propertyId?: string) {
   const { user } = useAuth();
   const { activeCompany } = useActiveCompany();
@@ -271,8 +320,8 @@ export function useFinancialStats(propertyId?: string) {
       const { data, error } = await query;
       if (error) throw error;
 
-      const now = new Date();
-      const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+      const today = bangkokTodayISO();
+      const [currentMonth] = financeOverviewMonths(today).slice(-1);
 
       const stats: FinancialStats = {
         totalIncome: 0,
@@ -287,8 +336,8 @@ export function useFinancialStats(propertyId?: string) {
 
       (data || []).forEach(item => {
         const amount = Number(item.amount);
-        const transactionDate = new Date(item.transaction_date);
-        const isThisMonth = transactionDate >= startOfMonth;
+        const isThisMonth = item.transaction_date >= currentMonth.start &&
+          item.transaction_date < currentMonth.endExclusive && item.transaction_date <= today;
 
         if (item.transaction_type === 'income') {
           stats.totalIncome += amount;

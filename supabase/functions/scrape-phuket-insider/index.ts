@@ -1,6 +1,7 @@
 // deno-lint-ignore-file no-explicit-any
 import { createClient, SupabaseClient } from "npm:@supabase/supabase-js@2";
 import { getCorsHeaders } from "../_shared/cors.ts";
+import { requireServiceCaller } from "../_shared/internal-secret.ts";
 
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
@@ -197,6 +198,7 @@ Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
+  { const denied = await requireServiceCaller(req, corsHeaders); if (denied) return denied; }
 
   try {
     const { mode, urls, city_slug, section, batch_size } = await req.json();

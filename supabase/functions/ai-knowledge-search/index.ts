@@ -1,6 +1,7 @@
 // AI Knowledge semantic search: embeds query, calls match_ai_knowledge RPC.
 // Public (used by ai-support-chat and admin UI).
 import { createClient } from "../_shared/supabase.ts";
+import { requireInternalOrStaff } from "../_shared/authz.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -13,6 +14,7 @@ const EMBED_DIMS = 1536;
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
+  { const gate = await requireInternalOrStaff(req, corsHeaders); if (gate instanceof Response) return gate; }
 
   try {
     const body = await req.json().catch(() => null);
