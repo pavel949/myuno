@@ -121,3 +121,54 @@ test('legacy public lead stays internal and generates an exact Inbox notificatio
   assert.equal((await actor('authenticated', owner, c => c`SELECT id FROM public.nb_leads`))[0].id, lead);
   assert.equal((await actor('authenticated', stranger, c => c`SELECT id FROM public.nb_leads`)).length, 0);
 });
+
+const durable=(p,role='anon',uid=null)=>actor(role,uid,async c=>(await c`SELECT public.submit_consultation_request_durable(${c.json(p)}) id`)[0].id);
+const catalogue=(patch={})=>payload({entry_point:'catalogue_search:rent',request_type:'property_consultation',vertical_metadata:{search_kind:'rent',search:{mode:'rent'},request_only:true},...patch});
+test('durable catalogue enquiry preserves omitted stay criteria and enqueues two channels',async()=>{
+ const p=catalogue();
+ const ids=await Promise.all(Array.from({length:8},()=>durable(p)));
+ assert.equal(new Set(ids).size,1);const id=ids[0];
+ assert.equal((await queue(id)).length,2);
+ const [row]=await sql`SELECT status,guests_count,children_count,vertical_metadata FROM consultation_requests WHERE id=${id}`;
+ assert.equal(row.status,'pending');assert.equal(row.guests_count,null);assert.equal(row.children_count,null);
+ assert.equal(row.vertical_metadata.search_kind,'rent');assert.equal(await durable(p),id);
+ await assert.rejects(durable({...p,name:'Changed'}),{code:'23505'});
+});
+test('cross-protocol replay is rejected instead of sending twice',async()=>{
+ const p=catalogue();const legacy=await submit(p);assert.equal((await queue(legacy)).length,0);
+ await assert.rejects(durable(p),{code:'23505'});
+ const q=catalogue(),id=await durable(q);
+ await assert.rejects(submit(q),{code:'23505'});assert.equal((await queue(id)).length,2);
+});
+test('physical listing enquiry works without offplan context and rejects hidden property',async()=>{
+ const p=catalogue({entry_point:'/property/details',vertical_metadata:{property_id:property,intent:'rental_enquiry',request_only:true}});
+ const id=await durable(p);assert.equal((await queue(id)).length,2);
+ await assert.rejects(durable({...p,intake_request_key:uuid(nonce++),vertical_metadata:{...p.vertical_metadata,property_id:uuid(99)}}),{code:'42501'});
+});
+test('resale viewing validates the actual listing and canonical link',async()=>{
+ const listing=uuid(41);await sql`INSERT INTO resale_properties VALUES(${listing},${project},'active')`;
+ const p=catalogue({entry_point:'/property/resale',request_type:'property_tour',vertical_id:'property',vertical_metadata:{marketplace:'resale',resale_listing_id:listing,intent:'viewing'}});
+ const id=await durable(p);const [row]=await sql`SELECT resale_property_id FROM consultation_requests WHERE id=${id}`;
+ assert.equal(row.resale_property_id,listing);assert.equal((await queue(id)).length,2);
+ await assert.rejects(durable({...p,intake_request_key:uuid(nonce++),vertical_metadata:{...p.vertical_metadata,resale_listing_id:uuid(99)}}),{code:'42501'});
+});
+test('durable enqueue failure rolls back the enquiry itself',async()=>{
+ await sql.unsafe("CREATE FUNCTION private.fixture_fail_durable() RETURNS trigger LANGUAGE plpgsql AS $$ BEGIN RAISE EXCEPTION 'synthetic failure'; END; $$; CREATE TRIGGER fixture_fail_durable BEFORE INSERT ON private.consultation_notification_outbox FOR EACH ROW EXECUTE FUNCTION private.fixture_fail_durable();");
+ const p=catalogue();
+ try {await assert.rejects(durable(p));assert.equal((await sql`SELECT id FROM consultation_requests WHERE intake_request_key=${p.intake_request_key}`).length,0);}
+ finally{await sql.unsafe('DROP TRIGGER fixture_fail_durable ON private.consultation_notification_outbox; DROP FUNCTION private.fixture_fail_durable();');}
+});
+test('dedicated experience receipt remains compatible with the general guards',async()=>{
+ await sql.unsafe("CREATE TABLE public.listings(id uuid PRIMARY KEY,name_ru text,name_en text,vertical text,is_active boolean,approval_status text,attributes jsonb)");
+ const c=await sql.reserve();
+ try{await c.unsafe(readFileSync('docs/hardening/experience-inquiry/forward.sql','utf8'));}
+ catch(e){await c.unsafe('ROLLBACK');throw e;}finally{c.release();}
+ const offer=uuid(42),actorId=uuid(43);await sql`INSERT INTO auth.users VALUES(${actorId})`;
+ await sql`INSERT INTO listings VALUES(${offer},'Synthetic','Synthetic','experience',true,'approved','{"status":"published"}')`;
+ const exp={intake_request_key:uuid(nonce++),intake_actor_hint:actorId,name:'Synthetic Guest',phone:'+66000000000',preferred_language:'en',preferred_dates:[{date:'2099-01-01'}],guests_count:2,vertical_metadata:{listing_id:offer}};
+ const send=()=>actor('authenticated',actorId,async tx=>(await tx`SELECT public.submit_experience_inquiry(${tx.json(exp)}) id`)[0].id);
+ const id=await send();assert.equal(await send(),id);assert.equal((await queue(id)).length,0);
+ await assert.rejects(durable(catalogue({request_type:'tour_booking'})),{code:'42501'});
+ await sql`DELETE FROM auth.users WHERE id=${actorId}`;
+ assert.equal((await sql`SELECT user_id FROM consultation_requests WHERE id=${id}`)[0].user_id,null);
+});

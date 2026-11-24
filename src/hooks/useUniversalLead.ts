@@ -1,6 +1,6 @@
 import { observeLeadNotification } from '@/lib/leadNotification';
 import { useRef } from 'react';
-import { createConsultationIntakeAttempt, consultationIntakeErrorCopy, OFFPLAN_BUYER_ENTRY } from '@/lib/consultationIntake';
+import { createGeneralConsultationIntakeAttempt, consultationIntakeErrorCopy, OFFPLAN_BUYER_ENTRY } from '@/lib/consultationIntake';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -47,8 +47,8 @@ export function useUniversalLead() {
   const { user } = useAuth();
   const { language } = useLanguage();
   const queryClient = useQueryClient();
-  const intake = useRef<ReturnType<typeof createConsultationIntakeAttempt> | null>(null);
-  if (!intake.current) intake.current = createConsultationIntakeAttempt();
+  const intake = useRef<ReturnType<typeof createGeneralConsultationIntakeAttempt> | null>(null);
+  if (!intake.current) intake.current = createGeneralConsultationIntakeAttempt();
 
   const submitLead = useMutation({
     mutationFn: async (input: UniversalLeadInput) => {

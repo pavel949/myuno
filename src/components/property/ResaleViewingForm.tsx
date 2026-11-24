@@ -7,7 +7,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { supabase } from '@/integrations/supabase/client';
 import { APP_ROUTES } from '@/lib/config/routes';
-import { consultationIntakeErrorCopy, createConsultationIntakeAttempt } from '@/lib/consultationIntake';
+import { consultationIntakeErrorCopy, createGeneralConsultationIntakeAttempt } from '@/lib/consultationIntake';
 import { contactIntakeSchema } from '@/lib/crm/validation';
 import { pickLang } from '@/lib/i18n/pickLang';
 
@@ -22,7 +22,7 @@ export function ResaleViewingForm({ listingId, onClose }: { listingId: string; o
   const [receipt, setReceipt] = useState<string>();
   const [submitting, setSubmitting] = useState(false);
   const sending = useRef(false);
-  const [intake] = useState(() => createConsultationIntakeAttempt({ allowUncertainRetry: false }));
+  const [intake] = useState(() => createGeneralConsultationIntakeAttempt());
   const t = (ru: string, en: string, th: string) => pickLang(language, { ru, en, th });
 
   const submit = async (event: FormEvent<HTMLFormElement>) => {

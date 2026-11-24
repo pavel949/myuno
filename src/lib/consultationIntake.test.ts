@@ -48,3 +48,30 @@ describe('pending consultation nonce recovery',()=>{
  });
 
 });
+
+describe('versioned durable general intake protocol',()=>{
+  it('uses only the durable RPC, retains its nonce after lost response, and suppresses browser dispatch',async()=>{
+    const f=fixture();
+    const rpc=vi.fn().mockRejectedValueOnce(new Error('response lost')).mockResolvedValue({data:'synthetic-durable-receipt',error:null});
+    const make=()=>createConsultationIntakeAttempt({storage:f.storage,crypto:webcrypto as unknown as Crypto,allowUncertainRetry:true,durable:true});
+    await expect(make().submit({rpc},body)).rejects.toThrow('response lost');
+    const result=await make().submit({rpc},body);
+    expect(result).toEqual({id:'synthetic-durable-receipt',shouldDispatch:false});
+    expect(rpc).toHaveBeenCalledTimes(2);
+    expect(rpc.mock.calls.every(c=>c[0]==='submit_consultation_request_durable')).toBe(true);
+    expect(rpc.mock.calls[0][1].payload.intake_request_key).toBe(rpc.mock.calls[1][1].payload.intake_request_key);
+  });
+  it('does not replay an uncertain legacy request through the new writer',async()=>{
+    const f=fixture(),rpc=vi.fn().mockRejectedValue(new Error('response lost'));
+    await expect(f.make().submit({rpc},body)).rejects.toThrow('response lost');
+    const durable=createConsultationIntakeAttempt({storage:f.storage,crypto:webcrypto as unknown as Crypto,allowUncertainRetry:true,durable:true});
+    await expect(durable.submit({rpc},body)).rejects.toThrow('legacy request outcome is uncertain');
+    expect(rpc).toHaveBeenCalledOnce();
+  });
+  it('does not fall back to the old writer on a missing durable RPC',async()=>{
+    const f=fixture(),rpc=vi.fn().mockResolvedValue({data:null,error:{code:'PGRST202'}});
+    const durable=createConsultationIntakeAttempt({storage:f.storage,crypto:webcrypto as unknown as Crypto,allowUncertainRetry:true,durable:true});
+    await expect(durable.submit({rpc},body)).rejects.toMatchObject({code:'PGRST202'});
+    expect(rpc).toHaveBeenCalledOnce();expect(rpc.mock.calls[0][0]).toBe('submit_consultation_request_durable');
+  });
+});

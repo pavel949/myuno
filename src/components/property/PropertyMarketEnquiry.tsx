@@ -7,7 +7,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { supabase } from '@/integrations/supabase/client';
-import { consultationIntakeErrorCopy, createConsultationIntakeAttempt } from '@/lib/consultationIntake';
+import { consultationIntakeErrorCopy, createGeneralConsultationIntakeAttempt } from '@/lib/consultationIntake';
 import { contactIntakeSchema } from '@/lib/crm/validation';
 import { pickLang } from '@/lib/i18n/pickLang';
 import { propertyDetailHref } from '@/lib/real-estate/propertyDetailIntent';
@@ -32,7 +32,7 @@ export function PropertyMarketEnquiry({ propertyId, title, intent, onClose }: {
   const sending = useRef(false);
   // The deployed legacy RPC does not claim the nonce. A transport failure must
   // never cause a second insert, including after closing/reopening this modal.
-  const [intake] = useState(() => createConsultationIntakeAttempt({ allowUncertainRetry: false }));
+  const [intake] = useState(() => createGeneralConsultationIntakeAttempt());
   const t = (ru: string, en: string, th: string) => pickLang(language, { ru, en, th });
   const tenancy = intent.mode === 'rent' ? intent.tenancy : undefined;
   const topic = intent.mode === 'buy'
