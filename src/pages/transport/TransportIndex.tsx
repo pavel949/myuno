@@ -3,12 +3,14 @@ import '@/styles/public-commerce.css';
  * TransportIndex — Premium vehicle rental catalog
  * Sixt/Hertz-level UX with myUNO trust architecture
  */
-import { useState, useMemo, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Car, SlidersHorizontal, Plane, ArrowUpDown } from 'lucide-react';
+import { useMemo, useRef, useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { Car, Plane, ArrowUpDown } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { MiniAppLayout } from '@/components/miniapp/MiniAppLayout';
 import { Button } from '@/components/ui/button';
+import { MarketplaceFilterSheet } from '@/components/services/MarketplaceFilterSheet';
+import { pickLang } from '@/lib/i18n/pickLang';
 import { Skeleton } from '@/components/ui/skeleton';
 import { EmptyState } from '@/components/uno/EmptyState';
 import { CrossSellSection } from '@/components/crosssell';
@@ -17,11 +19,13 @@ import { ECOSYSTEM_PAGE_CONTAINER } from '@/design-system/ecosystemLayout';
 import { normalizeVehicleType } from '@/lib/taxonomies';
 import { cn } from '@/lib/utils';
 import { TransportHeroSearch } from '@/components/transport/TransportHeroSearch';
-import { VehicleClassNav } from '@/components/transport/VehicleClassNav';
+import { VEHICLE_CLASSES, VehicleClassNav } from '@/components/transport/VehicleClassNav';
 import { VehicleCard } from '@/components/transport/VehicleCard';
 import {
   TransportFilterSidebar,
   applyTransportFilters,
+  compareTransportDailyPrice,
+  parseTransportPriceRange,
   DEFAULT_FILTERS,
   type TransportFilters,
 } from '@/components/transport/TransportFilterSidebar';
@@ -48,16 +52,87 @@ const QUICK_LINKS = [
   { id: 'airport', labelEn: 'Airport Transfer', labelRu: 'Трансфер', path: '/transport/airport-transfer', icon: Plane },
 ];
 
+function writeQueryValue(params: URLSearchParams, key: string, value: string) {
+  if (value) params.set(key, value);
+  else params.delete(key);
+}
+
+function readTransportState(params: URLSearchParams) {
+  const selectedClass = VEHICLE_CLASSES.find(option => option.id === params.get('vehicleClass'))?.id ?? 'all';
+  const sortKey = SORT_OPTIONS.find(option => option.id === params.get('sort'))?.id ?? 'recommended';
+  const seats = Number(params.get('seats'));
+  const list = (key: string) => [...new Set(params.getAll(key).map(value => value.trim()).filter(Boolean))];
+  return { selectedClass, sortKey, filters: {
+    minPrice: params.get('minPrice') ?? '',
+    maxPrice: params.get('maxPrice') ?? '',
+    transmissions: list('transmission'),
+    fuelTypes: list('fuel'),
+    brands: list('brand'),
+    minSeats: [2, 4, 7, 9].includes(seats) ? seats : null,
+    deliveryOnly: params.get('delivery') === '1',
+    withDriverOnly: params.get('withDriver') === '1',
+  } satisfies TransportFilters };
+}
+
+const TRANSPORT_PANEL_KEYS = ['minPrice', 'maxPrice', 'seats', 'delivery', 'withDriver', 'transmission', 'fuel', 'brand'] as const;
+
+function writeTransportFilters(params: URLSearchParams, filters: TransportFilters) {
+  writeQueryValue(params, 'minPrice', filters.minPrice);
+  writeQueryValue(params, 'maxPrice', filters.maxPrice);
+  writeQueryValue(params, 'seats', filters.minSeats?.toString() ?? '');
+  writeQueryValue(params, 'delivery', filters.deliveryOnly ? '1' : '');
+  writeQueryValue(params, 'withDriver', filters.withDriverOnly ? '1' : '');
+  for (const [key, values] of [['transmission', filters.transmissions], ['fuel', filters.fuelTypes], ['brand', filters.brands]] as const) {
+    params.delete(key);
+    for (const value of values) params.append(key, value);
+  }
+}
+
 export default function TransportIndex() {
   const { language } = useLanguage();
   const navigate = useNavigate();
   const isRu = language === 'ru';
   const { vehicles, isLoading } = useVehicles();
 
-  const [selectedClass, setSelectedClass] = useState('all');
-  const [sortKey, setSortKey] = useState<SortKey>('recommended');
-  const [filters, setFilters] = useState<TransportFilters>(DEFAULT_FILTERS);
-  const [filtersOpen, setFiltersOpen] = useState(false);
+  const location = useLocation();
+  const t = (ru: string, en: string, th: string) => pickLang(language, { ru, en, th });
+  const pending = useRef({ key: location.key, search: location.search });
+  if (pending.current.key !== location.key) pending.current = { key: location.key, search: location.search };
+  const { selectedClass, sortKey, filters } = useMemo(() => readTransportState(new URLSearchParams(location.search)), [location.search]);
+  const changeSearch = (edit: (params: URLSearchParams) => void) => {
+    const params = new URLSearchParams(pending.current.search);
+    edit(params);
+    const search = params.size ? `?${params.toString()}` : '';
+    if (search === pending.current.search) return;
+    pending.current.search = search;
+    navigate({ search, hash: location.hash }, { state: location.state, preventScrollReset: true });
+  };
+  const setSelectedClass = (value: string) => changeSearch(params => writeQueryValue(params, 'vehicleClass', value === 'all' ? '' : value));
+  const setSortKey = (value: string) => changeSearch(params => writeQueryValue(params, 'sort', value === 'recommended' ? '' : value));
+  const setFilters = (values: TransportFilters) => changeSearch(params => writeTransportFilters(params, values));
+  const [editing, setEditing] = useState<{ initial: TransportFilters; values: TransportFilters } | null>(null);
+  const draft = editing?.values ?? filters;
+  const draftPriceInvalid = !parseTransportPriceRange(draft).valid;
+  const priceInvalid = !parseTransportPriceRange(filters).valid;
+  const editDraft = (values: TransportFilters) => setEditing(previous => ({ initial: previous?.initial ?? filters, values }));
+  const applyDraft = () => {
+    if (!editing || draftPriceInvalid) return;
+    const initial = new URLSearchParams();
+    const next = new URLSearchParams();
+    writeTransportFilters(initial, editing.initial);
+    writeTransportFilters(next, editing.values);
+    changeSearch(params => {
+      // Rebase only changed keys onto the latest URL. Repeated values (brands,
+      // fuel and transmissions) must round-trip, unlike single-value facets.
+      for (const key of TRANSPORT_PANEL_KEYS) {
+        const before = initial.getAll(key);
+        const after = next.getAll(key);
+        if (before.length === after.length && before.every((value, index) => value === after[index])) continue;
+        params.delete(key);
+        after.forEach(value => params.append(key, value));
+      }
+    });
+  };
   const resultsRef = useRef<HTMLDivElement>(null);
 
   // Count vehicles per class
@@ -73,7 +148,7 @@ export default function TransportIndex() {
   // Count active filters
   const activeFilterCount = useMemo(() => {
     let count = 0;
-    if (filters.priceRange[0] > 0 || filters.priceRange[1] < 5000) count++;
+    if (filters.minPrice || filters.maxPrice) count++;
     if (filters.transmissions.length > 0) count++;
     if (filters.fuelTypes.length > 0) count++;
     if (filters.brands.length > 0) count++;
@@ -96,8 +171,8 @@ export default function TransportIndex() {
     // Sort
     results.sort((a, b) => {
       switch (sortKey) {
-        case 'price_asc': return (a.price_per_day || 0) - (b.price_per_day || 0);
-        case 'price_desc': return (b.price_per_day || 0) - (a.price_per_day || 0);
+        case 'price_asc': return compareTransportDailyPrice(a, b, false);
+        case 'price_desc': return compareTransportDailyPrice(a, b, true);
         case 'rating': return (b.rating || 0) - (a.rating || 0);
         case 'newest': return (b.year_built || 0) - (a.year_built || 0);
         case 'recommended':
@@ -124,11 +199,8 @@ export default function TransportIndex() {
     >
       {/* Hero Search */}
       <TransportHeroSearch onSearch={(params) => {
-        setFilters(prev => ({
-          ...prev,
-          deliveryOnly: params.delivery,
-          withDriverOnly: params.withDriver,
-        }));
+        const current = readTransportState(new URLSearchParams(pending.current.search));
+        setFilters({ ...current.filters, deliveryOnly: params.delivery, withDriverOnly: params.withDriver });
         resultsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
       }} />
 
@@ -160,26 +232,18 @@ export default function TransportIndex() {
             <p className="text-sm text-muted-foreground whitespace-nowrap">
               {isRu ? `Найдено: ${filtered.length}` : `${filtered.length} results`}
             </p>
-            <Button
-              variant="outline"
-              size="sm"
-              className={cn(
-                "text-xs gap-1.5 min-h-11 whitespace-nowrap",
-                activeFilterCount > 0 && "border-primary text-primary"
-              )}
-              onClick={() => setFiltersOpen(!filtersOpen)}
-            >
-              <SlidersHorizontal className="w-3.5 h-3.5" />
-              {isRu ? 'Фильтры' : 'Filters'}
-              {activeFilterCount > 0 && (
-                <span className="px-1.5 py-0.5 rounded-full bg-primary text-primary-foreground text-[10px] font-bold ml-0.5">
-                  {activeFilterCount}
-                </span>
-              )}
-            </Button>
+            <MarketplaceFilterSheet title={t('Фильтры транспорта', 'Vehicle filters', 'ตัวกรองยานพาหนะ')} showLabel activeCount={activeFilterCount}
+              applyLabel={t('Показать транспорт', 'Show vehicles', 'แสดงยานพาหนะ')}
+              onOpenChange={open => {
+                const current = readTransportState(new URLSearchParams(pending.current.search)).filters;
+                setEditing(open ? { initial: current, values: current } : null);
+              }}
+              onReset={() => editDraft(DEFAULT_FILTERS)} onApply={applyDraft} applyDisabled={draftPriceInvalid}>
+              <TransportFilterSidebar filters={draft} onChange={editDraft} vehicles={vehicles} />
+            </MarketplaceFilterSheet>
           </div>
 
-          <Select value={sortKey} onValueChange={(v) => setSortKey(v as SortKey)}>
+          <Select value={sortKey} onValueChange={setSortKey}>
             <SelectTrigger className="w-auto shrink-0 gap-1.5 min-h-11 whitespace-nowrap text-xs border-border/50 bg-background" aria-label={isRu ? 'Сортировка' : 'Sort by'}>
               <ArrowUpDown className="w-3.5 h-3.5 text-muted-foreground" />
               <SelectValue />
@@ -195,18 +259,8 @@ export default function TransportIndex() {
         </div>
       </div>
 
-      {/* Main content with optional sidebar */}
       <div className={cn(ECOSYSTEM_PAGE_CONTAINER, "pb-24")}>
-        <div className={cn("flex gap-6", filtersOpen && "lg:flex")}>
-          <TransportFilterSidebar
-            filters={filters}
-            onChange={setFilters}
-            vehicles={vehicles}
-            open={filtersOpen}
-            onClose={() => setFiltersOpen(false)}
-          />
-
-          <div className="flex-1 min-w-0">
+        <div className="min-w-0">
             {isLoading ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                 {[1, 2, 3, 4, 5, 6].map(i => (
@@ -223,6 +277,10 @@ export default function TransportIndex() {
                   </div>
                 ))}
               </div>
+            ) : priceInvalid ? (
+              <EmptyState icon={Car} title={t('Неверный диапазон цен', 'Invalid price range', 'ช่วงราคาไม่ถูกต้อง')}
+                description={t('Укажите неотрицательные цены, от меньшей к большей.', 'Use non-negative amounts, from lowest to highest.', 'กรอกจำนวนเงินที่ไม่ติดลบ เรียงจากต่ำไปสูง')}
+                action={<Button type="button" variant="outline" onClick={() => setFilters({ ...filters, minPrice: '', maxPrice: '' })}>{t('Сбросить диапазон цен', 'Clear price range', 'ล้างช่วงราคา')}</Button>} />
             ) : filtered.length === 0 ? (
               <EmptyState
                 icon={Car}
@@ -230,12 +288,7 @@ export default function TransportIndex() {
                 description={isRu ? 'Попробуйте изменить фильтры или выбрать другой класс' : 'Try adjusting filters or selecting a different class'}
               />
             ) : (
-              <div className={cn(
-                "grid gap-4 md:gap-6",
-                filtersOpen
-                  ? "grid-cols-1 sm:grid-cols-2"
-                  : "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"
-              )}>
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:gap-6 lg:grid-cols-3">
                 {filtered.map(vehicle => (
                   <VehicleCard
                     key={vehicle.id}
@@ -247,7 +300,6 @@ export default function TransportIndex() {
             )}
 
             <CrossSellSection currentVertical="transport" className="mt-10" />
-          </div>
         </div>
       </div>
     </MiniAppLayout>

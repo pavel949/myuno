@@ -16,7 +16,7 @@ const offers = [
  { id: 'dive', title_en: 'Underwater activity', title_ru: 'Погружение', category: 'diving', experience_type: 'activity', price: 400, rating: 5 },
  { id: 'unknown', title_en: 'Request-priced tour', title_ru: 'Экскурсия по запросу', category: 'islands', experience_type: 'tour', price: null, rating: 0 },
 ];
-vi.mock('@/components/services/MarketplaceFilterSheet', () => ({ MarketplaceFilterSheet: ({ children }: { children: React.ReactNode }) => <>{children}</> }));
+vi.mock('@/components/services/MarketplaceFilterSheet', () => ({ MarketplaceFilterSheet: ({ children, onApply }: { children: React.ReactNode; onApply: () => void }) => <>{children}<button onClick={onApply}>Apply fixture filters</button></> }));
 vi.mock('@/contexts/LanguageContext', () => ({ useLanguage: () => ({ language: state.language }) }));
 vi.mock('@/hooks/useExperiences', () => ({
  useExperiences: (options: { type?: string; category?: string; search?: string }) => {
@@ -56,12 +56,13 @@ describe('public experience catalogue journey', () => {
  });
  it('shows invalid budget as a validation failure instead of unfiltered offers', () => {
   mount('/experiences?minPrice=500&maxPrice=100');
-  expect(screen.getByRole('alert')).toHaveTextContent('minimum cannot exceed the maximum');
+  expect(screen.getAllByRole('alert').some(alert => alert.textContent?.includes('minimum cannot exceed the maximum'))).toBe(true);
   expect(screen.queryAllByTestId('offer')).toHaveLength(0);
  });
  it('keeps duration in URL and removes it through its chip', () => {
   mount('/experiences?ref=campaign');
   fireEvent.change(screen.getByRole('combobox', { name: 'Duration' }), { target: { value: 'half-day' } });
+  fireEvent.click(screen.getByRole('button', { name: 'Apply fixture filters' }));
   expect(screen.getByTestId('url')).toHaveTextContent('duration=half-day');
   fireEvent.click(screen.getByRole('button', { name: 'Remove filter: 2–6 hours' }));
   expect(screen.getByTestId('url')).toHaveTextContent('/experiences?ref=campaign');
@@ -75,12 +76,13 @@ describe('public experience catalogue journey', () => {
  });
  it('updates the actual reader and selected controls after a same-page category link', () => {
   mount('/experiences?type=tour'); fireEvent.click(screen.getByRole('link', { name: 'Native activity link' }));
-  expect(screen.getByRole('button', { name: 'Activities' })).toHaveAttribute('aria-pressed', 'true');
+  expect(screen.getByText('Type from older link:', { exact: false })).toHaveTextContent('Activities');
   expect(screen.getAllByTestId('offer')).toHaveLength(1);
   expect(state.read).toHaveBeenLastCalledWith({ publishedOnly: true, type: 'activity', category: undefined, search: undefined });
  });
  it('uses only returned category slugs and retains URL filters after returning from a detail', () => {
   mount(); fireEvent.change(screen.getByRole('combobox', { name: 'Category' }), { target: { value: 'islands' } });
+  fireEvent.click(screen.getByRole('button', { name: 'Apply fixture filters' }));
   expect(screen.getByTestId('url')).toHaveTextContent('/experiences?category=islands');
   fireEvent.click(screen.getByRole('link', { name: 'Island route' }));
   expect(screen.getByRole('heading', { name: 'Offer details' })).toBeInTheDocument();
@@ -88,18 +90,22 @@ describe('public experience catalogue journey', () => {
   expect(screen.getByTestId('url')).toHaveTextContent('/experiences?category=islands');
   expect(screen.getAllByTestId('offer')).toHaveLength(2);
  });
- it('clears an incompatible category when changing type, keeping unrelated URL context', () => {
+ it('shows a single topic hierarchy, replacing an incompatible legacy type and category only on Apply', () => {
   mount('/experiences?type=tour&category=islands&ref=source');
-  fireEvent.click(screen.getByRole('button', { name: 'Activities' }));
-  expect(screen.getByTestId('url')).toHaveTextContent('/experiences?type=activity&ref=source');
-  expect(screen.getAllByTestId('offer')).toHaveLength(1);
+  fireEvent.change(screen.getByRole('combobox', { name: 'Section' }), { target: { value: 'parks' } });
+  expect(screen.getByTestId('url')).toHaveTextContent('type=tour&category=islands');
+  fireEvent.click(screen.getByRole('button', { name: 'Apply fixture filters' }));
+  expect(screen.getByTestId('url')).toHaveTextContent('/experiences?ref=source&group=parks');
  });
- it('preserves a compatible category when changing to all types', () => {
-  mount('/experiences?type=tour&category=islands');fireEvent.click(screen.getByRole('button', { name: 'All' }));
+ it('preserves a category when discarding a legacy type restriction', () => {
+  mount('/experiences?type=tour&category=islands');
+  fireEvent.click(screen.getByRole('button', { name: 'Remove type' }));
+  fireEvent.click(screen.getByRole('button', { name: 'Apply fixture filters' }));
   expect(screen.getByTestId('url')).toHaveTextContent('/experiences?category=islands');
  });
  it.each(['price_asc', 'price_desc'])('keeps unrecorded prices last with %s and persists sorting in the URL', sort => {
   mount(); fireEvent.change(screen.getByRole('combobox', { name: 'Sort experiences' }), { target: { value: sort } });
+  fireEvent.click(screen.getByRole('button', { name: 'Apply fixture filters' }));
   expect(screen.getByTestId('url')).toHaveTextContent('/experiences?sort=' + sort);
   expect(screen.getAllByTestId('offer').at(-1)).toHaveTextContent('Request-priced tour');
   expect(screen.getAllByTestId('offer')[0]).toHaveTextContent(sort === 'price_asc' ? 'Island route' : 'Underwater activity');
@@ -132,7 +138,7 @@ describe('public experience catalogue journey', () => {
  it('renders the primary filter controls and states in Thai', () => {
   state.language = 'th'; mount();
   expect(screen.getByRole('heading', { level: 1, name: 'ประสบการณ์' })).toBeInTheDocument();
-  expect(screen.getByRole('group', { name: 'ประเภทประสบการณ์' })).toBeInTheDocument();
+  expect(screen.getByRole('combobox', { name: 'หมวดหลัก' })).toBeInTheDocument();
   expect(screen.getByRole('combobox', { name: 'เรียงลำดับประสบการณ์' })).toBeInTheDocument();
  });
 });
@@ -173,6 +179,8 @@ it('composes rapid search and sorting controls over the intended URL', () => {
   fireEvent.change(screen.getByRole('textbox', { name: 'Search experiences…' }), { target: { value: 'Island' } });
   fireEvent.change(screen.getByRole('combobox', { name: 'Sort experiences' }), { target: { value: 'price_desc' } });
  });
+ expect(screen.getByTestId('url')).not.toHaveTextContent('sort=');
+ fireEvent.click(screen.getByRole('button', { name: 'Apply fixture filters' }));
  expect(screen.getByTestId('url')).toHaveTextContent('ref=source&q=Island&sort=price_desc');
  expect(screen.getAllByTestId('offer')).toHaveLength(1);
 });

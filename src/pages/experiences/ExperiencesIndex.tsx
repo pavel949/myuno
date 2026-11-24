@@ -1,4 +1,5 @@
 import { MarketplaceEntry } from '@/components/landing/MarketplaceEntry';
+import { useCataloguePanelDraft } from '@/hooks/useCataloguePanelDraft';
 import { useUrlSearchDraft } from '@/hooks/useUrlSearchDraft';
 import { EXPERIENCE_DURATIONS, matchesExperienceFilters, readExperienceFilters } from '@/lib/experiences/discoveryFilters';
 import { EXPERIENCE_DISCOVERY_GROUPS, experienceGroup, isFixedVenue, experienceCategoryLabel, populatedExperienceCategories } from '@/lib/taxonomies/experienceDiscovery';
@@ -6,7 +7,7 @@ import { PUBLIC_CATALOG_GRID } from '@/design-system/ecosystemLayout';
 import '@/styles/public-commerce.css';
 import { useEffect, useMemo, useRef } from 'react';
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
-import { Compass, Waves, X } from 'lucide-react';
+import { Compass, X } from 'lucide-react';
 import { SEOHead } from '@/components/seo';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { MiniAppLayout, CatalogCard } from '@/components/miniapp';
@@ -29,6 +30,7 @@ import { CURRENCIES } from '@/lib/config/currencies';
 import { VerticalContextBanner } from '@/components/vertical/VerticalContextBanner';
 import { VerticalInsightPanel } from '@/components/vertical/VerticalInsightPanel';
 
+const PANEL_KEYS = ['group', 'place', 'type', 'category', 'sort', 'minPrice', 'maxPrice', 'duration'] as const;
 type ViewType = 'all' | 'tour' | 'activity';
 type SortKey = 'recommended' | 'price_asc' | 'price_desc' | 'rating';
 const TYPES = ['all', 'tour', 'activity'] as const;
@@ -47,7 +49,7 @@ export default function ExperiencesIndex() {
   const location = useLocation();
   const catalogueNavigationState = useMemo(() => publicJourneyState(location), [location]);
   const openExperience = (path: string) => navigate(path, { state: catalogueNavigationState });
-  const [params, setParams] = useSearchParams();
+  const [params] = useSearchParams();
   const pendingQuery = useRef({ key: location.key, params });
   if (pendingQuery.current.key !== location.key) pendingQuery.current = { key: location.key, params };
   // The URL owns filters: links, refresh and browser Back all render the same selection.
@@ -78,7 +80,6 @@ export default function ExperiencesIndex() {
   const availableCategories = populatedExperienceCategories(categories, facetOffers).filter(category => selectedGroup === 'all' || experienceGroup(category.slug) === selectedGroup);
   const categoryRecord = categories.find(category => category.slug === selectedCategory);
   const categoryName = categoryRecord ? experienceCategoryLabel(categoryRecord, language) : '';
-  const selectableCategories = categoryRecord && !availableCategories.includes(categoryRecord) ? [categoryRecord, ...availableCategories] : availableCategories;
   const filtered = discovery.min !== undefined || discovery.max !== undefined || Boolean(discovery.duration) || selectedGroup !== 'all' || venueOnly || viewType !== 'all' || selectedCategory !== 'all' || Boolean(query.trim()) || sortKey !== 'recommended' || invalidFilters;
   const overview = !filtered;
   const pricedCurrencies = experiences.filter(exp => matchesExperienceFilters(exp, discovery) && priceValue(exp.price) !== null).map(exp => exp.currency?.trim().toUpperCase());
@@ -97,28 +98,43 @@ export default function ExperiencesIndex() {
     });
     return rows;
   }, [experiences, sortKey, priceSortUnavailable, discovery]);
-  const update = (key: 'type' | 'category' | 'sort' | 'q' | 'group' | 'place' | 'minPrice' | 'maxPrice' | 'duration', value: string) => {
-    const next = new URLSearchParams(pendingQuery.current.params);
+  const applyParam = (next: URLSearchParams, key: typeof PANEL_KEYS[number] | 'q', value: string) => {
     if (!value || (key !== 'q' && (value === 'all' || value === 'recommended'))) next.delete(key); else next.set(key, value);
-    if (key === 'group') next.delete('category');
+    if (key === 'group' && value && value !== 'all') {
+      next.delete('type');
+      const category = next.get('category');
+      if (category && experienceGroup(category) !== value) next.delete('category');
+    }
     const currentCategory = next.get('category');
     if (key === 'type' && currentCategory && currentCategory !== 'all') {
       const selected = categories.find(category => category.slug === currentCategory);
-      if (selected && value !== 'all' && selected.experience_type !== 'all' && selected.experience_type !== value) next.delete('category');
+      if (selected && value && value !== 'all' && selected.experience_type !== 'all' && selected.experience_type !== value) next.delete('category');
     }
-    pendingQuery.current.params = next;
-    if (key === 'q') {
-      navigate({ pathname: location.pathname, search: next.toString(), hash: location.hash }, { replace: true, state: location.state });
-    } else {
-      setParams(next, { replace: key === 'minPrice' || key === 'maxPrice' });
-    }
+    return next;
   };
+  const commit = (next: URLSearchParams, replace = false) => {
+    if (next.toString() === pendingQuery.current.params.toString()) return;
+    pendingQuery.current.params = next;
+    navigate({ pathname: location.pathname, search: next.toString(), hash: location.hash }, { replace, state: location.state, preventScrollReset: true });
+  };
+  const update = (key: typeof PANEL_KEYS[number] | 'q', value: string) => commit(applyParam(new URLSearchParams(pendingQuery.current.params), key, value), key === 'q');
+  const panel = useCataloguePanelDraft(PANEL_KEYS, params, commit);
+  const panelGroup = panel.values.get('group') || 'all';
+  const panelType = panel.values.get('type') || 'all';
+  const panelCategory = panel.values.get('category') || 'all';
+  const panelDiscovery = readExperienceFilters(panel.values);
+  const edit = (key: typeof PANEL_KEYS[number], value: string) => panel.setValues(next => applyParam(next, key, value));
+  const resetPanel = () => panel.setValues(next => { PANEL_KEYS.forEach(key => next.delete(key)); return next; });
+  const panelCategories = populatedExperienceCategories(categories, facetOffers).filter(category =>
+    category.slug === panelCategory || ((panelGroup === 'all' || experienceGroup(category.slug) === panelGroup) &&
+    (panelType === 'all' || category.experience_type === 'all' || category.experience_type === panelType)));
+  const currentInvalidGroup = panelGroup !== 'all' && !EXPERIENCE_DISCOVERY_GROUPS.some(group => group.id === panelGroup);
+  const currentUnlistedCategory = panelCategory !== 'all' && !panelCategories.some(category => category.slug === panelCategory);
   const [searchDraft, updateSearch] = useUrlSearchDraft(query, value => update('q', value));
   const clear = () => {
     const next = new URLSearchParams(pendingQuery.current.params);
     for (const key of ['type', 'category', 'sort', 'q', 'group', 'place', 'minPrice', 'maxPrice', 'duration']) next.delete(key);
-    pendingQuery.current.params = next;
-    setParams(next);
+    commit(next);
   };
   const focusResults = useRef(false);
   useEffect(() => {
@@ -151,36 +167,39 @@ export default function ExperiencesIndex() {
     searchValue={searchDraft} onSearchChange={updateSearch} searchPlaceholder={t('Найти впечатление…', 'Search experiences…', 'ค้นหาประสบการณ์…')}
     mapMarkers={invalidFilters || error ? [] : vertRowsToMarkers(sorted, { titleFields: ['title_en', 'name_en'], titleRuFields: ['title_ru', 'name_ru'] })}
     onMapMarkerSelect={id => openExperience(`/experiences/${id}`)} mapIconChar="🧭"
-    filterButton={<MarketplaceFilterSheet title={t('Фильтры впечатлений', 'Experience filters', 'ตัวกรองประสบการณ์')} activeCount={[selectedGroup !== 'all', venueOnly, viewType !== 'all', selectedCategory !== 'all', sortKey !== 'recommended', params.has('minPrice'), params.has('maxPrice'), Boolean(discovery.duration)].filter(Boolean).length}><div className="space-y-4">
+    filterButton={<MarketplaceFilterSheet title={t('Фильтры впечатлений', 'Experience filters', 'ตัวกรองประสบการณ์')} activeCount={[selectedGroup !== 'all', venueOnly, viewType !== 'all', selectedCategory !== 'all', sortKey !== 'recommended', params.has('minPrice'), params.has('maxPrice'), Boolean(discovery.duration)].filter(Boolean).length} onOpenChange={panel.openChange} onApply={() => panel.apply(pendingQuery.current.params)} onReset={resetPanel} applyDisabled={panelDiscovery.invalid}><div className="space-y-4">
       <label className="flex flex-col gap-2 text-sm"><span className="font-medium">{t('Раздел', 'Section', 'หมวดหลัก')}</span>
-        <select className="min-h-11 w-full border border-border bg-background px-3" value={selectedGroup} onChange={event => update('group', event.target.value)}>
+        <select className="min-h-11 w-full border border-border bg-background px-3" value={panelGroup} onChange={event => edit('group', event.target.value)}>
           <option value="all">{t('Все впечатления', 'All experiences', 'ประสบการณ์ทั้งหมด')}</option>
+          {currentInvalidGroup && <option value={panelGroup}>{t("Неизвестный раздел", "Unknown section", "ไม่พบหมวด")}</option>}
           {EXPERIENCE_DISCOVERY_GROUPS.map(group => <option key={group.id} value={group.id}>{pickLang(language, group)}</option>)}
         </select>
       </label>
-      <label className="flex min-h-11 items-center gap-3 text-sm"><input type="checkbox" checked={venueOnly} onChange={event => update('place', event.target.checked ? 'fixed' : '')} />{t('Места, куда можно приехать', 'Places you can visit', 'สถานที่ที่สามารถไปเยี่ยมชมได้')}</label>
-      <div className="flex flex-wrap gap-1" role="group" aria-label={t('Тип впечатления', 'Experience type', 'ประเภทประสบการณ์')}>
-        {TYPES.map(type => <Button key={type} size="sm" variant={viewType === type && !invalidFilters ? 'secondary' : 'ghost'} aria-pressed={viewType === type && !invalidFilters} onClick={() => update('type', type)}>
-          {type === 'tour' ? <Compass className="size-4" aria-hidden="true" /> : type === 'activity' ? <Waves className="size-4" aria-hidden="true" /> : null}
-          {type === 'all' ? t('Все', 'All', 'ทั้งหมด') : type === 'tour' ? t('Экскурсии', 'Tours', 'ทัวร์') : t('Активный отдых', 'Activities', 'กิจกรรม')}
-        </Button>)}
-      </div>
+      <label className="block space-y-2 text-sm"><span className="font-medium">{t('Категория', 'Category', 'หมวดหมู่')}</span>
+        <select className="min-h-11 w-full border border-border bg-background px-3" value={panelCategory} onChange={event => edit('category', event.target.value)}>
+          <option value="all">{t('Все категории', 'All categories', 'ทุกหมวดหมู่')}</option>
+          {currentUnlistedCategory && <option value={panelCategory}>{t("Неизвестная категория", "Unknown category", "ไม่พบหมวดหมู่")}</option>}
+          {panelCategories.map(category => <option key={category.id} value={category.slug}>{experienceCategoryLabel(category, language)}</option>)}
+        </select>
+      </label>
+      <label className="flex min-h-11 items-center gap-3 text-sm"><input type="checkbox" aria-label={t('Места, куда можно приехать', 'Places you can visit', 'สถานที่ที่สามารถไปเยี่ยมชมได้')} checked={panel.values.get('place') === 'fixed'} onChange={event => edit('place', event.target.checked ? 'fixed' : '')} />{t('Места, куда можно приехать', 'Places you can visit', 'สถานที่ที่สามารถไปเยี่ยมชมได้')}</label>
+      {panelType !== 'all' && <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
+        <span>{t('Тип из прежней ссылки', 'Type from older link', 'ประเภทจากลิงก์เดิม')}: {panelType === 'tour' ? t('Экскурсии', 'Tours', 'ทัวร์') : panelType === 'activity' ? t('Активный отдых', 'Activities', 'กิจกรรม') : t('Неизвестный', 'Unknown', 'ไม่ทราบ')}</span>
+        <Button type="button" variant="outline" className="min-h-11" onClick={() => edit('type', '')}>{t('Убрать тип', 'Remove type', 'ลบประเภท')}</Button>
+      </div>}
       <fieldset className="space-y-2"><legend className="text-sm font-medium">{t('Цена из карточки, THB', 'Listed price, THB', 'ราคาที่ระบุ, THB')}</legend>
-        <div className="grid grid-cols-2 gap-3">{(['minPrice', 'maxPrice'] as const).map(key => <label key={key} className="space-y-1 text-sm"><span>{key === 'minPrice' ? t('От', 'Minimum price', 'ราคาต่ำสุด') : t('До', 'Maximum price', 'ราคาสูงสุด')}</span><input aria-label={key === 'minPrice' ? t('От', 'Minimum price', 'ราคาต่ำสุด') : t('До', 'Maximum price', 'ราคาสูงสุด')} type="number" inputMode="decimal" min="0" step="0.01" value={params.get(key) || ''} onChange={event => update(key, event.target.value)} className="min-h-11 w-full min-w-0 border border-border bg-background px-3 text-foreground" /></label>)}</div>
+        <div className="grid grid-cols-2 gap-3">{(['minPrice', 'maxPrice'] as const).map(key => <label key={key} className="space-y-1 text-sm"><span>{key === 'minPrice' ? t('От', 'Minimum price', 'ราคาต่ำสุด') : t('До', 'Maximum price', 'ราคาสูงสุด')}</span><input aria-label={key === 'minPrice' ? t('От', 'Minimum price', 'ราคาต่ำสุด') : t('До', 'Maximum price', 'ราคาสูงสุด')} type="number" inputMode="decimal" min="0" step="0.01" value={panel.values.get(key) || ''} onChange={event => edit(key, event.target.value)} className="min-h-11 w-full min-w-0 border border-border bg-background px-3 text-foreground" /></label>)}</div>
         <p className="text-xs text-muted-foreground">{t('Цена за единицу, указанную в предложении. При выборе диапазона показываем только цены в THB; итог зависит от состава бронирования.', 'Per the unit listed in each offer. A price range shows only THB prices; the booking total depends on your selection.', 'ราคาต่อหน่วยตามข้อเสนอ ช่วงราคาจะแสดงเฉพาะ THB ยอดรวมขึ้นอยู่กับการจอง')}</p>
       </fieldset>
-      <label className="block space-y-2 text-sm"><span className="font-medium">{t('Длительность', 'Duration', 'ระยะเวลา')}</span><select className="min-h-11 w-full border border-border bg-background px-3" value={discovery.duration} onChange={event => update('duration', event.target.value)}><option value="">{t('Любая', 'Any duration', 'ทุกระยะเวลา')}</option>{EXPERIENCE_DURATIONS.map(value => <option key={value} value={value}>{durationLabel(value)}</option>)}</select></label>
+      <label className="block space-y-2 text-sm"><span className="font-medium">{t('Длительность', 'Duration', 'ระยะเวลา')}</span><select className="min-h-11 w-full border border-border bg-background px-3" value={panelDiscovery.duration} onChange={event => edit('duration', event.target.value)}><option value="">{t('Любая', 'Any duration', 'ทุกระยะเวลา')}</option>{EXPERIENCE_DURATIONS.map(value => <option key={value} value={value}>{durationLabel(value)}</option>)}</select></label>
       <label className="flex min-w-0 flex-col items-start gap-2 text-sm"><span className="font-medium">{t('Сортировка', 'Sort experiences', 'เรียงลำดับประสบการณ์')}</span>
-        <select className="min-h-11 min-w-0 w-full border border-border bg-background px-3 text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" value={sortKey} onChange={event => update('sort', event.target.value)}>
+        <select className="min-h-11 min-w-0 w-full border border-border bg-background px-3 text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" value={panel.values.get('sort') || 'recommended'} onChange={event => edit('sort', event.target.value)}>
           {SORT_OPTIONS.map(item => <option key={item.id} value={item.id} disabled={!comparablePrices && (item.id === 'price_asc' || item.id === 'price_desc')}>{pickLang(language, item)}</option>)}
         </select>
       </label>
-    <label className="block space-y-2 text-sm"><span className="font-medium">{t('Категория', 'Category', 'หมวดหมู่')}</span>
-        <select className="min-h-11 w-full border border-border bg-background px-3" value={selectedCategory} onChange={event => update('category', event.target.value)}>
-          <option value="all">{t('Все категории', 'All categories', 'ทุกหมวดหมู่')}</option>
-          {selectableCategories.map(category => <option key={category.id} value={category.slug}>{experienceCategoryLabel(category, language)}</option>)}
-        </select>
-      </label></div></MarketplaceFilterSheet>}>
+
+      {(panelDiscovery.invalid) && <p role="alert" className="text-sm text-destructive">{t('Проверьте диапазон цены и длительность.', 'Check the price range and duration.', 'ตรวจสอบช่วงราคาและระยะเวลา')}</p>}
+      </div></MarketplaceFilterSheet>}>
     <SEOHead title={t('Впечатления на Пхукете', 'Experiences in Phuket', 'ประสบการณ์ในภูเก็ต')}
       description={t('Экскурсии, острова и активный отдых: выберите тему и изучите предложения.', 'Tours, islands and activities: choose a category and explore the offers.', 'ทัวร์ เกาะ และกิจกรรม: เลือกหมวดหมู่และสำรวจข้อเสนอ')} />
     {categoriesQuery.isError && <div role="alert" className="space-y-3 border border-border p-4"><p>{t('Не удалось загрузить темы. Каталог и поиск остаются доступны.', 'Categories could not be loaded. You can still browse and search the catalogue.', 'โหลดหมวดหมู่ไม่สำเร็จ คุณยังสามารถดูและค้นหาในรายการได้')}</p><Button variant="outline" onClick={() => categoriesQuery.refetch()}>{t('Повторить загрузку тем', 'Retry categories', 'ลองโหลดหมวดหมู่อีกครั้ง')}</Button></div>}

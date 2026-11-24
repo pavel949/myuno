@@ -9,7 +9,7 @@ import GoalEntryPage from '@/pages/discover/GoalEntryPage';
 import { PropertyHubTabs } from '@/pages/property/PropertyHub';
 import { PropertyHubIndex } from '@/components/layout/routes/propertyHubRoutes';
 
-const state = vi.hoisted(() => ({ filters: {} as Record<string, unknown>, mobile: false, language: 'en', loading: false, failed: false, nextPageError: false, properties: [] as Record<string, unknown>[] }));
+const state = vi.hoisted(() => ({ filters: {} as Record<string, unknown>, mobile: false, withPriceLevel: false, language: 'en', loading: false, failed: false, nextPageError: false, properties: [] as Record<string, unknown>[] }));
 const calendar = vi.hoisted(() => ({ pending: false, failed: false, hasNextPage: false }));
 vi.mock('@/hooks/useSearchPropertyAvailability', () => ({ useSearchPropertyAvailability: (_ids: string[], start?: string, end?: string) => ({ enabled: !!start && !!end, availableIds: new Set(), pending: calendar.pending, failed: calendar.failed, retry: vi.fn() }) }));
 vi.mock('@/contexts/AuthContext', () => ({ useAuth: () => ({ user: null }) }));
@@ -19,7 +19,7 @@ vi.mock('@/contexts/LanguageContext', () => ({ useLanguage: () => ({ language: s
 vi.mock('@/hooks/useProperties', () => ({ usePropertiesInfinite: (filters: Record<string, unknown>) => { state.filters = filters; return { data: { pages: [{ properties: state.properties }] }, isLoading: state.loading, isError: state.failed, isFetchNextPageError: state.nextPageError, refetch: vi.fn(), hasNextPage: calendar.hasNextPage, fetchNextPage: vi.fn() }; } }));
 vi.mock('@/hooks/useManagementCompanies', () => ({ useManagementCompanies: () => { throw new Error('Guest discovery must not fetch management companies'); } }));
 vi.mock('@/hooks/usePropertyQuickFilters', () => ({ usePropertyQuickFilters: () => ({ projects: [{ id: 'project-a', nameEn: 'Community A', nameRu: 'Комплекс A', propertyCount: 2 }, { id: 'project-b', nameEn: 'Community B', nameRu: 'Комплекс B', propertyCount: 1 }], districts: [{ id: 'layan', valueKey: 'layan', labelEn: 'Layan', labelRu: 'Лаян' }], isLoading: false }), applyQuickFilters: (items: unknown) => items }));
-vi.mock('@/hooks/usePropertyFilterOptions', () => ({ usePropertyFilterOptions: () => ({ propertyTypes: [{ id: 'villa', labelEn: 'Villa', labelRu: 'Вилла' }], filterConfig: { sections: [] }, isLoading: false }) }));
+vi.mock('@/hooks/usePropertyFilterOptions', () => ({ usePropertyFilterOptions: () => ({ propertyTypes: [{ id: 'villa', labelEn: 'Villa', labelRu: 'Вилла' }], filterConfig: { sections: state.withPriceLevel ? [{ id: 'priceLevel', titleRu: 'Уровень цен', titleEn: 'Price level', type: 'price-level', options: [] }] : [] }, isLoading: false }) }));
 vi.mock('@/hooks/useMapListSync', () => ({ useMapListSync: () => ({ selectedId: null, select: vi.fn() }) }));
 vi.mock('@/components/property/PropertyListingCard', () => ({ PropertyListingCard: ({ property }: { property: { id: string } }) => <article data-testid="synthetic-property-card">{property.id}</article> }));
 vi.mock('@/components/property/PropertyMapView', () => ({ PropertyMapView: ({ properties, className }: { properties: unknown[]; className: string }) => <div data-testid="existing-map-boundary" data-property-count={properties.length} className={className} /> }));
@@ -50,7 +50,7 @@ function mount(entry: string, navigationState?: unknown) {
   if (secondary) fireEvent.click(secondary);
   return result;
 }
-beforeEach(() => { state.language = 'en'; state.loading = false; state.failed = false; state.nextPageError = false; state.properties = []; calendar.pending = false; calendar.failed = false; calendar.hasNextPage = false; state.mobile = false; Element.prototype.scrollIntoView = vi.fn(); });
+beforeEach(() => { state.withPriceLevel = false; state.language = 'en'; state.loading = false; state.failed = false; state.nextPageError = false; state.properties = []; calendar.pending = false; calendar.failed = false; calendar.hasNextPage = false; state.mobile = false; Element.prototype.scrollIntoView = vi.fn(); });
 afterEach(cleanup);
 
 describe('one residential results surface', () => {
@@ -237,6 +237,20 @@ describe('one residential results surface', () => {
     expect(within(dialog).getByRole('button', { name: apply })).toBeVisible();
     fireEvent.click(within(dialog).getByRole('button', { name: apply }));
     expect(screen.getByTestId('location')).toHaveTextContent('mode=rent&q=Title');
+  });
+  it('shows the real nightly THB bands without a tooltip and reports the Russian singular', () => {
+    state.language = 'ru';
+    state.withPriceLevel = true;
+    mount('/property/search?mode=rent');
+    fireEvent.click(screen.getByRole('button', { name: 'Цена и удобства' }));
+    const dialog = screen.getByRole('dialog');
+    expect(within(dialog).getByRole('button', { name: 'Закрыть' })).toBeVisible();
+    const tier = within(dialog).getByText('THB ≤ 3,000 · за ночь');
+    fireEvent.click(tier);
+    expect(screen.getByTestId('location')).not.toHaveTextContent('f.priceLevel');
+    fireEvent.click(within(dialog).getByRole('button', { name: /Применить/ }));
+    expect(screen.getByTestId('location')).toHaveTextContent('f.priceLevel=1');
+    expect(screen.getByText(/· 1 фильтр($| )/)).toBeVisible();
   });
   it.each([false, true])('discloses checked-night filtering without changing selected dates (mobile=%s)', mobile => {
     state.mobile = mobile;

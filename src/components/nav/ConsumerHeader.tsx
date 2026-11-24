@@ -1,4 +1,4 @@
-import { useLayoutEffect, useRef, useState, type ReactNode } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Menu, Search, Building2, Compass, Wrench, ChevronRight, CalendarDays, ShoppingBag, HelpCircle, LogIn } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -20,6 +20,30 @@ export function ConsumerHeader({ overlay = false, onSearch, headerActions }: { o
   const { user } = useAuth();
   const [open, setOpen] = useState(false);
   const headerRef = useRef<HTMLElement>(null);
+  const partnerMenuRef = useRef<HTMLDetailsElement>(null);
+  const partnerTriggerRef = useRef<HTMLElement>(null);
+  useEffect(() => {
+    const menu = partnerMenuRef.current;
+    if (!menu) return;
+    const dismissOutside = (event: Event) => {
+      if (menu.open && event.target instanceof Node && !menu.contains(event.target)) menu.open = false;
+    };
+    const dismissWithEscape = (event: KeyboardEvent) => {
+      if (event.key !== 'Escape' || event.defaultPrevented || !menu.open
+        || !(event.target instanceof Node) || !menu.contains(event.target)) return;
+      event.preventDefault();
+      menu.open = false;
+      partnerTriggerRef.current?.focus();
+    };
+    document.addEventListener('pointerdown', dismissOutside);
+    document.addEventListener('focusin', dismissOutside);
+    menu.addEventListener('keydown', dismissWithEscape);
+    return () => {
+      document.removeEventListener('pointerdown', dismissOutside);
+      document.removeEventListener('focusin', dismissOutside);
+      menu.removeEventListener('keydown', dismissWithEscape);
+    };
+  }, []);
   useLayoutEffect(() => {
     const header = headerRef.current;
     const canvas = header?.closest<HTMLElement>('[data-canvas]');
@@ -44,6 +68,10 @@ export function ConsumerHeader({ overlay = false, onSearch, headerActions }: { o
   }, []);
   const t = (ru: string, en: string, th: string) => pickLang(language, { ru, en, th });
   const { pathname, search, hash } = useLocation();
+  useEffect(() => {
+    if (partnerMenuRef.current) partnerMenuRef.current.open = false;
+    setOpen(false);
+  }, [pathname, search, hash]);
   const frame = publicContentFrame(pathname);
   const signInPath = buildAuthPath({ from: `${pathname}${search}${hash}` });
   const activeDestination = getActiveGuestTopNavItem(pathname);
@@ -67,10 +95,10 @@ export function ConsumerHeader({ overlay = false, onSearch, headerActions }: { o
           <nav className="consumer-nav" aria-label={t('Основные разделы', 'Main navigation', 'เมนูหลัก')}>
             {links.map(l => <Link key={l.to} to={l.to} aria-current={l.active ? "page" : undefined}>{l.label}</Link>)}
           </nav>
-          <details className="consumer-partner-menu">
-            <summary aria-current={partnerActive ? 'page' : undefined}>{t('Партнёрам', 'For partners', 'สำหรับพาร์ทเนอร์')}</summary>
+          <details ref={partnerMenuRef} className="consumer-partner-menu">
+            <summary ref={partnerTriggerRef} aria-current={partnerActive ? 'page' : undefined}>{t('Партнёрам', 'For partners', 'สำหรับพาร์ทเนอร์')}</summary>
             <div className="consumer-partner-menu-panel">
-              {partnerLinks.map(link => <Link key={link.to} to={link.to}>{link.label}</Link>)}
+              {partnerLinks.map(link => <Link key={link.to} to={link.to} aria-current={pathname === link.to || pathname.startsWith(`${link.to}/`) ? 'page' : undefined} onClick={() => { if (partnerMenuRef.current) partnerMenuRef.current.open = false; }}>{link.label}</Link>)}
             </div>
           </details>
         <div className="consumer-utilities">
@@ -78,8 +106,8 @@ export function ConsumerHeader({ overlay = false, onSearch, headerActions }: { o
           <div className="consumer-secondary-utilities"><GlobalPreferencesControls showCurrency={!overlay} className={overlay ? 'consumer-overlay-preferences' : undefined} /></div>
           {headerActions}
           {!overlay && <div className="consumer-secondary-utilities"><MiniCart /></div>}
-          {user ? <UserAvatarMenu consumerNavigation={[...links, { to: R.FOR_OWNERS, label: t('Собственникам', 'For owners', 'สำหรับเจ้าของ') }, { to: '/cart', label: t('Корзина', 'Cart', 'ตะกร้า') }]} consumerSearch={onSearch} /> : <Link className="consumer-login" to={signInPath}>{t('Войти', 'Sign in', 'เข้าสู่ระบบ')}</Link>}
-          {!user && <Sheet open={open} onOpenChange={setOpen}>
+          {user ? <UserAvatarMenu consumerHeader /> : <Link className="consumer-login" to={signInPath}>{t('Войти', 'Sign in', 'เข้าสู่ระบบ')}</Link>}
+          <Sheet open={open} onOpenChange={setOpen}>
             <SheetTrigger asChild><button type="button" className="consumer-menu" aria-label={t('Открыть меню', 'Open menu', 'เปิดเมนู')}><Menu aria-hidden="true" /></button></SheetTrigger>
             <SheetContent closeLabel={t('Закрыть меню', 'Close menu', 'ปิดเมนู')} className={`consumer-task-menu w-[min(100vw,24rem)]${overlay ? '' : ' consumer-header-menu'}`}>
               <div className="consumer-task-menu-heading">
@@ -107,7 +135,7 @@ export function ConsumerHeader({ overlay = false, onSearch, headerActions }: { o
                     <h2 id="consumer-personal-heading">{t('Мои дела', 'Your plans', 'แผนของคุณ')}</h2>
                     <Link to={R.BOOKINGS} onClick={() => setOpen(false)} className="consumer-task-row" aria-current={activeDestination?.path === R.BOOKINGS ? 'page' : undefined}><CalendarDays aria-hidden="true" /><span>{t('Заявки и бронирования', 'Requests and bookings', 'คำขอและการจอง')}</span><ChevronRight aria-hidden="true" /></Link>
                     <Link to="/cart" onClick={() => setOpen(false)} className="consumer-task-row" aria-current={pathname === '/cart' ? 'page' : undefined}><ShoppingBag aria-hidden="true" /><span>{t('Корзина', 'Cart', 'ตะกร้า')}</span><ChevronRight aria-hidden="true" /></Link>
-                    <Link to={signInPath} onClick={() => setOpen(false)} className="consumer-task-row"><LogIn aria-hidden="true" /><span>{t('Войти', 'Sign in', 'เข้าสู่ระบบ')}</span><ChevronRight aria-hidden="true" /></Link>
+                    {!user && <Link to={signInPath} onClick={() => setOpen(false)} className="consumer-task-row"><LogIn aria-hidden="true" /><span>{t('Войти', 'Sign in', 'เข้าสู่ระบบ')}</span><ChevronRight aria-hidden="true" /></Link>}
                   </section>
                   <Link to={R.SUPPORT} onClick={() => setOpen(false)} className="consumer-task-row"><HelpCircle aria-hidden="true" /><span>{t('Помощь myUNO', 'myUNO help', 'ความช่วยเหลือ myUNO')}</span><ChevronRight aria-hidden="true" /></Link>
                   <details className="consumer-task-partners">
@@ -121,7 +149,7 @@ export function ConsumerHeader({ overlay = false, onSearch, headerActions }: { o
                 </div>
               </div>
             </SheetContent>
-          </Sheet>}
+          </Sheet>
         </div>
       </div>
 

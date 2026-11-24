@@ -1,3 +1,4 @@
+import { ProfileCountrySelect } from '@/components/profile/ProfileCountrySelect';
 import '@/styles/premium-account.css';
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
@@ -28,17 +29,6 @@ import { SecuritySettingsSection } from '@/components/profile/SecuritySettingsSe
 import { ConnectedAccountsSection } from '@/components/profile/ConnectedAccountsSection';
 import { ProfileCompletionCard } from '@/components/profile/ProfileCompletionCard';
 import { redirectToAuth } from '@/lib/auth/redirectToAuth';
-
-const COUNTRIES = [
-  { code: 'RU', nameEn: 'Russia', nameRu: 'Россия' },
-  { code: 'TH', nameEn: 'Thailand', nameRu: 'Таиланд' },
-  { code: 'US', nameEn: 'USA', nameRu: 'США' },
-  { code: 'DE', nameEn: 'Germany', nameRu: 'Германия' },
-  { code: 'UA', nameEn: 'Ukraine', nameRu: 'Украина' },
-  { code: 'KZ', nameEn: 'Kazakhstan', nameRu: 'Казахстан' },
-  { code: 'BY', nameEn: 'Belarus', nameRu: 'Беларусь' },
-  { code: 'GB', nameEn: 'United Kingdom', nameRu: 'Великобритания' },
-];
 
 const GENDERS = [
   { value: 'male', labelEn: 'Male', labelRu: 'Мужской' },
@@ -211,19 +201,8 @@ export default function ProfileSettings() {
               </div>
 
               <div>
-                <Label className="text-xs">{isRu ? 'Гражданство' : 'Nationality'}</Label>
-                <Select value={formData.nationality || ''} onValueChange={(v) => handleChange('nationality', v)}>
-                  <SelectTrigger className="mt-1">
-                    <SelectValue placeholder={isRu ? 'Выбрать страну' : 'Select country'} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {COUNTRIES.map(c => (
-                      <SelectItem key={c.code} value={c.code}>
-                        {isRu ? c.nameRu : c.nameEn}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <Label htmlFor="settings-nationality" className="text-xs">{isRu ? 'Гражданство' : 'Nationality'}</Label>
+                <ProfileCountrySelect id="settings-nationality" value={formData.nationality || ''} onChange={value => handleChange('nationality', value)} className="mt-1" />
               </div>
             </SectionCard>
           </motion.div>
@@ -325,19 +304,8 @@ export default function ProfileSettings() {
                   />
                 </div>
                 <div>
-                  <Label className="text-xs">{isRu ? 'Страна' : 'Country'}</Label>
-                  <Select value={formData.country || ''} onValueChange={(v) => handleChange('country', v)}>
-                    <SelectTrigger className="mt-1">
-                      <SelectValue placeholder={isRu ? 'Выбрать' : 'Select'} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {COUNTRIES.map(c => (
-                        <SelectItem key={c.code} value={c.code}>
-                          {isRu ? c.nameRu : c.nameEn}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <Label htmlFor="settings-country" className="text-xs">{isRu ? 'Страна' : 'Country'}</Label>
+                  <ProfileCountrySelect id="settings-country" value={formData.country || ''} onChange={value => handleChange('country', value)} className="mt-1" />
                 </div>
               </div>
             </SectionCard>

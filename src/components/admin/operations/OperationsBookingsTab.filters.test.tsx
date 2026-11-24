@@ -66,7 +66,7 @@ describe('actual operations order queue URL',()=>{
     state.many=true;setup();
     expect(await within(await screen.findByRole('table')).findByText('Queue order 99')).toBeInTheDocument();
     expect(screen.queryAllByText('Queue order 100')).toHaveLength(0);
-    expect(screen.getByText(/^Matching orders:/)).toHaveTextContent('Matching orders: 101');
+    expect(screen.getByText(/^Orders across all pages/)).toHaveTextContent('Orders across all pages (status and date): 101');
     fireEvent.click(screen.getByRole('button',{name:'Next'}));
     expect(await within(await screen.findByRole('table')).findByText('Queue order 100')).toBeInTheDocument();
     expect(screen.getByTestId('location')).toHaveTextContent('order_page=1');
@@ -83,7 +83,19 @@ describe('actual operations order queue URL',()=>{
   it('shows an unavailable exact count and disables unproven next pages',async()=>{
     state.noCount=true;setup();
     expect(await within(await screen.findByRole('table')).findByText('Older order')).toBeInTheDocument();
-    expect(screen.getByText(/^Matching orders:/)).toHaveTextContent('Count unavailable');
+    expect(screen.getByText(/^Orders across all pages/)).toHaveTextContent('Count unavailable');
     expect(screen.getByRole('button',{name:'Next'})).toBeDisabled();
   });
+});
+
+it('separates text matches on the loaded page from the global status/date count and never writes contact text to URL', async () => {
+  setup();
+  expect(await within(await screen.findByRole('table')).findByText('Older order')).toBeInTheDocument();
+  const search = screen.getByRole('searchbox', { name: 'Order text search on this page' });
+  fireEvent.change(search, { target: { value: 'private@example.invalid' } });
+  expect(screen.getByText(/^Matches on this page/)).toHaveTextContent('Matches on this page: 0');
+  expect(screen.getByText(/^Matches on this page/)).toHaveTextContent('Orders across all pages (status and date): 1');
+  expect(screen.getByTestId('location')).not.toHaveTextContent(/private|q=/);
+  fireEvent.change(search, { target: { value: 'Older' } });
+  expect(screen.getByText(/^Matches on this page/)).toHaveTextContent('Matches on this page: 1');
 });

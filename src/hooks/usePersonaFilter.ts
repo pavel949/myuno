@@ -14,7 +14,7 @@
  */
 
 import { useCallback, useMemo } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { resolvePersonaSlug } from '@/lib/landings/slugAliases';
 import { getPersonaListingTags } from '@/lib/landings/personaTagMap';
 
@@ -26,15 +26,17 @@ export interface UsePersonaFilterResult {
   /**
    * Apply persona filter to a list of items. `getTags` returns the tag-array
    * to test against (e.g. `(item) => item.persona_tags ?? item.tags ?? []`).
-   * Falls back to the original list when no items match.
+   * Preserve the legacy fallback by default; strict catalogues opt out.
    */
-  applyFilter<T>(items: T[], getTags: (item: T) => string[] | null | undefined): T[];
+  applyFilter<T>(items: T[], getTags: (item: T) => string[] | null | undefined, options?: { strict?: boolean }): T[];
   /** Remove `?persona=` from the URL (for the "Clear" chip action). */
   clearPersona: () => void;
 }
 
 export function usePersonaFilter(): UsePersonaFilterResult {
-  const [searchParams, setSearchParams] = useSearchParams();
+  const [searchParams] = useSearchParams();
+  const { hash, state } = useLocation();
+  const navigate = useNavigate();
   const raw = searchParams.get('persona');
 
   const personaSlug = useMemo(() => {
@@ -51,6 +53,7 @@ export function usePersonaFilter(): UsePersonaFilterResult {
     function applyFilterImpl<T>(
       items: T[],
       getTags: (item: T) => string[] | null | undefined,
+      options?: { strict?: boolean },
     ): T[] {
       if (!personaSlug || personaTags.length === 0) return items;
       const tagSet = new Set(personaTags.map((t) => t.toLowerCase()));
@@ -59,8 +62,8 @@ export function usePersonaFilter(): UsePersonaFilterResult {
         if (!itemTags || itemTags.length === 0) return false;
         return itemTags.some((t) => tagSet.has(String(t).toLowerCase()));
       });
-      // Graceful fallback — never strand the user with an empty catalog.
-      return matched.length > 0 ? matched : items;
+      // Unmigrated consumers retain their legacy fallback.
+      return options?.strict || matched.length > 0 ? matched : items;
     },
     [personaSlug, personaTags],
   );
@@ -68,8 +71,8 @@ export function usePersonaFilter(): UsePersonaFilterResult {
   const clearPersona = useCallback(() => {
     const next = new URLSearchParams(searchParams);
     next.delete('persona');
-    setSearchParams(next, { replace: true });
-  }, [searchParams, setSearchParams]);
+    navigate({ search: next.toString(), hash }, { replace: true, state, preventScrollReset: true });
+  }, [searchParams, hash, state, navigate]);
 
   return { personaSlug, personaTags, applyFilter, clearPersona };
 }

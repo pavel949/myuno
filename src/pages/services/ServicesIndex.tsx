@@ -1,4 +1,5 @@
 import { MarketplaceEntry } from '@/components/landing/MarketplaceEntry';
+import { useCataloguePanelDraft } from '@/hooks/useCataloguePanelDraft';
 import { useUrlSearchDraft } from '@/hooks/useUrlSearchDraft';
 import { lazy, Suspense, useEffect, useRef, useState } from 'react';
 import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
@@ -112,30 +113,36 @@ export default function ServicesIndex({ embedded = false }: { embedded?: boolean
       focusResults.current = false;
     }
   }, [category, filters.situation]);
-  const discoveryFilters = <MarketplaceFilterSheet title={t('Категории и ситуации', 'Categories and situations', 'หมวดหมู่และสถานการณ์')} activeCount={[Boolean(filters.category), Boolean(filters.situation)].filter(Boolean).length}>
+  const panelKeys = ['category', 'type', 'home', 'browse', 'situation'] as const;
+  const panel = useCataloguePanelDraft(panelKeys, params, commit);
+  const panelFilters = readServiceDiscoveryQuery(panel.values);
+  const editPanel = (key: 'browse' | 'category' | 'situation', value: string) =>
+    panel.setValues(next => updateServiceDiscoveryQuery(next, key, value));
+  const resetPanel = () => panel.setValues(next => { panelKeys.forEach(key => next.delete(key)); return next; });
+  const panelCategory = home && explicitHomeIntent && filters.category === panelFilters.category ? home.id : panelFilters.category;
+  const discoveryFilters = <MarketplaceFilterSheet title={t('Категории и ситуации', 'Categories and situations', 'หมวดหมู่และสถานการณ์')} activeCount={[Boolean(filters.category), Boolean(filters.situation)].filter(Boolean).length} onOpenChange={panel.openChange} onApply={() => panel.apply(pendingQuery.current.params)} onReset={resetPanel}>
 
-      <Tabs value={filters.view} onValueChange={value => update('browse', value)} className="space-y-4">
+      <Tabs value={panelFilters.view} onValueChange={value => editPanel('browse', value)} className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-2">
           <TabsList className="h-auto min-h-12" aria-label={t('Способ выбора', 'Browse services', 'วิธีค้นหาบริการ')}>
             <TabsTrigger className="min-h-12 whitespace-normal overflow-visible text-clip" value="situations">{t('По ситуации', 'By situation', 'ตามสถานการณ์')}</TabsTrigger>
             <TabsTrigger className="min-h-12 whitespace-normal overflow-visible text-clip" value="categories">{t('По категориям', 'By category', 'ตามหมวดหมู่')}</TabsTrigger>
           </TabsList>
-        <Button asChild variant="ghost" className="w-11 px-0 sm:w-auto sm:px-3"><Link to="/bookings" aria-label={t('Мои заявки', 'My requests', 'คำขอของฉัน')} title={t('Мои заявки', 'My requests', 'คำขอของฉัน')}><ClipboardList className="size-4 shrink-0 sm:mr-2" aria-hidden="true" /><span className="hidden sm:inline">{t('Мои заявки', 'My requests', 'คำขอของฉัน')}</span></Link></Button>
       </div>
-      <TabsContent value={filters.view}>
+      <TabsContent value={panelFilters.view}>
       <>
       <div className="grid items-end gap-3 sm:grid-cols-2">
         <div className="space-y-2">
-          <p id="service-view-filter" className="text-sm font-medium">{filters.view === 'categories' ? t('Категория', 'Category', 'หมวดหมู่') : t('Ситуация', 'Situation', 'สถานการณ์')}</p>
-          <Select value={(filters.view === 'categories' ? category : filters.situation) || 'all'} onValueChange={value => update(filters.view === 'categories' ? 'category' : 'situation', value)}>
+          <p id="service-view-filter" className="text-sm font-medium">{panelFilters.view === 'categories' ? t('Категория', 'Category', 'หมวดหมู่') : t('Ситуация', 'Situation', 'สถานการณ์')}</p>
+          <Select value={(panelFilters.view === 'categories' ? panelCategory : panelFilters.situation) || 'all'} onValueChange={value => editPanel(panelFilters.view === 'categories' ? 'category' : 'situation', value)}>
             <SelectTrigger id="service-view-trigger" aria-labelledby="service-view-filter" className="min-h-11"><SelectValue /></SelectTrigger>
             <SelectContent collisionPadding={12} className="max-w-[var(--radix-select-content-available-width)]">
               <SelectItem className="min-h-11" value="all">{t('Все', 'All', 'ทั้งหมด')}</SelectItem>
-              {filters.view === 'categories' ? <>
-                {!knownCategory && <SelectItem className="min-h-11" value={category}>{t('Неизвестная категория', 'Unknown category', 'ไม่พบหมวดหมู่')}</SelectItem>}
+              {panelFilters.view === 'categories' ? <>
+                {panelCategory && !categories.some(item => item.id === panelCategory) && <SelectItem className="min-h-11" value={panelCategory}>{t('Неизвестная категория', 'Unknown category', 'ไม่พบหมวดหมู่')}</SelectItem>}
                 {categories.map(item => <SelectItem className="min-h-11" key={item.id} value={item.id}>{label(item)}</SelectItem>)}
               </> : <>
-                {!knownSituation && <SelectItem className="min-h-11" value={filters.situation}>{t('Неизвестная ситуация', 'Unknown situation', 'ไม่พบสถานการณ์')}</SelectItem>}
+                {panelFilters.situation && !situations.some(item => item.code === panelFilters.situation) && <SelectItem className="min-h-11" value={panelFilters.situation}>{t('Неизвестная ситуация', 'Unknown situation', 'ไม่พบสถานการณ์')}</SelectItem>}
                 {situations.map(item => <SelectItem className="min-h-11" key={item.code} value={item.code}>{pickLang(language, { ru: item.titleRu, en: item.titleEn })}</SelectItem>)}
               </>}
             </SelectContent>
@@ -159,6 +166,9 @@ export default function ServicesIndex({ embedded = false }: { embedded?: boolean
         {filters.category && <Button aria-label={t('Убрать фильтр категории', 'Remove category filter', 'ลบตัวกรองหมวดหมู่')} variant="outline" size="sm" className="min-h-11" onClick={() => update('category', '')}>{categoryLabel}<X className="ml-2 size-4" aria-hidden="true" /></Button>}
         <Button variant="ghost" size="sm" className="min-h-11" onClick={clear}>{t('Сбросить всё', 'Reset all', 'รีเซ็ตทั้งหมด')}</Button>
       </div>}
+      {!embedded && <Button asChild variant="ghost" className="min-h-11 gap-2 self-start">
+        <Link to="/bookings"><ClipboardList className="size-4" aria-hidden="true" />{t('Мои заявки', 'My requests', 'คำขอของฉัน')}</Link>
+      </Button>}
     {params.has('sort') && <p role="status" className="text-sm text-muted-foreground">{t('Сортировка из старой ссылки не применяется. Сбросьте фильтры, чтобы убрать её.', 'Sorting from this older link is not applied. Reset filters to remove it.', 'ไม่ได้ใช้การเรียงลำดับจากลิงก์เดิม รีเซ็ตตัวกรองเพื่อลบออก')}</p>}
     {catalog.isLoading && <p role="status">{t('Загружаем каталог…', 'Loading catalogue…', 'กำลังโหลดรายการบริการ…')}</p>}
     {(catalog.error || (!catalog.isLoading && !catalog.isFromDB)) && <div role="alert" className="space-y-2"><p>{t('Каталог временно недоступен. Попробуйте ещё раз.', 'The catalogue is temporarily unavailable. Try again.', 'รายการบริการไม่พร้อมใช้งานชั่วคราว โปรดลองอีกครั้ง')}</p><Button variant="outline" onClick={() => catalog.refetch()}>{t('Повторить', 'Try again', 'ลองอีกครั้ง')}</Button></div>}

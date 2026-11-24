@@ -17,7 +17,7 @@ vi.mock('@/lib/catalog/useCatalogFromDB', () => ({ useCatalogFromDB: () => {
   if (state.homeShape === 'empty') categories = [{ ...legacy, services: [] }];
   return { categories, lifeSituations: LIFE_SITUATIONS, isFromDB: !state.fallback, isLoading: state.loading, error: state.error ? new Error('fixture') : null, refetch: vi.fn() };
 } }));
-vi.mock('@/components/services/MarketplaceFilterSheet', () => ({ MarketplaceFilterSheet: ({ children }: { children: React.ReactNode }) => <>{children}</> }));
+vi.mock('@/components/services/MarketplaceFilterSheet', () => ({ MarketplaceFilterSheet: ({ children, onApply }: { children: React.ReactNode; onApply: () => void }) => <>{children}<button onClick={onApply}>Apply fixture filters</button></> }));
 vi.mock('@/contexts/LanguageContext', () => ({ useLanguage: () => ({ language: 'en' }) }));
 vi.mock('@/components/miniapp/MiniAppLayout', () => ({ MiniAppLayout: ({ children, onSearchChange, searchValue, filterButton }: { filterButton: ReactNode; children: ReactNode; onSearchChange: (s: string) => void; searchValue: string }) => <><input type="search" aria-label="Search services…" value={searchValue} onChange={e => onSearchChange(e.target.value)} />{filterButton}{children}</> }));
 vi.mock('@/hooks/useServiceMarketplace', () => ({ useMarketplaceServices: () => ({ data: state.providerOnly ? [{ name_en: 'Synthetic provider offer', provider: { name: 'Synthetic' } }] : [], isLoading: false, isError: false }) }));
@@ -200,6 +200,8 @@ describe('canonical services hub', () => {
     const situation = screen.getByRole('tab', { name: 'By situation' });
     act(() => { fireEvent.mouseDown(situation, { button: 0 }); fireEvent.focus(situation); });
     expect(situation).toHaveAttribute('aria-selected', 'true');
+    expect(screen.getByTestId('location')).not.toHaveTextContent('browse=');
+    fireEvent.click(screen.getByRole('button', { name: 'Apply fixture filters' }));
     fireEvent.click(screen.getByText('Back fixture'));
     expect(screen.getByTestId('service-discovery-menu')).toBeVisible();
     expect(screen.getByTestId('location')).toHaveTextContent('/discover/services?ref=history|');
@@ -207,6 +209,7 @@ describe('canonical services hub', () => {
     expect(screen.getByTestId('service-situation-menu')).toBeVisible();
     const category = screen.getByRole('tab', { name: 'By category' });
     act(() => { fireEvent.mouseDown(category, { button: 0 }); fireEvent.focus(category); });
+    fireEvent.click(screen.getByRole('button', { name: 'Apply fixture filters' }));
     fireEvent.click(screen.getByText('Back fixture'));
     expect(screen.getByTestId('service-situation-menu')).toBeVisible();
   });
