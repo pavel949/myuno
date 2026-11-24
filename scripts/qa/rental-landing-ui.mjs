@@ -19,6 +19,7 @@ const virtual = {
   "@/hooks/usePropertyProjects": `export const usePublicPropertyProjects=(limit,district,ids)=>{window.fixtureProjectRead={limit,district,ids};return{data:ids.length?[{id:'synthetic-community',name_en:'Synthetic rental community',name_ru:'Тестовый жилой комплекс',district:'rawai'}]:[],isLoading:false,isError:false,refetch:()=>Promise.resolve()}};`,
   "@/hooks/usePropertyQuickFilters": `export const usePropertyQuickFilters=()=>({districts:[{id:'rawai',valueKey:'rawai',labelRu:'Равай',labelEn:'Rawai'}],isLoading:false});`,
   "@/hooks/usePropertyFilterOptions": `export const usePropertyFilterOptions=()=>({propertyTypes:[{id:'villa',labelRu:'Вилла',labelEn:'Villa'},{id:'condo',labelRu:'Кондо',labelEn:'Condo'}],isLoading:false});`,
+  "@/hooks/useUniversalLead": `export const useUniversalLead=()=>({isSubmitting:false,submitLead:{mutateAsync:async(input)=>{window.fixtureLeadRequests.push(input);return{id:'11111111-2222-4333-8444-555555555555'}}}}); window.fixtureLeadRequests=[];`,
   "@/integrations/supabase/client": `export const supabase=new Proxy({},{get(){throw Error('Live backend capability is forbidden in rental UI fixture')}});`,
 };
 const result = await build({
@@ -66,6 +67,7 @@ for (const file of [
   "src/pages/property/PropertyLanding.tsx",
   "src/components/home/HomeDiscoverySearch.tsx",
   "src/components/home/HomeSearchDateRange.tsx",
+  "src/components/search/SearchLeadRequest.tsx",
   "src/styles/rental-landing.css",
 ])
   if (
@@ -101,6 +103,8 @@ const files = [
   "src/pages/property/PropertyLanding.tsx",
   "src/styles/rental-landing.css",
   "src/content/property/rentalLanding.ts",
+  "src/components/search/SearchLeadRequest.tsx",
+  "src/lib/searchLead.ts",
   "src/components/home/HomeDiscoverySearch.tsx",
 ];
 await writeFile(
@@ -119,7 +123,7 @@ await writeFile(
       ),
       syntheticBoundaries: Object.keys(virtual),
       limits:
-        "Actual page, editorial copy, stored-media fallback and shared search. Synthetic public homes/project reads and taxonomy; no live backend, full AppLayout or production acceptance. Fallback fonts.",
+        "Actual page, editorial copy, stored-media fallback and shared search. Synthetic public homes/project reads, taxonomy and lead receipt; no live backend, full AppLayout or production acceptance. Fallback fonts.",
     },
     null,
     2,
