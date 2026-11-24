@@ -44,8 +44,8 @@ export async function readAdminInvitationResult(data: unknown, error: unknown, r
   if (error && typeof error === 'object' && 'context' in error && error.context instanceof Response) {
     result = await error.context.clone().json().catch(() => null);
   }
-  const outcome = result as { success?: boolean; invite_email_sent?: boolean; role_granted?: boolean; transfer_operator_linked?: boolean; error?: string } | null;
-  if (!outcome || outcome.success !== true || outcome.invite_email_sent !== true || outcome.role_granted !== true || (requiresOperatorLink && outcome.transfer_operator_linked !== true)) {
+  const outcome = result as { success?: boolean; invite_email_sent?: boolean; role_granted?: boolean; transfer_operator_linked?: boolean; audit_recorded?: boolean; error?: string } | null;
+  if (!outcome || outcome.success !== true || outcome.invite_email_sent !== true || outcome.role_granted !== true || outcome.audit_recorded === false || (requiresOperatorLink && outcome.transfer_operator_linked !== true)) {
     throw new Error(outcome?.error || 'Invitation or access setup is unconfirmed. Review the account before retrying.');
   }
 }
