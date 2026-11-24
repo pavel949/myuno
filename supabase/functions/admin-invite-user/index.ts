@@ -24,15 +24,15 @@ import { createServiceClient } from "../_shared/supabase.ts";
 import { requireActorRpc } from "../_shared/authz.ts";
 import { requireAuth } from "../_shared/auth-guard.ts";
 import { getCorsHeaders } from "../_shared/cors.ts";
+import { createActorClient } from "../_shared/operating-space-auth.ts";
 
 
 const PUBLIC_APP_URL = Deno.env.get("PUBLIC_APP_URL") || "https://myuno.app";
 
 // app_role enum values the caller may grant on the invite.
 // `uno_team` requires the caller to be `admin` (verified below).
-// `admin` itself is intentionally NOT grantable here — promotion to
-// admin must go through the dedicated `admin-manage-user.add_role`
-// flow with explicit audit + 2-admin chain.
+// Platform admin is not grantable here or through admin-manage-user.
+// Team membership uses the checked, audited membership RPC.
 const GRANTABLE_ROLES = new Set([
   "user",
   "staff",
@@ -52,6 +52,7 @@ Deno.serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
+  if (req.method !== "POST") return new Response(null, { status: 405, headers: corsHeaders });
   try {
     const authResult = await requireAuth(req, corsHeaders);
     if (authResult instanceof Response) return authResult;
@@ -59,6 +60,8 @@ Deno.serve(async (req) => {
 
     const guard = await requireActorRpc(req, corsHeaders, "actor_has_platform_admin");
     if (guard) return guard;
+    const active = await requireActorRpc(req, corsHeaders, "actor_has_active_platform_admin");
+    if (active) return active;
     const admin = createServiceClient();
     const isAdmin = true;
 
@@ -143,10 +146,13 @@ Deno.serve(async (req) => {
 
     // Grant role if requested. UPSERT keeps the call idempotent.
     if (role) {
-      const { data: grantedRole, error: roleErr } = await admin
-        .from("user_roles")
-        .upsert({ user_id: newUserId, role }, { onConflict: "user_id,role" }).select('user_id, role').single();
-      if (roleErr || !grantedRole || grantedRole.user_id !== newUserId || grantedRole.role !== role) {
+      const result = role === "uno_team"
+        ? await createActorClient(req).rpc("manage_uno_team_membership_checked", { p_user_id: newUserId, p_grant: true })
+        : await admin.from("user_roles").upsert({ user_id: newUserId, role }, { onConflict: "user_id,role" }).select("user_id, role").single();
+      const confirmed = role === "uno_team"
+        ? result.data?.success === true && result.data?.uno_team === true
+        : result.data?.user_id === newUserId && result.data?.role === role;
+      if (result.error || !confirmed) {
         return new Response(JSON.stringify({ success: false, code: 'role_grant_incomplete',
           error: 'Invitation sent, but the requested role was not granted. Review access before retrying.',
           user_id: newUserId, invite_email_sent: true, role_granted: false, transfer_operator_linked: false }),
@@ -181,7 +187,8 @@ Deno.serve(async (req) => {
 
     return new Response(
       JSON.stringify({
-        success: true,
+        success: !auditError,
+        ...(auditError ? { code: "audit_incomplete", error: "Invitation and access confirmed; audit unavailable. Review before retrying." } : {}),
         user_id: newUserId,
         email,
         role: role || null,
@@ -191,7 +198,7 @@ Deno.serve(async (req) => {
         transfer_operator_linked: !!transferOperatorId,
         audit_recorded: !auditError,
       }),
-      { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      { status: auditError ? 409 : 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
     );
   } catch {
     return new Response(

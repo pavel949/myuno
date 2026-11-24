@@ -62,14 +62,17 @@ export interface UnoTeamMember {
   email: string | null;
   avatar_url: string | null;
   permissions: UnoTeamPermission[];
+  isPlatformAdmin?: boolean;
 }
 
 // Hook for fetching UNO Team members and their permissions (admin use)
 export function useUnoTeamMembers() {
   const queryClient = useQueryClient();
+  const { user } = useAuth();
 
-  const { data: members, isLoading } = useQuery({
-    queryKey: ['uno-team-members'],
+  const { data: members, isLoading, isError, refetch } = useQuery({
+    queryKey: ['uno-team-members', user?.id],
+    enabled: !!user?.id,
     queryFn: async () => {
       // Get all users with uno_team role
       const { data: roleData, error: roleError } = await supabase
@@ -82,6 +85,14 @@ export function useUnoTeamMembers() {
       const userIds = roleData?.map(r => r.user_id) || [];
       if (userIds.length === 0) return [];
 
+      // A failed protected-role lookup must not become an editable member.
+      const protectedIds = new Set<string>();
+      for (let offset = 0; offset < userIds.length; offset += 20) {
+        const { data, error } = await supabase.from('user_roles').select('user_id')
+          .eq('role', 'admin').in('user_id', userIds.slice(offset, offset + 20));
+        if (error || !data) throw error || new Error('Administrator roles unavailable');
+        data.forEach(row => protectedIds.add(row.user_id));
+      }
       // Get profiles
       const { data: profiles, error: profileError } = await supabase
         .from('profiles')
@@ -104,6 +115,7 @@ export function useUnoTeamMembers() {
         full_name: p.full_name,
         email: p.email,
         avatar_url: p.avatar_url,
+        isPlatformAdmin: protectedIds.has(p.id),
         permissions: (permissions || []).filter(perm => perm.user_id === p.id) as UnoTeamPermission[],
       })) as UnoTeamMember[];
     },
@@ -190,6 +202,8 @@ export function useUnoTeamMembers() {
   return {
     members,
     isLoading,
+    isError,
+    refetch,
     updatePermission: updatePermission.mutateAsync,
     removePermission: removePermission.mutateAsync,
     grantAllPermissions: grantAllPermissions.mutateAsync,

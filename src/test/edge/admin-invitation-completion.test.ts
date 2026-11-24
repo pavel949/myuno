@@ -55,7 +55,7 @@ describe('platform invitation partial completion', () => {
     const setup = fixture(); expect(await (await setup.run(true)).json()).toMatchObject({ success: true, role_granted: true, transfer_operator_linked: true, audit_recorded: true });
   });
   it('audit failure is disclosed separately from confirmed invitation and rights', async () => {
-    const setup = fixture({ auditFails: true }); expect(await (await setup.run()).json()).toMatchObject({ success: true, role_granted: true, audit_recorded: false });
+    const setup = fixture({ auditFails: true }); expect(await (await setup.run()).json()).toMatchObject({ success: false, role_granted: true, audit_recorded: false });
   });
   it('SDK error is not returned or logged as credentials', async () => {
     const setup = fixture(); setup.invite.mockRejectedValue(new Error('private-token-value'));

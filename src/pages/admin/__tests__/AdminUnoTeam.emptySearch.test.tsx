@@ -7,6 +7,7 @@ import AdminUnoTeam from '../AdminUnoTeam';
 import type { UnoTeamMember } from '@/hooks/useUnoTeamPermissions';
 
 const state = vi.hoisted(() => ({ language: 'en', members: [] as UnoTeamMember[], write: vi.fn() }));
+vi.mock('@/contexts/AuthContext', () => ({ useAuth: () => ({ user: { id: 'synthetic-admin' } }) }));
 vi.mock('@/contexts/LanguageContext', () => ({ useLanguage: () => ({ language: state.language }) }));
 vi.mock('@/hooks/useUnoTeamPermissions', () => ({
   useUnoTeamMembers: () => ({ members: state.members, isLoading: false, updatePermission: state.write, grantAllPermissions: state.write }),
@@ -17,7 +18,7 @@ const view = () => <QueryClientProvider client={new QueryClient()}><MemoryRouter
 afterEach(cleanup);
 beforeEach(() => {
   state.write.mockClear();
-  state.members = [{ user_id: 'synthetic-member', full_name: 'Alex Example', email: 'alex@example.test', avatar_url: null, permissions: [] }];
+  state.members = [{ user_id: 'synthetic-member', full_name: 'Alex Example', email: 'alex@example.test', avatar_url: null, permissions: [], isPlatformAdmin: false }];
 });
 describe('UNO Team filtered empty state', () => {
   it.each(['en', 'ru'])('explains a zero-result search and restores members after clearing (%s)', language => {

@@ -1,4 +1,6 @@
 import { readAdminInvitationResult } from '@/lib/teamInvitation';
+import { changeUnoTeamMembership } from '@/lib/adminTeamMembership';
+import { useAuth } from '@/contexts/AuthContext';
 import { useState } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useUnoTeamMembers, VERTICALS, VERTICAL_LABELS, type Vertical, type UnoTeamMember } from '@/hooks/useUnoTeamPermissions';
@@ -27,7 +29,8 @@ import {
 export default function AdminUnoTeam() {
   const { language } = useLanguage();
   const isRu = language === 'ru';
-  const { members, isLoading, updatePermission, grantAllPermissions } = useUnoTeamMembers();
+  const { user } = useAuth();
+  const { members, isLoading, isError, refetch, updatePermission, grantAllPermissions } = useUnoTeamMembers();
   const [selectedMember, setSelectedMember] = useState<UnoTeamMember | null>(null);
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [addEmail, setAddEmail] = useState('');
@@ -59,20 +62,22 @@ export default function AdminUnoTeam() {
 
     setIsAdding(true);
     try {
-      const { data: profile } = await supabase
+      const { data: profile, error: profileError } = await supabase
         .from('profiles')
         .select('id, email, full_name')
         .eq('email', email)
         .maybeSingle();
+      if (profileError) throw profileError;
 
       if (profile) {
         // Path 1 — promote existing user.
-        const { data: existingRole } = await supabase
+        const { data: existingRole, error: lookupError } = await supabase
           .from('user_roles')
           .select('id')
           .eq('user_id', profile.id)
           .eq('role', 'uno_team')
           .maybeSingle();
+        if (lookupError) throw lookupError;
 
         if (existingRole) {
           toast.error(isRu ? 'Уже в команде' : 'Already in team', {
@@ -81,10 +86,7 @@ export default function AdminUnoTeam() {
           return;
         }
 
-        const { error: roleError } = await supabase
-          .from('user_roles')
-          .insert({ user_id: profile.id, role: 'uno_team' });
-        if (roleError) throw roleError;
+        await changeUnoTeamMembership(profile.id, true);
 
         toast.success(isRu ? 'Успешно' : 'Success', {
           description: isRu
@@ -108,7 +110,11 @@ export default function AdminUnoTeam() {
         });
       }
 
-      queryClient.invalidateQueries({ queryKey: ['uno-team-members'] });
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ['uno-team-members'] }),
+        queryClient.invalidateQueries({ queryKey: ['user-roles'] }),
+        queryClient.invalidateQueries({ queryKey: ['user-active-context'] }),
+      ]);
       setShowAddDialog(false);
       setAddEmail('');
       setAddFullName('');
@@ -125,26 +131,18 @@ export default function AdminUnoTeam() {
 
   const handleRemoveMember = async (userId: string, memberName: string) => {
     try {
-      // Remove role
-      const { error: roleError } = await supabase
-        .from('user_roles')
-        .delete()
-        .eq('user_id', userId)
-        .eq('role', 'uno_team');
-
-      if (roleError) throw roleError;
-
-      // Remove permissions
-      await supabase
-        .from('uno_team_permissions')
-        .delete()
-        .eq('user_id', userId);
+      if (!user?.id || user.id === userId || members?.find(m => m.user_id === userId)?.isPlatformAdmin !== false) throw new Error('Protected or unavailable membership');
+      await changeUnoTeamMembership(userId, false);
 
       toast(isRu ? 'Удалено' : 'Removed', {
         description: isRu ? `${memberName} удалён из myUNO Team` : `${memberName} removed from myUNO Team`,
       });
 
-      queryClient.invalidateQueries({ queryKey: ['uno-team-members'] });
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ['uno-team-members'] }),
+        queryClient.invalidateQueries({ queryKey: ['user-roles'] }),
+        queryClient.invalidateQueries({ queryKey: ['user-active-context'] }),
+      ]);
     } catch (err) {
       console.error('Error removing member:', err);
       toast.error(isRu ? 'Ошибка' : 'Error', {
@@ -176,6 +174,12 @@ export default function AdminUnoTeam() {
     m.email?.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
+  if (isError) {
+    return <PageContainer><div role="alert" className="space-y-3 py-6">
+      <p>{isRu ? 'Не удалось проверить права команды' : 'Team access could not be verified'}</p>
+      <Button variant="outline" onClick={() => void refetch()}>{isRu ? 'Повторить' : 'Retry'}</Button>
+    </div></PageContainer>;
+  }
   if (isLoading) {
     return (
       <>
@@ -367,6 +371,7 @@ export default function AdminUnoTeam() {
                         size="sm" 
                         variant="ghost" 
                         className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                        disabled={!user?.id || user.id === member.user_id || member.isPlatformAdmin !== false}
                         onClick={() => handleRemoveMember(member.user_id, member.full_name || member.email || 'User')}
                       >
                         <Trash2 className="h-4 w-4" />

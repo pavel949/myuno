@@ -2,271 +2,84 @@ import { createServiceClient } from "../_shared/supabase.ts";
 import { requireActorRpc } from "../_shared/authz.ts";
 import { requireAuth } from "../_shared/auth-guard.ts";
 import { getCorsHeaders } from "../_shared/cors.ts";
-
+import { createActorClient } from "../_shared/operating-space-auth.ts";
+import { isRoleAction, parseUserRequest, userMutationDenial } from "../_shared/admin-user-policy.ts";
 
 Deno.serve(async (req) => {
-  const corsHeaders = getCorsHeaders(req);
-  if (req.method === "OPTIONS") {
-    return new Response(null, { headers: corsHeaders });
-  }
-
+  const cors = getCorsHeaders(req);
+  const json = (status: number, body: Record<string, unknown>) => new Response(JSON.stringify(body), {
+    status, headers: { ...cors, "Content-Type": "application/json" },
+  });
+  if (req.method === "OPTIONS") return new Response(null, { headers: cors });
+  if (req.method !== "POST") return json(405, { error: "Method Not Allowed" });
+  let operationId: string | null = null;
   try {
-    // Auth check
-    const authResult = await requireAuth(req, corsHeaders);
-    if (authResult instanceof Response) return authResult;
-    const callerId = authResult.user.id;
-
-    // Admin check via service client
-    const guard = await requireActorRpc(req, corsHeaders, "actor_has_platform_admin");
+    const auth = await requireAuth(req, cors);
+    if (auth instanceof Response) return auth;
+    const guard = await requireActorRpc(req, cors, "actor_has_platform_admin");
     if (guard) return guard;
+    const active = await requireActorRpc(req, cors, "actor_has_active_platform_admin");
+    if (active) return active;
+    const input = parseUserRequest(await req.json().catch(() => null));
+    if (!input) return json(400, { error: "Bad Request", message: "Invalid action, target or role" });
+    const denial = userMutationDenial(input, auth.user.id, false);
+    if (denial) return json(403, { error: "Forbidden", message: denial });
+    const { action, user_id, role } = input;
+
+    if (isRoleAction(action)) {
+      const { data, error } = await createActorClient(req).rpc("manage_nonplatform_role_checked", {
+        p_user_id: user_id, p_role: role, p_grant: action === "add_role",
+      });
+      if (error || data?.success !== true) {
+        return json(error?.code === "42501" ? 403 : error?.code === "P0002" ? 404 : 409,
+          { success: false, error: "Role change not confirmed. Refresh access before retrying." });
+      }
+      return json(200, { success: true, ...data });
+    }
+
     const admin = createServiceClient();
-
-    const { action, user_id, role, hard_delete } = await req.json();
-
-    if (!action || !user_id) {
-      return new Response(
-        JSON.stringify({ error: "Bad Request", message: "action and user_id required" }),
-        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
-    }
-
-    // Prevent self-action
-    if (callerId === user_id && ["suspend", "deactivate", "delete"].includes(action)) {
-      return new Response(
-        JSON.stringify({ error: "Forbidden", message: "Cannot perform this action on yourself" }),
-        { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
-    }
-
-    // Platform-admin protection. add_role already refuses to mint admins here;
-    // the reverse must hold too, otherwise one admin can lock out every other
-    // admin (suspend/deactivate/delete them, or strip their admin role) — or
-    // lock themselves out by removing their own admin role.
-    const PROTECTED_ROLES = ["admin", "uno_team"];
-    if (action === "remove_role" && callerId === user_id && PROTECTED_ROLES.includes(role)) {
-      return new Response(
-        JSON.stringify({ error: "Forbidden", message: "Cannot remove your own platform role" }),
-        { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
-    }
-    const targetsPlatformAdmin =
-      ["suspend", "deactivate", "delete"].includes(action) ||
-      (action === "remove_role" && role === "admin");
-    if (targetsPlatformAdmin) {
-      const { data: targetAdminRole, error: roleLookupErr } = await admin
-        .from("user_roles")
-        .select("role")
-        .eq("user_id", user_id)
-        .eq("role", "admin")
-        .maybeSingle();
-      if (roleLookupErr) throw roleLookupErr;
-      if (targetAdminRole) {
-        return new Response(
-          JSON.stringify({
-            error: "Forbidden",
-            message: "Platform admins cannot be suspended, deleted or demoted via this endpoint",
-          }),
-          { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-        );
-      }
-    }
-
-    let result: Record<string, unknown> = {};
-
-    switch (action) {
-      case "suspend": {
-        // Ban in auth (100 years)
-        const { error: authErr } = await admin.auth.admin.updateUserById(user_id, {
-          ban_duration: "876000h",
-        });
-        if (authErr) throw authErr;
-
-        // Update profile
-        const { error: dbErr } = await admin
-          .from("profiles")
-          .update({
-            status: "suspended",
-            suspended_at: new Date().toISOString(),
-            status_changed_by: callerId,
-          })
-          .eq("id", user_id);
-        if (dbErr) throw dbErr;
-
-        // Audit log
-        await admin.from("admin_audit_logs").insert({
-          admin_id: callerId,
-          action: "user.suspended",
-          entity_type: "user",
-          entity_id: user_id,
-          new_data: { status: "suspended" },
-        });
-
-        result = { status: "suspended" };
-        break;
-      }
-
-      case "activate": {
-        // Remove ban
-        const { error: authErr } = await admin.auth.admin.updateUserById(user_id, {
-          ban_duration: "none",
-        });
-        if (authErr) throw authErr;
-
-        const { error: dbErr } = await admin
-          .from("profiles")
-          .update({
-            status: "active",
-            suspended_at: null,
-            deactivated_at: null,
-            status_changed_by: callerId,
-          })
-          .eq("id", user_id);
-        if (dbErr) throw dbErr;
-
-        await admin.from("admin_audit_logs").insert({
-          admin_id: callerId,
-          action: "user.activated",
-          entity_type: "user",
-          entity_id: user_id,
-          new_data: { status: "active" },
-        });
-
-        result = { status: "active" };
-        break;
-      }
-
-      case "deactivate": {
-        const { error: authErr } = await admin.auth.admin.updateUserById(user_id, {
-          ban_duration: "876000h",
-        });
-        if (authErr) throw authErr;
-
-        const { error: dbErr } = await admin
-          .from("profiles")
-          .update({
-            status: "deactivated",
-            deactivated_at: new Date().toISOString(),
-            status_changed_by: callerId,
-          })
-          .eq("id", user_id);
-        if (dbErr) throw dbErr;
-
-        await admin.from("admin_audit_logs").insert({
-          admin_id: callerId,
-          action: "user.deactivated",
-          entity_type: "user",
-          entity_id: user_id,
-          new_data: { status: "deactivated" },
-        });
-
-        result = { status: "deactivated" };
-        break;
-      }
-
-      case "delete": {
-        if (hard_delete) {
-          // Hard delete from auth (cascades to profiles via FK)
-          const { error: authErr } = await admin.auth.admin.deleteUser(user_id);
-          if (authErr) throw authErr;
-        } else {
-          // Soft delete
-          const { error: authErr } = await admin.auth.admin.updateUserById(user_id, {
-            ban_duration: "876000h",
-          });
-          if (authErr) throw authErr;
-
-          const { error: dbErr } = await admin
-            .from("profiles")
-            .update({
-              status: "deactivated",
-              deactivated_at: new Date().toISOString(),
-              status_changed_by: callerId,
-            })
-            .eq("id", user_id);
-          if (dbErr) throw dbErr;
-        }
-
-        await admin.from("admin_audit_logs").insert({
-          admin_id: callerId,
-          action: hard_delete ? "user.deleted_hard" : "user.deleted_soft",
-          entity_type: "user",
-          entity_id: user_id,
-          new_data: { hard_delete: !!hard_delete },
-        });
-
-        result = { deleted: true, hard_delete: !!hard_delete };
-        break;
-      }
-
-      case "add_role": {
-        if (!role) throw new Error("role is required for add_role");
-        // A single admin must not be able to silently mint another platform
-        // admin via this generic endpoint (no second-admin approval exists).
-        // Granting the highest-privilege roles is intentionally not available
-        // here — provision those through a dedicated, audited flow / migration.
-        if (["admin", "uno_team"].includes(role)) {
-          return new Response(
-            JSON.stringify({
-              error: "Forbidden",
-              message: "Granting platform-admin roles is not permitted via this endpoint",
-            }),
-            { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-          );
-        }
-        const { error } = await admin
-          .from("user_roles")
-          .upsert({ user_id, role }, { onConflict: "user_id,role" });
-        if (error) throw error;
-
-        await admin.from("admin_audit_logs").insert({
-          admin_id: callerId,
-          action: "user.role_added",
-          entity_type: "user",
-          entity_id: user_id,
-          new_data: { role },
-        });
-
-        result = { role_added: role };
-        break;
-      }
-
-      case "remove_role": {
-        if (!role) throw new Error("role is required for remove_role");
-        const { error } = await admin
-          .from("user_roles")
-          .delete()
-          .eq("user_id", user_id)
-          .eq("role", role);
-        if (error) throw error;
-
-        await admin.from("admin_audit_logs").insert({
-          admin_id: callerId,
-          action: "user.role_removed",
-          entity_type: "user",
-          entity_id: user_id,
-          old_data: { role },
-        });
-
-        result = { role_removed: role };
-        break;
-      }
-
-      default:
-        return new Response(
-          JSON.stringify({ error: "Bad Request", message: `Unknown action: ${action}` }),
-          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-        );
-    }
-
-    return new Response(JSON.stringify({ success: true, ...result }), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    const { data: target, error: targetError } = await admin.from("profiles")
+      .select("id,status").eq("id", user_id).maybeSingle();
+    if (targetError) return json(503, { error: "Target verification unavailable" });
+    if (!target) return json(404, { error: "Target not found" });
+    const { data: targetAdmin, error: lookupError } = await admin.from("user_roles")
+      .select("role").eq("user_id", user_id).eq("role", "admin").maybeSingle();
+    if (lookupError) return json(503, { error: "Target role verification unavailable" });
+    const targetDenial = userMutationDenial(input, auth.user.id, !!targetAdmin);
+    if (targetDenial) return json(403, { error: "Forbidden", message: targetDenial });
+    // A durable intent precedes the external Auth mutation. Auth and SQL are not
+    // one transaction; incomplete/ambiguous outcomes require reconciliation.
+    const id = crypto.randomUUID();
+    const { error: intentError } = await admin.from("admin_audit_logs").insert({
+      admin_id: auth.user.id, action: "user.lifecycle_intent", entity_type: "user",
+      entity_id: user_id, old_data: { status: target.status },
+      new_data: { operation_id: id, requested_action: action },
     });
-  } catch (err: unknown) {
-    const message = err instanceof Error ? err.message : "Internal error";
-    console.error("admin-manage-user error:", err);
-    return new Response(
-      JSON.stringify({ error: "Internal Server Error", message }),
-      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-    );
+    if (intentError) return json(503, { error: "Audit unavailable; no lifecycle mutation attempted" });
+    operationId = id;
+    const status = action === "activate" ? "active" : action === "suspend" ? "suspended" : "deactivated";
+    const partial = () => json(409, { success: false, code: "lifecycle_reconciliation_required",
+      operation_id: id, error: "Lifecycle completion unconfirmed. Review Auth, profile and audit before retrying." });
+    const { error: authError } = await admin.auth.admin.updateUserById(user_id, {
+      ban_duration: status === "active" ? "none" : "876000h",
+    });
+    if (authError) return partial();
+    const now = new Date().toISOString();
+    const { data: updated, error: profileError } = await admin.from("profiles").update({
+      status, suspended_at: status === "suspended" ? now : null,
+      deactivated_at: status === "deactivated" ? now : null, status_changed_by: auth.user.id,
+    }).eq("id", user_id).select("id,status").maybeSingle();
+    if (profileError || updated?.id !== user_id || updated?.status !== status) return partial();
+    const { error: auditError } = await admin.from("admin_audit_logs").insert({
+      admin_id: auth.user.id,
+      action: action === "delete" ? "user.deleted_soft" : status === "active" ? "user.activated" : status === "suspended" ? "user.suspended" : "user.deactivated",
+      entity_type: "user", entity_id: user_id, old_data: { status: target.status },
+      new_data: { status, operation_id: id, hard_delete: false },
+    });
+    if (auditError) return partial();
+    return json(200, { success: true, status, operation_id: id, ...(action === "delete" ? { deleted: true, hard_delete: false } : {}) });
+  } catch {
+    return json(operationId ? 409 : 500, { success: false, operation_id: operationId,
+      error: operationId ? "Lifecycle completion unconfirmed. Review before retrying." : "Action not confirmed." });
   }
 });
