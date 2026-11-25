@@ -39,6 +39,7 @@ import { AchievementsCard } from "@/components/wallet/AchievementsCard";
 import { PaymentMethodsSection } from "@/components/wallet/PaymentMethodsSection";
 import { SpendingInsights } from "@/components/wallet/SpendingInsights";
 import { redirectToAuth } from '@/lib/auth/redirectToAuth';
+import { walletCurrencySymbol } from '@/lib/walletCurrency';
 
 interface WalletData {
   id: string;
@@ -79,14 +80,19 @@ const Wallet = () => {
     const amount = searchParams.get('amount');
 
     if (success === 'true') {
-      toast.success(t('wallet.toppedUp').replace('{amount}', `${amount} ₽`));
+      toast.success(
+        t('wallet.toppedUp').replace(
+          '{amount}',
+          `${amount} ${walletCurrencySymbol(wallet?.currency)}`,
+        ),
+      );
       // Remove query params from URL
       navigate('/wallet', { replace: true });
     } else if (canceled === 'true') {
       toast.error(t('wallet.paymentCanceled'));
       navigate('/wallet', { replace: true });
     }
-  }, [searchParams, navigate, language]);
+  }, [searchParams, navigate, t, wallet?.currency]);
 
   useEffect(() => {
     if (!user) {
@@ -132,8 +138,14 @@ const Wallet = () => {
   }, [user, navigate]);
 
   const handleTopUp = async () => {
+    const currency = wallet?.currency ?? 'THB';
+    const symbol = walletCurrencySymbol(currency);
     if (!user || topUpAmount < 100) {
-      toast.error(language === 'ru' ? 'Минимальная сумма 100 ₽' : 'Minimum amount is 100 ₽');
+      toast.error(
+        language === 'ru'
+          ? `Минимальная сумма 100 ${symbol}`
+          : `Minimum amount is 100 ${symbol}`,
+      );
       return;
     }
 
@@ -144,7 +156,7 @@ const Wallet = () => {
       const response = await supabase.functions.invoke('create-checkout-session', {
         body: { 
           amount: topUpAmount,
-          currency: 'rub',
+          currency,
         },
       });
 
@@ -206,7 +218,7 @@ const Wallet = () => {
   };
 
   const formatCurrency = (amount: number, currency: string) => {
-    const symbol = currency === 'RUB' ? '₽' : currency;
+    const symbol = walletCurrencySymbol(currency);
     return `${amount >= 0 ? '+' : ''}${amount.toLocaleString()} ${symbol}`;
   };
 
@@ -255,7 +267,7 @@ const Wallet = () => {
                   </span>
                 </div>
                 <div className="text-4xl font-bold mb-4" data-testid="wallet-balance">
-                  {wallet?.balance.toLocaleString() || 0} ₽
+                  {wallet?.balance.toLocaleString() || 0} {walletCurrencySymbol(wallet?.currency)}
                 </div>
                 <div className="text-sm opacity-75">
                   {language === 'ru' 
@@ -433,7 +445,7 @@ const Wallet = () => {
                   onClick={() => setTopUpAmount(amount)}
                   className="h-12"
                 >
-                  {amount} ₽
+                  {amount} {walletCurrencySymbol(wallet?.currency)}
                 </Button>
               ))}
             </div>
@@ -453,11 +465,13 @@ const Wallet = () => {
                   className="pr-12 h-12 text-lg"
                 />
                 <span className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground">
-                  ₽
+                  {walletCurrencySymbol(wallet?.currency)}
                 </span>
               </div>
               <p className="text-xs text-muted-foreground">
-                {language === 'ru' ? 'Минимум 100 ₽' : 'Minimum 100 ₽'}
+                {language === 'ru'
+                  ? `Минимум 100 ${walletCurrencySymbol(wallet?.currency)}`
+                  : `Minimum 100 ${walletCurrencySymbol(wallet?.currency)}`}
               </p>
             </div>
 
@@ -476,7 +490,7 @@ const Wallet = () => {
               ) : (
                 <>
                   <CreditCard className="w-5 h-5" />
-                  {language === 'ru' ? `Оплатить ${topUpAmount} ₽` : `Pay ${topUpAmount} ₽`}
+                  {language === 'ru' ? `Оплатить ${topUpAmount} ${walletCurrencySymbol(wallet?.currency)}` : `Pay ${topUpAmount} ${walletCurrencySymbol(wallet?.currency)}`}
                 </>
               )}
             </Button>
