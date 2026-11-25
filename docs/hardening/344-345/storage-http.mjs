@@ -155,4 +155,17 @@ await ok("signed synthetic GET",call(storage+signed.signedURL,{publicRequest:tru
 await denied("private move forbidden",call(storage+"/object/move",{method:"POST",token:a.token,body:{bucketId:"intake-uploads",sourceKey:own,destinationKey:a.id+"/"+randomUUID()+".txt"}}));
 await ok("owner private remove",call(storage+"/object/intake-uploads",{method:"DELETE",token:a.token,body:{prefixes:[own]}}));
 await denied("private removed",authenticated("intake-uploads",own,a.token));
+// Document suffix authorization; valid document bytes are tested by the Deno parser fixture.
+for (const [ext, mime] of [["pdf","application/pdf"],["docx","application/vnd.openxmlformats-officedocument.wordprocessingml.document"],["xlsx","application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"]]) {
+  const key = a.id + "/" + randomUUID() + "." + ext;
+  const bytes = new Uint8Array([1,2,3,4]);
+  const options = {method:"POST",token:a.token,body:bytes,headers:{"Content-Type":mime,"x-upsert":"false"}};
+  await ok("private document upload "+ext,call(storage+"/object/intake-uploads/"+key,options));
+  await denied("document direct public URL "+ext,pub("intake-uploads",key));
+  await denied("document foreign download "+ext,authenticated("intake-uploads",key,b.token));
+  const downloaded = await ok("document own download "+ext,authenticated("intake-uploads",key,a.token));
+  assert.deepEqual(new Uint8Array(await downloaded.arrayBuffer()),bytes);
+  await denied("document foreign upload "+ext,call(storage+"/object/intake-uploads/"+a.id+"/"+randomUUID()+"."+ext,{...options,token:b.token}));
+  await ok("document own delete "+ext,call(storage+"/object/intake-uploads",{method:"DELETE",token:a.token,body:{prefixes:[key]}}));
+}
 console.log("Real local Storage HTTP assertions: "+count+" HTTP outcomes plus content/list checks; synthetic fixture only.");

@@ -44,7 +44,8 @@ jobs:
           export DENO_DIR="$RUNNER_TEMP/intake-deno-cache"
           cd "$FIXTURE"
           "$DENO" --version
-          "$DENO" cache --no-config --node-modules-dir=none --lock="$RUNNER_TEMP/intake-document-deno.lock" docs/hardening/344-345/intake-documents.deno.ts
+          cp "$GITHUB_WORKSPACE/docs/hardening/344-345/intake-document-deno.lock" "$RUNNER_TEMP/intake-document-deno.lock"
+          "$DENO" cache --no-config --node-modules-dir=none --lock="$RUNNER_TEMP/intake-document-deno.lock" --frozen docs/hardening/344-345/intake-documents.deno.ts
       - name: Actual PDF DOCX XLSX parsing, without runtime network or filesystem permissions
         run: |
           DENO="$RUNNER_TEMP/intake-deno/deno"

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { makeIntakePath, parseIntakePaths, publicIntakeImages, hasPrivateIntakeReference, validateIntakeFileMetadata, validateIntakeBytes } from '../../../supabase/functions/_shared/intake-private-contract';
+import { INTAKE_FILE_CONTRACT, INTAKE_DOCUMENT_CONTRACT, intakeContractReady, intakeContractForExtensions, intakeMime, makeIntakePath, parseIntakePaths, publicIntakeImages, hasPrivateIntakeReference, validateIntakeFileMetadata, validateIntakeBytes } from '../../../supabase/functions/_shared/intake-private-contract';
 
 const actor = '11111111-1111-4111-8111-111111111111';
 const other = '22222222-2222-4222-8222-222222222222';
@@ -53,5 +53,28 @@ describe('private intake contract', () => {
     const publicUrl = 'https://project.test/storage/v1/object/public/property-images/one%20villa.jpg';
     expect(publicIntakeImages([publicUrl])).toEqual([publicUrl]);
     expect(hasPrivateIntakeReference('Price changed by 5%25')).toBe(false);
+  });
+
+  it('negotiates document support separately without widening private-v2', () => {
+    expect(intakeContractForExtensions(['png', 'txt'])).toBe(INTAKE_FILE_CONTRACT);
+    expect(intakeContractReady(INTAKE_FILE_CONTRACT, false)).toBe(true);
+    expect(intakeContractReady(INTAKE_DOCUMENT_CONTRACT, false)).toBe(false);
+    expect(intakeContractReady(INTAKE_DOCUMENT_CONTRACT, true)).toBe(true);
+    expect(intakeContractReady('unknown', true)).toBe(false);
+    for (const extension of ['pdf', 'docx', 'xlsx']) {
+      expect(intakeContractForExtensions([extension])).toBe(INTAKE_DOCUMENT_CONTRACT);
+      const path = makeIntakePath(actor, file, extension, true);
+      expect(() => makeIntakePath(actor, file, extension)).toThrow();
+      expect(() => parseIntakePaths(actor, [path])).toThrow();
+      expect(parseIntakePaths(actor, [path], true)).toEqual([path]);
+      expect(() => parseIntakePaths(other, [path], true)).toThrow();
+      expect(validateIntakeFileMetadata([{ name: 'test.' + extension, size: 10 }], true)).toEqual([extension]);
+      expect(intakeMime(extension, true)).toBeTruthy();
+      expect(intakeMime(extension)).toBeUndefined();
+      expect(hasPrivateIntakeReference(path)).toBe(true);
+    }
+    for (const extension of ['doc','xls','docm','xlsm','exe','constructor']) {
+      expect(() => validateIntakeFileMetadata([{ name: 'test.' + extension, size: 10 }], true)).toThrow();
+    }
   });
 });

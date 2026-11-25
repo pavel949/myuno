@@ -1,6 +1,6 @@
 import { requireInternalOrStaff, requireActorRpc } from "../_shared/authz.ts";
 import { createActorClient } from "../_shared/operating-space-auth.ts";
-import { INTAKE_FILE_CONTRACT, INTAKE_MAX_TOTAL_BYTES, INTAKE_MAX_FILE_BYTES, INTAKE_MAX_TEXT, parseIntakePaths, intakeMime, validateIntakeBytes, hasPrivateIntakeReference } from "../_shared/intake-private-contract.ts";
+import { INTAKE_FILE_CONTRACT, INTAKE_DOCUMENT_CONTRACT, intakeContractReady, isIntakeDocumentExtension, INTAKE_MAX_TOTAL_BYTES, INTAKE_MAX_FILE_BYTES, INTAKE_MAX_TEXT, parseIntakePaths, intakeMime, validateIntakeBytes, hasPrivateIntakeReference } from "../_shared/intake-private-contract.ts";
 import { validateExternalUrlForSSRF } from "../_shared/ssrf-guard.ts";
 // Deno.serve used (native edge runtime)
 import { createClient } from "../_shared/supabase.ts";
@@ -947,11 +947,16 @@ Deno.serve(async (req) => {
     const staffGate = await requireInternalOrStaff(req, corsHeaders);
     if (staffGate instanceof Response) return staffGate;
     let privatePaths: string[] = [];
+    let privateDocuments = false;
     if (mode === 'files' || mode === 'private_upload_ready') {
       const denied = await requireActorRpc(req, corsHeaders, 'actor_has_platform_admin');
       if (denied) return denied;
-      if (body.fileContract !== INTAKE_FILE_CONTRACT || (mode === 'files' && (images.length || sessionId))) {
+      if ((body.fileContract !== INTAKE_FILE_CONTRACT && body.fileContract !== INTAKE_DOCUMENT_CONTRACT) || (mode === 'files' && (images.length || sessionId || rawText || urls?.length || fileData))) {
         return new Response(JSON.stringify({ error: 'Private file contract required' }), { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+      }
+      privateDocuments = body.fileContract === INTAKE_DOCUMENT_CONTRACT;
+      if (!intakeContractReady(body.fileContract, Deno.env.get('INTAKE_PRIVATE_DOCUMENTS_ENABLED') === 'true')) {
+        return new Response(JSON.stringify({ error: 'Private document processing not ready' }), { status: 503, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
       }
       // Never accept an upload contract while the bucket remains public, even if a flag is set.
       const { data: bucket, error: bucketError } = await supabase.storage.getBucket('intake-uploads');
@@ -959,9 +964,9 @@ Deno.serve(async (req) => {
         return new Response(JSON.stringify({ error: 'Private file processing not ready' }), { status: 503, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
       }
       if (mode === 'private_upload_ready') {
-        return new Response(JSON.stringify({ ready: true, fileContract: INTAKE_FILE_CONTRACT }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+        return new Response(JSON.stringify({ ready: true, fileContract: body.fileContract }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
       }
-      try { privatePaths = parseIntakePaths(userId, body.uploadedPaths); }
+      try { privatePaths = parseIntakePaths(userId, body.uploadedPaths, privateDocuments); }
       catch { return new Response(JSON.stringify({ error: 'Invalid private file paths' }), { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }); }
     }
     if (sessionId) {
@@ -1036,8 +1041,19 @@ Deno.serve(async (req) => {
         total += blob.size;
         if (total > INTAKE_MAX_TOTAL_BYTES) throw new Error('Private files exceed total size limit');
         const bytes = new Uint8Array(await blob.arrayBuffer());
-        const mime = intakeMime(path.split('.').pop() || '');
+        const extension = path.split('.').pop() || '';
+        const mime = intakeMime(extension, privateDocuments);
         if (!mime) throw new Error('Unsupported private file type');
+        if (isIntakeDocumentExtension(extension)) {
+          if (!privateDocuments) throw new Error('Private document contract required');
+          try {
+            const { extractIntakeDocument } = await import('../_shared/intake-documents.ts');
+            textParts.push(await extractIntakeDocument(extension, bytes));
+          } catch {
+            throw new Error('Private document could not be safely extracted');
+          }
+          continue;
+        }
         validateIntakeBytes(mime, bytes);
         if (mime.startsWith('image/')) {
           let binary = '';

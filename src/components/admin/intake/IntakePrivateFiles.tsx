@@ -16,7 +16,7 @@ export function IntakePrivateFiles({ paths }: { paths?: string[] }) {
     try {
       const { data: actor, error: authError } = await supabase.auth.getUser();
       if (authError || !actor.user) throw new Error('Authentication required');
-      const [checked] = parseIntakePaths(actor.user.id, [path]);
+      const [checked] = parseIntakePaths(actor.user.id, [path], true);
       const { data: blob, error } = await supabase.storage.from('intake-uploads').download(checked);
       if (error || !blob) throw new Error('File unavailable');
       const url = URL.createObjectURL(blob);

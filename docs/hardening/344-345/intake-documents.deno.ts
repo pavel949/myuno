@@ -1,4 +1,5 @@
 import { extractIntakeDocument, type IntakeDocumentKind } from "../../../supabase/functions/_shared/intake-documents.ts";
+import { INTAKE_DOCUMENT_CONTRACT, INTAKE_FILE_CONTRACT, intakeContractForExtensions, intakeContractReady, isIntakeDocumentExtension, makeIntakePath, parseIntakePaths, hasPrivateIntakeReference } from "../../../supabase/functions/_shared/intake-private-contract.ts";
 import { ZipWriter, Uint8ArrayWriter, TextReader } from "npm:@zip.js/zip.js@2.25.0";
 
 function assert(ok: unknown, message = "Assertion failed"): asserts ok { if (!ok) throw new Error(message); }
@@ -89,4 +90,29 @@ Deno.test("rejects text and expanded archive limits", async()=>{
   await rejects(()=>extractIntakeDocument("docx",data));
   const bomb=await zip({...wordParts(),"word/oversize.xml":"A".repeat(2*1024*1024)});
   await rejects(()=>extractIntakeDocument("docx",bomb));
+});
+
+Deno.test("versioned document paths require explicit readiness; accepted bytes use the real parser", async () => {
+  const actor = "11111111-1111-4111-8111-111111111111";
+  const other = "22222222-2222-4222-8222-222222222222";
+  const id = "33333333-3333-4333-8333-333333333333";
+  const fixtures: [string, Uint8Array, string][] = [
+    ["pdf", pdf("Synthetic villa price 100"), "Synthetic villa price 100"],
+    ["docx", await zip(wordParts()), "Villa & pool"],
+    ["xlsx", await zip(xlsxParts()), "A1=Villa"]
+  ];
+  assert(intakeContractReady(INTAKE_FILE_CONTRACT, false));
+  assert(!intakeContractReady(INTAKE_DOCUMENT_CONTRACT, false));
+  assert(intakeContractReady(INTAKE_DOCUMENT_CONTRACT, true));
+  for (const [ext, bytes, expected] of fixtures) {
+    assert(intakeContractForExtensions([ext]) === INTAKE_DOCUMENT_CONTRACT);
+    const key = makeIntakePath(actor, id, ext, true);
+    await rejects(async () => parseIntakePaths(actor,[key]));
+    await rejects(async () => parseIntakePaths(other,[key],true));
+    const [checked] = parseIntakePaths(actor,[key],true);
+    const kind = checked.split(".").pop() || "";
+    assert(isIntakeDocumentExtension(kind));
+    assert((await extractIntakeDocument(kind,bytes)).includes(expected));
+    assert(hasPrivateIntakeReference(key));
+  }
 });

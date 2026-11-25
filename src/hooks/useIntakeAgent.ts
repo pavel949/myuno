@@ -7,7 +7,7 @@ import { isValidIntakeTable, VALID_INTAKE_TABLES } from '@/lib/providerIdMapping
 import { useActiveCompany } from '@/hooks/useActiveCompany';
 import { getVerticalById } from '@/lib/intakeVerticals';
 import { validateIntakeItem } from '@/lib/intake/validateItem';
-import { INTAKE_FILE_CONTRACT, intakeMime, makeIntakePath, validateIntakeFileMetadata, publicIntakeImages, hasPrivateIntakeReference } from '../../supabase/functions/_shared/intake-private-contract';
+import { INTAKE_DOCUMENT_CONTRACT, intakeContractForExtensions, intakeMime, makeIntakePath, validateIntakeFileMetadata, publicIntakeImages, hasPrivateIntakeReference } from '../../supabase/functions/_shared/intake-private-contract';
 
 export interface IntakeProgress {
   total: number;
@@ -114,23 +114,26 @@ export function useIntakeAgent() {
     
     try {
       const uploadedPaths: string[] = [];
+      let fileContract: string | undefined;
       if (options.mode === 'files') {
         const files = (options.files || []).map(item => item.file);
-        const extensions = validateIntakeFileMetadata(files);
+        const extensions = validateIntakeFileMetadata(files, true);
+        fileContract = intakeContractForExtensions(extensions);
+        const allowDocuments = fileContract === INTAKE_DOCUMENT_CONTRACT;
         const { data: actor, error: actorError } = await supabase.auth.getUser();
         if (actorError || !actor.user) throw new Error('Authentication required');
         const { data: ready, error: readyError } = await supabase.functions.invoke('intake-listing-agent', {
-          body: { mode: 'private_upload_ready', fileContract: INTAKE_FILE_CONTRACT },
+          body: { mode: 'private_upload_ready', fileContract },
         });
-        if (readyError || ready?.ready !== true || ready?.fileContract !== INTAKE_FILE_CONTRACT) {
+        if (readyError || ready?.ready !== true || ready?.fileContract !== fileContract) {
           throw new Error(language === 'ru' ? 'Безопасная загрузка файлов пока недоступна. Используйте текст или импорт таблицы.' : 'Private file upload is unavailable. Use text or spreadsheet import.');
         }
         try {
           for (let i = 0; i < files.length; i++) {
             const ext = extensions[i];
-            const path = makeIntakePath(actor.user.id, crypto.randomUUID(), ext);
+            const path = makeIntakePath(actor.user.id, crypto.randomUUID(), ext, allowDocuments);
             const { error: uploadError } = await supabase.storage.from('intake-uploads')
-              .upload(path, files[i], { contentType: intakeMime(ext), upsert: false });
+              .upload(path, files[i], { contentType: intakeMime(ext, allowDocuments), upsert: false });
             if (uploadError) throw new Error('Private file upload failed');
             uploadedPaths.push(path);
           }
@@ -149,7 +152,7 @@ export function useIntakeAgent() {
         mode: edgeMode,
         rawText: options.rawText,
         urls: options.urls,
-        fileContract: edgeMode === 'files' ? INTAKE_FILE_CONTRACT : undefined,
+        fileContract: edgeMode === 'files' ? fileContract : undefined,
         uploadedPaths: uploadedPaths.length ? uploadedPaths : undefined,
         forceVertical: options.forceVertical,
       };

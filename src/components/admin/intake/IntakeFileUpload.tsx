@@ -32,10 +32,10 @@ interface IntakeFileUploadProps {
 
 const ACCEPTED_TYPES = {
   image: ['image/jpeg', 'image/png', 'image/webp'],
-  pdf: [],
-  excel: [],
+  pdf: ['application/pdf'],
+  excel: ['application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'],
   csv: ['text/csv', 'application/csv'],
-  document: ['text/plain'],
+  document: ['text/plain', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'],
 };
 
 const ALL_ACCEPTED = Object.values(ACCEPTED_TYPES).flat();
@@ -190,8 +190,8 @@ export function IntakeFileUpload({
         </p>
         <p className="text-sm text-muted-foreground mt-1">
           {isRu 
-            ? `JPEG, PNG, WebP, TXT, CSV (до ${maxSizeMB} МБ на файл, 12 МБ всего)` 
-            : `JPEG, PNG, WebP, TXT, CSV (max ${maxSizeMB} MB each, 12 MB total)`
+            ? `JPEG, PNG, WebP, TXT, CSV; PDF, DOCX, XLSX при доступности (до ${maxSizeMB} МБ на файл, 12 МБ всего)` 
+            : `JPEG, PNG, WebP, TXT, CSV; PDF, DOCX, XLSX when enabled (max ${maxSizeMB} MB each, 12 MB total)`
           }
         </p>
       </div>
