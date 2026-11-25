@@ -11,14 +11,35 @@
  *   { kind: 'booking_status', bookingId }
  *   { kind: 'new_message', messageId }
  *   { kind: 'partner_lead', leadId }   // B2B acquisition lead from /thai-business
+ *
+ * Authorization (verify_jwt = false, so enforced here — see thai-notify-auth.ts):
+ *   - service callers (internal secret / service role) may send any kind;
+ *   - signed-in users only for bookings they are a participant of;
+ *   - anonymous callers only for a fresh, untouched partner lead.
+ * Nothing is sent until the check passes.
  */
 import { createServiceClient } from "../_shared/supabase.ts";
 import { getCorsHeaders } from "../_shared/cors.ts";
 import { sendWhatsApp } from "../_shared/whatsapp.ts";
 import { sendEmail, buildEmailHtml } from "../_shared/notify-utils.ts";
 import { getAdminWhatsApp, getAdminEmails, getMailFrom } from "../_shared/admin-config.ts";
+import { requireServiceCaller } from "../_shared/internal-secret.ts";
+import { optionalAuth } from "../_shared/auth-guard.ts";
+import {
+  canNotifyBooking,
+  canNotifyMessage,
+  canNotifyPartnerLead,
+  isThaiNotifyKind,
+  type ThaiNotifyCaller,
+} from "../_shared/thai-notify-auth.ts";
 
 const SITE_URL = "https://myuno.app";
+
+async function resolveCaller(req: Request, corsHeaders: Record<string, string>): Promise<ThaiNotifyCaller> {
+  if ((await requireServiceCaller(req, corsHeaders)) === null) return { mode: "service" };
+  const user = await optionalAuth(req);
+  return user ? { mode: "user", userId: user.id } : { mode: "anonymous" };
+}
 
 interface Section { label: string; value: string }
 
@@ -62,14 +83,31 @@ Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
+    const body: unknown = await req.json().catch(() => null);
+    const { kind, bookingId, messageId, leadId } = (body ?? {}) as Record<string, unknown>;
+    if (!isThaiNotifyKind(kind)) return json({ success: false, error: "unknown kind" }, 400, corsHeaders);
+    const targetId = kind === "new_message" ? messageId : kind === "partner_lead" ? leadId : bookingId;
+    if (typeof targetId !== "string" || targetId.length === 0) {
+      return json({ success: false, error: "missing id" }, 400, corsHeaders);
+    }
+
+    const caller = await resolveCaller(req, corsHeaders);
+    // Chat alerts are server-dispatched only: reject before touching the DB.
+    if (kind === "new_message" && !canNotifyMessage(caller)) {
+      return json({ success: false, error: "Forbidden" }, 403, corsHeaders);
+    }
+    // Booking alerts need a signed-in participant (or a service caller).
+    if ((kind === "new_booking" || kind === "booking_status") && caller.mode === "anonymous") {
+      return json({ success: false, error: "Unauthorized" }, 401, corsHeaders);
+    }
+
     const sb = createServiceClient();
-    const { kind, bookingId, messageId, leadId } = await req.json();
 
     if (kind === "new_booking" || kind === "booking_status") {
       const { data: booking } = await sb
         .from("thai_bookings")
-        .select("id, status, date_time, total_amount_thb, notes, business_id, customer_id, service_id")
-        .eq("id", bookingId)
+        .select("id, status, date_time, total_amount_thb, notes, business_id, customer_id, service_id, created_at")
+        .eq("id", targetId)
         .maybeSingle();
       if (!booking) return json({ success: false, error: "booking not found" }, 404, corsHeaders);
 
@@ -78,6 +116,13 @@ Deno.serve(async (req) => {
         .select("name_ru, name_en, name_th, phone, owner_id")
         .eq("id", booking.business_id)
         .maybeSingle();
+
+      const allowed = canNotifyBooking(caller, kind, {
+        customerId: booking.customer_id ?? null,
+        businessOwnerId: business?.owner_id ?? null,
+        createdAt: booking.created_at ?? null,
+      });
+      if (!allowed) return json({ success: false, error: "Forbidden" }, 403, corsHeaders);
       const { data: service } = booking.service_id
         ? await sb.from("thai_business_services").select("name_ru, name_th").eq("id", booking.service_id).maybeSingle()
         : { data: null };
@@ -146,7 +191,7 @@ Deno.serve(async (req) => {
       const { data: msg } = await sb
         .from("thai_chat_messages")
         .select("id, chat_id, sender_id, text_translated, text_original")
-        .eq("id", messageId)
+        .eq("id", targetId)
         .maybeSingle();
       if (!msg) return json({ success: false, error: "message not found" }, 404, corsHeaders);
 
@@ -196,10 +241,13 @@ Deno.serve(async (req) => {
     if (kind === "partner_lead") {
       const { data: lead } = await sb
         .from("thai_partner_leads")
-        .select("id, contact_name, business_name, phone, email, category, interests, message, preferred_lang, created_at")
-        .eq("id", leadId)
+        .select("id, contact_name, business_name, phone, email, category, interests, message, preferred_lang, status, created_at")
+        .eq("id", targetId)
         .maybeSingle();
       if (!lead) return json({ success: false, error: "lead not found" }, 404, corsHeaders);
+      if (!canNotifyPartnerLead(caller, { status: lead.status ?? null, createdAt: lead.created_at ?? null })) {
+        return json({ success: false, error: "Forbidden" }, 403, corsHeaders);
+      }
 
       const adminWa = await getAdminWhatsApp();
       const adminEmails = await getAdminEmails();
@@ -242,7 +290,7 @@ Deno.serve(async (req) => {
     return json({ success: false, error: "unknown kind" }, 400, corsHeaders);
   } catch (error) {
     console.error("[thai-notify] error:", error);
-    return json({ success: false, error: error instanceof Error ? error.message : "unknown" }, 500, getCorsHeaders(req));
+    return json({ success: false, error: "internal error" }, 500, getCorsHeaders(req));
   }
 });
 
