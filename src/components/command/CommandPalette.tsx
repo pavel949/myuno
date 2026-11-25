@@ -30,6 +30,8 @@ import { Sheet, SheetContent } from '@/components/ui/sheet';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useUserPersonas } from '@/hooks/useUserPersonas';
 import { APP_REGISTRY, type AppEntry } from '@/lib/appRegistry';
+import { useFocusMode } from '@/hooks/useFocusMode';
+import { isFocusHiddenApp } from '@/lib/focus/focusMode';
 
 const RECENT_KEY = 'myuno.cmdk.recent';
 const RECENT_MAX = 5;
@@ -96,19 +98,23 @@ const PaletteBody: React.FC<PaletteBodyProps> = ({ onClose, onSwitchRole }) => {
 
   const activeTags = new Set<string>(effectivePersonas);
 
+  const focusMode = useFocusMode();
   const personalised = useMemo(() => {
-    return [...ALL_APPS].sort((a, b) => {
+    const apps = focusMode ? ALL_APPS.filter((a) => !isFocusHiddenApp(a.id)) : ALL_APPS;
+    return [...apps].sort((a, b) => {
       const aBoost = a.personaTags.some((t) => activeTags.has(t)) ? 1 : 0;
       const bBoost = b.personaTags.some((t) => activeTags.has(t)) ? 1 : 0;
       if (aBoost !== bBoost) return bBoost - aBoost;
       return getLabel(a).localeCompare(getLabel(b), isRu ? 'ru' : 'en');
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [effectivePersonas, isRu]);
+  }, [effectivePersonas, isRu, focusMode]);
 
   const recent = useMemo(
-    () => recentIds.map((id) => APP_REGISTRY[id]).filter(Boolean),
-    [recentIds],
+    () => recentIds
+      .map((id) => APP_REGISTRY[id])
+      .filter((app): app is AppEntry => Boolean(app) && !(focusMode && isFocusHiddenApp(app.id))),
+    [recentIds, focusMode],
   );
 
   const go = useCallback(

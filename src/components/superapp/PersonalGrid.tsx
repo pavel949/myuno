@@ -3,7 +3,7 @@
  * personas and shows top 8 as an icon grid. Reacts to RoleSheet changes.
  */
 import React, { useMemo } from 'react';
-import { AVAILABLE_SERVICES } from '@/lib/catalog/taxonomy';
+import { getVisibleAvailableServices } from '@/lib/catalog/taxonomy';
 import { useUserPersonas } from '@/hooks/useUserPersonas';
 import { useLifeOSRole } from '@/hooks/useLifeOS';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -31,7 +31,7 @@ export function usePersonalGridServiceIds(
 
   return useMemo(
     () =>
-      rankServices(AVAILABLE_SERVICES, { role, personas: effectivePersonas, activeSituationCode })
+      rankServices(getVisibleAvailableServices(), { role, personas: effectivePersonas, activeSituationCode })
         .slice(0, limit)
         .map((s) => s.id),
     [role, effectivePersonas, activeSituationCode, limit],
@@ -48,7 +48,7 @@ export const PersonalGrid: React.FC<PersonalGridProps> = ({
 
   const ranked = useMemo(
     () =>
-      rankServices(AVAILABLE_SERVICES, {
+      rankServices(getVisibleAvailableServices(), {
         role,
         personas: effectivePersonas,
         activeSituationCode,

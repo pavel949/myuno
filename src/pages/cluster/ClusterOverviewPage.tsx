@@ -27,6 +27,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import {
   CLUSTERS,
   CATEGORIES,
+  getVisibleCategoryServices,
   getClusterById,
   type ClusterId,
 } from '@/lib/catalog/taxonomy';
@@ -42,7 +43,9 @@ export default function ClusterOverviewPage({ clusterId }: ClusterOverviewPagePr
 
   const cluster = useMemo(() => getClusterById(clusterId), [clusterId]);
   const categories = useMemo(
-    () => CATEGORIES.filter(category => category.clusterId === clusterId && category.services.length > 0),
+    () => CATEGORIES
+      .map((category) => ({ ...category, services: getVisibleCategoryServices(category) }))
+      .filter((category) => category.clusterId === clusterId && category.services.length > 0),
     [clusterId],
   );
 

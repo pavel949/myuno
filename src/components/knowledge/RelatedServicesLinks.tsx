@@ -12,6 +12,7 @@ import {
 } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { cn } from '@/lib/utils';
+import { isHiddenNow } from '@/lib/focus/focusMode';
 
 interface ServiceLink {
   icon: React.ElementType;
@@ -52,9 +53,10 @@ export function RelatedServicesLinks({ section, showAll = false, className }: Re
   const allLinks = serviceLinks[language as 'en' | 'ru'] || serviceLinks.en;
   
   // Filter by section if provided, otherwise show all
-  const links = showAll || !section 
-    ? allLinks 
-    : allLinks.filter(link => !link.section || link.section === section);
+  const links = (showAll || !section
+    ? allLinks
+    : allLinks.filter(link => !link.section || link.section === section))
+    .filter((link) => !isHiddenNow(link.route));
 
   if (links.length === 0) return null;
 

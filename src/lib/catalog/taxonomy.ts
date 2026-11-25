@@ -51,6 +51,7 @@ import {
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { APP_ROUTES } from '@/lib/config/routes';
+import { isHiddenNow } from '@/lib/focus/focusMode';
 
 // ─────────────────────────────────────────────────────────────────────────
 // Types
@@ -721,6 +722,20 @@ export const FLAT_SERVICES: FlatService[] = CATEGORIES.flatMap((cat) =>
 
 export const AVAILABLE_SERVICES: FlatService[] =
   FLAT_SERVICES.filter((s) => s.status !== 'soon');
+
+/**
+ * AVAILABLE_SERVICES minus apps hidden by focus mode (src/lib/focus/focusMode.ts).
+ * Evaluated per call so the kill-switch applies on the next render. Public
+ * grids and rails must use this instead of AVAILABLE_SERVICES directly.
+ */
+export function getVisibleAvailableServices(): FlatService[] {
+  return AVAILABLE_SERVICES.filter((s) => !isHiddenNow(s.path));
+}
+
+/** Category services minus apps hidden by focus mode. */
+export function getVisibleCategoryServices(category: CategoryEntry): CategoryEntry['services'] {
+  return category.services.filter((s) => !isHiddenNow(s.path));
+}
 
 export const SOON_SERVICES: FlatService[] =
   FLAT_SERVICES.filter((s) => s.status === 'soon');

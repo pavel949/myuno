@@ -32,6 +32,7 @@ import { PHUKET_AREAS } from '@/lib/config/phuketAreas';
 import { NAVIGATION_INDEX } from './navigationIndex';
 import { scoreEntry, tokenize, norm, type ScorableEntry, type ScoreContext } from './scoring';
 import type { SearchResult } from '@/hooks/useGlobalSearch';
+import { isHiddenNow } from '@/lib/focus/focusMode';
 
 /** A scorable entry plus everything needed to render it as a SearchResult. */
 interface StaticSearchEntry extends ScorableEntry {
@@ -228,6 +229,8 @@ export function searchStaticIndex(
 
   const hits: Array<{ entry: StaticSearchEntry; score: number }> = [];
   for (const entry of STATIC_INDEX) {
+    // Focus mode: hidden micro-apps never surface in search.
+    if (isHiddenNow(entry.path)) continue;
     const score = scoreEntry(entry, qNorm, qTokens, ctx, { fuzzy: true });
     if (score > 0) hits.push({ entry, score });
   }

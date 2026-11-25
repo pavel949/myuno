@@ -8,6 +8,7 @@ import {
 import { useLanguage } from '@/contexts/LanguageContext';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
+import { isHiddenNow } from '@/lib/focus/focusMode';
 
 interface TripService {
   id: string;
@@ -143,6 +144,7 @@ export function TripServicesGrid({
   const isRu = language === 'ru';
 
   const displayServices = TRIP_SERVICES
+    .filter((s) => !isHiddenNow(s.path))
     .sort((a, b) => a.priority - b.priority)
     .slice(0, maxItems);
 
