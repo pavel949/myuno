@@ -15,7 +15,7 @@
 3. The approver is always `auth.uid()`, never a parameter. Every approval and every publish writes a row to `admin_audit_logs`.
 4. Publishing needs **two distinct admins**, and each sign-off must be later than the report's `updated_at`. Editing a report therefore invalidates earlier sign-offs.
 5. A trigger blocks `is_published` going false → true unless the transaction-local marker is set. Only `hq_publish_clearview_report` sets that marker. This closes the bypass through the pre-existing `"Admins manage DD reports" FOR ALL` policy.
-6. The role pairing between `APP_ROUTES`/`hqAccessPolicy.APPROVAL_ROLES` and `hq_can_approve` is checked by a unit test.
+6. The role pairing between `hqAccessPolicy.APPROVAL_ROLES` and the SQL `hq_can_approve` is checked by a unit test (`src/lib/__tests__/round4aHq.test.ts`).
 
 ## Reproduction
 
