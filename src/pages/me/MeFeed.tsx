@@ -6,7 +6,7 @@
  */
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { AlertTriangle, Bell, CreditCard, Sparkles, ChevronRight, FileText, Plane, FilePlus } from 'lucide-react';
+import { AlertTriangle, Bell, CreditCard, Sparkles, ChevronRight, FileText, Plane, FilePlus, CalendarCheck, ClipboardList, Heart } from 'lucide-react';
 import { MeShellLayout } from '@/components/layout/MeShellLayout';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -74,6 +74,13 @@ const QUICK_ACTIONS = [
   { to: '/me/documents', icon: FileText, en: 'Upload document', ru: 'Загрузить документ' },
 ];
 
+const ACCOUNT_AREAS = [
+  { to: '/me/bookings', icon: CalendarCheck, en: 'Trips & bookings', ru: 'Поездки и брони', subEn: 'Stays, boats, experiences', subRu: 'Жильё, яхты, впечатления' },
+  { to: '/me/requests', icon: ClipboardList, en: 'Requests', ru: 'Заявки', subEn: 'Services and viewings', subRu: 'Услуги и просмотры' },
+  { to: '/favorites', icon: Heart, en: 'Saved', ru: 'Сохранённое', subEn: 'Items and search alerts', subRu: 'Объекты и оповещения' },
+  { to: '/me/documents', icon: FileText, en: 'Documents', ru: 'Документы', subEn: 'Visa, TM30, contracts', subRu: 'Виза, TM30, договоры' },
+];
+
 export default function MeFeed() {
   const { language } = useLanguage();
   const isRu = language === 'ru';
@@ -119,6 +126,28 @@ export default function MeFeed() {
             </Link>
           ))}
         </div>
+
+        {/* Account areas across marketplaces (design U1) */}
+        <nav aria-label={isRu ? 'Разделы кабинета' : 'Account areas'}>
+          <ul className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+            {ACCOUNT_AREAS.map((area) => (
+              <li key={area.to}>
+                <Link
+                  to={area.to}
+                  onPointerDown={() => prefetchRoute(area.to)}
+                  onMouseEnter={() => prefetchRoute(area.to)}
+                  className="flex min-h-14 items-center gap-3 rounded-md border border-border bg-card px-3 py-2 transition-colors hover:border-primary/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                >
+                  <area.icon className="h-5 w-5 shrink-0 text-primary" aria-hidden="true" />
+                  <span className="min-w-0">
+                    <span className="block text-sm font-semibold text-foreground">{isRu ? area.ru : area.en}</span>
+                    <span className="block truncate text-xs text-muted-foreground">{isRu ? area.subRu : area.subEn}</span>
+                  </span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </nav>
 
         {(isError || failedSources.length > 0) && (
           <div role="alert" className="space-y-2 border border-border p-4 text-sm">
