@@ -1,0 +1,103 @@
+name: Intake isolated document and Storage acceptance
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'docs/hardening/344-345/**'
+      - 'supabase/functions/_shared/intake-documents.ts'
+      - 'supabase/functions/_shared/intake-private-contract.ts'
+      - 'drizzle/migrations/0044_restrict_public_bucket_listing.sql'
+      - '.github/workflows/intake-isolated-acceptance.yml'
+permissions:
+  contents: read
+jobs:
+  document-parser:
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '22'
+      - name: Install pinned Deno and resolve only parser dependencies
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/intake-deno"
+          cd "$RUNNER_TEMP/intake-deno"
+          RELEASE="https://github.com/denoland/deno/releases/download/v2.9.8/deno-x86_64-unknown-linux-gnu.zip"
+          curl --fail --silent --show-error --location "$RELEASE" -o deno.zip
+          curl --fail --silent --show-error --location "$RELEASE.sha256sum" -o deno.zip.sha256sum
+          EXPECTED="$(awk 'NR==1{print $1}' deno.zip.sha256sum)"
+          [[ "$EXPECTED" =~ ^[a-fA-F0-9]{64}$ ]]
+          printf "%s  deno.zip\n" "$EXPECTED" | sha256sum -c -
+          unzip -q deno.zip deno
+          DENO="$RUNNER_TEMP/intake-deno/deno"
+          # Isolate npm resolution from the application package.json and node_modules.
+          FIXTURE="$RUNNER_TEMP/intake-document-fixture"
+          for file in supabase/functions/_shared/intake-private-contract.ts supabase/functions/_shared/intake-documents.ts docs/hardening/344-345/intake-documents.deno.ts; do
+            install -D "$GITHUB_WORKSPACE/$file" "$FIXTURE/$file"
+            cmp "$GITHUB_WORKSPACE/$file" "$FIXTURE/$file"
+          done
+          export DENO_DIR="$RUNNER_TEMP/intake-deno-cache"
+          cd "$FIXTURE"
+          "$DENO" --version
+          cp "$GITHUB_WORKSPACE/docs/hardening/344-345/intake-document-deno.lock" "$RUNNER_TEMP/intake-document-deno.lock"
+          "$DENO" cache --no-config --node-modules-dir=none --lock="$RUNNER_TEMP/intake-document-deno.lock" --frozen docs/hardening/344-345/intake-documents.deno.ts
+      - name: Actual PDF DOCX XLSX parsing, without runtime network or filesystem permissions
+        run: |
+          DENO="$RUNNER_TEMP/intake-deno/deno"
+          export DENO_DIR="$RUNNER_TEMP/intake-deno-cache"
+          cd "$RUNNER_TEMP/intake-document-fixture"
+          "$DENO" test --no-config --node-modules-dir=none --cached-only --no-prompt --lock="$RUNNER_TEMP/intake-document-deno.lock" --frozen docs/hardening/344-345/intake-documents.deno.ts
+      - name: Retain actual resolved parser dependency lock for review
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: intake-document-deno-lock
+          path: ${{ runner.temp }}/intake-document-deno.lock
+          if-no-files-found: error
+  storage-http:
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '22'
+      - name: Install checksum-pinned local Supabase CLI
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/intake-bin" "$RUNNER_TEMP/intake-stack"
+          curl --fail --silent --show-error --location https://github.com/supabase/cli/releases/download/v3.4.0/supabase_3.4.0_linux_amd64.tar.gz -o "$RUNNER_TEMP/intake-cli.tar.gz"
+          echo "d82f8fc8a1611c45b9422b10378f61df614325f7e25624acda3704544513d6ac  $RUNNER_TEMP/intake-cli.tar.gz" | sha256sum -c -
+          tar -xzf "$RUNNER_TEMP/intake-cli.tar.gz" -C "$RUNNER_TEMP/intake-bin" supabase
+          echo "$RUNNER_TEMP/intake-bin" >> "$GITHUB_PATH"
+          command -v psql >/dev/null || { sudo apt-get update -qq && sudo apt-get install -y postgresql-client; }
+      - name: Start disposable Supabase away from repository configuration
+        run: |
+          set -euo pipefail
+          cd "$RUNNER_TEMP/intake-stack"
+          unset SUPABASE_ACCESS_TOKEN SUPABASE_DB_PASSWORD SUPABASE_PROJECT_ID
+          supabase --version
+          supabase init --help >/dev/null
+          supabase start --help >/dev/null
+          supabase init
+          supabase start -x studio,realtime,edge-runtime,logflare,vector,supavisor
+          supabase status -o json > "$RUNNER_TEMP/intake-stack-status.json"
+      - name: Actual Storage HTTP RLS and private bucket cutover
+        env:
+          MYUNO_DISPOSABLE_STORAGE: 'yes'
+          MYUNO_LOCAL_STATUS: ${{ runner.temp }}/intake-stack-status.json
+        run: node docs/hardening/344-345/storage-http.mjs
+      - name: Dispose of synthetic stack
+        if: always()
+        run: |
+          cd "$RUNNER_TEMP/intake-stack"
+          supabase stop --no-backup
+          rm -f "$RUNNER_TEMP/intake-stack-status.json"

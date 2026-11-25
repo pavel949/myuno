@@ -14,19 +14,17 @@ const root = process.cwd(),
 await mkdir(output, { recursive: true });
 const virtual = {
   "@/contexts/LanguageContext": `export const useLanguage=()=>({language:new URLSearchParams(location.search).get('lang')||'en'});`,
+  "@/contexts/AuthContext": `export const useAuth=()=>({user:null,session:null,isLoading:false});`,
   "@/components/seo": `export const SEOHead=()=>null;`,
   "@/hooks/useProperties": `import {useState} from 'react';export function useProperties(filters,limit){const[retried,set]=useState(false);const state=new URLSearchParams(location.search).get('state');window.fixtureRentRead={filters,limit};return{data:state==='empty'?[]:[{id:'synthetic-home',project_id:'synthetic-community'}],isLoading:state==='loading',isError:state==='error'&&!retried,refetch:()=>{set(true);return Promise.resolve()}}}`,
   "@/hooks/usePropertyProjects": `export const usePublicPropertyProjects=(limit,district,ids)=>{window.fixtureProjectRead={limit,district,ids};return{data:ids.length?[{id:'synthetic-community',name_en:'Synthetic rental community',name_ru:'Тестовый жилой комплекс',district:'rawai'}]:[],isLoading:false,isError:false,refetch:()=>Promise.resolve()}};`,
   "@/hooks/usePropertyQuickFilters": `export const usePropertyQuickFilters=()=>({districts:[{id:'rawai',valueKey:'rawai',labelRu:'Равай',labelEn:'Rawai'}],isLoading:false});`,
   "@/hooks/usePropertyFilterOptions": `export const usePropertyFilterOptions=()=>({propertyTypes:[{id:'villa',labelRu:'Вилла',labelEn:'Villa'},{id:'condo',labelRu:'Кондо',labelEn:'Condo'}],isLoading:false});`,
-  // The mounted enquiry form belongs to the page; its authenticated CRM writer
-  // does not belong to this isolated layout/search fixture.
-  "@/hooks/useUniversalLead": `const deny=()=>{throw Error('CRM submission is forbidden in rental UI fixture')};export const useUniversalLead=()=>({isSubmitting:false,submitLead:{mutate:deny}});`,
   "@/integrations/supabase/client": `export const supabase=new Proxy({},{get(){throw Error('Live backend capability is forbidden in rental UI fixture')}});`,
 };
 const result = await build({
   stdin: {
-    contents: `import React from'react';import{createRoot}from'react-dom/client';import{MemoryRouter,Routes,Route,useLocation}from'react-router-dom';import Page from'${root}/src/pages/property/PropertyLanding.tsx';function Probe(){let l=useLocation();return <output hidden data-testid="location">{l.pathname+l.search+l.hash}</output>}createRoot(document.getElementById('root')).render(<MemoryRouter initialEntries={['/property/rent']}><main className="ds-frame ds-frame-catalogue"><Routes><Route path="/property/rent" element={<Page/>}/><Route path="*" element={<h1>Canonical destination boundary</h1>}/></Routes><Probe/></main></MemoryRouter>);`,
+    contents: `import React from'react';import{createRoot}from'react-dom/client';import{MemoryRouter,Routes,Route,useLocation}from'react-router-dom';import{QueryClient,QueryClientProvider}from'@tanstack/react-query';import Page from'${root}/src/pages/property/PropertyLanding.tsx';function Probe(){let l=useLocation();return <output hidden data-testid="location">{l.pathname+l.search+l.hash}</output>}const queryClient=new QueryClient({defaultOptions:{queries:{retry:false},mutations:{retry:false}}});createRoot(document.getElementById('root')).render(<QueryClientProvider client={queryClient}><MemoryRouter initialEntries={['/property/rent']}><main className="ds-frame ds-frame-catalogue"><Routes><Route path="/property/rent" element={<Page/>}/><Route path="*" element={<h1>Canonical destination boundary</h1>}/></Routes><Probe/></main></MemoryRouter></QueryClientProvider>);`,
     loader: "tsx",
     resolveDir: root,
   },
@@ -70,6 +68,7 @@ for (const file of [
   "src/components/home/HomeDiscoverySearch.tsx",
   "src/components/home/HomeSearchDateRange.tsx",
   "src/components/search/SearchLeadRequest.tsx",
+  "src/hooks/useUniversalLead.ts",
   "src/styles/rental-landing.css",
 ])
   if (
@@ -80,10 +79,10 @@ if (
   Object.keys(result.metafile.inputs).some(
     (input) =>
       !input.startsWith("synthetic:") &&
-      (input.endsWith("integrations/supabase/client.ts") || input.endsWith("hooks/useUniversalLead.ts")),
+      (input.endsWith("integrations/supabase/client.ts") || input.endsWith("contexts/AuthContext.tsx")),
   )
 )
-  throw Error("Live backend or enquiry writer included");
+  throw Error("Live backend module included");
 const routeCss = await readFile(path.join(output, "fixture.css"), "utf8");
 const css = await postcss([
   postcssImport(),
@@ -105,8 +104,9 @@ const files = [
   "src/pages/property/PropertyLanding.tsx",
   "src/styles/rental-landing.css",
   "src/content/property/rentalLanding.ts",
-  "src/components/search/SearchLeadRequest.tsx",
   "src/components/home/HomeDiscoverySearch.tsx",
+  "src/components/search/SearchLeadRequest.tsx",
+  "src/hooks/useUniversalLead.ts",
 ];
 await writeFile(
   path.join(output, "provenance.json"),
@@ -124,7 +124,7 @@ await writeFile(
       ),
       syntheticBoundaries: Object.keys(virtual),
       limits:
-        "Actual page, editorial copy, stored-media fallback and shared search. Synthetic public homes/project reads and taxonomy; enquiry renders but submission is denied. No live backend, full AppLayout or production acceptance. Fallback fonts.",
+        "Actual page, editorial copy, stored-media fallback, shared search and request form with real lead hook/QueryClient. Synthetic guest auth, public homes/project reads and taxonomy; backend capability throws. No live backend, full AppLayout or production acceptance. Fallback fonts.",
     },
     null,
     2,

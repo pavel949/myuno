@@ -12,6 +12,7 @@
 
 import { IntakeItem } from '@/hooks/useIntakeAgent';
 import { getVerticalById } from '@/lib/intakeVerticals';
+import { publicIntakeImages, hasPrivateIntakeReference } from '../../../supabase/functions/_shared/intake-private-contract';
 
 export interface IntakeHealthScore {
   /** 0..100 */
@@ -50,7 +51,7 @@ export function calculateHealthScore(item: IntakeItem): IntakeHealthScore {
   const vertical = getVerticalById(item.detectedVertical);
   const flat: Record<string, unknown> = {};
   for (const [k, f] of Object.entries(item.extractedFields || {})) {
-    flat[k] = f?.value;
+    flat[k] = hasPrivateIntakeReference(f?.value) ? undefined : f?.value;
   }
 
   // Inject AI-suggested + uploaded so they count toward the score
@@ -58,8 +59,9 @@ export function calculateHealthScore(item: IntakeItem): IntakeHealthScore {
   if (isEmpty(flat.name_ru) && item.suggestedTitle?.ru) flat.name_ru = item.suggestedTitle.ru;
   if (isEmpty(flat.description_en) && item.suggestedDescription?.en) flat.description_en = item.suggestedDescription.en;
   if (isEmpty(flat.description_ru) && item.suggestedDescription?.ru) flat.description_ru = item.suggestedDescription.ru;
-  if (isEmpty(flat.images) && item.sourceImages?.length) flat.images = item.sourceImages;
-  if (isEmpty(flat.cover_image) && item.sourceImages?.length) flat.cover_image = item.sourceImages[0];
+  const images = publicIntakeImages(item.sourceImages);
+  if (isEmpty(flat.images) && images.length) flat.images = images;
+  if (isEmpty(flat.cover_image) && images.length) flat.cover_image = images[0];
 
   const missing: string[] = [];
 

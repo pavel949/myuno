@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { IntakeItem } from '@/hooks/useIntakeAgent';
+import { IntakePrivateFiles } from './IntakePrivateFiles';
 import { IntakeVerticalBadge } from './IntakeVerticalBadge';
 import { IntakeConfidenceBar } from './IntakeConfidenceBar';
 import { IntakeHealthBadge } from './IntakeHealthBadge';
@@ -181,6 +182,7 @@ export function IntakeItemCard({
       </CardHeader>
       
       <CardContent className="space-y-3 lg:space-y-2 lg:px-3 lg:pb-3">
+        <IntakePrivateFiles paths={item.sourceFilePaths} />
         {/* Confidence bar */}
         <div>
           <div className="flex items-center justify-between text-xs text-muted-foreground mb-1">

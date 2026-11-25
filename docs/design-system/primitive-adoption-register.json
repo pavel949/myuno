@@ -23,8 +23,8 @@
   ],
   "families": {
     "Button": {
-      "directConsumerFiles": 914,
-      "sourceInstances": 3017
+      "directConsumerFiles": 915,
+      "sourceInstances": 3018
     },
     "Card": {
       "directConsumerFiles": 532,
@@ -2124,7 +2124,7 @@
     },
     {
       "file": "src/components/admin/intake/IntakeFileUpload.tsx",
-      "sha256": "b1b659c64f142bba72df10fcc495239b79ca86f42dfcc960b66062bd9aefd522",
+      "sha256": "c13fe0fd293d1d1fe32f642ea5189d083e43f45a9d29f51cc513a369b63cce29",
       "directRouteDeclarations": [],
       "runtime": "NOTTESTED",
       "visual": "NOTTESTED",
@@ -2134,7 +2134,7 @@
           "source": "@/components/ui/button",
           "instances": 1,
           "lines": [
-            248
+            241
           ]
         }
       ]
@@ -2182,7 +2182,7 @@
     },
     {
       "file": "src/components/admin/intake/IntakeItemCard.tsx",
-      "sha256": "13d4d28371a6cd16c0af3eef0a968d20a51217d04cf28a60737667aaf526bea5",
+      "sha256": "fe9327c9a4a6d638750451a867c31f5c648c56741a95e7947c738887009d8585",
       "directRouteDeclarations": [],
       "runtime": "NOTTESTED",
       "visual": "NOTTESTED",
@@ -2192,9 +2192,9 @@
           "source": "@/components/ui/button",
           "instances": 3,
           "lines": [
-            237,
-            246,
-            254
+            239,
+            248,
+            256
           ]
         },
         {
@@ -2202,7 +2202,7 @@
           "source": "@/components/ui/card",
           "instances": 1,
           "lines": [
-            130
+            131
           ]
         }
       ]
@@ -2257,7 +2257,7 @@
     },
     {
       "file": "src/components/admin/intake/IntakeItemPanel.tsx",
-      "sha256": "21688d3bd5de4056a010dc84bd1fe61b66e5c0e8623be7897bddb8d1ee36a476",
+      "sha256": "0b5c4979299a5c8812dfb4e01d3281596b7f8e6e29655de835d24a6b692ed41e",
       "directRouteDeclarations": [],
       "runtime": "NOTTESTED",
       "visual": "NOTTESTED",
@@ -2267,9 +2267,26 @@
           "source": "@/components/ui/button",
           "instances": 3,
           "lines": [
-            129,
-            133,
-            136
+            132,
+            136,
+            139
+          ]
+        }
+      ]
+    },
+    {
+      "file": "src/components/admin/intake/IntakePrivateFiles.tsx",
+      "sha256": "5447ecd958855306bd0d2d8c3c930efddc2e3d0b6843d592191d7197c5479e4e",
+      "directRouteDeclarations": [],
+      "runtime": "NOTTESTED",
+      "visual": "NOTTESTED",
+      "primitiveImports": [
+        {
+          "name": "Button",
+          "source": "@/components/ui/button",
+          "instances": 1,
+          "lines": [
+            37
           ]
         }
       ]
@@ -12980,7 +12997,7 @@
     },
     {
       "file": "src/components/owner/property-wizard/AIIntakePanel.tsx",
-      "sha256": "40be6ea98d37311ec3d9cd136d5d15b98ccf6547b71eceb4743746fae6b86b61",
+      "sha256": "6f8486c26f213f01e9158cadd366ff5fbeab6a1b95cf24757f25f4a96b3d34ea",
       "directRouteDeclarations": [],
       "runtime": "NOTTESTED",
       "visual": "NOTTESTED",

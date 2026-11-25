@@ -7,6 +7,7 @@ import { isValidIntakeTable, VALID_INTAKE_TABLES } from '@/lib/providerIdMapping
 import { useActiveCompany } from '@/hooks/useActiveCompany';
 import { getVerticalById } from '@/lib/intakeVerticals';
 import { validateIntakeItem } from '@/lib/intake/validateItem';
+import { INTAKE_DOCUMENT_CONTRACT, intakeContractForExtensions, intakeMime, makeIntakePath, validateIntakeFileMetadata, publicIntakeImages, hasPrivateIntakeReference } from '../../supabase/functions/_shared/intake-private-contract';
 
 export interface IntakeProgress {
   total: number;
@@ -46,6 +47,7 @@ export interface IntakeItem {
   sourceUrl?: string;
   sourceText?: string;
   sourceImages?: string[];
+  sourceFilePaths?: string[];
 
   // AI Analysis
   detectedVertical: string;
@@ -111,45 +113,37 @@ export function useIntakeAgent() {
     setError(null);
     
     try {
-      let uploadedFileUrls: string[] = [];
-      
-      // Upload files to storage if in files mode
-      if (options.mode === 'files' && options.files && options.files.length > 0) {
-        const uploadPromises = options.files.map(async (fileItem) => {
-          const timestamp = Date.now();
-          const fileName = `${timestamp}-${fileItem.file.name}`;
-          const filePath = `intake/${fileName}`;
-          
-          const { data: uploadData, error: uploadError } = await supabase.storage
-            .from('intake-uploads')
-            .upload(filePath, fileItem.file);
-            
-          if (uploadError) {
-            throw new Error(`Failed to upload ${fileItem.file.name}: ${uploadError.message}`);
-          }
-          
-          // Get public URL
-          const { data: urlData } = supabase.storage
-            .from('intake-uploads')
-            .getPublicUrl(filePath);
-            
-          return {
-            url: urlData.publicUrl,
-            name: fileItem.file.name,
-            type: fileItem.type
-          };
+      const uploadedPaths: string[] = [];
+      let fileContract: string | undefined;
+      if (options.mode === 'files') {
+        const files = (options.files || []).map(item => item.file);
+        const extensions = validateIntakeFileMetadata(files, true);
+        fileContract = intakeContractForExtensions(extensions);
+        const allowDocuments = fileContract === INTAKE_DOCUMENT_CONTRACT;
+        const { data: actor, error: actorError } = await supabase.auth.getUser();
+        if (actorError || !actor.user) throw new Error('Authentication required');
+        const { data: ready, error: readyError } = await supabase.functions.invoke('intake-listing-agent', {
+          body: { mode: 'private_upload_ready', fileContract },
         });
-        
-        const uploadedFiles = await Promise.all(uploadPromises);
-        uploadedFileUrls = uploadedFiles.map(f => f.url);
-        
-        toast.success(
-          language === 'ru' 
-            ? `Загружено ${uploadedFiles.length} файлов` 
-            : `Uploaded ${uploadedFiles.length} files`
-        );
+        if (readyError || ready?.ready !== true || ready?.fileContract !== fileContract) {
+          throw new Error(language === 'ru' ? 'Безопасная загрузка файлов пока недоступна. Используйте текст или импорт таблицы.' : 'Private file upload is unavailable. Use text or spreadsheet import.');
+        }
+        try {
+          for (let i = 0; i < files.length; i++) {
+            const ext = extensions[i];
+            const path = makeIntakePath(actor.user.id, crypto.randomUUID(), ext, allowDocuments);
+            const { error: uploadError } = await supabase.storage.from('intake-uploads')
+              .upload(path, files[i], { contentType: intakeMime(ext, allowDocuments), upsert: false });
+            if (uploadError) throw new Error('Private file upload failed');
+            uploadedPaths.push(path);
+          }
+        } catch (uploadError) {
+          // No processing request has been sent; cleanup only this request's new keys.
+          if (uploadedPaths.length) await supabase.storage.from('intake-uploads').remove(uploadedPaths);
+          throw uploadError;
+        }
       }
-      
+
       // Map UI mode to edge-function mode. CSV is sent as bulk_text (records joined with ---).
       const edgeMode: 'single' | 'bulk_text' | 'bulk_urls' | 'files' | 'agent_message' =
         options.mode === 'csv' ? 'bulk_text' : options.mode;
@@ -158,7 +152,8 @@ export function useIntakeAgent() {
         mode: edgeMode,
         rawText: options.rawText,
         urls: options.urls,
-        uploadedImages: uploadedFileUrls.length > 0 ? uploadedFileUrls : undefined,
+        fileContract: edgeMode === 'files' ? fileContract : undefined,
+        uploadedPaths: uploadedPaths.length ? uploadedPaths : undefined,
         forceVertical: options.forceVertical,
       };
       
@@ -268,16 +263,16 @@ export function useIntakeAgent() {
       if (!fields.description_ru && item.suggestedDescription?.ru) {
         fields.description_ru = item.suggestedDescription.ru;
       }
-      // Attach resolved cloud images to listing
-      if (!fields.images && item.sourceImages && item.sourceImages.length > 0) {
-        fields.images = item.sourceImages;
-      }
-      // Set first image as cover/main image if not already set
-      if (!fields.cover_image && item.sourceImages && item.sourceImages.length > 0) {
-        fields.cover_image = item.sourceImages[0];
-      }
-      if (!fields.image && item.sourceImages && item.sourceImages.length > 0) {
-        fields.image = item.sourceImages[0];
+      // Original intake objects are private evidence, not listing media.
+      const images = publicIntakeImages(item.sourceImages);
+      if (!fields.images && images.length) fields.images = images;
+      if (!fields.cover_image && images.length) fields.cover_image = images[0];
+      if (!fields.image && images.length) fields.image = images[0];
+      if (hasPrivateIntakeReference(fields)) {
+        const message = language === 'ru' ? 'Удалите приватные ссылки из объявления и выберите разрешённые фото.' : 'Remove private references and select reviewed listing media.';
+        recordFailure({ code: 'validation', message, occurredAt: new Date().toISOString() });
+        if (!opts?.silent) toast.error(message);
+        return false;
       }
 
       // P0 FIX: Resolve target table from vertical config (not the vertical id itself!)
@@ -336,7 +331,7 @@ export function useIntakeAgent() {
               entity_id: insertedId,
               new_data: {
                 vertical: item.detectedVertical,
-                source: item.sourceUrl ? 'url' : item.sourceImages?.length ? 'files' : 'text',
+                source: item.sourceUrl ? 'url' : item.sourceFilePaths?.length || item.sourceImages?.length ? 'files' : 'text',
                 title: item.suggestedTitle?.en || item.suggestedTitle?.ru,
                 health: item.overallConfidence,
               },

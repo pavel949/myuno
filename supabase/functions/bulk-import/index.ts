@@ -3,6 +3,7 @@ import { createClient } from "../_shared/supabase.ts";
 import { getCorsHeaders } from "../_shared/cors.ts";
 import { requireAuth } from "../_shared/auth-guard.ts";
 import { requireActorRpc } from "../_shared/authz.ts";
+import { hasPrivateIntakeReference } from "../_shared/intake-private-contract.ts";
 
 
 // Allowed tables for bulk import - synchronized with src/lib/providerIdMapping.ts
@@ -124,6 +125,9 @@ Deno.serve(async (req) => {
       throw new Error("Maximum 1000 records per import");
     }
 
+    if (hasPrivateIntakeReference(records)) {
+      return new Response(JSON.stringify({ error: "Private intake references cannot be published" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
     console.info(`Bulk import: ${records.length} records to ${table}`);
 
     // Process in batches of 100

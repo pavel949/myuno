@@ -1,4 +1,6 @@
-import { requireInternalOrStaff } from "../_shared/authz.ts";
+import { requireInternalOrStaff, requireActorRpc } from "../_shared/authz.ts";
+import { createActorClient } from "../_shared/operating-space-auth.ts";
+import { INTAKE_FILE_CONTRACT, INTAKE_DOCUMENT_CONTRACT, intakeContractReady, isIntakeDocumentExtension, INTAKE_MAX_TOTAL_BYTES, INTAKE_MAX_FILE_BYTES, INTAKE_MAX_TEXT, parseIntakePaths, intakeMime, validateIntakeBytes, hasPrivateIntakeReference } from "../_shared/intake-private-contract.ts";
 import { validateExternalUrlForSSRF } from "../_shared/ssrf-guard.ts";
 // Deno.serve used (native edge runtime)
 import { createClient } from "../_shared/supabase.ts";
@@ -272,7 +274,9 @@ function splitAgentMessage(text: string): string[] {
 }
 
 interface IntakeRequest {
-  mode: 'single' | 'bulk_text' | 'bulk_file' | 'bulk_urls' | 'files' | 'agent_message';
+  mode: 'single' | 'bulk_text' | 'bulk_file' | 'bulk_urls' | 'files' | 'agent_message' | 'private_upload_ready';
+  fileContract?: string;
+  uploadedPaths?: unknown;
   rawText?: string;
   fileData?: { rows: Record<string, unknown>[] };
   urls?: string[];
@@ -293,6 +297,7 @@ interface IntakeItem {
   sourceUrl?: string;
   sourceText?: string;
   sourceImages?: string[];
+  sourceFilePaths?: string[];
   detectedVertical: string;
   verticalConfidence: number;
   extractedFields: Record<string, ExtractedField>;
@@ -536,7 +541,9 @@ async function scrapeUrls(urls: string[], firecrawlApiKey?: string): Promise<Rec
 async function extractFieldsWithAI(
   content: string,
   vertical: string,
-  apiKey: string
+  apiKey: string,
+  privateImages: Array<{ type: 'image_url'; image_url: { url: string } }> = [],
+  strictFileMode = false,
 ): Promise<{
   fields: Record<string, ExtractedField>;
   title: { en: string; ru: string };
@@ -668,7 +675,7 @@ Return valid JSON only.`;
         max_tokens: 2000,
         messages: [
           { role: "system", content: systemPrompt },
-          { role: "user", content: userPrompt },
+          { role: "user", content: privateImages.length ? [{ type: "text", text: userPrompt }, ...privateImages] : userPrompt },
         ],
         tools: [{
           type: "function",
@@ -718,6 +725,7 @@ Return valid JSON only.`;
 
     if (!response.ok) {
       console.error('[INTAKE] AI extraction error:', response.status);
+      if (strictFileMode) throw new Error('Private file analysis failed');
       return getDefaultExtraction(vertical);
     }
 
@@ -734,12 +742,15 @@ Return valid JSON only.`;
           confidence: parsed.confidence || 0.5,
         };
       } catch (e) {
+        if (strictFileMode) throw new Error('Private file analysis failed');
         console.error('[INTAKE] Failed to parse AI response:', e);
       }
     }
 
+    if (strictFileMode) throw new Error('Private file analysis failed');
     return getDefaultExtraction(vertical);
   } catch (error) {
+    if (strictFileMode) throw new Error('Private file analysis failed');
     console.error('[INTAKE] AI extraction exception:', error);
     return getDefaultExtraction(vertical);
   }
@@ -796,7 +807,9 @@ async function processItem(
   images: string[],
   forceVertical: string | undefined,
   apiKey: string,
-  verticals: VerticalConfig[]
+  verticals: VerticalConfig[],
+  privateFiles: string[] = [],
+  privateImages: Array<{ type: 'image_url'; image_url: { url: string } }> = [],
 ): Promise<IntakeItem> {
   const id = crypto.randomUUID();
   
@@ -809,7 +822,8 @@ async function processItem(
   }
 
   // Extract fields with AI
-  const extraction = await extractFieldsWithAI(content, verticalResult.vertical, apiKey);
+  const extraction = await extractFieldsWithAI(content, verticalResult.vertical, apiKey, privateImages, privateFiles.length > 0);
+  if (hasPrivateIntakeReference(extraction)) throw new Error('Private references cannot be used as listing content');
 
   // Auto-fill name fields from AI-generated title if not in extracted fields
   if (!extraction.fields.name_en?.value && extraction.title?.en) {
@@ -855,8 +869,9 @@ async function processItem(
     id,
     status: 'pending',
     sourceUrl,
-    sourceText: content.substring(0, 500),
+    sourceText: privateFiles.length ? undefined : content.substring(0, 500),
     sourceImages: images,
+    sourceFilePaths: privateFiles.length ? privateFiles : undefined,
     detectedVertical: verticalResult.vertical,
     verticalConfidence: verticalResult.confidence,
     extractedFields: extraction.fields,
@@ -882,6 +897,9 @@ Deno.serve(async (req) => {
     const { mode, rawText, fileData, urls, forceVertical, sessionId } = body;
     // Support both "images" and "uploadedImages" from frontend
     const images = body.images || body.uploadedImages || [];
+    if (hasPrivateIntakeReference({ images: body.images, uploadedImages: body.uploadedImages, rawText, urls, fileData })) {
+      return new Response(JSON.stringify({ error: 'Private references are not accepted as URLs' }), { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+    }
 
     console.info(`[INTAKE] Processing request: mode=${mode}, sessionId=${sessionId || 'new'}`);
 
@@ -928,10 +946,33 @@ Deno.serve(async (req) => {
     // Intake sessions and scraping are admin tools.
     const staffGate = await requireInternalOrStaff(req, corsHeaders);
     if (staffGate instanceof Response) return staffGate;
+    let privatePaths: string[] = [];
+    let privateDocuments = false;
+    if (mode === 'files' || mode === 'private_upload_ready') {
+      const denied = await requireActorRpc(req, corsHeaders, 'actor_has_platform_admin');
+      if (denied) return denied;
+      if ((body.fileContract !== INTAKE_FILE_CONTRACT && body.fileContract !== INTAKE_DOCUMENT_CONTRACT) || (mode === 'files' && (images.length || sessionId || rawText || urls?.length || fileData))) {
+        return new Response(JSON.stringify({ error: 'Private file contract required' }), { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+      }
+      privateDocuments = body.fileContract === INTAKE_DOCUMENT_CONTRACT;
+      if (!intakeContractReady(body.fileContract, Deno.env.get('INTAKE_PRIVATE_DOCUMENTS_ENABLED') === 'true')) {
+        return new Response(JSON.stringify({ error: 'Private document processing not ready' }), { status: 503, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+      }
+      // Never accept an upload contract while the bucket remains public, even if a flag is set.
+      const { data: bucket, error: bucketError } = await supabase.storage.getBucket('intake-uploads');
+      if (Deno.env.get('INTAKE_PRIVATE_UPLOADS_ENABLED') !== 'true' || bucketError || bucket?.public !== false || !Deno.env.get('LOVABLE_API_KEY')) {
+        return new Response(JSON.stringify({ error: 'Private file processing not ready' }), { status: 503, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+      }
+      if (mode === 'private_upload_ready') {
+        return new Response(JSON.stringify({ ready: true, fileContract: body.fileContract }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+      }
+      try { privatePaths = parseIntakePaths(userId, body.uploadedPaths, privateDocuments); }
+      catch { return new Response(JSON.stringify({ error: 'Invalid private file paths' }), { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }); }
+    }
     if (sessionId) {
-      const { data: existingSession } = await supabase
+      const { data: existingSession, error: existingSessionError } = await supabase
         .from('ai_intake_sessions').select('admin_id').eq('id', sessionId).maybeSingle();
-      if (existingSession && existingSession.admin_id && existingSession.admin_id !== userId) {
+      if (existingSessionError || !existingSession || existingSession.admin_id !== userId) {
         return new Response(JSON.stringify({ error: "Forbidden" }), { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } });
       }
     }
@@ -987,11 +1028,44 @@ Deno.serve(async (req) => {
           });
         }
       }
-    } else if (mode === 'files' && images.length > 0) {
-      // Files mode: uploaded images/documents - describe them for AI extraction
-      const imageListText = images.map((url: string, i: number) => `Image ${i + 1}: ${url}`).join('\n');
-      const content = `Uploaded files for listing creation:\n${imageListText}\n\nPlease extract all possible listing information from these images/documents.`;
-      const item = await processItem(content, undefined, images, forceVertical, LOVABLE_API_KEY, verticals);
+    } else if (mode === 'files' && privatePaths.length) {
+      // Download through the caller-bound client (actual private Storage RLS, not service-role).
+      const actor = createActorClient(req);
+      const textParts: string[] = [];
+      const imageParts: Array<{ type: 'image_url'; image_url: { url: string } }> = [];
+      let total = 0;
+      for (const path of privatePaths) {
+        const { data: blob, error: downloadError } = await actor.storage.from('intake-uploads').download(path);
+        if (downloadError || !blob) throw new Error('Private file inaccessible');
+        if (blob.size > INTAKE_MAX_FILE_BYTES || blob.size === 0) throw new Error('Invalid private file size');
+        total += blob.size;
+        if (total > INTAKE_MAX_TOTAL_BYTES) throw new Error('Private files exceed total size limit');
+        const bytes = new Uint8Array(await blob.arrayBuffer());
+        const extension = path.split('.').pop() || '';
+        const mime = intakeMime(extension, privateDocuments);
+        if (!mime) throw new Error('Unsupported private file type');
+        if (isIntakeDocumentExtension(extension)) {
+          if (!privateDocuments) throw new Error('Private document contract required');
+          try {
+            const { extractIntakeDocument } = await import('../_shared/intake-documents.ts');
+            textParts.push(await extractIntakeDocument(extension, bytes));
+          } catch {
+            throw new Error('Private document could not be safely extracted');
+          }
+          continue;
+        }
+        validateIntakeBytes(mime, bytes);
+        if (mime.startsWith('image/')) {
+          let binary = '';
+          for (let i = 0; i < bytes.length; i += 8192) binary += String.fromCharCode(...bytes.subarray(i, i + 8192));
+          imageParts.push({ type: 'image_url', image_url: { url: 'data:' + mime + ';base64,' + btoa(binary) } });
+        } else {
+          textParts.push(new TextDecoder('utf-8', { fatal: true }).decode(bytes));
+        }
+      }
+      const content = 'Extract listing information from the supplied private file content. Never return original file references.\n' + textParts.join('\n---\n');
+      if (content.length > INTAKE_MAX_TEXT) throw new Error('Private file text exceeds analysis limit');
+      const item = await processItem(content, undefined, [], forceVertical, LOVABLE_API_KEY, verticals, privatePaths, imageParts);
       items.push(item);
     } else if (mode === 'bulk_file' && fileData?.rows) {
       // Process file rows
@@ -1075,7 +1149,7 @@ Deno.serve(async (req) => {
         admin_id: userId,
         input_mode: mode,
         raw_input: rawText?.substring(0, 10000),
-        uploaded_images: images,
+        uploaded_images: privatePaths.length ? privatePaths.map(path => 'intake-private:' + path) : images,
         items_count: items.length,
         items: items,
         status: items.length > 0 ? 'ready' : 'failed',
@@ -1084,6 +1158,7 @@ Deno.serve(async (req) => {
       });
 
     if (sessionError) {
+      if (privatePaths.length) throw new Error('Private intake session could not be saved');
       console.error('[INTAKE] Failed to save session:', sessionError);
     }
 

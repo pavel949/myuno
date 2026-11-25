@@ -15,8 +15,8 @@ interface AIIntakePanelProps {
   onDataExtracted: (data: Record<string, any>) => void;
 }
 
-const ACCEPTED_FILE_TYPES = '.pdf,.doc,.docx,.xls,.xlsx,.csv,.txt,.jpg,.jpeg,.png,.webp,.heic';
-const MAX_FILE_SIZE_MB = 20;
+const ACCEPTED_FILE_TYPES = '.csv,.txt,.jpg,.jpeg,.png,.webp';
+const MAX_FILE_SIZE_MB = 5;
 
 export function AIIntakePanel({ onDataExtracted }: AIIntakePanelProps) {
   const { language } = useLanguage();
@@ -151,7 +151,7 @@ export function AIIntakePanel({ onDataExtracted }: AIIntakePanelProps) {
               className="border-2 border-dashed border-muted-foreground/25 rounded-none p-6 text-center cursor-pointer hover:border-primary/40 hover:bg-primary/5 transition-colors">
               <Upload className="h-8 w-8 mx-auto mb-2 text-muted-foreground/50" />
               <p className="text-sm font-medium">{isRu ? 'Нажмите для загрузки файлов' : 'Click to upload files'}</p>
-              <p className="text-xs text-muted-foreground mt-1">PDF, Word, Excel, CSV, фото — {isRu ? 'до' : 'up to'} {MAX_FILE_SIZE_MB}MB</p>
+              <p className="text-xs text-muted-foreground mt-1">JPEG, PNG, WebP, TXT, CSV — {isRu ? 'до' : 'up to'} {MAX_FILE_SIZE_MB}MB</p>
             </div>
             {files.length > 0 && (
               <div className="space-y-2 max-h-[200px] overflow-y-auto">
