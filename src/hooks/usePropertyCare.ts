@@ -2,7 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
-import { createManagedPropertyDraft, saveManagedPropertyDraft, propertyAuthoringPatch, isIndependentPropertyProvider, readManagedPropertyDraft, readIndependentPropertyForAuthoring } from '@/lib/propertyAuthoring';
+import { PropertyAuthoringConflict, createManagedPropertyDraft, saveManagedPropertyDraft, propertyAuthoringPatch, isIndependentPropertyProvider, readManagedPropertyDraft, readIndependentPropertyForAuthoring } from '@/lib/propertyAuthoring';
 import { useIsAdmin } from '@/hooks/useIsAdmin';
 import { createErrorHandler } from '@/lib/errorHandler';
 
@@ -207,15 +207,19 @@ export function useUpdateOwnerProperty() {
       if (!user) throw new Error('Not authenticated');
       
       if (_authoring) {
+        if (!_expectedUpdatedAt) throw new PropertyAuthoringConflict();
         const independent = await readIndependentPropertyForAuthoring(id, user.id, isAdmin);
         if (independent) {
-          let update = supabase.from('properties').update(data as never).eq('id', id);
+          let update = supabase.from('properties').update(data as never)
+            .eq('id', id)
+            .eq('updated_at', _expectedUpdatedAt)
+            .is('deleted_at', null);
           if (!isAdmin) update = independent.owner_id === user.id ? update.eq('owner_id', user.id) : update.eq('provider_id', independent.provider_id!);
-          const result = await update.select().single();
+          const result = await update.select().maybeSingle();
           if (result.error) throw result.error;
+          if (!result.data || result.data.id !== id || !result.data.updated_at) throw new PropertyAuthoringConflict();
           return result.data;
         }
-        if (!_expectedUpdatedAt) throw new Error('Reload the draft before saving; its version is unknown.');
         const current = await readManagedPropertyDraft(id, activeCompany?.company_id);
         return saveManagedPropertyDraft({
           propertyId: id, companyId: current.management_company_id!,

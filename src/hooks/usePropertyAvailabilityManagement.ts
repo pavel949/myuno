@@ -19,13 +19,15 @@ interface PropertyAvailabilityRow {
   updated_at: string;
 }
 
+const EMPTY_AVAILABILITY: AvailabilityEntry[] = [];
+
 export function usePropertyAvailabilityManagement(propertyId?: string) {
   const { language } = useLanguage();
   const isRu = language === 'ru';
   const queryClient = useQueryClient();
 
   // Fetch availability for a property
-  const { data: availability = [], isLoading } = useQuery({
+  const { data: availability = EMPTY_AVAILABILITY, isLoading, isFetching, isSuccess } = useQuery({
     queryKey: ['property-availability-management', propertyId],
     queryFn: async () => {
       if (!propertyId) return [];
@@ -133,6 +135,7 @@ export function usePropertyAvailabilityManagement(propertyId?: string) {
   return {
     availability,
     isLoading,
+    isReady: isSuccess && !isFetching,
     syncAvailability,
     upsertAvailability: upsertMutation.mutateAsync,
     deleteAvailability: deleteMutation.mutateAsync,

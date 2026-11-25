@@ -62,6 +62,13 @@ jobs:
         run: DS_CAPITAL_OUTPUT="$GITHUB_WORKSPACE/artifacts/design-system/capital-adoption" node scripts/qa/design-system-capital-adoption.mjs
         env:
           NODE_OPTIONS: --require ./scripts/qa/local-network-only.cjs
+      - name: Five admin editors preview unsaved changes without business writes
+        timeout-minutes: 4
+        run: node scripts/qa/admin-authoring-preview-ui.mjs
+        env:
+          ADMIN_AUTHORING_CSS_FILE: ${{ github.workspace }}/artifacts/design-system/core/pms/normal.css
+          ADMIN_AUTHORING_OUTPUT: ${{ github.workspace }}/artifacts/design-system/admin-authoring-preview
+          NODE_OPTIONS: --require ./scripts/qa/local-network-only.cjs
       - name: Actual management and vendor page frames
         run: WORKSPACE_DS_OUTPUT="$GITHUB_WORKSPACE/artifacts/design-system/workspace-adoption" node scripts/qa/ds-workspace-pages.mjs
         env:

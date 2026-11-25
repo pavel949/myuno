@@ -1,3 +1,4 @@
+import { AdminDraftPreview, ADMIN_EDITOR_HEADER, ADMIN_EDITOR_BODY, ADMIN_EDITOR_FOOTER } from '@/components/admin/AdminDraftPreview';
 import { ProjectInstallmentDraft } from '@/components/admin/projects/ProjectInstallmentDraft';
 import { ProjectGalleryOrder } from '@/components/property/ProjectGalleryOrder';
 import { projectGalleryField, publicProjectMediaUrl } from '@/lib/real-estate/projectEditorialMedia';
@@ -113,7 +114,7 @@ export default function AdminProjects() {
   const isRu = language === 'ru';
   const { isAdmin, isLoading: adminLoading } = useAdminCheck();
   const { data: projects, isLoading, error: projectsError, refetch } = useAdminPropertyProjects();
-  const { data: developers } = useAdminDevelopers();
+  const { data: developers, isError: developersError, refetch: refetchDevelopers } = useAdminDevelopers();
   const createProject = useCreatePropertyProject();
   const updateProject = useUpdatePropertyProject();
   const queryClient = useQueryClient();
@@ -183,9 +184,11 @@ export default function AdminProjects() {
     if (!bulkDeveloperId || selectedIds.size === 0) return;
     setIsBulkProcessing(true);
     try {
+      const developer = developers?.find(row => row.id === bulkDeveloperId && row.id !== UNASSIGNED_DEVELOPER_ID);
+      if (!developer) throw new Error('Select a developer from the current directory');
       const { data, error } = await supabase
         .from('property_projects')
-        .update({ developer_id: bulkDeveloperId, needs_review: false })
+        .update({ developer_id: bulkDeveloperId, developer_name: developer.name_en || developer.name_ru, needs_review: false })
         .in('id', Array.from(selectedIds))
         .select('id,developer_id,needs_review');
       if (error) throw error;
@@ -288,6 +291,7 @@ export default function AdminProjects() {
       description_ru: project.description_ru || '',
       address: project.address || '',
       district: project.district || '',
+      developer_id: project.developer_id,
       developer_name: project.developer_name || '',
       year_built: project.year_built,
       total_units: project.total_units,
@@ -358,6 +362,8 @@ export default function AdminProjects() {
       cam_payment_day: juristicData.cam_payment_day ? parseInt(juristicData.cam_payment_day) : null,
     };
     if (editingProject) {
+      if (payload.developer_id === editingProject.developer_id) delete payload.developer_id;
+      if (payload.developer_name === (editingProject.developer_name || '')) delete payload.developer_name;
       if ((payload.cover_image ?? '') === (editingProject.cover_image ?? '')) delete payload.cover_image;
       if ((payload.video_url ?? '') === (editingProject.video_url ?? '')) delete payload.video_url;
       if (JSON.stringify(payload.images ?? []) === JSON.stringify(editingProject.images ?? [])) delete payload.images;
@@ -565,7 +571,7 @@ export default function AdminProjects() {
         ) : (
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {filteredProjects.map((project) => {
-              const isOrphan = project.developer_id === UNASSIGNED_DEVELOPER_ID;
+              const isOrphan = !project.developer_id || project.developer_id === UNASSIGNED_DEVELOPER_ID;
               const isSelected = selectedIds.has(project.id);
               return (
               <Card 
@@ -668,8 +674,8 @@ export default function AdminProjects() {
 
         {/* Edit/Create Sheet */}
         <Sheet open={isFormOpen} onOpenChange={setIsFormOpen}>
-          <SheetContent className="w-full sm:max-w-2xl overflow-y-auto p-0">
-            <SheetHeader className="px-4 pb-0 pt-5 sm:px-6">
+          <SheetContent className="w-full sm:max-w-[var(--layout-width-form)] flex h-dvh flex-col gap-0 overflow-hidden p-0">
+            <SheetHeader className={ADMIN_EDITOR_HEADER}>
               <SheetTitle className="flex items-center gap-2">
                 <Building2 className="h-5 w-5" />
                 {editingProject 
@@ -679,7 +685,9 @@ export default function AdminProjects() {
               </SheetTitle>
             </SheetHeader>
 
-            <Tabs defaultValue="basic" className="p-4 sm:p-6">
+            <div data-admin-editor-scroll="" className={ADMIN_EDITOR_BODY}>
+            <div className="mb-4"><AdminDraftPreview language={language} title={isRu ? formData.name_ru || formData.name_en : formData.name_en || formData.name_ru} description={isRu ? formData.description_ru || formData.description_en : formData.description_en || formData.description_ru} /></div>
+            <Tabs defaultValue="basic" className="min-w-0">
               <TabsList className="grid h-auto w-full grid-cols-2 items-stretch sm:grid-cols-3">
                 <TabsTrigger value="basic" className="min-h-11 overflow-visible whitespace-normal px-2 leading-snug [overflow-wrap:anywhere]">
                   {isRu ? 'Основное' : 'Basic'}
@@ -733,7 +741,7 @@ export default function AdminProjects() {
                   rows={4}
                 />
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid min-w-0 gap-4 sm:grid-cols-2 [&>*]:min-w-0">
                   <div className="space-y-2">
                     <Label>{isRu ? 'Адрес' : 'Address'}</Label>
                     <Input
@@ -758,14 +766,42 @@ export default function AdminProjects() {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-3 gap-4">
+                <div className="grid min-w-0 gap-4 sm:grid-cols-3 [&>*]:min-w-0">
                   <div className="space-y-2">
-                    <Label>{isRu ? 'Застройщик' : 'Developer'}</Label>
-                    <Input
-                      value={formData.developer_name || ''}
-                      onChange={(e) => updateFormField('developer_name', e.target.value)}
-                      placeholder="Sansiri"
-                    />
+                    <Label htmlFor="admin-project-developer">{pickLang(language, { en: 'Linked developer', ru: 'Связанный застройщик', th: 'ผู้พัฒนาที่เชื่อมโยง' })}</Label>
+                    <Select
+                      value={formData.developer_id && formData.developer_id !== UNASSIGNED_DEVELOPER_ID ? formData.developer_id : 'unlinked'}
+                      disabled={!developers || developersError}
+                      onValueChange={value => {
+                        if (value === 'unlinked') {
+                          setFormData(previous => ({ ...previous, developer_id: null, developer_name: '' }));
+                          return;
+                        }
+                        const selected = developers?.find(developer => developer.id === value);
+                        if (selected && selected.id !== UNASSIGNED_DEVELOPER_ID) {
+                          setFormData(previous => ({ ...previous, developer_id: selected.id, developer_name: selected.name_en || selected.name_ru }));
+                        }
+                      }}
+                    >
+                      <SelectTrigger id="admin-project-developer"><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="unlinked">{pickLang(language, { en: 'No linked developer', ru: 'Без связи с застройщиком', th: 'ไม่ได้เชื่อมโยงผู้พัฒนา' })}</SelectItem>
+                        {formData.developer_id && formData.developer_id !== UNASSIGNED_DEVELOPER_ID &&
+                          !developers?.some(developer => developer.id === formData.developer_id) && (
+                            <SelectItem value={formData.developer_id} disabled>{formData.developer_name || pickLang(language, { en: 'Existing link unavailable', ru: 'Связанный профиль недоступен', th: 'ไม่พบโปรไฟล์ที่เชื่อมโยง' })}</SelectItem>
+                          )}
+                        {developers?.filter(developer => developer.id !== UNASSIGNED_DEVELOPER_ID).map(developer => (
+                          <SelectItem key={developer.id} value={developer.id}>{(isRu ? developer.name_ru : developer.name_en) || developer.name_en || developer.name_ru}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    {developersError && <Button type="button" variant="ghost" onClick={() => void refetchDevelopers()}>{pickLang(language, { en: 'Retry loading developers', ru: 'Повторить загрузку застройщиков', th: 'ลองโหลดผู้พัฒนาอีกครั้ง' })}</Button>}
+                    {(!formData.developer_id || formData.developer_id === UNASSIGNED_DEVELOPER_ID) && (
+                      <div className="space-y-2">
+                        <Label htmlFor="admin-project-developer-label">{pickLang(language, { en: 'Text label (not a profile link)', ru: 'Текстовая подпись (не ссылка на профиль)', th: 'ชื่อแบบข้อความ (ไม่ใช่ลิงก์โปรไฟล์)' })}</Label>
+                        <Input id="admin-project-developer-label" value={formData.developer_name || ''} onChange={event => updateFormField('developer_name', event.target.value)} />
+                      </div>
+                    )}
                   </div>
                   <div className="space-y-2">
                     <Label>{isRu ? 'Год постройки' : 'Year Built'}</Label>
@@ -916,7 +952,7 @@ export default function AdminProjects() {
                       }))}
                     />
 
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid min-w-0 gap-4 sm:grid-cols-2 [&>*]:min-w-0">
                       <div className="space-y-2">
                         <Label className="flex items-center gap-1">
                           <Mail className="h-3 w-3" /> Email
@@ -938,7 +974,7 @@ export default function AdminProjects() {
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid min-w-0 gap-4 sm:grid-cols-2 [&>*]:min-w-0">
                       <div className="space-y-2">
                         <Label>Line ID</Label>
                         <Input
@@ -963,7 +999,7 @@ export default function AdminProjects() {
                       />
                     </div>
 
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid min-w-0 gap-4 sm:grid-cols-2 [&>*]:min-w-0">
                       <div className="space-y-2">
                         <Label>{isRu ? 'Контактное лицо' : 'Contact Person'}</Label>
                         <Input
@@ -999,7 +1035,7 @@ export default function AdminProjects() {
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-4">
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid min-w-0 gap-4 sm:grid-cols-2 [&>*]:min-w-0">
                       <div className="space-y-2">
                         <Label>{isRu ? 'Банк' : 'Bank Name'}</Label>
                         <Input
@@ -1016,7 +1052,7 @@ export default function AdminProjects() {
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid min-w-0 gap-4 sm:grid-cols-2 [&>*]:min-w-0">
                       <div className="space-y-2">
                         <Label>{isRu ? 'Номер счёта' : 'Account Number'}</Label>
                         <Input
@@ -1043,7 +1079,7 @@ export default function AdminProjects() {
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-4">
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid min-w-0 gap-4 sm:grid-cols-2 [&>*]:min-w-0">
                       <div className="space-y-2">
                         <Label>{isRu ? 'Ставка за м²' : 'Fee per sqm'} ({cityCurrencyCode})</Label>
                         <Input
@@ -1081,9 +1117,10 @@ export default function AdminProjects() {
                 </Card>
               </TabsContent>
             </Tabs>
+            </div>
 
             {/* Footer Actions */}
-            <div className="sticky bottom-0 border-t bg-background p-4 flex justify-end gap-2">
+            <div className={ADMIN_EDITOR_FOOTER}>
               <Button variant="outline" onClick={() => setIsFormOpen(false)}>
                 {pickLang(language, { en: "Cancel", ru: "Отмена", th: "ยกเลิก" })}
               </Button>

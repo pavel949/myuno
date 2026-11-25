@@ -9,13 +9,14 @@ beforeEach(() => {
   db.from.mockReturnValue(chain); db.select.mockReturnValue(chain); db.eq.mockReturnValue(chain); db.update.mockReturnValue(chain);
 });
 it.each(INBOX_SOURCES)('reads the exact %s ID without a list limit or alternate domain', async source => {
-  expect(await fetchInboxRequest(source, id)).toMatchObject({ id, message: 'Selected request' });
+  if (source === 'service_orders') db.result.data = { id, service_type: 'marketplace' };
+  expect(await fetchInboxRequest(source, id)).toMatchObject({ id });
   expect(db.from).toHaveBeenCalledExactlyOnceWith(source);
-  expect(db.eq).toHaveBeenCalledExactlyOnceWith('id', id);
+  expect(db.eq.mock.calls).toEqual(source === 'service_orders' ? [['id', id], ['service_type', 'marketplace']] : [['id', id]]);
   expect(db.select.mock.calls[0][0]).not.toContain('*');
 });
 it.each(INBOX_SOURCES)('keeps %s identity in the generated Inbox handoff', async source => {
-  db.result.data = [{ id, created_at: '2026-11-13T00:00:00Z', status: 'pending' }];
+  db.result.data = [{ id, created_at: '2026-11-13T00:00:00Z', status: 'pending', service_type: 'marketplace' }];
   const result = await fetchInbox(source, 0, 'all');
   const url = new URL(result.items[0].href, 'http://localhost');
   expect(url.pathname).toBe('/admin/inbox');

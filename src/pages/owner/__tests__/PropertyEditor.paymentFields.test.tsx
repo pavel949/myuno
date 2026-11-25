@@ -5,6 +5,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { ComponentProps } from 'react';
 import type { CanonicalPropertyForm } from '@/components/property/canonical-form/CanonicalPropertyForm';
 import PropertyEditor from '../PropertyEditor';
+import { PropertyAuthoringConflict } from '@/lib/propertyAuthoring';
 import { propertySupportsMode } from '@/lib/real-estate/propertyDetailIntent';
 
 const mocks = vi.hoisted(() => ({
@@ -14,10 +15,12 @@ const mocks = vi.hoisted(() => ({
   revisionSave: vi.fn(),
   canAccess: vi.fn(),
   mutateAsync: vi.fn(),
+  refetchProperty: vi.fn(),
   mutate: vi.fn(),
   navigate: vi.fn(),
   syncAvailability: vi.fn(),
-  availability: [],
+  availability: [] as Array<{ date: Date; status: "blocked" }>,
+  availabilityReady: true,
 }));
 
 vi.mock('@/lib/propertyAuthoring', async importOriginal => ({ ...(await importOriginal<typeof import('@/lib/propertyAuthoring')>()), isIndependentPropertyProvider: mocks.provider }));
@@ -34,12 +37,13 @@ vi.mock('@/hooks/useTeamPermissions', () => ({ useTeamPermissions: () => ({ canA
 vi.mock('@/contexts/LanguageContext', () => ({ useLanguage: () => ({ language: 'en' }) }));
 vi.mock('@/hooks/useCityCurrency', () => ({ useCityCurrency: () => ({ code: 'THB' }) }));
 vi.mock('@/hooks/usePropertyCare', () => ({
-  useOwnerProperty: () => ({ data: mocks.property, isLoading: false }),
+  useOwnerProperty: () => ({ data: mocks.property, isLoading: false, refetch: mocks.refetchProperty }),
   useUpdateOwnerProperty: () => ({ mutateAsync: mocks.mutateAsync, mutate: mocks.mutate, isPending: false }),
 }));
 vi.mock('@/hooks/usePropertyAvailabilityManagement', () => ({
   usePropertyAvailabilityManagement: () => ({
     availability: mocks.availability,
+    isReady: mocks.availabilityReady,
     syncAvailability: mocks.syncAvailability,
     isSaving: false,
   }),
@@ -48,7 +52,10 @@ vi.mock('@/components/uno/PageContainer', () => ({ PageContainer: ({ children }:
 vi.mock('@/components/uno/PageHeader', () => ({ PageHeader: ({ actions }: { actions: React.ReactNode }) => <div>{actions}</div> }));
 vi.mock('@/components/property/PropertyListingCard', () => ({ PropertyListingCard: ({ property }: { property: unknown }) => <output data-testid="preview-property">{JSON.stringify(property)}</output> }));
 vi.mock('@/components/property/PropertyRooms', () => ({ PropertyRooms: () => null }));
-vi.mock('@/components/property/PropertyCalendar', () => ({ PropertyCalendar: ({ currency }: { currency?: string }) => <output data-testid="calendar-currency">{currency || "unknown"}</output> }));
+vi.mock('@/components/property/PropertyCalendar', () => ({ PropertyCalendar: ({ currency, onChange }: { currency?: string; onChange: (entries: typeof mocks.availability) => void }) => <>
+  <output data-testid="calendar-currency">{currency || "unknown"}</output>
+  <button onClick={() => onChange([{ date: new Date('2026-11-01T00:00:00Z'), status: 'blocked' }])}>Block fixture day</button>
+</> }));
 vi.mock('@/components/owner/PropertyTeamTab', () => ({ PropertyTeamTab: () => null }));
 vi.mock('@/components/owner/property-wizard/AIIntakePanel', () => ({ AIIntakePanel: () => null }));
 vi.mock('sonner', () => ({ toast: Object.assign(vi.fn(), { error: vi.fn() }) }));
@@ -81,7 +88,7 @@ async function save() {
   fireEvent.click(screen.getByRole('button', { name: 'Save property' }));
   await waitFor(() => expect(mocks.navigate).toHaveBeenCalledWith('/mc/properties/synthetic-property'));
   expect(mocks.mutateAsync).toHaveBeenCalledTimes(1);
-  expect(mocks.syncAvailability).toHaveBeenCalledWith([]);
+  expect(mocks.syncAvailability).not.toHaveBeenCalled();
   return savedPayload();
 }
 
@@ -98,6 +105,8 @@ describe('PropertyEditor payment-field round trip', () => {
     };
     mocks.mutateAsync.mockResolvedValue({ id: 'synthetic-property' });
     mocks.syncAvailability.mockResolvedValue(undefined);
+    mocks.availabilityReady = true;
+    mocks.availability = [];
   });
   afterEach(cleanup);
 
@@ -108,6 +117,56 @@ describe('PropertyEditor payment-field round trip', () => {
     expect(renderedData('controlled-data')).toMatchObject(expected);
     fireEvent.change(screen.getByLabelText('Title'), { target: { value: 'Updated title only' } });
     expect(await save()).toMatchObject({ ...expected, title: 'Updated title only', deposit_amount: 300 });
+  });
+
+  it('keeps rejected edits visible and requires an explicit reload before saving a newer version', async () => {
+    const latest = { ...mocks.property, title: 'Saved by another editor', updated_at: '2026-10-02T00:00:00Z' };
+    mocks.mutateAsync.mockRejectedValueOnce(new PropertyAuthoringConflict());
+    mocks.refetchProperty.mockImplementation(async () => {
+      mocks.property = latest;
+      return { data: latest, error: null };
+    });
+    renderEditor();
+    fireEvent.change(screen.getByLabelText('Title'), { target: { value: 'Unsaved local title' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Save property' }));
+    expect(await screen.findByRole('alert')).toHaveTextContent('Your edits have not been saved');
+    expect(screen.getByLabelText('Title')).toHaveValue('Unsaved local title');
+    fireEvent.click(screen.getByRole('button', { name: 'Save property' }));
+    expect(mocks.mutateAsync).toHaveBeenCalledTimes(1);
+    expect(mocks.syncAvailability).not.toHaveBeenCalled();
+    expect(mocks.navigate).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByRole('button', { name: 'Reload and discard unsaved changes' }));
+    await waitFor(() => expect(screen.getByLabelText('Title')).toHaveValue(latest.title));
+    fireEvent.change(screen.getByLabelText('Title'), { target: { value: 'Reviewed new title' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Save property' }));
+    await waitFor(() => expect(mocks.mutateAsync).toHaveBeenLastCalledWith(expect.objectContaining({ _expectedUpdatedAt: latest.updated_at, title: 'Reviewed new title' })));
+  });
+
+  it('saves metadata without touching availability while the calendar is unhydrated', async () => {
+    mocks.availabilityReady = false;
+    renderEditor();
+    expect(screen.queryByRole('button', { name: 'Block fixture day' })).not.toBeInTheDocument();
+    fireEvent.change(screen.getByLabelText('Title'), { target: { value: 'Metadata only before calendar load' } });
+    expect(await save()).toMatchObject({ title: 'Metadata only before calendar load' });
+  });
+
+  it('retains the existing calendar write only for an explicitly edited, ready calendar', async () => {
+    renderEditor();
+    fireEvent.click(screen.getByRole('button', { name: 'Block fixture day' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Save property' }));
+    await waitFor(() => expect(mocks.navigate).toHaveBeenCalledWith('/mc/properties/synthetic-property'));
+    expect(mocks.syncAvailability).toHaveBeenCalledExactlyOnceWith([{ date: new Date('2026-11-01T00:00:00Z'), status: 'blocked' }]);
+  });
+
+  it('does not write over a different availability snapshot after an explicit calendar edit', () => {
+    renderEditor();
+    fireEvent.click(screen.getByRole('button', { name: 'Block fixture day' }));
+    mocks.availability = [{ date: new Date('2026-11-03T00:00:00Z'), status: 'blocked' }];
+    fireEvent.change(screen.getByLabelText('Title'), { target: { value: 'Edit against stale calendar' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Save property' }));
+    expect(mocks.syncAvailability).not.toHaveBeenCalled();
+    expect(mocks.mutateAsync).not.toHaveBeenCalled();
+    expect(mocks.navigate).not.toHaveBeenCalled();
   });
 
   it.each([

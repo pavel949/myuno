@@ -4,7 +4,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { buildPropertyPayload } from '@/hooks/property-wizard/buildPayload';
 import { initialOwnershipData, mapPropertyToFormData } from '@/hooks/property-wizard/initialData';
 import { propertyRevisionEditingRow, readPropertyRevision, savePropertyRevision } from '@/lib/propertyRevisions';
-import { propertyAuthoringDelta, editablePropertyAuthoringPatch, isIndependentPropertyProvider } from '@/lib/propertyAuthoring';
+import { PropertyAuthoringConflict, propertyAuthoringDelta, editablePropertyAuthoringPatch, isIndependentPropertyProvider } from '@/lib/propertyAuthoring';
 import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
@@ -243,16 +243,27 @@ export default function PropertyEditor() {
   const mountedRef = useRef(true);
   useEffect(() => { mountedRef.current = true; return () => { mountedRef.current = false; }; }, []);
   useEffect(() => { savingRef.current = false; setRevisionSaveBlocked(false); setRevisionSaving(false); }, [actorScope]);
+  const [independentConflict, setIndependentConflict] = useState(false);
+  useEffect(() => setIndependentConflict(false), [actorScope]);
   const savedVersionRef = useRef<string>(undefined);
   const updateProperty = useUpdateOwnerProperty();
   const autosaveProperty = useUpdateOwnerProperty();
-  const { availability, syncAvailability, isSaving: isSavingAvailability } = usePropertyAvailabilityManagement(property && !managedEmployee ? id : undefined);
+  const { availability, syncAvailability, isReady: calendarReady, isSaving: isSavingAvailability } = usePropertyAvailabilityManagement(property && !managedEmployee ? id : undefined);
 
   const [showPreview, setShowPreview] = useState(false);
 
   // Rooms & Calendar local state (not in CanonicalPropertyForm)
   const [rooms, setRooms] = useState<Room[]>([]);
-  const [localAvailability, setLocalAvailability] = useState<AvailabilityEntry[]>([]);
+  const [calendarDraft, setCalendarDraft] = useState<{ scope: string; baseline: AvailabilityEntry[]; entries: AvailabilityEntry[] }>();
+  const currentCalendarDraft = calendarDraft?.scope === actorScope ? calendarDraft : undefined;
+  const localAvailability = currentCalendarDraft?.entries ?? availability;
+  const changeAvailability = useCallback((entries: AvailabilityEntry[]) => {
+    if (!calendarReady) return;
+    setCalendarDraft(previous => {
+      const baseline = previous?.scope === actorScope ? previous.baseline : availability;
+      return JSON.stringify(entries) === JSON.stringify(baseline) ? undefined : { scope: actorScope, baseline, entries };
+    });
+  }, [actorScope, availability, calendarReady]);
 
   // Controlled form data for CanonicalPropertyForm
   const [formData, setFormData] = useState<PropertyFormData | null>(null);
@@ -372,12 +383,7 @@ export default function PropertyEditor() {
     setUtilitiesData(nextUtilitiesData);
     setServicesData(nextServicesData);
     setRooms(nextRooms);
-  }, [property, user?.id, publishedRevision, revisionQuery.data, revisionSaveBlocked]);
-
-  // Sync availability
-  useEffect(() => {
-    if (availability) setLocalAvailability(availability);
-  }, [availability]);
+  }, [property, user?.id, publishedRevision, revisionQuery.data, revisionSaveBlocked, independentConflict]);
 
   const hasUnsavedChanges = useMemo(() => {
     if (!formData) return false;
@@ -487,7 +493,7 @@ export default function PropertyEditor() {
   };
 
   const persistEditorDraft = useCallback(async () => {
-    if (!id || !formData || !hasUnsavedChanges || !canEdit || (publishedRevision && revisionSaveBlocked) || savingRef.current || hydratedIdRef.current !== actorScope) return;
+    if (!id || !formData || !hasUnsavedChanges || !canEdit || independentConflict || (publishedRevision && revisionSaveBlocked) || savingRef.current || hydratedIdRef.current !== actorScope) return;
     const savingScope = actorScope;
 
     savingRef.current = true;
@@ -511,9 +517,10 @@ export default function PropertyEditor() {
     } catch (error) {
       if (!mountedRef.current || actorScopeRef.current !== savingScope) return;
       setSaveState('error');
+      if (error instanceof PropertyAuthoringConflict) setIndependentConflict(true);
       errorLog.silent(error, 'persist_editor_draft');
     } finally { if (actorScopeRef.current === savingScope) savingRef.current = false; }
-  }, [actorScope, autosaveProperty, buildEditorPayload, canEdit, formData, hasUnsavedChanges, id, rooms, servicesData, utilitiesData, publishedRevision, persistRevision, revisionSaveBlocked]);
+  }, [actorScope, autosaveProperty, buildEditorPayload, canEdit, formData, hasUnsavedChanges, id, rooms, servicesData, utilitiesData, publishedRevision, persistRevision, revisionSaveBlocked, independentConflict]);
 
   useEffect(() => {
     if (!hasUnsavedChanges) return;
@@ -532,14 +539,14 @@ export default function PropertyEditor() {
 
   useEffect(() => {
     const handleBeforeUnload = (event: BeforeUnloadEvent) => {
-      if (!hasUnsavedChanges) return;
+      if (!hasUnsavedChanges && !currentCalendarDraft) return;
       event.preventDefault();
       event.returnValue = '';
     };
 
     window.addEventListener('beforeunload', handleBeforeUnload);
     return () => window.removeEventListener('beforeunload', handleBeforeUnload);
-  }, [hasUnsavedChanges]);
+  }, [hasUnsavedChanges, currentCalendarDraft]);
 
   const handleBlurAutosave = useCallback((event: React.FocusEvent) => {
     // A save/review button must not lose its click to blur-triggered autosave.
@@ -549,15 +556,23 @@ export default function PropertyEditor() {
   }, [hasUnsavedChanges, persistEditorDraft]);
 
   const handleSubmit = async (submitForReview = false) => {
-    if (!id || !formData || !canEdit || (publishedRevision && revisionSaveBlocked) || savingRef.current || hydratedIdRef.current !== actorScope) return;
+    if (!id || !formData || !canEdit || independentConflict || (publishedRevision && revisionSaveBlocked) || savingRef.current || hydratedIdRef.current !== actorScope) return;
     const savingScope = actorScope;
     savingRef.current = true;
     try {
+      if (currentCalendarDraft && (!calendarReady || currentCalendarDraft.baseline !== availability)) {
+        toast.error(pickLang(language, {
+          en: 'The calendar changed or is refreshing. Reopen the property and review the dates before saving calendar changes.',
+          ru: 'Календарь изменился или обновляется. Откройте объект заново и проверьте даты перед сохранением календаря.',
+          th: 'ปฏิทินมีการเปลี่ยนแปลงหรือกำลังโหลด โปรดเปิดที่พักใหม่และตรวจสอบวันที่ก่อนบันทึก',
+        }));
+        return;
+      }
       const saved = publishedRevision ? await persistRevision(buildEditorPayload() || {}, submitForReview) : await updateProperty.mutateAsync({ id, ...(buildEditorPayload() || {}), _authoring: true, _expectedUpdatedAt: savedVersionRef.current, _submitForReview: submitForReview, ...(submitForReview ? { approval_status: 'pending', is_active: false } : {}) } as never);
       if (!mountedRef.current || actorScopeRef.current !== savingScope) return;
       savedVersionRef.current = saved.updated_at;
 
-      if (!managedEmployee) await syncAvailability(localAvailability);
+      if (!managedEmployee && currentCalendarDraft) await syncAvailability(currentCalendarDraft.entries);
       if (!mountedRef.current || actorScopeRef.current !== savingScope) return;
       lastSavedSnapshotRef.current = JSON.stringify({ formData, rooms, utilitiesData, servicesData });
       setLastSaved(new Date());
@@ -577,6 +592,7 @@ export default function PropertyEditor() {
     } catch (error) {
       if (!mountedRef.current || actorScopeRef.current !== savingScope) return;
       setSaveState('error');
+      if (error instanceof PropertyAuthoringConflict) setIndependentConflict(true);
       toast.error(error instanceof Error ? error.message : pickLang(language, { en: 'Could not save property', ru: 'Не удалось сохранить объект', th: 'บันทึกอสังหาริมทรัพย์ไม่สำเร็จ' }));
       errorLog.error(error, 'save_property');
     } finally { if (actorScopeRef.current === savingScope) savingRef.current = false; }
@@ -597,9 +613,9 @@ export default function PropertyEditor() {
       labelEn: 'Calendar',
       labelRu: 'Календарь',
       content: (
-        <PropertyCalendar
+        !calendarReady ? <p role="status">{pickLang(language, { en: 'Calendar is loading or unavailable.', ru: 'Календарь загружается или недоступен.', th: 'ปฏิทินกำลังโหลดหรือไม่พร้อมใช้งาน' })}</p> : <PropertyCalendar
           availability={localAvailability}
-          onChange={setLocalAvailability}
+          onChange={changeAvailability}
           basePrice={Number(formData?.price_per_night) || 0}
           currency={property?.currency?.trim() || ''}
         />
@@ -612,7 +628,7 @@ export default function PropertyEditor() {
       labelRu: 'Команда',
       content: <PropertyTeamTab propertyId={id || ''} />,
     },
-  ], [rooms, localAvailability, formData?.price_per_night, id, property?.currency]);
+  ], [rooms, localAvailability, formData?.price_per_night, id, property?.currency, calendarReady, changeAvailability, language]);
 
   // Loading state
   if (isLoading || adminLoading || providerAuthority.isLoading || (managedEmployee && permissionsLoading) || (publishedRevision && revisionQuery.isLoading)) {
@@ -672,7 +688,7 @@ export default function PropertyEditor() {
     </PageContainer>;
   }
 
-  const isSubmitting = updateProperty.isPending || autosaveProperty.isPending || isSavingAvailability || revisionSaving || (publishedRevision && revisionSaveBlocked);
+  const isSubmitting = updateProperty.isPending || autosaveProperty.isPending || isSavingAvailability || revisionSaving || independentConflict || (publishedRevision && revisionSaveBlocked);
 
   return (
     <PageContainer>
@@ -725,6 +741,21 @@ export default function PropertyEditor() {
           }}>{pickLang(language, { en: 'Reload and discard unsaved changes', ru: 'Обновить и отбросить несохранённые изменения', th: 'โหลดใหม่และละทิ้งการแก้ไขที่ยังไม่บันทึก' })}</Button>
         </div>}
         {revisionQuery.data?.revision?.reason && <p>{pickLang(language, { en: 'Returned for correction:', ru: 'Возвращено на доработку:', th: 'ส่งกลับเพื่อแก้ไข:' })} {revisionQuery.data.revision.reason}</p>}
+      </div>}
+
+      {independentConflict && <div role="alert" className="mb-4 space-y-2 border border-destructive p-3 text-sm">
+        <p>{pickLang(language, {
+          en: 'The property changed or is no longer available for editing. Your edits have not been saved.',
+          ru: 'Объект изменился или больше недоступен для редактирования. Ваши правки не сохранены.',
+          th: 'ที่พักมีการเปลี่ยนแปลงหรือไม่สามารถแก้ไขได้แล้ว การแก้ไขของคุณยังไม่ถูกบันทึก',
+        })}</p>
+        <Button variant="outline" onClick={async () => {
+          const result = await refetchProperty();
+          if (result.error || !result.data || !mountedRef.current || actorScopeRef.current !== actorScope) return;
+          hydratedIdRef.current = undefined;
+          lastSavedSnapshotRef.current = latestSnapshotRef.current;
+          setIndependentConflict(false);
+        }}>{pickLang(language, { en: 'Reload and discard unsaved changes', ru: 'Обновить и отбросить несохранённые изменения', th: 'โหลดใหม่และละทิ้งการแก้ไขที่ยังไม่บันทึก' })}</Button>
       </div>}
 
       {/* Autosave status bar */}

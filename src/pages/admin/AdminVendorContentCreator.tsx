@@ -13,7 +13,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
-import { useAdminProviders } from '@/hooks/useAdmin';
+import { useAdminCheck, useAdminProviders } from '@/hooks/useAdmin';
 
 import { PageContainer } from '@/components/uno/PageContainer';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -38,7 +38,6 @@ import {
   DialogTitle,
   DialogFooter,
 } from '@/components/ui/dialog';
-import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import {
   Building2,
@@ -141,7 +140,8 @@ export default function AdminVendorContentCreator() {
   const { user } = useAuth();
   const isRu = language === 'ru';
 
-  const { providers, isLoading, refetch } = useAdminProviders();
+  const { isAdmin, isLoading: adminLoading } = useAdminCheck();
+  const { providers, isLoading, createProvider } = useAdminProviders();
 
   // State
   const [step, setStep] = useState<'select-vendor' | 'select-content'>('select-vendor');
@@ -164,6 +164,7 @@ export default function AdminVendorContentCreator() {
 
   // Create new vendor
   const handleCreateVendor = async () => {
+    if (!user || !isAdmin || adminLoading || isCreatingVendor) return;
     if (!newVendorData.name.trim()) {
       toast.error(isRu ? 'Введите название' : 'Enter name');
       return;
@@ -171,31 +172,17 @@ export default function AdminVendorContentCreator() {
 
     setIsCreatingVendor(true);
     try {
-      const { data, error } = await supabase
-        .from('providers')
-        .insert({
-          name: newVendorData.name.trim(),
-          email: newVendorData.email.trim() || null,
-          phone: newVendorData.phone.trim() || null,
-          business_category: newVendorData.business_category,
-          is_active: true,
-          is_verified: true,
-          approval_status: 'approved',
-          created_by_uno_team: true,
-          uno_team_creator_id: user?.id,
-          pending_payout: 0,
-          rating: 0,
-          review_count: 0,
-        })
-        .select()
-        .single();
+      const { data, error } = await createProvider({
+        name: newVendorData.name.trim(),
+        email: newVendorData.email.trim() || null,
+        phone: newVendorData.phone.trim() || null,
+        business_category: newVendorData.business_category,
+        uno_team_creator_id: user.id,
+      });
+      if (error || !data) throw error ?? new Error('Provider creation was not confirmed');
 
-      if (error) throw error;
-
-      toast.success(isRu ? 'Вендор создан!' : 'Vendor created!');
-      await refetch();
-      
-      // Auto-select newly created vendor
+      toast.success(isRu ? 'Черновик поставщика сохранён' : 'Provider draft saved');
+      // Continue authoring without activating the provider or exposing a listing.
       setSelectedProvider(data);
       setStep('select-content');
       setIsCreateVendorOpen(false);

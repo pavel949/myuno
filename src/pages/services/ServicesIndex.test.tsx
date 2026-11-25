@@ -21,7 +21,7 @@ vi.mock('@/components/services/MarketplaceFilterSheet', () => ({ MarketplaceFilt
 vi.mock('@/contexts/LanguageContext', () => ({ useLanguage: () => ({ language: 'en' }) }));
 vi.mock('@/components/miniapp/MiniAppLayout', () => ({ MiniAppLayout: ({ children, onSearchChange, searchValue, filterButton }: { filterButton: ReactNode; children: ReactNode; onSearchChange: (s: string) => void; searchValue: string }) => <><input type="search" aria-label="Search services…" value={searchValue} onChange={e => onSearchChange(e.target.value)} />{filterButton}{children}</> }));
 vi.mock('@/hooks/useServiceMarketplace', () => ({ useMarketplaceServices: () => ({ data: state.providerOnly ? [{ name_en: 'Synthetic provider offer', provider: { name: 'Synthetic' } }] : [], isLoading: false, isError: false }) }));
-vi.mock('@/components/services/MarketplaceServiceGrid', () => ({ MarketplaceServiceGrid: ({ onConcierge }: { onConcierge: () => void }) => <button onClick={onConcierge}>Fixture concierge fallback</button> }));
+vi.mock('@/components/services/MarketplaceServiceGrid', () => ({ MarketplaceServiceGrid: ({ onConcierge, categorySlugs }: { onConcierge: () => void; categorySlugs?: string[] }) => <><output data-testid="offer-scope">{categorySlugs?.join(',') ?? 'all'}</output><button onClick={onConcierge}>Fixture concierge fallback</button></> }));
 vi.mock('@/components/concierge/ConciergeHelpSheet', () => ({ ConciergeHelpSheet: ({ sourceData }: { sourceData: Record<string, unknown> }) => <output data-testid="concierge-context">{JSON.stringify(sourceData)}</output> }));
 vi.mock('@/components/services', () => ({ ServiceFunctionCard: ({ fn, onClick }: { fn: { name: string }; onClick: () => void }) => <button onClick={onClick}>{fn.name}</button> }));
 function Location() { const l = useLocation(); const navigate = useNavigate(); return <><output data-testid="location">{l.pathname}{l.search}{l.hash}|{JSON.stringify(l.state)}</output><button onClick={() => navigate(-1)}>Back fixture</button><button onClick={() => navigate(1)}>Forward fixture</button></>; }
@@ -37,6 +37,15 @@ describe('canonical services hub', () => {
     expect(screen.getByTestId('location')).toHaveTextContent('maxPrice=1000');
     expect(screen.getByTestId('location')).not.toHaveTextContent('category=ac');
   });
+  it('keeps valid public offers in the selected category without sending the guest back to all services', () => {
+    mount('/discover/services?category=cat-business-legal&district=Rawai&ref=trip');
+    const category = CATEGORIES.find(value => value.id === 'cat-business-legal')!;
+    const scope = screen.getByTestId('offer-scope');
+    expect(scope).toHaveTextContent(category.id);
+    expect(scope.textContent?.split(',')).not.toContain('cat-health-wellness');
+    expect(screen.getByTestId('location')).toHaveTextContent('category=cat-business-legal&district=Rawai&ref=trip');
+  });
+
   it('hands the current offer filters to concierge without another booking writer', async () => {
     mount('/discover/services?q=cleaning&district=Rawai&date=2099-01-01&minPrice=0&maxPrice=1000&currency=THB&ref=trip');
     fireEvent.click(screen.getByRole('button', { name: 'Fixture concierge fallback' }));

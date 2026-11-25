@@ -308,7 +308,7 @@ export default function AdminProperties() {
         cover_image: data.cover_image === undefined ? undefined : data.cover_image || null,
         images: data.images,
         amenities: data.amenities?.length ? data.amenities : undefined,
-        highlights: data.highlights?.length ? data.highlights : undefined,
+        highlights: data.highlights,
         instant_booking: data.instant_booking,
         is_active: data.is_active ?? true,
         is_featured: data.is_featured,

@@ -139,3 +139,11 @@ export async function readIndependentPropertyForAuthoring(propertyId: string, us
   if (property.error) throw property.error;
   return property.data as unknown as OwnerProperty | null;
 }
+
+/** A zero-row conditional write can be a stale version or lost access. */
+export class PropertyAuthoringConflict extends Error {
+  constructor() {
+    super('The property changed or is no longer available for editing. Reload before saving.');
+    this.name = 'PropertyAuthoringConflict';
+  }
+}

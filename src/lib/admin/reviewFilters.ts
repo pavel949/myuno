@@ -53,7 +53,7 @@ export function matchesProjectReview(project: ProjectReviewRecord, filters: {
   if (!matchesSearch(filters.q, [project.name_en, project.name_ru, project.address, project.district, project.developer_name])) return false;
   if (filters.stage !== 'all' && project.project_status !== filters.stage) return false;
   switch (filters.review) {
-    case 'orphan': return project.developer_id === UNASSIGNED_DEVELOPER_ID;
+    case 'orphan': return !project.developer_id || project.developer_id === UNASSIGNED_DEVELOPER_ID;
     case 'needs_review': return project.needs_review === true;
     case 'pending': return project.is_approved === false;
     case 'approved': return project.is_approved === true;

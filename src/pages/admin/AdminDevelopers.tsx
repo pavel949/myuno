@@ -1,3 +1,4 @@
+import { AdminDraftPreview, ADMIN_EDITOR_HEADER, ADMIN_EDITOR_BODY, ADMIN_EDITOR_FOOTER } from '@/components/admin/AdminDraftPreview';
 import { PageShell } from '@/components/page/PageShell';
 /**
  * Admin Developers Management
@@ -404,8 +405,8 @@ export default function AdminDevelopers() {
 
       {/* Edit/Create Sheet */}
       <Sheet open={isFormOpen} onOpenChange={setIsFormOpen}>
-        <SheetContent className="w-full sm:max-w-xl overflow-y-auto p-0">
-          <SheetHeader className="px-4 pb-0 pt-5 sm:px-6">
+        <SheetContent className="w-full sm:max-w-[var(--layout-width-article)] flex h-dvh flex-col gap-0 overflow-hidden p-0">
+          <SheetHeader className={ADMIN_EDITOR_HEADER}>
             <SheetTitle className="flex items-center gap-2">
               <Building2 className="h-5 w-5" />
               {editingDeveloper 
@@ -415,7 +416,9 @@ export default function AdminDevelopers() {
             </SheetTitle>
           </SheetHeader>
 
-          <Tabs defaultValue="basic" className="p-4 sm:p-6">
+          <div data-admin-editor-scroll="" className={ADMIN_EDITOR_BODY}>
+            <div className="mb-4"><AdminDraftPreview language={language} title={isRu ? formData.name_ru || formData.name_en : formData.name_en || formData.name_ru} description={isRu ? formData.description_ru || formData.description_en : formData.description_en || formData.description_ru} /></div>
+            <Tabs defaultValue="basic" className="min-w-0">
             <TabsList className="grid h-auto w-full grid-cols-3 items-stretch">
               <TabsTrigger className="min-h-11 overflow-visible whitespace-normal px-2 leading-snug [overflow-wrap:anywhere]" value="basic">{isRu ? 'Основное' : 'Basic'}</TabsTrigger>
               <TabsTrigger className="min-h-11 overflow-visible whitespace-normal px-2 leading-snug [overflow-wrap:anywhere]" value="details">{isRu ? 'Детали' : 'Details'}</TabsTrigger>
@@ -442,7 +445,7 @@ export default function AdminDevelopers() {
                 multiline
               />
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid min-w-0 gap-4 sm:grid-cols-2 [&>*]:min-w-0">
                 <div className="space-y-2">
                   <Label>{isRu ? 'Штаб-квартира' : 'Headquarters'}</Label>
                   <Input
@@ -464,7 +467,7 @@ export default function AdminDevelopers() {
               </div>
 
               {/* Flags */}
-              <div className="grid grid-cols-3 gap-4 pt-4">
+              <div className="grid min-w-0 gap-4 sm:grid-cols-3 [&>*]:min-w-0 pt-4">
                 <div className="flex items-center justify-between">
                   <Label>Active</Label>
                   <Switch
@@ -497,7 +500,7 @@ export default function AdminDevelopers() {
 
             {/* Details Tab */}
             <TabsContent value="details" className="space-y-4 mt-4">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid min-w-0 gap-4 sm:grid-cols-2 [&>*]:min-w-0">
                 <div className="space-y-2">
                   <Label className="flex items-center gap-1">
                     <Globe className="h-4 w-4" />
@@ -536,7 +539,7 @@ export default function AdminDevelopers() {
                 />
               </div>
 
-              <div className="grid grid-cols-3 gap-4">
+              <div className="grid min-w-0 gap-4 sm:grid-cols-3 [&>*]:min-w-0">
                 <div className="space-y-2">
                   <Label>{isRu ? 'Завершено проектов' : 'Projects Completed'}</Label>
                   <Input
@@ -613,9 +616,10 @@ export default function AdminDevelopers() {
               </div>
             </TabsContent>
           </Tabs>
+            </div>
 
           {/* Save Button */}
-          <div className="p-6 pt-0 flex gap-3">
+          <div className={ADMIN_EDITOR_FOOTER}>
             <Button 
               variant="outline" 
               onClick={() => setIsFormOpen(false)}
