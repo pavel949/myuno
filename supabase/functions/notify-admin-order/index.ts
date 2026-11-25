@@ -2,6 +2,7 @@ import { attemptChannel, emailAccepted, whatsAppAccepted } from './delivery.ts';
 import { Resend } from 'npm:resend@2.0.0';
 import { getConfiguredAdminContacts } from '../_shared/admin-config.ts';
 import { NOTIFY_CORS as corsHeaders } from '../_shared/notify-utils.ts';
+import { withRateLimit } from '../_shared/rate-limit.ts';
 
 interface OrderNotificationPayload {
   order_id: string;
@@ -126,6 +127,11 @@ Deno.serve(async (req) => {
   }
 
   if (req.method !== 'POST') return new Response(null, { status: 405, headers: { ...corsHeaders, Allow: 'POST, OPTIONS' } });
+
+  // Browser-reachable with the public anon key and only messages the admin:
+  // throttle per client so the admin channel cannot be flooded.
+  const limited = await withRateLimit(req, 'notify-admin-order', { maxRequests: 10, windowSeconds: 60 }, corsHeaders);
+  if (limited) return limited;
 
   try {
     const payload: OrderNotificationPayload = await req.json();

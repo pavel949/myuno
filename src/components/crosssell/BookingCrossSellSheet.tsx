@@ -18,6 +18,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { getCurrencySymbol } from '@/lib/config/currencies';
 
 import { toast } from 'sonner';
+import { isHiddenNow } from '@/lib/focus/focusMode';
 const SERVICE_ICONS: Record<string, any> = {
   transfer: Plane,
   car_rental: Car,
@@ -168,7 +169,7 @@ export function BookingCrossSellSheet({ bookingId, open, onOpenChange }: Booking
           </p>
         ) : (
           <AnimatePresence>
-            {offers.map((offer, idx) => {
+            {offers.filter((offer) => !isHiddenNow(SERVICE_PATHS[offer.service_type])).map((offer, idx) => {
               const Icon = SERVICE_ICONS[offer.service_type] || Compass;
               const gradient = SERVICE_GRADIENTS[offer.service_type] || 'from-primary to-primary/80';
               const currencySymbol = getCurrencySymbol(offer.currency || 'THB');

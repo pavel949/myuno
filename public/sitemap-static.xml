@@ -150,24 +150,6 @@
   </url>
 
   <!-- ===== Restaurants ===== -->
-  <url>
-    <loc>https://www.myuno.app/restaurants</loc>
-    <lastmod>2026-04-14</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-    <xhtml:link rel="alternate" hreflang="en" href="https://www.myuno.app/restaurants?lang=en"/>
-    <xhtml:link rel="alternate" hreflang="ru" href="https://www.myuno.app/restaurants?lang=ru"/>
-    <xhtml:link rel="alternate" hreflang="th" href="https://www.myuno.app/restaurants?lang=th"/>
-  </url>
-  <url>
-    <loc>https://www.myuno.app/restaurants/map</loc>
-    <lastmod>2026-04-14</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
-    <xhtml:link rel="alternate" hreflang="en" href="https://www.myuno.app/restaurants/map?lang=en"/>
-    <xhtml:link rel="alternate" hreflang="ru" href="https://www.myuno.app/restaurants/map?lang=ru"/>
-    <xhtml:link rel="alternate" hreflang="th" href="https://www.myuno.app/restaurants/map?lang=th"/>
-  </url>
 
   <!-- ===== Transport ===== -->
   <url>
@@ -189,15 +171,6 @@
     <xhtml:link rel="alternate" hreflang="th" href="https://www.myuno.app/transport/airport-transfer?lang=th"/>
   </url>
   <url>
-    <loc>https://www.myuno.app/transport/fast-track</loc>
-    <lastmod>2026-04-14</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
-    <xhtml:link rel="alternate" hreflang="en" href="https://www.myuno.app/transport/fast-track?lang=en"/>
-    <xhtml:link rel="alternate" hreflang="ru" href="https://www.myuno.app/transport/fast-track?lang=ru"/>
-    <xhtml:link rel="alternate" hreflang="th" href="https://www.myuno.app/transport/fast-track?lang=th"/>
-  </url>
-  <url>
     <loc>https://www.myuno.app/transport/taxi</loc>
     <lastmod>2026-04-14</lastmod>
     <changefreq>weekly</changefreq>
@@ -217,53 +190,8 @@
   </url>
 
   <!-- ===== Beauty & Spa ===== -->
-  <url>
-    <loc>https://www.myuno.app/beauty</loc>
-    <lastmod>2026-04-14</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
-    <xhtml:link rel="alternate" hreflang="en" href="https://www.myuno.app/beauty?lang=en"/>
-    <xhtml:link rel="alternate" hreflang="ru" href="https://www.myuno.app/beauty?lang=ru"/>
-    <xhtml:link rel="alternate" hreflang="th" href="https://www.myuno.app/beauty?lang=th"/>
-  </url>
-  <url>
-    <loc>https://www.myuno.app/beauty/services</loc>
-    <lastmod>2026-04-14</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
-    <xhtml:link rel="alternate" hreflang="en" href="https://www.myuno.app/beauty/services?lang=en"/>
-    <xhtml:link rel="alternate" hreflang="ru" href="https://www.myuno.app/beauty/services?lang=ru"/>
-    <xhtml:link rel="alternate" hreflang="th" href="https://www.myuno.app/beauty/services?lang=th"/>
-  </url>
-  <url>
-    <loc>https://www.myuno.app/beauty/map</loc>
-    <lastmod>2026-04-14</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.6</priority>
-    <xhtml:link rel="alternate" hreflang="en" href="https://www.myuno.app/beauty/map?lang=en"/>
-    <xhtml:link rel="alternate" hreflang="ru" href="https://www.myuno.app/beauty/map?lang=ru"/>
-    <xhtml:link rel="alternate" hreflang="th" href="https://www.myuno.app/beauty/map?lang=th"/>
-  </url>
 
   <!-- ===== Fitness & Wellness ===== -->
-  <url>
-    <loc>https://www.myuno.app/fitness</loc>
-    <lastmod>2026-04-14</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
-    <xhtml:link rel="alternate" hreflang="en" href="https://www.myuno.app/fitness?lang=en"/>
-    <xhtml:link rel="alternate" hreflang="ru" href="https://www.myuno.app/fitness?lang=ru"/>
-    <xhtml:link rel="alternate" hreflang="th" href="https://www.myuno.app/fitness?lang=th"/>
-  </url>
-  <url>
-    <loc>https://www.myuno.app/medical</loc>
-    <lastmod>2026-04-14</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
-    <xhtml:link rel="alternate" hreflang="en" href="https://www.myuno.app/medical?lang=en"/>
-    <xhtml:link rel="alternate" hreflang="ru" href="https://www.myuno.app/medical?lang=ru"/>
-    <xhtml:link rel="alternate" hreflang="th" href="https://www.myuno.app/medical?lang=th"/>
-  </url>
 
   <!-- ===== Events & Education ===== -->
   <url>
@@ -324,24 +252,6 @@
     <xhtml:link rel="alternate" hreflang="ru" href="https://www.myuno.app/services/map?lang=ru"/>
     <xhtml:link rel="alternate" hreflang="th" href="https://www.myuno.app/services/map?lang=th"/>
   </url>
-  <url>
-    <loc>https://www.myuno.app/cleaning</loc>
-    <lastmod>2026-04-14</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
-    <xhtml:link rel="alternate" hreflang="en" href="https://www.myuno.app/cleaning?lang=en"/>
-    <xhtml:link rel="alternate" hreflang="ru" href="https://www.myuno.app/cleaning?lang=ru"/>
-    <xhtml:link rel="alternate" hreflang="th" href="https://www.myuno.app/cleaning?lang=th"/>
-  </url>
-  <url>
-    <loc>https://www.myuno.app/babysitter</loc>
-    <lastmod>2026-04-14</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
-    <xhtml:link rel="alternate" hreflang="en" href="https://www.myuno.app/babysitter?lang=en"/>
-    <xhtml:link rel="alternate" hreflang="ru" href="https://www.myuno.app/babysitter?lang=ru"/>
-    <xhtml:link rel="alternate" hreflang="th" href="https://www.myuno.app/babysitter?lang=th"/>
-  </url>
 
   <!-- ===== Legal & Financial ===== -->
   <url>
@@ -383,24 +293,6 @@
 
   <!-- ===== Insurance & Banking ===== -->
   <url>
-    <loc>https://www.myuno.app/insurance</loc>
-    <lastmod>2026-04-14</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
-    <xhtml:link rel="alternate" hreflang="en" href="https://www.myuno.app/insurance?lang=en"/>
-    <xhtml:link rel="alternate" hreflang="ru" href="https://www.myuno.app/insurance?lang=ru"/>
-    <xhtml:link rel="alternate" hreflang="th" href="https://www.myuno.app/insurance?lang=th"/>
-  </url>
-  <url>
-    <loc>https://www.myuno.app/insurance/travel</loc>
-    <lastmod>2026-04-14</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
-    <xhtml:link rel="alternate" hreflang="en" href="https://www.myuno.app/insurance/travel?lang=en"/>
-    <xhtml:link rel="alternate" hreflang="ru" href="https://www.myuno.app/insurance/travel?lang=ru"/>
-    <xhtml:link rel="alternate" hreflang="th" href="https://www.myuno.app/insurance/travel?lang=th"/>
-  </url>
-  <url>
     <loc>https://www.myuno.app/banking</loc>
     <lastmod>2026-04-14</lastmod>
     <changefreq>monthly</changefreq>
@@ -411,33 +303,6 @@
   </url>
 
   <!-- ===== Pets & Pharmacy ===== -->
-  <url>
-    <loc>https://www.myuno.app/pets</loc>
-    <lastmod>2026-04-14</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
-    <xhtml:link rel="alternate" hreflang="en" href="https://www.myuno.app/pets?lang=en"/>
-    <xhtml:link rel="alternate" hreflang="ru" href="https://www.myuno.app/pets?lang=ru"/>
-    <xhtml:link rel="alternate" hreflang="th" href="https://www.myuno.app/pets?lang=th"/>
-  </url>
-  <url>
-    <loc>https://www.myuno.app/pharmacy</loc>
-    <lastmod>2026-04-14</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
-    <xhtml:link rel="alternate" hreflang="en" href="https://www.myuno.app/pharmacy?lang=en"/>
-    <xhtml:link rel="alternate" hreflang="ru" href="https://www.myuno.app/pharmacy?lang=ru"/>
-    <xhtml:link rel="alternate" hreflang="th" href="https://www.myuno.app/pharmacy?lang=th"/>
-  </url>
-  <url>
-    <loc>https://www.myuno.app/veterinary</loc>
-    <lastmod>2026-04-14</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
-    <xhtml:link rel="alternate" hreflang="en" href="https://www.myuno.app/veterinary?lang=en"/>
-    <xhtml:link rel="alternate" hreflang="ru" href="https://www.myuno.app/veterinary?lang=ru"/>
-    <xhtml:link rel="alternate" hreflang="th" href="https://www.myuno.app/veterinary?lang=th"/>
-  </url>
 
   <!-- ===== Market & Shopping ===== -->
   <url>
@@ -466,15 +331,6 @@
     <xhtml:link rel="alternate" hreflang="en" href="https://www.myuno.app/sell?lang=en"/>
     <xhtml:link rel="alternate" hreflang="ru" href="https://www.myuno.app/sell?lang=ru"/>
     <xhtml:link rel="alternate" hreflang="th" href="https://www.myuno.app/sell?lang=th"/>
-  </url>
-  <url>
-    <loc>https://www.myuno.app/delivery</loc>
-    <lastmod>2026-04-14</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
-    <xhtml:link rel="alternate" hreflang="en" href="https://www.myuno.app/delivery?lang=en"/>
-    <xhtml:link rel="alternate" hreflang="ru" href="https://www.myuno.app/delivery?lang=ru"/>
-    <xhtml:link rel="alternate" hreflang="th" href="https://www.myuno.app/delivery?lang=th"/>
   </url>
   <url>
     <loc>https://www.myuno.app/classifieds</loc>
@@ -519,33 +375,6 @@
     <xhtml:link rel="alternate" hreflang="th" href="https://www.myuno.app/arrive?lang=th"/>
   </url>
   <url>
-    <loc>https://www.myuno.app/sim</loc>
-    <lastmod>2026-04-14</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.6</priority>
-    <xhtml:link rel="alternate" hreflang="en" href="https://www.myuno.app/sim?lang=en"/>
-    <xhtml:link rel="alternate" hreflang="ru" href="https://www.myuno.app/sim?lang=ru"/>
-    <xhtml:link rel="alternate" hreflang="th" href="https://www.myuno.app/sim?lang=th"/>
-  </url>
-  <url>
-    <loc>https://www.myuno.app/exchange</loc>
-    <lastmod>2026-04-14</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.6</priority>
-    <xhtml:link rel="alternate" hreflang="en" href="https://www.myuno.app/exchange?lang=en"/>
-    <xhtml:link rel="alternate" hreflang="ru" href="https://www.myuno.app/exchange?lang=ru"/>
-    <xhtml:link rel="alternate" hreflang="th" href="https://www.myuno.app/exchange?lang=th"/>
-  </url>
-  <url>
-    <loc>https://www.myuno.app/school-finder</loc>
-    <lastmod>2026-04-14</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.6</priority>
-    <xhtml:link rel="alternate" hreflang="en" href="https://www.myuno.app/school-finder?lang=en"/>
-    <xhtml:link rel="alternate" hreflang="ru" href="https://www.myuno.app/school-finder?lang=ru"/>
-    <xhtml:link rel="alternate" hreflang="th" href="https://www.myuno.app/school-finder?lang=th"/>
-  </url>
-  <url>
     <loc>https://www.myuno.app/cost-of-living</loc>
     <lastmod>2026-04-14</lastmod>
     <changefreq>weekly</changefreq>
@@ -584,24 +413,6 @@
     <xhtml:link rel="alternate" hreflang="en" href="https://www.myuno.app/relocate?lang=en"/>
     <xhtml:link rel="alternate" hreflang="ru" href="https://www.myuno.app/relocate?lang=ru"/>
     <xhtml:link rel="alternate" hreflang="th" href="https://www.myuno.app/relocate?lang=th"/>
-  </url>
-  <url>
-    <loc>https://www.myuno.app/wedding</loc>
-    <lastmod>2026-04-14</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
-    <xhtml:link rel="alternate" hreflang="en" href="https://www.myuno.app/wedding?lang=en"/>
-    <xhtml:link rel="alternate" hreflang="ru" href="https://www.myuno.app/wedding?lang=ru"/>
-    <xhtml:link rel="alternate" hreflang="th" href="https://www.myuno.app/wedding?lang=th"/>
-  </url>
-  <url>
-    <loc>https://www.myuno.app/kids</loc>
-    <lastmod>2026-04-14</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.6</priority>
-    <xhtml:link rel="alternate" hreflang="en" href="https://www.myuno.app/kids?lang=en"/>
-    <xhtml:link rel="alternate" hreflang="ru" href="https://www.myuno.app/kids?lang=ru"/>
-    <xhtml:link rel="alternate" hreflang="th" href="https://www.myuno.app/kids?lang=th"/>
   </url>
   <url>
     <loc>https://www.myuno.app/nomad-guide</loc>

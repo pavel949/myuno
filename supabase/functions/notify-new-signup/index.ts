@@ -45,5 +45,5 @@ Deno.serve(createNotifyHandler("notify-new-signup", async (body) => {
   // `on_auth_user_email_confirmed` trigger after the user confirms email.
   // This handler now only delivers the admin notification.
   return adminResult;
-}));
+}, { rateLimit: { maxRequests: 5, windowSeconds: 60 } }));
 

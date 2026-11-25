@@ -12,6 +12,7 @@ import { Badge } from '@/components/ui/badge';
 import { Sparkles, ArrowRight, Tag } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
+import { isHiddenNow } from '@/lib/focus/focusMode';
 
 // Category-based recommendation mapping
 const RELATED_SERVICES: Record<string, Array<{ slug: string; labelEn: string; labelRu: string; icon: string; path: string }>> = {
@@ -88,7 +89,8 @@ export function CrossSellRecommendations({ orderType, orderId, className }: Cros
   const isRu = language === 'ru';
   const navigate = useNavigate();
 
-  const suggestions = RELATED_SERVICES[orderType || ''] || RELATED_SERVICES.default;
+  const suggestions = (RELATED_SERVICES[orderType || ''] || RELATED_SERVICES.default)
+    .filter((s) => !isHiddenNow(s.path));
 
   return (
     <Card className={cn('border-accent/30', className)}>

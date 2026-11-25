@@ -32,6 +32,7 @@ import { CLUSTERS } from '@/lib/catalog/taxonomy';
 
 const TOTAL_CLUSTERS = CLUSTERS.length;
 import { APP_ROUTES } from '@/lib/config/routes';
+import { isHiddenNow } from '@/lib/focus/focusMode';
 
 // Static icon map — keep tree-shakable. Adding a new icon here requires
 // adding the import above (intentional friction so we never regress to
@@ -114,7 +115,7 @@ export function ExploreMoreRail({ clusterId, currentPath, className }: ExploreMo
   const navigate = useNavigate();
 
   const services = (CLUSTER_SERVICES[clusterId] || [])
-    .filter(s => s.path !== currentPath)
+    .filter(s => s.path !== currentPath && !isHiddenNow(s.path))
     .slice(0, 3);
 
   if (services.length === 0) return null;

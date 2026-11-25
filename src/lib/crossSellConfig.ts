@@ -7,6 +7,7 @@ import {
   Hospital, Pill, Home, Scale, MapPin, PartyPopper, Smile, Brush, Bike,
   Plane, CreditCard, Baby, Wifi, Sparkles
 } from 'lucide-react';
+import { isFocusHiddenApp, isFocusModeActive, isHiddenNow } from '@/lib/focus/focusMode';
 
 export interface CrossSellLink {
   id: string;
@@ -127,7 +128,7 @@ export const CROSS_SELL_MATRIX: Record<string, CrossSellLink[]> = {
 };
 
 export function getCrossSellLinks(vertical: string, maxItems = 4): CrossSellLink[] {
-  const links = CROSS_SELL_MATRIX[vertical] || [];
+  const links = (CROSS_SELL_MATRIX[vertical] || []).filter((l) => !isHiddenNow(l.path));
   return links.slice(0, maxItems);
 }
 
@@ -179,5 +180,8 @@ export const CONTEXTUAL_CROSS_SELL: Record<string, ContextualCrossSellItem[]> = 
 
 export function getContextualCrossSell(category: string | null | undefined): ContextualCrossSellItem[] {
   if (!category) return [];
-  return CONTEXTUAL_CROSS_SELL[category] || [];
+  // Items carry a vertical, not a path; verticals are plural ('restaurants'),
+  // registry ids singular ('restaurant').
+  const hidden = (v: string) => isFocusModeActive() && (isFocusHiddenApp(v) || isFocusHiddenApp(v.replace(/s$/, '')));
+  return (CONTEXTUAL_CROSS_SELL[category] || []).filter((item) => !hidden(item.vertical));
 }

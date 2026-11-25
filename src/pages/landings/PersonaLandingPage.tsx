@@ -31,6 +31,8 @@ import { LandingContainer } from '@/components/landings/LandingPrimitives';
 import { tokenColor } from '@/lib/utils/hslAlpha';
 import { ArrowRight, CheckCircle2, MapPin, Sparkles, Grid3x3 } from 'lucide-react';
 import { getAppsForPersona, withPersonaParam } from '@/lib/landings/personaTagMap';
+import { useFocusMode } from '@/hooks/useFocusMode';
+import { isFocusHiddenApp } from '@/lib/focus/focusMode';
 import { getBundleForPersona } from '@/lib/segmentation/bundles';
 import { BundleCard } from '@/components/segmentation/BundleCard';
 
@@ -80,7 +82,11 @@ const PersonaLandingView = ({ landing }: PersonaLandingViewProps) => {
 
   // "All apps for you" — pulled from the canonical app registry, filtered by
   // persona (with show-all fallback when no specific apps match).
-  const personaApps = useMemo(() => getAppsForPersona(landing.slug), [landing.slug]);
+  const focusMode = useFocusMode();
+  const personaApps = useMemo(
+    () => getAppsForPersona(landing.slug).filter((app) => !(focusMode && isFocusHiddenApp(app.id))),
+    [landing.slug, focusMode],
+  );
 
   // P23 keeps its existing canonical identity, but its owner-management entry
   // is not an investor due-diligence journey. Suppress only that irrelevant

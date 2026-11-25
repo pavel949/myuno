@@ -5,13 +5,16 @@
  * that the search modal always returns useful navigational results instantly,
  * in RU + EN, with typo tolerance, across every static dataset.
  */
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it } from 'vitest';
 import { searchStaticIndex, STATIC_INDEX_SIZE } from '../staticIndex';
 import type { ScoreContext } from '../scoring';
+import { isFocusHiddenPath, setFocusModeActive } from '@/lib/focus/focusMode';
 
 const ctx: ScoreContext = { isAuthenticated: false, roles: [], personas: [] };
 
 const paths = (q: string): string[] => searchStaticIndex(q, ctx, 20).map((r) => r.path);
+
+afterEach(() => setFocusModeActive(true));
 
 describe('staticIndex', () => {
   it('indexes a broad catalogue of navigable entities', () => {
@@ -35,7 +38,10 @@ describe('staticIndex', () => {
     expect(paths('скутер').some((p) => p.startsWith('/transport'))).toBe(true);
   });
 
-  it('finds beauty for массаж / spa', () => {
+  // Beauty and cleaning are hidden by focus mode (src/lib/focus/focusMode.ts);
+  // these two guard the underlying index, so they run with focus mode off.
+  it('finds beauty for массаж / spa (focus mode off)', () => {
+    setFocusModeActive(false);
     expect(paths('массаж').some((p) => p.startsWith('/beauty'))).toBe(true);
     expect(paths('spa').some((p) => p.startsWith('/beauty'))).toBe(true);
   });
@@ -54,8 +60,19 @@ describe('staticIndex', () => {
     expect(results.length).toBeGreaterThan(0);
   });
 
-  it('finds a micro-app destination', () => {
+  it('finds a micro-app destination (focus mode off)', () => {
+    setFocusModeActive(false);
     expect(paths('cleaning').some((p) => p.includes('clean'))).toBe(true);
+  });
+
+  it('finds a kept micro-app destination with focus mode on', () => {
+    expect(paths('yacht').some((p) => p.startsWith('/yachts'))).toBe(true);
+  });
+
+  it('never returns focus-hidden apps while focus mode is on', () => {
+    for (const q of ['массаж', 'spa', 'cleaning', 'beauty', 'restaurant', 'pharmacy', 'sim']) {
+      expect(paths(q).filter((p) => isFocusHiddenPath(p)), q).toEqual([]);
+    }
   });
 
   it('tolerates a single-character typo (scoter → scooter)', () => {

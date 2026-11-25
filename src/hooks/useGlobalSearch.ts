@@ -1,4 +1,6 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
+import { useFocusMode } from '@/hooks/useFocusMode';
+import { isFocusHiddenPath } from '@/lib/focus/focusMode';
 import { supabase } from '@/integrations/supabase/client';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { propertyDetailHref, propertySupportsMode } from '@/lib/real-estate/propertyDetailIntent';
@@ -385,5 +387,12 @@ export function useGlobalSearch(query: string, enabled: boolean = true) {
     };
   }, [query, enabled, performSearch, callAiSmartSearch]);
 
-  return { results, isLoading, aiAnswer, aiLoading };
+  // Focus mode: drop hidden micro-apps from every tier (synonyms, DB, static).
+  const focusMode = useFocusMode();
+  const visibleResults = useMemo(
+    () => (focusMode ? results.filter((r) => !isFocusHiddenPath(r.path)) : results),
+    [results, focusMode],
+  );
+
+  return { results: visibleResults, isLoading, aiAnswer, aiLoading };
 }

@@ -10,7 +10,7 @@ import React, { useMemo } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import {
   CLUSTERS,
-  AVAILABLE_SERVICES,
+  getVisibleAvailableServices,
   type ClusterId,
 } from '@/lib/catalog/taxonomy';
 import { useUserPersonas } from '@/hooks/useUserPersonas';
@@ -52,7 +52,7 @@ function NavigatorClusterSectionImpl({
     if (hideAppGrid) return [];
     // Skip services already shown in the page-level "For you" grid.
     const skip = new Set(excludeServiceIds ?? []);
-    const inCluster = AVAILABLE_SERVICES.filter(
+    const inCluster = getVisibleAvailableServices().filter(
       (s) => s.clusterId === clusterId && !skip.has(s.id),
     );
     return rankServices(inCluster, { role, personas: effectivePersonas }).slice(0, 6);

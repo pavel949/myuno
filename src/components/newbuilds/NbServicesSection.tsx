@@ -4,6 +4,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { FileText, Shield, Umbrella, Calculator, ClipboardCheck, Home, ArrowRight } from 'lucide-react';
+import { isHiddenNow } from '@/lib/focus/focusMode';
 
 const SERVICES = [
   { icon: FileText, label: 'Проверка контракта', desc: 'Юридический анализ договора', path: '/legal/contract-analysis' },
@@ -18,7 +19,7 @@ export function NbServicesSection() {
   return (
     <div className="space-y-3">
       <p className="nb-label">СЕРВИСЫ myUNO</p>
-      {SERVICES.map(service => {
+      {SERVICES.filter((service) => !isHiddenNow(service.path)).map(service => {
         const Icon = service.icon;
         return (
           <Link

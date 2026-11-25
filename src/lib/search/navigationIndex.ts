@@ -9,7 +9,9 @@
  *  - APP_ROUTES (src/lib/config/routes.ts) for hrefs
  *  - Master Taxonomy v1.0 surfaces (src/lib/taxonomies/master.ts)
  *  - Each entry MUST resolve to an existing route — no dead links.
+ *  - Focus mode (src/lib/focus/focusMode.ts) hides non-core apps at query time.
  */
+import { isHiddenNow } from '@/lib/focus/focusMode';
 
 export type NavCluster =
   | 'arrive'
@@ -342,6 +344,8 @@ export function searchNavigationIndex(
 
   const hits: NavSearchHit[] = [];
   for (const target of NAVIGATION_INDEX) {
+    // Focus mode: hidden micro-apps never surface in search.
+    if (isHiddenNow(target.path)) continue;
     const s = scoreTarget(target, qNorm, qTokens, ctx);
     if (s > 0) hits.push({ target, score: s });
   }

@@ -21,15 +21,18 @@ import { MCPortalGuard } from '@/components/auth/MCPortalGuard';
 import { OwnerEntryRoute } from '@/components/auth/OwnerEntryRoute';
 import ManageHubGate from '@/components/layout/ManageHubGate';
 
-import { CapitalLayout } from '@/components/capital/CapitalLayout';
-import { AdminLayout } from '@/components/admin/AdminLayout';
+// Role-gated shells + rare core pages are lazy (see ./lazyShells); each use
+// is wrapped in <Suspense> so public visitors never download them.
+import {
+  CapitalLayout, AdminLayout, MCLayout, VendorLayout, GuestLayout,
+  Auth, OAuthConsent, Unsubscribe,
+} from './lazyShells';
 
-import { MCLayout } from '@/components/mc/MCLayout';
-import { VendorLayout } from '@/components/vendor/VendorLayout';
-import { GuestLayout } from '@/components/guest/GuestLayout';
-import { StaffLayout } from '@/components/staff/StaffLayout';
+
 import { useNavigationDirection } from '@/hooks/useNavigationDirection';
 import { APP_ROUTES } from '@/lib/config/routes';
+import { useFocusModeFlag } from '@/hooks/useFocusMode';
+import { FOCUS_REDIRECT_TARGET, isFocusHiddenPath, setFocusModeActive } from '@/lib/focus/focusMode';
 import { NewbuildProjectToOffplanRedirect, NewbuildDeveloperToHubRedirect } from '@/components/routing/NewbuildLegacyRedirects';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 import ForBusinessSkeleton from '@/components/landings/ForBusinessSkeleton';
@@ -53,14 +56,14 @@ const LifeFlowAlias = () => {
 
 // PropertyHubIndex moved to ./routes/propertyHubRoutes.tsx
 
-// Core pages — Auth/NotFound stay eager (small, on critical paths).
+// Core pages — NotFound stays eager (tiny fallback). Auth (~940 lines),
+// OAuthConsent and Unsubscribe are lazy (2026-11-25): most visitors never
+// open them, so they must not ship in the entry chunk (lazy, ./lazyShells).
+// They render through <LazyPage> (PageTransition + Suspense).
 // Index and WelcomeLanding are lazy: home is by far the heaviest route
 // (~30 home components + persona logic) and we don't want to block first
 // paint on /auth, /property/:id, deep links, etc.
-import Auth from '@/pages/Auth';
-import OAuthConsent from '@/pages/OAuthConsent';
 import NotFound from '@/pages/NotFound';
-import Unsubscribe from '@/pages/Unsubscribe';
 import { useAuth } from '@/contexts/AuthContext';
 
 const Index = React.lazy(() => import('@/pages/Index'));
@@ -135,32 +138,38 @@ const AdminRouteLayout = () => (
     {/* ActiveCompanyProvider lets admins act inside an MC context (house MC) —
         powers the CompanySwitcher and the lead→deal bridge target company. */}
     <ActiveCompanyProvider>
-      <AdminLayout>
-        <Suspense fallback={<LoadingState scope="content" />}>
-          <Outlet />
-        </Suspense>
-      </AdminLayout>
+      <Suspense fallback={<LoadingState />}>
+        <AdminLayout>
+          <Suspense fallback={<LoadingState scope="content" />}>
+            <Outlet />
+          </Suspense>
+        </AdminLayout>
+      </Suspense>
     </ActiveCompanyProvider>
   </AdminGuard>
 );
 
 const VendorRouteLayout = () => (
   <VendorGuard>
-    <VendorLayout>
-      <Suspense fallback={<LoadingState scope="content" />}>
-        <Outlet />
-      </Suspense>
-    </VendorLayout>
+    <Suspense fallback={<LoadingState />}>
+      <VendorLayout>
+        <Suspense fallback={<LoadingState scope="content" />}>
+          <Outlet />
+        </Suspense>
+      </VendorLayout>
+    </Suspense>
   </VendorGuard>
 );
 
 const GuestRouteLayout = () => (
   <AuthGuard>
-    <GuestLayout>
-      <Suspense fallback={<LoadingState scope="content" />}>
-        <Outlet />
-      </Suspense>
-    </GuestLayout>
+    <Suspense fallback={<LoadingState />}>
+      <GuestLayout>
+        <Suspense fallback={<LoadingState scope="content" />}>
+          <Outlet />
+        </Suspense>
+      </GuestLayout>
+    </Suspense>
   </AuthGuard>
 );
 
@@ -177,10 +186,10 @@ const safeImport = (loader: () => Promise<unknown>) => {
 const prefetchRoutes = () => {
   if (typeof window === 'undefined') return;
   const run = () => {
+    // Focus mode (2026-11-25): warm only kept wedges; restaurants and beauty
+    // are hidden, so prefetching them wasted bandwidth on every visit.
     safeImport(() => import('@/pages/property/PropertySearchPage'));
-    safeImport(() => import('@/pages/restaurants/RestaurantsIndex'));
     safeImport(() => import('@/pages/experiences/ExperiencesIndex'));
-    safeImport(() => import('@/pages/beauty/BeautySpaIndex'));
   };
   if ('requestIdleCallback' in window) {
     (window as Window & { requestIdleCallback: (cb: () => void) => void }).requestIdleCallback(run);
@@ -192,8 +201,18 @@ const prefetchRoutes = () => {
 export const AnimatedRoutes: React.FC = () => {
   const location = useLocation();
   useNavigationDirection();
+  // Sync point: read the flag once here and publish it to useFocusMode readers.
+  const focusMode = useFocusModeFlag();
 
   React.useEffect(() => { prefetchRoutes(); }, []);
+  // Mirror the flag for non-React callers (search indexes, configs).
+  React.useEffect(() => { setFocusModeActive(focusMode); }, [focusMode]);
+
+  // Focus mode: hidden micro-apps redirect to the services hub (concierge
+  // fallback). Existing-booking pages are exempt — see focusMode.ts.
+  if (focusMode && isFocusHiddenPath(location.pathname)) {
+    return <Navigate to={FOCUS_REDIRECT_TARGET} replace />;
+  }
 
   return (
     <>
@@ -220,17 +239,17 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path="/onboarding/map" element={<Navigate to="/start" replace />} />
         <Route path="/start" element={<LazyPage><Pages.StartOnboardingV2 /></LazyPage>} />
         <Route path="/start/v2" element={<Navigate to="/start" replace />} />
-        <Route path={APP_ROUTES.AUTH} element={<PageTransition><Auth /></PageTransition>} />
+        <Route path={APP_ROUTES.AUTH} element={<LazyPage><Auth /></LazyPage>} />
         {/* OAuth providers may return to callback-style paths; render Auth instead of 404 */}
-        <Route path="/auth/callback" element={<PageTransition><Auth /></PageTransition>} />
-        <Route path="/auth/callback/*" element={<PageTransition><Auth /></PageTransition>} />
-        <Route path="/oauth/callback" element={<PageTransition><Auth /></PageTransition>} />
-        <Route path="/oauth/callback/*" element={<PageTransition><Auth /></PageTransition>} />
+        <Route path="/auth/callback" element={<LazyPage><Auth /></LazyPage>} />
+        <Route path="/auth/callback/*" element={<LazyPage><Auth /></LazyPage>} />
+        <Route path="/oauth/callback" element={<LazyPage><Auth /></LazyPage>} />
+        <Route path="/oauth/callback/*" element={<LazyPage><Auth /></LazyPage>} />
         <Route path={APP_ROUTES.AUTH_ACCOUNT_TYPE} element={<LazyPage><Pages.AccountTypeSelection /></LazyPage>} />
         <Route path={APP_ROUTES.AUTH_FORGOT_PASSWORD} element={<LazyPage><Pages.ForgotPassword /></LazyPage>} />
         <Route path={APP_ROUTES.AUTH_RESET_PASSWORD} element={<LazyPage><Pages.ResetPassword /></LazyPage>} />
         <Route path="/auth/setup-password" element={<LazyPage><Pages.SetupPassword /></LazyPage>} />
-        <Route path="/.lovable/oauth/consent" element={<PageTransition><OAuthConsent /></PageTransition>} />
+        <Route path="/.lovable/oauth/consent" element={<LazyPage><OAuthConsent /></LazyPage>} />
         
         {/* ── User ── */}
         {/* Intent-first discovery: /discover asks what the visitor needs;
@@ -758,12 +777,12 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path="/mc/register" element={<LazyPage><AuthGuard><Pages.MCRegistrationPage /></AuthGuard></LazyPage>} />
         
         {/* ── MC (Management Company) Workspace — child routes extracted to ./routes/mcRoutes ── */}
-        <Route path="/mc" element={<ActiveCompanyProvider><MCGuard><MCLayout /></MCGuard></ActiveCompanyProvider>}>
+        <Route path="/mc" element={<ActiveCompanyProvider><MCGuard><Suspense fallback={<LoadingState />}><MCLayout /></Suspense></MCGuard></ActiveCompanyProvider>}>
           {mcRoutes}
         </Route>
 
         {/* ── Capital CRM ── */}
-        <Route path="/capital" element={<InvestorGuard><CapitalLayout /></InvestorGuard>}>
+        <Route path="/capital" element={<InvestorGuard><Suspense fallback={<LoadingState />}><CapitalLayout /></Suspense></InvestorGuard>}>
           <Route index element={<LazyPage><Pages.CapitalDashboard /></LazyPage>} />
           <Route path="contacts" element={<LazyPage><Pages.CapitalContacts /></LazyPage>} />
           <Route path="contacts/:id" element={<LazyPage><Pages.CapitalContactDetail /></LazyPage>} />
@@ -856,7 +875,7 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path="/area/:slug" element={<LazyPage><Pages.AreaLandingPage /></LazyPage>} />
 
         {/* ── Email unsubscribe (token-based) ── */}
-        <Route path="/unsubscribe" element={<PageTransition><Unsubscribe /></PageTransition>} />
+        <Route path="/unsubscribe" element={<LazyPage><Unsubscribe /></LazyPage>} />
 
         {/* ── Catch-all ── */}
         <Route path="*" element={<PageTransition><NotFound /></PageTransition>} />

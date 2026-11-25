@@ -1,4 +1,5 @@
 import { requireServiceCaller } from "./internal-secret.ts";
+import { withRateLimit } from "./rate-limit.ts";
 /**
  * Shared notification utilities for Edge Functions.
  *
@@ -143,7 +144,11 @@ export type NotifyHandler = (body: Record<string, unknown>) => Promise<{ success
 export function createNotifyHandler(
   name: string,
   handler: NotifyHandler,
-  opts: { serviceOnly?: boolean } = {},
+  opts: {
+    serviceOnly?: boolean;
+    /** Per-client throttle for browser-reachable notifiers (admin-only alerts). */
+    rateLimit?: { maxRequests: number; windowSeconds: number };
+  } = {},
 ) {
   return async (req: Request): Promise<Response> => {
     if (req.method === "OPTIONS") {
@@ -152,6 +157,10 @@ export function createNotifyHandler(
     if (opts.serviceOnly) {
       const denied = await requireServiceCaller(req, NOTIFY_CORS);
       if (denied) return denied;
+    }
+    if (opts.rateLimit) {
+      const limited = await withRateLimit(req, name, opts.rateLimit, NOTIFY_CORS);
+      if (limited) return limited;
     }
     try {
       const body = await req.json();

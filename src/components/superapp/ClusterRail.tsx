@@ -4,7 +4,7 @@
  */
 import React, { useMemo } from 'react';
 import {
-  AVAILABLE_SERVICES,
+  getVisibleAvailableServices,
   getClusterById,
   type ClusterId,
 } from '@/lib/catalog/taxonomy';
@@ -28,7 +28,7 @@ export const ClusterRail: React.FC<ClusterRailProps> = ({ clusterId, limit = 8 }
   const cluster = getClusterById(clusterId);
 
   const services = useMemo(() => {
-    const inCluster = AVAILABLE_SERVICES.filter((s) => s.clusterId === clusterId);
+    const inCluster = getVisibleAvailableServices().filter((s) => s.clusterId === clusterId);
     return rankServices(inCluster, { role, personas: effectivePersonas }).slice(0, limit);
   }, [clusterId, role, effectivePersonas, limit]);
 
@@ -37,7 +37,7 @@ export const ClusterRail: React.FC<ClusterRailProps> = ({ clusterId, limit = 8 }
   return (
     <IconGrid
       title={pickLang(language, { ru: cluster.labelRu, en: cluster.labelEn, th: cluster.labelTh ?? cluster.labelEn })}
-      count={AVAILABLE_SERVICES.filter((s) => s.clusterId === clusterId).length}
+      count={getVisibleAvailableServices().filter((s) => s.clusterId === clusterId).length}
       seeAllHref={cluster.homeRoute}
       services={services}
     />
