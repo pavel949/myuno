@@ -50,7 +50,8 @@ All edge functions are in `supabase/functions/`. Each function is a Deno-based s
 |----------|-------------|---------|
 | `notify-admin-order` | Notify admin of new orders | `RESEND_API_KEY` |
 | `notify-admin-property-submission` | New property submission alert | `RESEND_API_KEY` |
-| `notify-fasttrack-booking` | Fast-track airport booking alert | `RESEND_API_KEY` |
+| `notify-fasttrack-booking` | Compatibility endpoint; checked request key required | `RESEND_API_KEY` |
+| `submit-fasttrack-request` | Versioned atomic Fast Track request and receipt recovery (no legacy fallback) | `RESEND_API_KEY` |
 | `notify-lead-whatsapp` | WhatsApp lead notification | — |
 | `notify-new-signup` | New user registration alert | `RESEND_API_KEY` |
 | `notify-order-status-change` | Order status update notification | `RESEND_API_KEY` |

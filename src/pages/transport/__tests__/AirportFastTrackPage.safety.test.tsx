@@ -23,7 +23,7 @@ function mount(direction='arrival',date='2099-12-01',passport:unknown='TEST12345
 beforeEach(()=>{sessionStorage.clear();f.user={id:'synthetic-user'};f.invoke.mockReset().mockResolvedValue({data:{success:true,booking_id:'synthetic-booking'},error:null});f.toast.mockReset();vi.spyOn(console,'error').mockImplementation(()=>{});});
 afterEach(()=>{cleanup();vi.useRealTimers();vi.restoreAllMocks();});
 describe('Fast Track review and submission with synthetic boundary',()=>{
- it.each(['arrival','departure'])('omits passports in review but sends the intact passport for %s',async direction=>{mount(direction);await screen.findByText('Synthetic Guest');expect(screen.queryByText(/TEST123456/)).toBeNull();fireEvent.click(screen.getByRole('button',{name:'Send request'}));await waitFor(()=>expect(f.invoke).toHaveBeenCalledTimes(1));expect(f.invoke.mock.calls[0][0]).toBe('notify-fasttrack-booking');expect(f.invoke.mock.calls[0][1].body).toMatchObject({direction,passengers:[{passport_number:'TEST123456'}]});await waitFor(()=>expect(sessionStorage.getItem('booking_draft:fasttrack_airport')).toBeNull());});
+ it.each(['arrival','departure'])('omits passports in review but sends the intact passport for %s',async direction=>{mount(direction);await screen.findByText('Synthetic Guest');expect(screen.queryByText(/TEST123456/)).toBeNull();fireEvent.click(screen.getByRole('button',{name:'Send request'}));await waitFor(()=>expect(f.invoke).toHaveBeenCalledTimes(1));expect(f.invoke.mock.calls[0][0]).toBe('submit-fasttrack-request');expect(f.invoke.mock.calls[0][1].body).toMatchObject({direction,passengers:[{passport_number:'TEST123456'}]});await waitFor(()=>expect(sessionStorage.getItem('booking_draft:fasttrack_airport')).toBeNull());});
  it('clears stale flight errors when the values are corrected', async () => {
   mount('arrival', '', 'TEST123456', 'service');
   const flight = await screen.findByLabelText('Flight number');
@@ -53,7 +53,7 @@ it('keeps a stable request key through a lost receipt and removes it only after 
  const first=f.invoke.mock.calls[0][1].body.request_key;
  expect(first).toMatch(/^[0-9a-f-]{36}$/i);
  expect(sessionStorage.getItem('myuno:fasttrack-pending:v1:synthetic-user')).toBe(first);
- fireEvent.click(screen.getByRole('button',{name:'Send request'}));
+ fireEvent.click(await screen.findByRole('button',{name:'Retry same request'}));
  await waitFor(()=>expect(f.invoke).toHaveBeenCalledTimes(2));
  expect(f.invoke.mock.calls[1][1].body.request_key).toBe(first);
  await waitFor(()=>expect(sessionStorage.getItem('myuno:fasttrack-pending:v1:synthetic-user')).toBeNull());

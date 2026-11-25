@@ -7,7 +7,7 @@ import assert from 'node:assert/strict';
 const require = createRequire(import.meta.url);
 const dir = '/tmp/fasttrack/handlers'; await mkdir(dir, { recursive: true });
 const sdk = 'export function createClient(u,k,o){return globalThis.__sdk(k,o)}; export const corsHeaders={"Access-Control-Allow-Origin":"*"};';
-const result = await build({ entryPoints: [resolve('supabase/functions/notify-fasttrack-booking/index.ts')], bundle: true, platform: 'node', format: 'cjs', write: false, plugins: [{
+const result = await build({ entryPoints: [resolve('supabase/functions/submit-fasttrack-request/index.ts')], bundle: true, platform: 'node', format: 'cjs', write: false, plugins: [{
   name: 'synthetic', setup(b) {
     b.onResolve({ filter: /_shared\/(supabase|admin-config)\.ts$/ }, a => ({ path: a.path, namespace: 'stub' }));
     b.onResolve({ filter: /_shared\/notify-utils\.ts$/ }, a => ({ path: a.path, namespace: 'stub' }));
