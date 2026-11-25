@@ -117,6 +117,9 @@ BEGIN
     RETURN json_build_object('success', false, 'error', 'Two reviewers must approve before publishing', 'approvals', v_count);
   END IF;
 
+  -- Transaction-local marker checked by the publish guard trigger below.
+  PERFORM set_config('hq.clearview_publish', 'on', true);
+
   UPDATE public.due_diligence_reports
   SET is_published = true, reviewed_by = v_uid, reviewed_at = now(), updated_at = now()
   WHERE id = _report_id;
@@ -132,6 +135,30 @@ BEGIN
   RETURN json_build_object('success', true, 'approvals', v_count);
 END;
 $$;
+
+-- Publish guard: the pre-existing "Admins manage DD reports" FOR ALL policy
+-- would otherwise let a single admin set is_published directly and skip the
+-- two-person rule. Unpublishing stays direct (it reduces exposure).
+CREATE OR REPLACE FUNCTION public.hq_guard_clearview_publish()
+RETURNS TRIGGER
+LANGUAGE plpgsql
+SET search_path = public
+AS $$
+BEGIN
+  IF NEW.is_published IS TRUE
+     AND (TG_OP = 'INSERT' OR OLD.is_published IS DISTINCT FROM TRUE)
+     AND coalesce(current_setting('hq.clearview_publish', true), '') <> 'on' THEN
+    RAISE EXCEPTION 'ClearView reports are published only through hq_publish_clearview_report (two reviewers)'
+      USING ERRCODE = '42501';
+  END IF;
+  RETURN NEW;
+END;
+$$;
+
+DROP TRIGGER IF EXISTS hq_guard_clearview_publish ON public.due_diligence_reports;
+CREATE TRIGGER hq_guard_clearview_publish
+  BEFORE INSERT OR UPDATE OF is_published ON public.due_diligence_reports
+  FOR EACH ROW EXECUTE FUNCTION public.hq_guard_clearview_publish();
 
 REVOKE ALL ON FUNCTION public.hq_record_approval(TEXT, TEXT, TEXT) FROM PUBLIC, anon;
 REVOKE ALL ON FUNCTION public.hq_publish_clearview_report(UUID) FROM PUBLIC, anon;
