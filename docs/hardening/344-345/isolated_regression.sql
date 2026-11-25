@@ -94,15 +94,22 @@ SELECT public.assert_true((SELECT count(*) FROM public.legal_services)=4,'admin 
 SELECT public.assert_true((SELECT count(*) FROM storage.objects WHERE bucket_id='property-images')=3,'admin sees ownerless too');
 RESET ROLE;
 -- Separate staged intake model, synthetic data only. A real bucket flag is changed via Storage API, not SQL.
-\ir intake-private.STAGED-NOT-IN-JOURNAL.sql
+CREATE TABLE public.ai_intake_sessions(id int PRIMARY KEY, admin_id uuid NOT NULL);
+ALTER TABLE public.ai_intake_sessions ENABLE ROW LEVEL SECURITY;
+CREATE POLICY synthetic_session_broad ON public.ai_intake_sessions FOR ALL USING(true) WITH CHECK(true);
+GRANT SELECT,INSERT,UPDATE,DELETE ON public.ai_intake_sessions TO authenticated;
+INSERT INTO public.ai_intake_sessions VALUES(1,'00000000-0000-0000-0000-000000000003'),(2,'00000000-0000-0000-0000-000000000004');
 UPDATE storage.buckets SET public=false WHERE id='intake-uploads';
+\ir intake-private.STAGED-NOT-IN-JOURNAL.sql
 SET LOCAL ROLE authenticated;
 SELECT set_config('request.jwt.claim.sub','00000000-0000-0000-0000-000000000003',true);
 INSERT INTO storage.objects VALUES('intake-uploads','00000000-0000-0000-0000-000000000003/object','00000000-0000-0000-0000-000000000003');
 SELECT public.assert_true((SELECT count(*) FROM storage.objects WHERE bucket_id='intake-uploads')=1,'intake own new key only');
+SELECT public.assert_true((SELECT array_agg(id) FROM public.ai_intake_sessions)=ARRAY[1],'admin reads only own intake sessions');
 DO $$BEGIN BEGIN INSERT INTO storage.objects VALUES('intake-uploads','wrong-prefix/file','00000000-0000-0000-0000-000000000003'); RAISE EXCEPTION 'unexpected insert success' USING ERRCODE='XX000'; EXCEPTION WHEN insufficient_privilege THEN NULL; END; END$$;
 SELECT set_config('request.jwt.claim.sub','00000000-0000-0000-0000-000000000001',true);
 SELECT public.assert_true((SELECT count(*) FROM storage.objects WHERE bucket_id='intake-uploads')=0,'nonadmin cannot read intake');
+SELECT public.assert_true((SELECT count(*) FROM public.ai_intake_sessions)=0,'nonadmin cannot read sessions');
 DO $$BEGIN BEGIN INSERT INTO storage.objects VALUES('intake-uploads','00000000-0000-0000-0000-000000000001/file','00000000-0000-0000-0000-000000000001'); RAISE EXCEPTION 'unexpected insert success' USING ERRCODE='XX000'; EXCEPTION WHEN insufficient_privilege THEN NULL; END; END$$;
 RESET ROLE;
 SET LOCAL ROLE anon;

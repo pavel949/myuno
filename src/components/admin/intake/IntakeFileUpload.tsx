@@ -31,18 +31,11 @@ interface IntakeFileUploadProps {
 }
 
 const ACCEPTED_TYPES = {
-  image: ['image/jpeg', 'image/png', 'image/webp', 'image/gif'],
-  pdf: ['application/pdf'],
-  excel: [
-    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-    'application/vnd.ms-excel',
-  ],
+  image: ['image/jpeg', 'image/png', 'image/webp'],
+  pdf: [],
+  excel: [],
   csv: ['text/csv', 'application/csv'],
-  document: [
-    'application/msword',
-    'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-    'text/plain',
-  ],
+  document: ['text/plain'],
 };
 
 const ALL_ACCEPTED = Object.values(ACCEPTED_TYPES).flat();
@@ -69,8 +62,8 @@ export function IntakeFileUpload({
   files,
   onFilesChange,
   disabled,
-  maxFiles = 20,
-  maxSizeMB = 20,
+  maxFiles = 5,
+  maxSizeMB = 5,
 }: IntakeFileUploadProps) {
   const { language } = useLanguage();
   const isRu = language === 'ru';
@@ -197,8 +190,8 @@ export function IntakeFileUpload({
         </p>
         <p className="text-sm text-muted-foreground mt-1">
           {isRu 
-            ? `Изображения, PDF, Excel, CSV, документы (макс. ${maxSizeMB}MB)` 
-            : `Images, PDF, Excel, CSV, documents (max ${maxSizeMB}MB)`
+            ? `JPEG, PNG, WebP, TXT, CSV (до ${maxSizeMB} МБ на файл, 12 МБ всего)` 
+            : `JPEG, PNG, WebP, TXT, CSV (max ${maxSizeMB} MB each, 12 MB total)`
           }
         </p>
       </div>

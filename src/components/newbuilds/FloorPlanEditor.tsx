@@ -122,8 +122,8 @@ function AddFloorModal({
     setUploading(true);
     try {
       const ext = file.name.split('.').pop();
-      const path = `developer-uploads/floorplans/${Date.now()}.${ext}`;
-      const { error } = await supabase.storage.from('property-images').upload(path, file, { upsert: true });
+      const path = `developer-uploads/floorplans/${crypto.randomUUID()}.${ext}`;
+      const { error } = await supabase.storage.from('property-images').upload(path, file, { upsert: false });
       if (error) throw error;
       const { data: pub } = supabase.storage.from('property-images').getPublicUrl(path);
       setImageUrl(pub.publicUrl);
