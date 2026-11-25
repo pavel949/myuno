@@ -40304,7 +40304,7 @@
     },
     {
       "file": "src/pages/property/PropertyLanding.tsx",
-      "sha256": "b803a000f8025592f3bd0a8065a7046943cdb22059354a69427713cf8e9d0218",
+      "sha256": "befdd44f26f1f66789cc56b458f3988fe9aa6ec111e8b25438ab4eb8b3f22131",
       "directRouteDeclarations": [
         {
           "id": "2492a5f81192388c",
@@ -40321,7 +40321,7 @@
           "source": "@/components/ui/button",
           "instances": 1,
           "lines": [
-            165
+            166
           ]
         }
       ]
@@ -40388,7 +40388,7 @@
     },
     {
       "file": "src/pages/property/PropertySearchPage.tsx",
-      "sha256": "5d736e1259081ecefc3e0be4b627c32224c09b3354b53e99718967c6944f10c4",
+      "sha256": "156948b4a5fbb7fc3712a420b50ef5768f9781817abcecbd6892861783090783",
       "directRouteDeclarations": [
         {
           "id": "2394e6ffdd06a39f",
@@ -40405,12 +40405,12 @@
           "source": "@/components/ui/button",
           "instances": 6,
           "lines": [
-            387,
-            399,
-            410,
-            480,
-            490,
-            497
+            388,
+            400,
+            411,
+            481,
+            491,
+            498
           ]
         }
       ]
