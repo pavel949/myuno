@@ -41,7 +41,7 @@ export function WelcomeGosuslugiQuickAccess() {
               key={row.label}
               to={row.href}
               className={cn(
-                'min-w-[140px] shrink-0 rounded-none border border-border bg-card px-4 py-3 transition-colors',
+                'min-w-[140px] shrink-0 rounded-md border border-border bg-card px-4 py-3 transition-colors',
                 'hover:bg-card/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring md:min-w-0',
               )}
             >

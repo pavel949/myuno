@@ -25,7 +25,7 @@ export function ManagementCompanyCard({ company, isRu }: ManagementCompanyCardPr
   return (
     <Link
       to={APP_ROUTES.MANAGEMENT_COMPANY(company.slug)}
-      className="group flex items-start gap-3 rounded-none border border-border/60 bg-card p-4 shadow-sm transition-all hover:border-primary/40 hover:shadow-md"
+      className="group flex items-start gap-3 rounded-md border border-border/60 bg-card p-4 shadow-sm transition-all hover:border-primary/40 hover:shadow-md"
     >
       <div className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-none border bg-muted">
         {company.logo ? (

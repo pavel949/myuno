@@ -27,7 +27,7 @@ export default function ClearViewLanding() {
       </header>
 
       <section className="px-4 py-5">
-        <div className="rounded-none border border-border bg-card p-4">
+        <div className="rounded-md border border-border bg-card p-4">
           <ShieldCheck className="w-5 h-5 text-foreground mb-2" />
           <h2 className="font-display text-[18px] font-semibold text-foreground tracking-[-0.01em]">
             {isRu ? 'Независимый рейтинг проекта' : 'Independent project rating'}

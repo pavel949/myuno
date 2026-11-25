@@ -76,7 +76,7 @@ function PriceLevelSelect({ value, onChange, descriptions }: { value: string | n
           title={descriptions?.[level.id]}
           onClick={() => onChange(value === level.id ? null : level.id)}
           className={cn(
-            "min-h-11 px-2 py-2 rounded-none text-sm font-medium border transition-colors",
+            "min-h-11 px-2 py-2 rounded-sm text-sm font-medium border transition-colors",
             value === level.id
               ? "bg-primary text-primary-foreground border-primary"
               : "bg-card border-border text-muted-foreground hover:border-primary/50"

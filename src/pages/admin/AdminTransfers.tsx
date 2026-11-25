@@ -272,7 +272,7 @@ export default function AdminTransfers() {
           { label: isRu ? 'К получению с клиентов' : 'Unpaid by customers', value: totals.unpaidByCustomer, tone: 'text-warning' },
           { label: isRu ? 'К выплате Klod' : 'Due to Klod', value: totals.dueToKlod, tone: 'text-primary' },
         ].map((k) => (
-          <div key={k.label} className="p-3 border border-border/50 bg-card rounded-none">
+          <div key={k.label} className="p-3 border border-border/50 bg-card rounded-md">
             <div className="text-[10.5px] uppercase tracking-wide text-muted-foreground">{k.label}</div>
             <div className={`text-lg font-bold mt-1 ${k.tone}`}>{fmtMoney(k.value)}</div>
           </div>
@@ -319,7 +319,7 @@ export default function AdminTransfers() {
             const isOpen = expanded.has(order.id);
 
             return (
-              <div key={order.id} className="p-4 rounded-none border border-border/50 bg-card space-y-3">
+              <div key={order.id} className="p-4 rounded-md border border-border/50 bg-card space-y-3">
                 <div className="flex items-center justify-between flex-wrap gap-2">
                   <div className="flex items-center gap-2">
                     <span className="font-semibold text-sm">#{order.order_number}</span>

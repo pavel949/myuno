@@ -372,7 +372,7 @@ export default function YachtBooking() {
         </motion.div>
 
         {/* Yacht Summary */}
-        <div className="flex gap-4 p-4 bg-card rounded-none border mb-6">
+        <div className="flex gap-4 p-4 bg-card rounded-md border mb-6">
           <img
             src={yacht.cover_image || '/placeholder.svg'}
             alt={yachtName}

@@ -54,7 +54,7 @@ export function ClusterGridCards({ personas }: ClusterGridCardsProps) {
             aria-label={getClusterHeaderLabel(c, language)}
             type="button"
             onClick={() => navigate(c.homeRoute)}
-            className="relative flex min-h-[86px] flex-col justify-between rounded-none border border-border bg-card p-3.5 pl-4 text-left transition-colors hover:border-primary/40 hover:bg-primary/5"
+            className="relative flex min-h-[86px] flex-col justify-between rounded-md border border-border bg-card p-3.5 pl-4 text-left transition-colors hover:border-primary/40 hover:bg-primary/5"
           >
             <span
               className="absolute bottom-3.5 left-0 top-3.5 w-0.5 rounded-none"

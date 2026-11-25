@@ -82,7 +82,7 @@ export default function DevelopersIndex() {
                   if (e.target === e.currentTarget && !e.repeat && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); goToDetail(); }
                 }}
                 className={cn(
-                  "rounded-none border bg-card p-4 cursor-pointer",
+                  "rounded-md border bg-card p-4 cursor-pointer",
                   "hover:border-primary/50 hover:shadow-md transition-all",
                   "focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                 )}

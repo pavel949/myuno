@@ -105,7 +105,7 @@ export default function KnowledgeHub() {
         <section className="mb-8">
           <Link
             to={APP_ROUTES.RELOCATION_GUIDES}
-            className="w-full text-left rounded-none border border-border bg-card p-5 hover:border-primary/50 transition-colors flex items-center gap-4"
+            className="w-full text-left rounded-md border border-border bg-card p-5 hover:border-primary/50 transition-colors flex items-center gap-4"
           >
             <div className="h-12 w-12 rounded-none bg-primary/10 flex items-center justify-center shrink-0">
               <Globe className="h-6 w-6 text-primary" />

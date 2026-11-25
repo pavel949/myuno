@@ -264,7 +264,7 @@ export function VendorOutreachPanel() {
               {log.map((entry) => (
                 <div
                   key={entry.id}
-                  className="flex items-center gap-3 p-3 rounded-none border bg-card hover:bg-muted/50 transition-colors"
+                  className="flex items-center gap-3 p-3 rounded-md border bg-card hover:bg-muted/50 transition-colors"
                 >
                   {entry.channel === 'whatsapp' ? (
                     <MessageSquare className="h-4 w-4 text-success flex-shrink-0" />

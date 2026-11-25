@@ -345,7 +345,7 @@ export const UnifiedChatFAB: React.FC<{ className?: string }> = ({ className }) 
                 <div className="grid grid-cols-3 gap-2">
                   <button
                     onClick={() => openExternal(getWhatsAppUrl(isRu ? 'Здравствуйте, myUNO!' : 'Hello myUNO!'))}
-                    className="flex flex-col items-center justify-center gap-2 p-3 rounded-none border border-border bg-card hover:border-foreground/40 transition-colors"
+                    className="flex flex-col items-center justify-center gap-2 p-3 rounded-md border border-border bg-card hover:border-foreground/40 transition-colors"
                   >
                     <div className="w-10 h-10 rounded-full bg-[#25D366] flex items-center justify-center">
                       <WhatsAppIcon className="w-5 h-5 text-white" />
@@ -354,7 +354,7 @@ export const UnifiedChatFAB: React.FC<{ className?: string }> = ({ className }) 
                   </button>
                   <button
                     onClick={() => openExternal(COMPANY_CONTACTS.telegram.support)}
-                    className="flex flex-col items-center justify-center gap-2 p-3 rounded-none border border-border bg-card hover:border-foreground/40 transition-colors"
+                    className="flex flex-col items-center justify-center gap-2 p-3 rounded-md border border-border bg-card hover:border-foreground/40 transition-colors"
                   >
                     <div className="w-10 h-10 rounded-full bg-[#229ED9] flex items-center justify-center">
                       <TelegramIcon className="w-5 h-5 text-white" />
@@ -364,7 +364,7 @@ export const UnifiedChatFAB: React.FC<{ className?: string }> = ({ className }) 
                   {showLine && (
                     <button
                       onClick={() => openExternal(getLineUrl())}
-                      className="flex flex-col items-center justify-center gap-2 p-3 rounded-none border border-border bg-card hover:border-foreground/40 transition-colors"
+                      className="flex flex-col items-center justify-center gap-2 p-3 rounded-md border border-border bg-card hover:border-foreground/40 transition-colors"
                     >
                       <div className="w-10 h-10 rounded-full bg-[#06C755] flex items-center justify-center">
                         <LineIcon className="w-5 h-5 text-white" />
@@ -378,7 +378,7 @@ export const UnifiedChatFAB: React.FC<{ className?: string }> = ({ className }) 
                 <div className="grid grid-cols-2 gap-2 pt-2">
                   <a
                     href={getTelLink()}
-                    className="flex items-center gap-2 p-3 rounded-none border border-border bg-card hover:border-foreground/40 transition-colors"
+                    className="flex items-center gap-2 p-3 rounded-md border border-border bg-card hover:border-foreground/40 transition-colors"
                   >
                     <Phone className="w-4 h-4 text-muted-foreground shrink-0" />
                     <div className="min-w-0">
@@ -388,7 +388,7 @@ export const UnifiedChatFAB: React.FC<{ className?: string }> = ({ className }) 
                   </a>
                   <a
                     href={getMailtoLink('support')}
-                    className="flex items-center gap-2 p-3 rounded-none border border-border bg-card hover:border-foreground/40 transition-colors"
+                    className="flex items-center gap-2 p-3 rounded-md border border-border bg-card hover:border-foreground/40 transition-colors"
                   >
                     <Mail className="w-4 h-4 text-muted-foreground shrink-0" />
                     <div className="min-w-0">

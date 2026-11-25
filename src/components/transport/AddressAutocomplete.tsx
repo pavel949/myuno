@@ -414,7 +414,7 @@ export function AddressAutocomplete({ id, value, onChange, placeholder, classNam
           <button
             type="button"
             title={isRu ? 'Открыть на карте' : 'Open on map'}
-            className="h-11 w-11 shrink-0 rounded-none border border-border bg-background flex items-center justify-center hover:bg-accent transition-colors"
+            className="h-11 w-11 shrink-0 rounded-sm border border-border bg-background flex items-center justify-center hover:bg-accent transition-colors"
             onClick={() => {
               const mapQuery = selectedSuggestion?.lat != null && selectedSuggestion?.lng != null
                 ? `${selectedSuggestion.lat},${selectedSuggestion.lng}`

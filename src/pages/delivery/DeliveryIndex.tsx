@@ -168,7 +168,7 @@ export default function DeliveryIndex() {
               <button
                 key={type.id}
                 onClick={() => navigate(`/delivery?type=${type.id}`)}
-                className="relative bg-card rounded-none border border-border/50 p-4 text-left hover:border-primary/30 transition-all [box-shadow:var(--shadow-elevation-1)]"
+                className="relative bg-card rounded-md border border-border/50 p-4 text-left hover:border-primary/30 transition-all [box-shadow:var(--shadow-elevation-1)]"
               >
                 {type.isPopular && (
                   <Badge className="absolute -top-2 -right-2 bg-warning text-warning-foreground text-[10px]">
@@ -231,7 +231,7 @@ export default function DeliveryIndex() {
             {recentOrders.map((order) => (
               <div
                 key={order.id}
-                className="bg-card rounded-none border border-border/50 p-4 [box-shadow:var(--shadow-elevation-1)]"
+                className="bg-card rounded-md border border-border/50 p-4 [box-shadow:var(--shadow-elevation-1)]"
               >
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex-1 min-w-0">

@@ -115,7 +115,7 @@ export default function InvestmentRealEstateZone() {
       <MiniAppLayout title={isRu ? 'Недвижимость' : 'Real estate'} showSearch={false}>
         <div className="space-y-6 pb-10">
           {/* Hero */}
-          <div className="rounded-none border border-border bg-card p-5 space-y-2">
+          <div className="rounded-md border border-border bg-card p-5 space-y-2">
             <div className="flex items-center gap-3">
               <div className="w-11 h-11 rounded-none bg-success/10 flex items-center justify-center shrink-0">
                 <Building2 className="h-5 w-5 text-success" />

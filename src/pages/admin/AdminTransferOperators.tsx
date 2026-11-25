@@ -492,19 +492,19 @@ export default function AdminTransferOperators() {
       />
 
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-5">
-        <div className="p-3 border border-border/50 bg-card rounded-none">
+        <div className="p-3 border border-border/50 bg-card rounded-md">
           <div className="text-[10.5px] uppercase tracking-wide text-muted-foreground">{isRu ? 'Всего' : 'Total'}</div>
           <div className="text-lg font-bold mt-1">{stats.total}</div>
         </div>
-        <div className="p-3 border border-border/50 bg-card rounded-none">
+        <div className="p-3 border border-border/50 bg-card rounded-md">
           <div className="text-[10.5px] uppercase tracking-wide text-muted-foreground">{isRu ? 'Активных' : 'Active'}</div>
           <div className="text-lg font-bold mt-1 text-success">{stats.active}</div>
         </div>
-        <div className="p-3 border border-border/50 bg-card rounded-none">
+        <div className="p-3 border border-border/50 bg-card rounded-md">
           <div className="text-[10.5px] uppercase tracking-wide text-muted-foreground">{isRu ? 'С аккаунтом' : 'Linked'}</div>
           <div className="text-lg font-bold mt-1 text-primary">{stats.linked}</div>
         </div>
-        <div className="p-3 border border-border/50 bg-card rounded-none">
+        <div className="p-3 border border-border/50 bg-card rounded-md">
           <div className="text-[10.5px] uppercase tracking-wide text-muted-foreground">{isRu ? 'Primary' : 'Primary'}</div>
           <div className="text-sm font-semibold mt-1 truncate">{stats.primary}</div>
         </div>
@@ -526,7 +526,7 @@ export default function AdminTransferOperators() {
           {operators.map((op) => {
             const lineId = parseLineId(op.notes);
             return (
-              <div key={op.id} className="p-4 rounded-none border border-border/50 bg-card">
+              <div key={op.id} className="p-4 rounded-md border border-border/50 bg-card">
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2 flex-wrap">
@@ -604,7 +604,7 @@ export default function AdminTransferOperators() {
                         {op.is_primary ? (isRu ? 'Снять primary' : 'Unset primary') : (isRu ? 'Сделать primary' : 'Make primary')}
                       </span>
                     </Button>
-                    <div className="flex items-center gap-2 px-2 h-9 border border-border/60 rounded-none">
+                    <div className="flex items-center gap-2 px-2 h-9 border border-border/60 rounded-sm">
                       <Label htmlFor={`active-${op.id}`} className="text-xs cursor-pointer">
                         {isRu ? 'Активен' : 'Active'}
                       </Label>

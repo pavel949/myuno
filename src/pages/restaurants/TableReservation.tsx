@@ -205,7 +205,7 @@ export default function TableReservation() {
 
         <div className="px-4 py-6 space-y-6">
           {/* Restaurant Card */}
-          <div className="flex gap-4 p-4 rounded-none bg-card border border-border/50">
+          <div className="flex gap-4 p-4 rounded-md bg-card border border-border/50">
             <img 
               src={restaurant.cover_image || PLACEHOLDER_IMAGES.restaurant} 
               alt={restaurant.name_en}
@@ -253,7 +253,7 @@ export default function TableReservation() {
             </Label>
             
             <div className="space-y-3">
-              <div className="flex items-center space-x-3 p-3 rounded-none bg-card border border-border/50">
+              <div className="flex items-center space-x-3 p-3 rounded-md bg-card border border-border/50">
                 <Checkbox 
                   id="highchair" 
                   checked={needHighChair}
@@ -267,7 +267,7 @@ export default function TableReservation() {
                 </label>
               </div>
 
-              <div className="flex items-center space-x-3 p-3 rounded-none bg-card border border-border/50">
+              <div className="flex items-center space-x-3 p-3 rounded-md bg-card border border-border/50">
                 <Checkbox 
                   id="outdoor" 
                   checked={isOutdoor}

@@ -252,7 +252,7 @@ export default function BookingDetail() {
 
         <div className="p-4 space-y-4 pb-32">
           {/* Status Card */}
-          <div className="bg-card border border-border rounded-none p-4">
+          <div className="bg-card border border-border rounded-md p-4">
             <div className="flex items-center gap-3">
               <div className={`w-12 h-12 rounded-full flex items-center justify-center ${getStatusColor(booking.status)}`}>
                 {getStatusIcon(booking.status)}
@@ -269,7 +269,7 @@ export default function BookingDetail() {
           </div>
 
           {/* Status history timeline */}
-          <div className="bg-card border border-border rounded-none p-4">
+          <div className="bg-card border border-border rounded-md p-4">
             <h3 className="font-medium mb-3 flex items-center gap-2">
               <History className="w-4 h-4 text-primary" />
               {language === 'ru' ? 'История статусов' : 'Status history'}
@@ -288,7 +288,7 @@ export default function BookingDetail() {
 
           {/* Schedule */}
           {booking.scheduled_at && (
-            <div className="bg-card border border-border rounded-none p-4">
+            <div className="bg-card border border-border rounded-md p-4">
               <h3 className="font-medium mb-3 flex items-center gap-2">
                 <Calendar className="w-4 h-4 text-primary" />
                 {language === 'ru' ? 'Дата и время' : 'Date & Time'}
@@ -327,7 +327,7 @@ export default function BookingDetail() {
 
           {/* Items */}
           {booking.items.length > 0 && (
-            <div className="bg-card border border-border rounded-none p-4">
+            <div className="bg-card border border-border rounded-md p-4">
               <h3 className="font-medium mb-3 flex items-center gap-2">
                 <Package className="w-4 h-4 text-primary" />
                 {language === 'ru' ? 'Услуги / Товары' : 'Services / Items'}
@@ -355,7 +355,7 @@ export default function BookingDetail() {
 
           {/* Contact */}
           {primaryParticipant && (
-            <div className="bg-card border border-border rounded-none p-4">
+            <div className="bg-card border border-border rounded-md p-4">
               <h3 className="font-medium mb-3 flex items-center gap-2">
                 <User className="w-4 h-4 text-primary" />
                 {language === 'ru' ? 'Контакт' : 'Contact'}
@@ -377,7 +377,7 @@ export default function BookingDetail() {
 
           {/* Address */}
           {deliveryAddress && (
-            <div className="bg-card border border-border rounded-none p-4">
+            <div className="bg-card border border-border rounded-md p-4">
               <h3 className="font-medium mb-3 flex items-center gap-2">
                 <MapPin className="w-4 h-4 text-primary" />
                 {language === 'ru' ? 'Адрес' : 'Address'}
@@ -388,7 +388,7 @@ export default function BookingDetail() {
 
           {/* Notes */}
           {booking.notes && (
-            <div className="bg-card border border-border rounded-none p-4">
+            <div className="bg-card border border-border rounded-md p-4">
               <h3 className="font-medium mb-2">
                 {language === 'ru' ? 'Примечания' : 'Notes'}
               </h3>

@@ -188,7 +188,7 @@ export function UnifiedCatalogShell<T extends { id: string }>(
       <Button
         variant={view === 'list' ? 'default' : 'ghost'}
         size="sm"
-        className={cn('h-11 min-w-11 px-2 rounded-none', view === 'list' && 'shadow-sm')}
+        className={cn('h-11 min-w-11 px-2 rounded-sm', view === 'list' && 'shadow-sm')}
         onClick={() => setView('list')}
         aria-label={isRu ? 'Список' : 'List'}
         aria-pressed={view === 'list'}
@@ -198,7 +198,7 @@ export function UnifiedCatalogShell<T extends { id: string }>(
       <Button
         variant={view === 'map' ? 'default' : 'ghost'}
         size="sm"
-        className={cn('h-11 min-w-11 px-2 rounded-none', view === 'map' && 'shadow-sm')}
+        className={cn('h-11 min-w-11 px-2 rounded-sm', view === 'map' && 'shadow-sm')}
         onClick={() => setView('map')}
         aria-label={isRu ? 'Карта' : 'Map'}
         aria-pressed={view === 'map'}

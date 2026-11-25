@@ -192,7 +192,7 @@ export default function InvestmentHubLanding() {
       >
         <div className="space-y-6 pb-10">
           {/* Hero — calm, gov-style */}
-          <div className="rounded-none border border-border bg-card p-5 space-y-3">
+          <div className="rounded-md border border-border bg-card p-5 space-y-3">
             <div className="flex items-center gap-3">
               <div className="w-11 h-11 rounded-none bg-cluster-invest/10 flex items-center justify-center flex-shrink-0">
                 <TrendingUp className="h-5 w-5 text-cluster-invest" />

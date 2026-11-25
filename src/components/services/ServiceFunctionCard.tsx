@@ -151,7 +151,7 @@ import { pickLang } from '@/lib/i18n/pickLang';
    return (
      <button
        onClick={onClick}
-       className="flex flex-col items-center p-3 rounded-none bg-card border border-border/50 hover:border-primary/30 hover:shadow-sm transition-all text-center min-w-0"
+       className="flex flex-col items-center p-3 rounded-md bg-card border border-border/50 hover:border-primary/30 hover:shadow-sm transition-all text-center min-w-0"
      >
        <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-lg mb-2">
          {fn.icon}

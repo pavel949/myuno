@@ -114,7 +114,7 @@ export function InsurancePromptBlock({ routeCode, accentColor }: InsurancePrompt
 
       <button
         onClick={() => navigate('/insurance/travel')}
-        className="w-full text-left rounded-none border border-border/60 bg-card overflow-hidden hover:shadow-sm transition-all touch-manipulation"
+        className="w-full text-left rounded-md border border-border/60 bg-card overflow-hidden hover:shadow-sm transition-all touch-manipulation"
       >
         <div className="p-4 space-y-3">
           <div className="flex items-start gap-3">

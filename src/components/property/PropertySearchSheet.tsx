@@ -599,7 +599,7 @@ function SearchCard({ title, summary, expanded, hasValue, onClick, children }: S
   return (
     <div
       className={cn(
-        'rounded-none border bg-card transition-shadow',
+        'rounded-md border bg-card transition-shadow',
         expanded ? 'shadow-md' : 'shadow-sm',
       )}
     >

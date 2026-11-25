@@ -51,7 +51,7 @@ export default function PartnerAgreementPage() {
             { emoji: '3️⃣', text: isRu ? 'Вы оказываете услугу, мы переводим оплату каждую пятницу' : 'You deliver the service, we transfer payment every Friday' },
             { emoji: '4️⃣', text: isRu ? 'Платформа удерживает комиссию по правилам ниже' : 'Platform deducts commission according to the rules below' },
           ].map((item, i) => (
-            <div key={i} className="flex items-start gap-3 p-3 rounded-none border bg-card">
+            <div key={i} className="flex items-start gap-3 p-3 rounded-md border bg-card">
               <span className="text-lg">{item.emoji}</span>
               <p className="text-sm">{item.text}</p>
             </div>

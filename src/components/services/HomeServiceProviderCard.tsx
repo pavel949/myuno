@@ -59,7 +59,7 @@ export const HomeServiceProviderCard = memo(function HomeServiceProviderCard({
       onClick={onClick}
       className={cn(
         "w-full flex items-start gap-4 p-4",
-        "bg-card border border-border/50 rounded-none",
+        "bg-card border border-border/50 rounded-md",
         "hover:shadow-lg hover:border-primary/30",
         "",
         "transition-all duration-200",

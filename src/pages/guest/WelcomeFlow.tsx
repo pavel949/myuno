@@ -178,7 +178,7 @@ const ServiceCard: React.FC<{
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.1 + index * 0.04, duration: 0.3, ease: 'easeOut' }}
       onClick={() => onNavigate(service.path)}
-      className="flex items-center gap-4 p-4 bg-card border border-border rounded-none hover:shadow-md hover:border-primary/20 transition-all duration-200 text-left w-full group"
+      className="flex items-center gap-4 p-4 bg-card border border-border rounded-md hover:shadow-md hover:border-primary/20 transition-all duration-200 text-left w-full group"
     >
       {/* Icon */}
       <div className={cn(
@@ -338,7 +338,7 @@ export default function WelcomeFlow() {
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 1, duration: 0.4 }}
-          className="mt-8 p-5 bg-card border border-border rounded-none text-center"
+          className="mt-8 p-5 bg-card border border-border rounded-md text-center"
         >
           <Sparkles className="w-6 h-6 text-primary mx-auto mb-2" />
           <p className="font-medium text-foreground text-[15px]">

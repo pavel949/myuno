@@ -433,7 +433,7 @@ export const MapLibreMap = forwardRef<MapLibreMapHandle, MapLibreMapProps>(funct
       {showLocateButton && !minimal && mapState !== 'unsupported' && (
         <div className="absolute right-3 bottom-20 z-10 flex flex-col items-end gap-2 pointer-events-none">
           {locateError && (
-            <div className="pointer-events-auto bg-card text-foreground text-xs px-3 py-1.5 rounded-none border border-border shadow-md">
+            <div className="pointer-events-auto bg-card text-foreground text-xs px-3 py-1.5 rounded-md border border-border shadow-md">
               {locateError}
             </div>
           )}

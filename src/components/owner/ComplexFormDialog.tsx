@@ -371,7 +371,7 @@ export function ComplexFormDialog({ open, onOpenChange, complex, managed, footer
           {managed.scopeMessage && <p role="status">{managed.scopeMessage}</p>}
           {!complex && <div className="space-y-1">
             <Label htmlFor="complex-authoring-space">{text('Operating Space', 'Рабочая область', 'พื้นที่ปฏิบัติงาน')}</Label>
-            <select id="complex-authoring-space" className="flex h-10 w-full rounded-none border border-input bg-background px-3 py-2" value={managed.spaceId} onChange={event => managed.onSpaceChange(event.target.value)} disabled={isPending || managed.blocked}>
+            <select id="complex-authoring-space" className="flex h-10 w-full rounded-sm border border-input bg-background px-3 py-2" value={managed.spaceId} onChange={event => managed.onSpaceChange(event.target.value)} disabled={isPending || managed.blocked}>
               <option value="">{text('Select an assigned Space', 'Выберите назначенную область', 'เลือกพื้นที่ที่ได้รับมอบหมาย')}</option>
               {managed.spaces.map(space => <option key={space.id} value={space.id}>{isRu ? space.name_ru || space.name_en : space.name_en || space.name_ru}</option>)}
             </select>

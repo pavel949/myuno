@@ -157,7 +157,7 @@ export default function QuickIncome() {
         </div>
 
         {/* Amount */}
-        <div className="bg-card rounded-none p-4 border border-success/20">
+        <div className="bg-card rounded-md p-4 border border-success/20">
           <Label className="text-xs text-muted-foreground mb-2 block">
             {isRu ? 'Сумма дохода' : 'Income Amount'}
           </Label>

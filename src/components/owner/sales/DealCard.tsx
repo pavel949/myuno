@@ -43,7 +43,7 @@ export function DealCard({ deal, selectable, selected, onToggleSelect }: Props) 
   return (
     <div
       className={cn(
-        'w-full text-left p-4 rounded-none border bg-card hover:bg-accent/50 transition-colors flex items-start gap-3 border-l-4',
+        'w-full text-left p-4 rounded-md border bg-card hover:bg-accent/50 transition-colors flex items-start gap-3 border-l-4',
         isOverdue && 'border-destructive/50 bg-destructive/5',
         isDueToday && 'border-primary/50 bg-primary/5',
         age > 30 && !isOverdue && !isDueToday && 'border-l-2 border-l-destructive',

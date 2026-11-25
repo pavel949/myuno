@@ -1,6 +1,15 @@
 # Design System — myUNO SuperApp
 
-> DS 2.1 — re-synced 2026-05-14 against `src/styles/tokens.css` + `tailwind.config.ts` (runtime SoT).
+> **Design Bible v4 — adopted 2026-11-25 (supersedes DS 2.1 below where they conflict).** Runtime SoT stays `src/styles/tokens.css` + `tailwind.config.ts`, now remapped at the primitive layer:
+> - **Colour:** navy `#0D2230` (primary, HQ rail) · gold `#C59A45` (singular accent; text/surfaces use gold-ink `#8A6524`, AA with white) · paper `#FDFBF7` page · ivory `#F4F1EA` quiet surfaces · text `#111827 / #334155 / #64748B`. Legacy `--brand-orange*` names now resolve to the gold family.
+> - **Status tones:** done `#EBF2EC/#1E3A25` · active `#D0E5F8/#0D2230` · waiting `#FDF8EE/#8F5E1B` · blocked `#FBEFEF/#7C2D12` · neutral `#F4F1EA/#475569` → `--success/--info/--warning/--danger/--muted`; UI via `WorkflowStatus` / `StatusPill`.
+> - **Type:** Outfit (display) + Manrope (UI, carries Cyrillic) + IBM Plex Mono (data, `tnum`). Outfit has no Cyrillic, so RU display falls back to Manrope per glyph.
+> - **Radius:** control 4px (`rounded-sm`/`rounded`) · card 8px (`rounded-md`) · media 12px (`rounded-lg`) · pill (`rounded-full`). `scripts/v4-radius-codemod.mjs` migrated unambiguous `rounded-none` cards/controls; remaining `rounded-none` are deliberate edges or pending review.
+> - **Elevation:** e1 `0 4px 12px -4px rgba(13,34,48,.08)` · e2 `0 20px 40px -15px rgba(13,34,48,.12)` + 1px ring. Focus ring: gold.
+> - **States (S1):** every list/page/form uses `src/components/page/SystemState.tsx` (empty · no_results · loading skeleton · error · payment_error · success · not_found · offline).
+> - Source bundle: Claude Design project "myUNO Design Bible" (tokens/myuno-tokens.css, tokens/tailwind.preset.js). Screen ↔ code map: `docs/design-system/design-bible-v4-screen-map.md`.
+
+> DS 2.1 (historical) — re-synced 2026-05-14 against `src/styles/tokens.css` + `tailwind.config.ts` (runtime SoT).
 > Prior versions (mint+emerald palette, 6-color cluster rainbow, Golos Text + DM Sans + JetBrains Mono fonts, dark-default) describe a superseded system. The current system is civic-infrastructure: light-default, navy primary, muted cluster tones.
 > `src/design-system/tokens.json` (DS 2.0 "Navy Premium") is deprecated — do not use.
 

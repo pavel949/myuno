@@ -356,7 +356,7 @@ export default function PropertyInquiry() {
 
             {/* Property mini-card */}
             {property && (
-              <div className="flex gap-3 p-3 rounded-none border bg-card">
+              <div className="flex gap-3 p-3 rounded-md border bg-card">
                 {propertyImage && (
                   <img
                     src={propertyImage}

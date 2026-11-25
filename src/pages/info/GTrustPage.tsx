@@ -429,7 +429,7 @@ const GTrustPage = () => {
           <h4 className="text-sm font-medium mb-3">{isRu ? "Уровни Trust Score:" : isTh ? "ระดับ Trust Score:" : "Trust Score Levels:"}</h4>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
             {trustScoreLevels.map((level, index) => (
-              <div key={index} className="p-3 rounded-none border bg-card text-center">
+              <div key={index} className="p-3 rounded-md border bg-card text-center">
                 <div className={`w-8 h-8 rounded-full ${level.bg} mx-auto mb-2 flex items-center justify-center`}>
                   <span className="text-white text-xs font-bold">{level.range.split('-')[0] || level.range.replace('<', '')}</span>
                 </div>

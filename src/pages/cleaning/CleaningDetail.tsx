@@ -75,7 +75,7 @@ export default function CleaningDetail() {
           </p>
 
           {/* What's Included */}
-          <div className="bg-card rounded-none border p-5">
+          <div className="bg-card rounded-md border p-5">
             <h3 className="font-semibold mb-4">
               {language === 'ru' ? 'Что включено' : "What's Included"}
             </h3>

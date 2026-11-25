@@ -71,7 +71,7 @@ export function MyDayWidget({ deals }: MyDayWidgetProps) {
   if (totalItems === 0 && upcomingTasks.length === 0) return null;
 
   return (
-    <div className="rounded-none border bg-card p-4 space-y-3">
+    <div className="rounded-md border bg-card p-4 space-y-3">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Star className="h-5 w-5 text-warning" />

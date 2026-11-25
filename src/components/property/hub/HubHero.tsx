@@ -20,7 +20,7 @@ export function HubHero({ t, isRu }: { t: TFn; isRu: boolean }) {
         </p>
       </div>
 
-      <div className="journey-primary rounded-none border border-border bg-card p-4">
+      <div className="journey-primary rounded-md border border-border bg-card p-4">
         <HomeDiscoverySearch />
       </div>
       <Link className="inline-flex min-h-11 items-center underline underline-offset-4" to={APP_ROUTES.OFFPLAN}>

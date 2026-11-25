@@ -146,7 +146,7 @@ export default function RestaurantMap() {
 
         {selected && (
           <div className="absolute bottom-4 left-4 right-4 z-20">
-            <div className="bg-card rounded-none border shadow-lg p-4">
+            <div className="bg-card rounded-md border shadow-lg p-4">
               <div className="flex gap-3">
                 <img
                   src={

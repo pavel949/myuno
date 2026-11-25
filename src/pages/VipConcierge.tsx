@@ -238,7 +238,7 @@ export default function VipConcierge() {
             return (
               <AnimatedItem key={service.id}>
               <div 
-                  className="p-4 rounded-none border bg-card cursor-pointer hover:border-accent-purple/30 transition-colors"
+                  className="p-4 rounded-md border bg-card cursor-pointer hover:border-accent-purple/30 transition-colors"
                   onClick={() => window.open(COMPANY_CONTACTS.whatsapp.link, '_blank')}
                 >
                   <div className="flex items-center gap-4">

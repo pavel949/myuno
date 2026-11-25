@@ -70,7 +70,7 @@ const StatCard: React.FC<{
   label: string;
   color: string;
 }> = ({ icon: Icon, value, label, color }) => (
-  <div className="bg-card border border-border rounded-none p-4 text-center">
+  <div className="bg-card border border-border rounded-md p-4 text-center">
     <Icon className={cn('w-5 h-5 mx-auto mb-2', color)} />
     <p className="text-lg font-bold text-foreground">{value}</p>
     <p className="text-[11px] text-muted-foreground">{label}</p>
@@ -93,7 +93,7 @@ const OrderItem: React.FC<{
   return (
     <button
       onClick={() => onNavigate(order.id)}
-      className="flex items-center gap-3 p-3 bg-card border border-border rounded-none hover:shadow-sm transition-all w-full text-left group"
+      className="flex items-center gap-3 p-3 bg-card border border-border rounded-md hover:shadow-sm transition-all w-full text-left group"
     >
       <div className="w-10 h-10 rounded-none bg-muted flex items-center justify-center flex-shrink-0">
         <ShoppingBag className="w-4 h-4 text-muted-foreground" />
@@ -217,7 +217,7 @@ export default function GuestProfile() {
               ))}
             </div>
           ) : (
-            <div className="text-center py-12 bg-card border border-border rounded-none">
+            <div className="text-center py-12 bg-card border border-border rounded-md">
               <ShoppingBag className="w-8 h-8 text-muted-foreground mx-auto mb-3" />
               <p className="text-sm text-muted-foreground">
                 {isRu ? 'Заказов пока нет' : 'No orders yet'}

@@ -149,10 +149,10 @@ export function OperationsModerationTab() {
               </div>
               <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)_minmax(0,1fr)_auto]">
                 <Input aria-label={label(["Search queue", "Поиск в очереди", "ค้นหาในคิว"])} placeholder={label(["Name or exact ID", "Название или точный ID", "ชื่อหรือรหัสที่ตรงกัน"])} value={search} onChange={event => setFilters({ q: event.target.value })} className="min-h-11 min-w-0" />
-                <select aria-label={label(["Content type", "Тип контента", "ประเภทเนื้อหา"])} value={type} onChange={event => setFilters({ type: event.target.value, category: 'all' })} className="min-h-11 min-w-0 rounded-none border bg-background px-3 text-sm">
+                <select aria-label={label(["Content type", "Тип контента", "ประเภทเนื้อหา"])} value={type} onChange={event => setFilters({ type: event.target.value, category: 'all' })} className="min-h-11 min-w-0 rounded-sm border bg-background px-3 text-sm">
                   {activeTypes.map(value => <option key={value} value={value}>{label(typeLabels[value])}</option>)}
                 </select>
-                <select aria-label={label(["Category", "Категория", "หมวดหมู่"])} value={category} disabled={type === 'service'} onChange={event => setFilters({ category: event.target.value })} className="min-h-11 min-w-0 rounded-none border bg-background px-3 text-sm">
+                <select aria-label={label(["Category", "Категория", "หมวดหมู่"])} value={category} disabled={type === 'service'} onChange={event => setFilters({ category: event.target.value })} className="min-h-11 min-w-0 rounded-sm border bg-background px-3 text-sm">
                   <option value="all">{label(["All categories", "Все категории", "ทุกหมวดหมู่"])}</option>
                   {categories.map(value => <option key={value} value={value}>{categoryLabel(value)}</option>)}
                 </select>

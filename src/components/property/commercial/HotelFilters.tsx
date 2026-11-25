@@ -123,7 +123,7 @@ export function HotelFiltersSheet({ value, onChange }: Props) {
               aria-label={isRu ? 'Тип лицензии' : 'License type'}
                 value={draft.licenseType ?? ''}
               onChange={(e) => setDraft({ ...draft, licenseType: e.target.value || undefined })}
-              className="flex h-10 w-full rounded-none border border-input bg-background px-3 py-1 text-sm shadow-sm"
+              className="flex h-10 w-full rounded-sm border border-input bg-background px-3 py-1 text-sm shadow-sm"
             >
               <option value="">{isRu ? 'Любая' : 'Any'}</option>
               {HOTEL_LICENSE_TYPES.map((l) => (

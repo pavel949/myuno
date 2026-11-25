@@ -313,7 +313,7 @@ export default function MCBookingsPage() {
             onClick={() => setStatusFilter(tile.filter)}
             aria-pressed={statusFilter === tile.filter}
             className={cn(
-              'justify-between gap-2 text-left px-3 py-2 rounded-none transition-colors min-h-11 h-auto',
+              'justify-between gap-2 text-left px-3 py-2 rounded-sm transition-colors min-h-11 h-auto',
               statusFilter === tile.filter ? 'bg-primary/10 ring-1 ring-primary' : 'bg-muted/50',
             )}
           >
@@ -370,7 +370,7 @@ export default function MCBookingsPage() {
             onClick={() => setStatusFilter(f.value)}
             aria-pressed={statusFilter === f.value}
             className={cn(
-              'px-2 py-2 text-xs rounded-none border transition-colors whitespace-normal break-words min-h-11 h-auto focus-visible:ring-2 focus-visible:ring-ring',
+              'px-2 py-2 text-xs rounded-sm border transition-colors whitespace-normal break-words min-h-11 h-auto focus-visible:ring-2 focus-visible:ring-ring',
               statusFilter === f.value
                 ? 'bg-primary text-primary-foreground border-primary'
                 : 'bg-background text-muted-foreground border-border hover:text-foreground',

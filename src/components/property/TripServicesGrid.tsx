@@ -188,7 +188,7 @@ export function TripServicesGrid({
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ delay: index * 0.05 }}
                 onClick={() => handleServiceClick(service)}
-                className="flex flex-col items-center p-3 rounded-none bg-card border border-border hover:border-primary/30 hover:shadow-md transition-all"
+                className="flex flex-col items-center p-3 rounded-md bg-card border border-border hover:border-primary/30 hover:shadow-md transition-all"
               >
                 <div className={cn(
                   "w-10 h-10 rounded-none flex items-center justify-center mb-2 bg-gradient-to-br",
@@ -240,7 +240,7 @@ export function TripServicesGrid({
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.05 }}
               onClick={() => handleServiceClick(service)}
-              className="flex flex-col items-center p-4 rounded-none bg-card border border-border hover:border-primary/30 hover:shadow-lg transition-all group"
+              className="flex flex-col items-center p-4 rounded-md bg-card border border-border hover:border-primary/30 hover:shadow-lg transition-all group"
             >
               <div className={cn(
                 "w-12 h-12 rounded-none flex items-center justify-center mb-3 bg-gradient-to-br transition-transform",

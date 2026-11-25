@@ -114,7 +114,7 @@ export default function TaxStructuringLanding() {
         en: 'Tax, Thai company, ownership structure and cross-border setup. Licensed myUNO lawyers — multilingual support (EN/RU/TH).',
       }}
     >
-      <div className="rounded-none border border-border bg-card p-6">
+      <div className="rounded-md border border-border bg-card p-6">
         <h2 className="text-xl font-semibold mb-4">
           {t({ ru: 'Когда это нужно', en: 'When you need this' })}
         </h2>

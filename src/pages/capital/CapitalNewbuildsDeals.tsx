@@ -238,7 +238,7 @@ function Kpi({ icon: Icon, label, value, sub }: {
   sub?: string;
 }) {
   return (
-    <div className="min-w-0 bg-card rounded-none p-4 border border-border shadow-sm">
+    <div className="min-w-0 bg-card rounded-md p-4 border border-border shadow-sm">
       <div className="flex items-center gap-2 mb-2">
         <div className="p-2 rounded-none bg-success/10">
           <Icon className="w-4 h-4 text-success" />
@@ -313,7 +313,7 @@ export default function CapitalNewbuildsDeals() {
             key={t.key}
             onClick={() => setActiveTab(t.key)}
             className={cn(
-              'min-h-11 shrink-0 whitespace-nowrap px-4 py-2 rounded-none text-sm transition-all flex items-center gap-2',
+              'min-h-11 shrink-0 whitespace-nowrap px-4 py-2 rounded-sm text-sm transition-all flex items-center gap-2',
               activeTab === t.key
                 ? 'bg-card shadow-sm text-foreground font-medium'
                 : 'text-muted-foreground hover:text-foreground',
@@ -334,7 +334,7 @@ export default function CapitalNewbuildsDeals() {
 
       {/* ── Tab: Leads / Attribution ── */}
       {activeTab === 'leads' && (
-        <div className="min-w-0 max-w-full bg-card rounded-none border border-border overflow-hidden">
+        <div className="min-w-0 max-w-full bg-card rounded-md border border-border overflow-hidden">
           <div className="p-4 border-b border-border">
             <h2 className="font-semibold text-foreground flex items-center gap-2">
               <Users className="w-4 h-4 text-success" />
@@ -409,7 +409,7 @@ export default function CapitalNewbuildsDeals() {
 
       {/* ── Tab: Holds ── */}
       {activeTab === 'holds' && (
-        <div className="min-w-0 max-w-full bg-card rounded-none border border-border overflow-hidden">
+        <div className="min-w-0 max-w-full bg-card rounded-md border border-border overflow-hidden">
           <div className="p-4 border-b border-border">
             <h2 className="font-semibold text-foreground flex items-center gap-2">
               <Clock className="w-4 h-4 text-accent" />
@@ -487,7 +487,7 @@ export default function CapitalNewbuildsDeals() {
 
       {/* ── Tab: RLN Journal ── */}
       {activeTab === 'rln' && (
-        <div className="min-w-0 max-w-full bg-card rounded-none border border-border overflow-hidden">
+        <div className="min-w-0 max-w-full bg-card rounded-md border border-border overflow-hidden">
           <div className="p-4 border-b border-border">
             <h2 className="font-semibold text-foreground flex items-center gap-2">
               <FileText className="w-4 h-4 text-success" />
@@ -530,7 +530,7 @@ export default function CapitalNewbuildsDeals() {
 
       {/* ── Tab: Commissions ── */}
       {activeTab === 'commissions' && (
-        <div className="bg-card rounded-none border border-border p-6">
+        <div className="bg-card rounded-md border border-border p-6">
           <div className="flex items-center gap-2 mb-4">
             <DollarSign className="w-5 h-5 text-success" />
             <h2 className="font-semibold text-foreground">Commission Forecast</h2>

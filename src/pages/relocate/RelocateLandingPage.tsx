@@ -371,7 +371,7 @@ export default function RelocateLandingPage() {
           {selectedSteps.map((step, i) => {
             const Icon = step.icon;
             return (
-              <button key={`${step.id}-${i}`} onClick={() => navigate(step.path)} className="w-full flex items-start gap-4 p-4 rounded-none border border-border bg-card text-left transition-all hover:[box-shadow:var(--shadow-elevation-2)] ">
+              <button key={`${step.id}-${i}`} onClick={() => navigate(step.path)} className="w-full flex items-start gap-4 p-4 rounded-md border border-border bg-card text-left transition-all hover:[box-shadow:var(--shadow-elevation-2)] ">
                 <div className="relative flex flex-col items-center">
                   <div className="w-10 h-10 rounded-none flex items-center justify-center shrink-0" style={{ background: tokenColor(step.color, 0.15) }}>
                     <Icon className="w-5 h-5" style={{ color: tokenColor(step.color) }} />
@@ -401,7 +401,7 @@ export default function RelocateLandingPage() {
           {STEPS.map((step, i) => {
             const Icon = step.icon;
             return (
-              <button key={i} onClick={() => navigate(step.path)} className="w-full flex items-start gap-4 p-4 rounded-none border border-border bg-card text-left transition-all hover:[box-shadow:var(--shadow-elevation-2)] ">
+              <button key={i} onClick={() => navigate(step.path)} className="w-full flex items-start gap-4 p-4 rounded-md border border-border bg-card text-left transition-all hover:[box-shadow:var(--shadow-elevation-2)] ">
                 <div className="relative flex flex-col items-center">
                   <div className="w-10 h-10 rounded-none flex items-center justify-center shrink-0" style={{ background: tokenColor(step.color, 0.15) }}>
                     <Icon className="w-5 h-5" style={{ color: tokenColor(step.color) }} />
@@ -429,7 +429,7 @@ export default function RelocateLandingPage() {
         </h2>
         <div className="grid gap-4 max-w-lg mx-auto md:grid-cols-3 md:max-w-3xl">
           {PLANS.map((plan, i) => (
-            <div key={i} className={cn("rounded-none border p-5 bg-card", plan.highlight ? "border-primary ring-2 ring-primary/20 shadow-lg" : "border-border")}>
+            <div key={i} className={cn("rounded-md border p-5 bg-card", plan.highlight ? "border-primary ring-2 ring-primary/20 shadow-lg" : "border-border")}>
               {plan.highlight && <span className="text-[10px] font-bold text-primary uppercase tracking-wider">{t ? 'Популярный' : 'Popular'}</span>}
               <h3 className="text-lg font-bold font-display text-foreground mt-1">{t ? plan.nameRu : plan.nameEn}</h3>
               <p className="text-2xl font-bold text-primary mt-2">{t ? plan.priceRu : plan.priceEn}</p>

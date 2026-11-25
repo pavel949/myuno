@@ -524,7 +524,7 @@ export default function MCHelpPage() {
               {filteredFeatures.map(section => {
                 const Icon = section.icon;
                 return (
-                  <AccordionItem key={section.id} value={section.id} className="border rounded-none bg-card px-0">
+                  <AccordionItem key={section.id} value={section.id} className="border rounded-md bg-card px-0">
                     <AccordionTrigger className="px-4 py-3 hover:no-underline">
                       <div className="flex items-center gap-3 text-left">
                         <div className="w-8 h-8 rounded-none bg-primary/10 flex items-center justify-center flex-shrink-0">

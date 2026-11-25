@@ -153,7 +153,7 @@ export default function SalesAnalytics() {
           { label: isRu ? 'Прогноз' : 'Forecast', value: formatValue(kpis.forecast) },
           { label: isRu ? 'Выиграно' : 'Won Deals', value: kpis.won },
         ].map(k => (
-          <div key={k.label} className="p-3 rounded-none border bg-card text-center">
+          <div key={k.label} className="p-3 rounded-md border bg-card text-center">
             <p className="text-2xl font-bold">{k.value}</p>
             <p className="text-xs text-muted-foreground mt-1">{k.label}</p>
           </div>
@@ -161,7 +161,7 @@ export default function SalesAnalytics() {
       </div>
 
       {/* Funnel */}
-      <div className="border rounded-none p-4 bg-card">
+      <div className="border rounded-md p-4 bg-card">
         <p className="text-sm font-medium mb-3">{isRu ? 'Воронка продаж' : 'Sales Funnel'}</p>
         {deals.length === 0 ? (
           <div className="text-center py-8">
@@ -192,7 +192,7 @@ export default function SalesAnalytics() {
       </div>
 
       {/* Monthly bar chart */}
-      <div className="border rounded-none p-4 bg-card">
+      <div className="border rounded-md p-4 bg-card">
         <p className="text-sm font-medium mb-3">{isRu ? 'Сделки по месяцам' : 'Deals by Month'}</p>
         <ResponsiveContainer width="100%" height={200}>
           <BarChart data={monthlyData}>
@@ -208,7 +208,7 @@ export default function SalesAnalytics() {
 
       {/* Sources pie */}
       {sourceData.length > 0 && (
-        <div className="border rounded-none p-4 bg-card">
+        <div className="border rounded-md p-4 bg-card">
           <p className="text-sm font-medium mb-3">{isRu ? 'Источники клиентов' : 'Client Sources'}</p>
           <div className="flex items-center gap-4">
             <ResponsiveContainer width={160} height={160}>

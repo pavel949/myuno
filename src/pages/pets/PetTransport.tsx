@@ -246,7 +246,7 @@ export default function PetTransport() {
         </div>
 
         {/* Process Timeline */}
-        <div className="bg-card border rounded-none p-4 mb-6">
+        <div className="bg-card border rounded-md p-4 mb-6">
           <h3 className="font-semibold mb-3 flex items-center gap-2">
             <Clock className="w-5 h-5 text-primary" />
             {language === 'ru' ? 'Процесс' : 'Process'}

@@ -135,7 +135,7 @@ export function DriveImportPanel({ projectId }: Props) {
         <div className="space-y-2">
           <Label className="text-sm">Подключённые папки</Label>
           {sources.map((src) => (
-            <div key={src.id} className="flex items-center gap-3 p-3 bg-card border rounded-none">
+            <div key={src.id} className="flex items-center gap-3 p-3 bg-card border rounded-md">
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 text-sm font-medium">
                   <span className="truncate">{src.folder_id}</span>

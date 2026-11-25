@@ -84,7 +84,7 @@ export const UnifiedHeader = memo(function UnifiedHeader({
             className={cn("ux-search-control pl-10 pr-4 text-sm", isSearchClickable && "cursor-pointer")}
           />
           {isSearching && searchResults && (
-            <div className="absolute top-full left-0 right-0 mt-2 bg-card border border-border rounded-none [box-shadow:var(--shadow-elevation-4)] z-50 overflow-hidden max-h-[60vh] overflow-y-auto">
+            <div className="absolute top-full left-0 right-0 mt-2 bg-card border border-border rounded-md [box-shadow:var(--shadow-elevation-4)] z-50 overflow-hidden max-h-[60vh] overflow-y-auto">
               {searchResults}
             </div>
           )}

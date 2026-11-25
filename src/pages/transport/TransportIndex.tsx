@@ -210,7 +210,7 @@ export default function TransportIndex() {
           <button
             key={link.id}
             onClick={() => navigate(link.path)}
-            className="flex items-center gap-2 px-4 py-2.5 rounded-none border border-border bg-card hover:border-foreground/20 transition-colors"
+            className="flex items-center gap-2 px-4 py-2.5 rounded-md border border-border bg-card hover:border-foreground/20 transition-colors"
           >
             <link.icon className="w-4 h-4 text-primary" />
             <span className="text-xs font-medium whitespace-nowrap">{isRu ? link.labelRu : link.labelEn}</span>

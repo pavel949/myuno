@@ -43,7 +43,7 @@ export const ReviewCard = ({ review, onHelpful, providerName }: ReviewCardProps)
   };
 
   return (
-    <div className="bg-card rounded-none p-4 border">
+    <div className="bg-card rounded-md p-4 border">
       {/* Featured Badge */}
       {review.is_featured && (
         <div className="mb-3">

@@ -434,7 +434,7 @@ export default function ContactDetail() {
         {/* ═══ LEFT PANEL ═══ */}
         <div className="space-y-4">
           {/* ─── Smart Buttons Strip (Odoo-style) ─── */}
-          <div className="flex items-center gap-1 border rounded-none bg-card p-1 overflow-x-auto">
+          <div className="flex items-center gap-1 border rounded-md bg-card p-1 overflow-x-auto">
             {[
               { icon: CalendarDays, label: isRu ? 'Встречи' : 'Meetings', count: meetings.length, onClick: () => setActiveTab('timeline') },
               {
@@ -510,7 +510,7 @@ export default function ContactDetail() {
           )}
 
           {/* ─── Main Contact Card (Odoo-style) ─── */}
-          <div className="rounded-none border bg-card overflow-hidden">
+          <div className="rounded-md border bg-card overflow-hidden">
             {/* Individual / Company toggle */}
             <div className="px-5 pt-4 pb-2 flex items-center gap-4 border-b">
               <label className="flex items-center gap-2 cursor-pointer text-sm">
@@ -758,7 +758,7 @@ export default function ContactDetail() {
             <TabsContent value="overview" className="mt-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {(contact.birthday || contact.family_info || contact.interests?.length || isMaritalStatus(contact.marital_status)) && (
-                  <div className="rounded-none border bg-card p-4 space-y-3">
+                  <div className="rounded-md border bg-card p-4 space-y-3">
                     <p className="text-sm font-semibold flex items-center gap-2">
                       <Heart className="h-4 w-4 text-muted-foreground" />
                       {isRu ? 'Персональное' : 'Personal'}
@@ -797,7 +797,7 @@ export default function ContactDetail() {
                 )}
 
                 {(contact.budget_max || contact.preferred_types?.length || contact.preferred_districts?.length) && (
-                  <div className="rounded-none border bg-card p-4 space-y-3">
+                  <div className="rounded-md border bg-card p-4 space-y-3">
                     <p className="text-sm font-semibold flex items-center gap-2">
                       <MapPin className="h-4 w-4 text-muted-foreground" />
                       {isRu ? 'Предпочтения' : 'Preferences'}
@@ -819,7 +819,7 @@ export default function ContactDetail() {
                 )}
 
                 {contact.notes && (
-                  <div className="rounded-none border bg-card p-4 space-y-2 md:col-span-2">
+                  <div className="rounded-md border bg-card p-4 space-y-2 md:col-span-2">
                     <p className="text-sm font-semibold">{isRu ? 'Заметки' : 'Notes'}</p>
                     <p className="text-sm text-muted-foreground whitespace-pre-wrap">{contact.notes}</p>
                   </div>
@@ -831,7 +831,7 @@ export default function ContactDetail() {
 
             {/* KYC */}
             <TabsContent value="kyc" className="mt-4">
-              <div className="rounded-none border bg-card p-5 space-y-4">
+              <div className="rounded-md border bg-card p-5 space-y-4">
                 <h3 className="text-sm font-semibold">{isRu ? 'KYC / Compliance' : 'KYC / Compliance'}</h3>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <FieldRow label={isRu ? 'Статус KYC' : 'KYC Status'}>
@@ -883,7 +883,7 @@ export default function ContactDetail() {
                 )}
                 <p className="text-sm font-medium">{isRu ? 'Активность (заметки)' : 'Activity (notes)'}</p>
                 {timelineItems.length === 0 ? (
-                  <div className="text-center py-12 rounded-none border bg-card">
+                  <div className="text-center py-12 rounded-md border bg-card">
                     <Clock className="h-10 w-10 mx-auto text-muted-foreground/30 mb-2" />
                     <p className="text-sm text-muted-foreground">{isRu ? 'Нет активности' : 'No activity yet'}</p>
                   </div>
@@ -1049,7 +1049,7 @@ export default function ContactDetail() {
                 </Button>
               </div>
               {deals.length === 0 ? (
-                <div className="text-center py-12 rounded-none border bg-card">
+                <div className="text-center py-12 rounded-md border bg-card">
                   <DollarSign className="h-10 w-10 mx-auto text-muted-foreground/30 mb-2" />
                   <p className="text-sm text-muted-foreground">{isRu ? 'Нет связанных сделок' : 'No linked deals'}</p>
                 </div>
@@ -1062,7 +1062,7 @@ export default function ContactDetail() {
                       <button
                         key={d.id}
                         onClick={() => navigate(APP_ROUTES.MC_SALES_DEAL(d.id))}
-                        className="w-full text-left p-4 rounded-none border bg-card hover:bg-accent/50 transition-colors flex items-center gap-3"
+                        className="w-full text-left p-4 rounded-md border bg-card hover:bg-accent/50 transition-colors flex items-center gap-3"
                       >
                         <div className={cn('h-3 w-3 rounded-full shrink-0', stageDotColors[stage] || 'bg-muted')} />
                         <div className="flex-1 min-w-0">
@@ -1091,7 +1091,7 @@ export default function ContactDetail() {
                 <InlineTaskCreator companyId={membership.company_id} contactId={contact.id} />
               )}
               {contactTasks.length === 0 ? (
-                <div className="text-center py-12 rounded-none border bg-card">
+                <div className="text-center py-12 rounded-md border bg-card">
                   <ListTodo className="h-10 w-10 mx-auto text-muted-foreground/30 mb-2" />
                   <p className="text-sm text-muted-foreground">{isRu ? 'Нет задач' : 'No tasks'}</p>
                 </div>
@@ -1114,7 +1114,7 @@ export default function ContactDetail() {
                       : isToday ? (isRu ? 'сегодня' : 'today')
                       : null;
                     return (
-                      <div key={task.id} className={cn('flex items-center gap-3 p-3 rounded-none border border-l-4 bg-card', dueState)}>
+                      <div key={task.id} className={cn('flex items-center gap-3 p-3 rounded-md border border-l-4 bg-card', dueState)}>
                         <button onClick={() => handleCompleteTask(task.id)} className="shrink-0">
                           <CheckCircle className={cn('h-5 w-5', task.status === 'completed' ? 'text-success' : 'text-muted-foreground/30 hover:text-success/60')} />
                         </button>
@@ -1152,7 +1152,7 @@ export default function ContactDetail() {
             {/* Documents */}
             <TabsContent value="documents" className="mt-4">
               {membership?.company_id ? (
-                <div className="rounded-none border bg-card p-5">
+                <div className="rounded-md border bg-card p-5">
                   <CrmDocumentsSection companyId={membership.company_id} contactId={contact.id} />
                 </div>
               ) : (
@@ -1172,7 +1172,7 @@ export default function ContactDetail() {
         {/* ═══ RIGHT PANEL: Chatter (Odoo-style) ═══ */}
         <div className="space-y-4">
           {/* Action buttons */}
-          <div className="flex gap-1 border rounded-none bg-card p-1">
+          <div className="flex gap-1 border rounded-md bg-card p-1">
             {[
               { key: 'message' as const, label: isRu ? 'Сообщение' : 'Send message', color: 'bg-primary text-primary-foreground' },
               { key: 'note' as const, label: isRu ? 'Заметка' : 'Log note', color: 'bg-warning/10 text-warning' },
@@ -1225,7 +1225,7 @@ export default function ContactDetail() {
           )}
 
           {chatterTab === 'activities' && user && (
-            <div className="space-y-2 rounded-none border bg-card p-3">
+            <div className="space-y-2 rounded-md border bg-card p-3">
               <Select value={logActType} onValueChange={setLogActType}>
                 <SelectTrigger className="h-9 text-xs"><SelectValue /></SelectTrigger>
                 <SelectContent>

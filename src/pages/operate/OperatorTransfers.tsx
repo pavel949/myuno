@@ -152,7 +152,7 @@ export default function OperatorTransfers() {
               const guestPhone = primary?.phone?.replace(/\D/g, '') || '';
 
               return (
-                <div key={order.id} className="p-4 rounded-none border border-border/50 bg-card space-y-3">
+                <div key={order.id} className="p-4 rounded-md border border-border/50 bg-card space-y-3">
                   <div className="flex items-center justify-between flex-wrap gap-2">
                     <div className="flex items-center gap-2">
                       <span className="font-semibold text-sm">#{order.order_number}</span>

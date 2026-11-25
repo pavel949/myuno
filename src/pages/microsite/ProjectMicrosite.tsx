@@ -148,7 +148,7 @@ export default function ProjectMicrosite() {
           ) : null}
 
           <div className="grid sm:grid-cols-2 gap-4">
-            <div className="p-5 rounded-none border border-border bg-card">
+            <div className="p-5 rounded-md border border-border bg-card">
               <p className="text-xs uppercase tracking-wider text-muted-foreground mb-2">Цена</p>
               <NbPriceDisplay price={project.price_from} size="md" />
             </div>
@@ -160,7 +160,7 @@ export default function ProjectMicrosite() {
               <h2 className="font-display text-h2 font-normal tracking-tight mb-4">Планировки юнитов</h2>
               <div className="grid sm:grid-cols-2 gap-4">
                 {units.slice(0, 6).map((u) => (
-                  <div key={u.id} className="p-4 rounded-none border border-border bg-card">
+                  <div key={u.id} className="p-4 rounded-md border border-border bg-card">
                     <p className="font-semibold mb-1">{u.name}</p>
                     <p className="text-sm text-muted-foreground mb-2">{u.bedrooms ?? 0} BR · {u.area_sqm} m²</p>
                     <NbPriceDisplay price={null} size="sm" />
@@ -175,7 +175,7 @@ export default function ProjectMicrosite() {
               <h2 className="font-display text-h2 font-normal tracking-tight mb-4">Удобства</h2>
               <div className="flex flex-wrap gap-2">
                 {project.amenities.slice(0, 20).map((a) => (
-                  <span key={a} className="px-3 py-1.5 rounded-none text-sm border border-border bg-card">
+                  <span key={a} className="px-3 py-1.5 rounded-md text-sm border border-border bg-card">
                     {a}
                   </span>
                 ))}
@@ -186,7 +186,7 @@ export default function ProjectMicrosite() {
 
         {/* Sticky lead form */}
         <aside className="lg:sticky lg:top-20 self-start" id="lead-form">
-          <div className="p-6 rounded-none border border-border bg-card">
+          <div className="p-6 rounded-md border border-border bg-card">
             <h3 className="font-display text-xl font-semibold mb-2">Получить детали</h3>
             <p className="text-sm text-muted-foreground mb-4">Брошюра, цены, планировки — за 1 минуту</p>
             <NbLeadForm projectId={project.id} source={`microsite_${slug}`} />

@@ -63,7 +63,7 @@ export function ClearViewPaywall({
       {/* Paywall overlay */}
       <div className="absolute inset-0 flex items-center justify-center p-4">
         <div className="w-full max-w-sm bg-card border border-border rounded-none p-5 text-center space-y-3 shadow-lg">
-          <div className="inline-flex items-center justify-center w-10 h-10 rounded-none border border-border bg-muted">
+          <div className="inline-flex items-center justify-center w-10 h-10 rounded-sm border border-border bg-muted">
             <Lock className="w-5 h-5 text-foreground" aria-hidden />
           </div>
           <div>

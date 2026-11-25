@@ -96,7 +96,7 @@ export function ClearViewBadgePopover({ projectId, detailHref, isRu = false, ...
         side="bottom"
         align="start"
         sideOffset={6}
-        className="w-[min(320px,calc(100vw-32px))] p-3 rounded-none border border-border bg-card shadow-lg"
+        className="w-[min(320px,calc(100vw-32px))] p-3 rounded-md border border-border bg-card shadow-lg"
         onClick={(e) => e.stopPropagation()}
       >
         {isLoading && (

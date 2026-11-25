@@ -150,7 +150,7 @@ export default function Search() {
                       <AnimatedCard key={type}>
                         <button
                           onClick={() => setSelectedType(type)}
-                          className="w-full min-h-14 flex items-center gap-2 p-2.5 rounded-none bg-card border border-border hover:border-primary/30 transition-all"
+                          className="w-full min-h-14 flex items-center gap-2 p-2.5 rounded-md bg-card border border-border hover:border-primary/30 transition-all"
                         >
                           <div className={cn(
                             "w-8 h-8 shrink-0 rounded-none flex items-center justify-center bg-gradient-to-br",
@@ -227,7 +227,7 @@ export default function Search() {
                         <Link
                           to={item.path}
                           state={publicJourneyState(location)}
-                          className="flex gap-3 p-3 rounded-none bg-card border border-border hover:border-primary/30 transition-all"
+                          className="flex gap-3 p-3 rounded-md bg-card border border-border hover:border-primary/30 transition-all"
                         >
                           {item.image ? (
                             <img

@@ -449,7 +449,7 @@ export default function OwnerDashboard() {
           </p>
         </motion.div>
 
-        <div className="rounded-none border bg-card p-6 space-y-4">
+        <div className="rounded-md border bg-card p-6 space-y-4">
           <div className="flex items-center justify-between">
             <span className="text-sm font-medium">
               {isRu ? 'Прогресс настройки' : 'Setup progress'}

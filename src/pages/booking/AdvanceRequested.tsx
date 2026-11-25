@@ -92,7 +92,7 @@ const AdvanceRequested = () => {
           </div>
 
           {/* Order Summary Card */}
-          <div className="bg-card border rounded-none p-5 mb-6">
+          <div className="bg-card border rounded-md p-5 mb-6">
             <div className="flex items-center gap-2 mb-4">
               <FileText className="w-5 h-5 text-primary" />
               <span className="font-semibold">

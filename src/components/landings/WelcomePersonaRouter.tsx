@@ -128,7 +128,7 @@ export function WelcomePersonaRouter() {
             'hover:bg-card/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background',
           )}
         >
-          <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-none border border-border bg-card transition-colors group-hover:border-primary/30">
+          <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-md border border-border bg-card transition-colors group-hover:border-primary/30">
             <Icon className="h-5 w-5 text-primary" strokeWidth={1.75} aria-hidden />
           </div>
           <h3 className="font-display text-h3 font-normal tracking-tight text-foreground">{title}</h3>

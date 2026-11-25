@@ -113,7 +113,7 @@ export default function ClusterOverviewPage({ clusterId }: ClusterOverviewPagePr
           <div className="mt-4 px-4">
             <Link
               to={APP_ROUTES.NEWBUILDS}
-              className="flex items-center justify-between rounded-none border border-border bg-card p-4 transition hover:border-primary/40 hover:bg-primary/[0.035]"
+              className="flex items-center justify-between rounded-md border border-border bg-card p-4 transition hover:border-primary/40 hover:bg-primary/[0.035]"
             >
               <span>
                 <span className="block text-[15px] font-semibold tracking-tight text-foreground">

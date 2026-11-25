@@ -48,7 +48,7 @@ export default function RelocationAreasPage() {
         <h1 className="text-2xl font-bold text-foreground">{title}</h1>
         <p className="text-sm text-muted-foreground mt-1">{description}</p>
 
-        <div className="mt-6 rounded-none border border-border bg-card p-4 space-y-4">
+        <div className="mt-6 rounded-md border border-border bg-card p-4 space-y-4">
           <div>
             <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
               {isRu ? 'Макс. средняя цена / м² (THB)' : 'Max avg price / sqm (THB)'}
@@ -96,7 +96,7 @@ export default function RelocationAreasPage() {
             const mapHref = `https://www.google.com/maps/search/?api=1&query=${area.lat},${area.lng}`;
             return (
               <li key={slug}>
-                <div className="h-full rounded-none border border-border bg-card p-4 flex flex-col">
+                <div className="h-full rounded-md border border-border bg-card p-4 flex flex-col">
                   <div className="flex items-start justify-between gap-2">
                     <h2 className="text-base font-semibold text-foreground">{name}</h2>
                     <div className="flex shrink-0 gap-0.5" aria-label={`rating ${area.investment_rating}`}>

@@ -99,7 +99,7 @@ export default function ManagementCompanyProfile() {
 
         {/* Company Info */}
         <div className="px-4 -mt-12 relative z-10">
-          <div className="bg-card rounded-none border shadow-sm p-4">
+          <div className="bg-card rounded-md border shadow-sm p-4">
             <div className="flex items-start gap-4">
               {/* Logo */}
               <div className="w-16 h-16 rounded-none bg-muted border overflow-hidden shrink-0">

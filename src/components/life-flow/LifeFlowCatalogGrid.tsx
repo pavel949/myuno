@@ -49,7 +49,7 @@ function CatalogCard({ item, index }: { item: EnrichedCatalogItem; index: number
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.03 }}
       onClick={handleClick}
-      className="w-[160px] md:w-auto shrink-0 md:shrink text-left rounded-none border border-border/60 overflow-hidden bg-card hover:shadow-sm transition-all touch-manipulation group"
+      className="w-[160px] md:w-auto shrink-0 md:shrink text-left rounded-md border border-border/60 overflow-hidden bg-card hover:shadow-sm transition-all touch-manipulation group"
     >
       {/* Cover */}
       <div className="relative h-24 overflow-hidden bg-muted">

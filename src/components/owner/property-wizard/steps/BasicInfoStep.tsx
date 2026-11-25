@@ -340,7 +340,7 @@ function BasicInfoStepInner({
                     disabled={catalogueOnly}
                     value={formData.title_deed_type ?? ''}
                     onChange={(e) => updateFormData({ title_deed_type: e.target.value || undefined })}
-                    className="flex h-9 w-full rounded-none border border-input bg-background px-3 py-1 text-sm shadow-sm"
+                    className="flex h-9 w-full rounded-sm border border-input bg-background px-3 py-1 text-sm shadow-sm"
                   >
                     <option value="">{isRu ? 'Не выбрано' : 'Not specified'}</option>
                     {TITLE_DEED_TYPES.map((d) => (
@@ -407,7 +407,7 @@ function BasicInfoStepInner({
                     disabled={catalogueOnly}
                     value={formData.title_deed_type ?? ''}
                     onChange={(e) => updateFormData({ title_deed_type: e.target.value || undefined })}
-                    className="flex h-9 w-full rounded-none border border-input bg-background px-3 py-1 text-sm shadow-sm"
+                    className="flex h-9 w-full rounded-sm border border-input bg-background px-3 py-1 text-sm shadow-sm"
                   >
                     <option value="">{isRu ? 'Не выбрано' : 'Not specified'}</option>
                     {TITLE_DEED_TYPES.map((d) => (
@@ -474,7 +474,7 @@ function BasicInfoStepInner({
                   disabled={catalogueOnly}
                   value={formData.hotel_license_type ?? ''}
                   onChange={(e) => updateFormData({ hotel_license_type: e.target.value || undefined })}
-                  className="flex h-9 w-full rounded-none border border-input bg-background px-3 py-1 text-sm shadow-sm"
+                  className="flex h-9 w-full rounded-sm border border-input bg-background px-3 py-1 text-sm shadow-sm"
                 >
                   <option value="">{isRu ? 'Не выбрано' : 'Not specified'}</option>
                   {HOTEL_LICENSE_TYPES.map((d) => (

@@ -639,7 +639,7 @@ export default function Bookings() {
                 return (
                   <div
                     key={booking.id}
-                    className="bg-card border border-border rounded-none hover:border-primary/30 transition-all"
+                    className="bg-card border border-border rounded-md hover:border-primary/30 transition-all"
                   >
                     {/* Card body */}
                     <button

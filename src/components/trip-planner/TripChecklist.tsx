@@ -166,7 +166,7 @@ export function TripChecklist() {
             >
               <div
                 className={cn(
-                  'rounded-none border bg-card transition-all',
+                  'rounded-md border bg-card transition-all',
                   isCompleted ? 'border-primary/20 bg-primary/5' : 'border-border',
                 )}
               >

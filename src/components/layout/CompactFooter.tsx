@@ -151,7 +151,7 @@ export const CompactFooter = forwardRef<HTMLElement>((_props, ref) => {
           <div className="flex justify-center">
             <button
               onClick={handleInstallClick}
-              className="inline-flex min-h-11 items-center gap-2 rounded-none border border-border bg-card px-4 py-2 font-sans text-body-sm font-medium text-foreground transition-colors hover:bg-card/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              className="inline-flex min-h-11 items-center gap-2 rounded-md border border-border bg-card px-4 py-2 font-sans text-body-sm font-medium text-foreground transition-colors hover:bg-card/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             >
               {isIOS ? <Smartphone className="h-4 w-4" /> : <Download className="h-4 w-4" />}
               {t(ECOSYSTEM_FOOTER_UI.downloadApp)}

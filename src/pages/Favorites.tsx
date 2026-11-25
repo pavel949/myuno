@@ -296,7 +296,7 @@ export default function Favorites() {
                       <div
                         key={item.id}
                         onClick={() => handleNavigate(item)}
-                        className="bg-card rounded-none overflow-hidden border hover:shadow-md transition-all cursor-pointer group"
+                        className="bg-card rounded-md overflow-hidden border hover:shadow-md transition-all cursor-pointer group"
                       >
                         <div className="relative aspect-[4/3] overflow-hidden">
                           <img

@@ -88,7 +88,7 @@ export function LandingShell({
               {benefits.map((b, i) => (
                 <div
                   key={i}
-                  className="flex gap-3 rounded-none border border-border bg-card p-4"
+                  className="flex gap-3 rounded-md border border-border bg-card p-4"
                 >
                   <div className="flex-none p-2 rounded-none bg-primary/10 h-fit">
                     <b.icon className="h-5 w-5 text-primary" />

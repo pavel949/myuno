@@ -65,7 +65,7 @@ const updateContact = useUpdateContact();
   };
 
   return (
-    <div className="rounded-none border bg-card p-4 space-y-4">
+    <div className="rounded-md border bg-card p-4 space-y-4">
       <div className="flex items-center justify-between">
         <p className="text-sm font-semibold flex items-center gap-2">
           <CalendarDays className="h-4 w-4 text-muted-foreground" />

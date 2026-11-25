@@ -167,7 +167,7 @@ export default function VisaComparePage() {
         <h1 className="text-2xl font-bold text-foreground">{title}</h1>
         <p className="text-sm text-muted-foreground mt-1">{description}</p>
 
-        <section className="mt-6 space-y-5 rounded-none border border-border bg-card p-4">
+        <section className="mt-6 space-y-5 rounded-md border border-border bg-card p-4">
           <div>
             <p className="text-xs font-semibold uppercase text-muted-foreground">{isRu ? 'Паспорт / регион' : 'Passport / region'}</p>
             <div className="flex flex-wrap gap-2 mt-2">
@@ -206,7 +206,7 @@ export default function VisaComparePage() {
         <section className="mt-8 space-y-3">
           <h2 className="text-lg font-semibold text-foreground">{isRu ? 'Рекомендованный порядок изучения' : 'Suggested order to explore'}</h2>
           {ranked.map((v, idx) => (
-            <div key={v.id} className="rounded-none border border-border bg-card p-4">
+            <div key={v.id} className="rounded-md border border-border bg-card p-4">
               <div className="flex items-center justify-between gap-2">
                 <p className="text-[10px] font-bold text-muted-foreground">#{idx + 1}</p>
                 <span className="text-[10px] font-mono text-muted-foreground">score {v.score}</span>

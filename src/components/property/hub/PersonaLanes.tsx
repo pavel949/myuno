@@ -196,7 +196,7 @@ function CapitalPersonaPrompt({
   isToggling: boolean;
 }) {
   return (
-    <div className="rounded-none border border-accent/40 bg-card p-5 shadow-sm">
+    <div className="rounded-md border border-accent/40 bg-card p-5 shadow-sm">
       <div className="flex items-start gap-3 mb-4">
         <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-none bg-accent/15 text-accent dark:text-accent">
           <Sparkles className="h-5 w-5" />

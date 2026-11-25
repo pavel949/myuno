@@ -15,7 +15,7 @@ export function ContentSkeleton({ variant = 'card', count = 1, className }: Cont
       return (
         <div className={cn('space-y-3', className)}>
           {items.map(i => (
-            <div key={i} className="p-4 rounded-none border border-border bg-card animate-pulse">
+            <div key={i} className="p-4 rounded-md border border-border bg-card animate-pulse">
               <div className="flex items-start gap-3">
                 <Skeleton className="h-12 w-12 rounded-none shrink-0" />
                 <div className="flex-1 space-y-2">

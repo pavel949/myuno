@@ -211,42 +211,34 @@
 ## 6. DESIGN SYSTEM
 
 > **See `DESIGN.md`** for the full, canonical design system. Always read it before making visual/UI decisions.
-> `DESIGN.md` was re-synced 2026-05-14 against `src/styles/tokens.css` runtime; this section is its short-form mirror.
+> `DESIGN.md` carries the v4 summary (2026-11-25) on top of the DS 2.1 history; this section is its short-form mirror.
 
-**Aesthetic direction (DS 2.1):** civic infrastructure — calm, authoritative, light-first. Reference points (per `tokens.css` header): GOV.UK, e-Estonia, The Economist, Apple support docs. **No mint, no glassmorphism, no glow, no decorative gradients.** Sharp corners by default (`--radius: 0`).
+**Aesthetic direction (Design Bible v4, adopted 2026-11-25 — supersedes DS 2.1):** calm, premium-civic. Navy authority, a single gold accent, paper pages, soft 4/8/12px corners. Still: no mint, no glassmorphism, no glow, no decorative gradients.
 
 **Light theme — `:root` (default):**
-- `--background` `#F7F5F1` (cream)
-- `--foreground` `#1C1916` (ink)
-- `--primary` `#0A2240` (navy) — CTAs, brand
-- `--accent` `#D96B1A` (orange) — **singular** accent, ≤3% of screen
+- `--background` paper `#FDFBF7` · `--muted` ivory `#F4F1EA`
+- `--foreground` `#111827`
+- `--primary` navy `#0D2230` — CTAs, brand, HQ rail
+- `--accent` gold-ink `#8A6524` (decorative gold `#C59A45` = `--brand-gold-500`) — **singular** accent, ≤3% of screen
+- Status: done/active/waiting/blocked/neutral → `--success/--info/--warning/--danger/--muted` (use `WorkflowStatus`)
 
-**Dark theme — `.dark` (admin/MC opt-in only):**
-- `--background` `#051428` (navy-900)
-- `--foreground` `#F7F5F1` (cream)
-- `--primary` `#D96B1A` (orange) — better contrast on navy than navy-on-navy
-- `--accent` navy-light
+**Dark theme — `.dark` (opt-in):** navy-900 background, paper foreground, gold accent.
 
-**⛔ Retired in DS 2.1 (do not reintroduce):**
-- Mint `#00D68F` as primary (was dark-mode primary in DS 2.0)
-- 6-color cluster rainbow (mint/blue/gold/purple/teal/red) — clusters now muted navy/orange/stone
-- Dark-default theme — light is default, dark is opt-in
-- Golos Text / DM Sans / JetBrains Mono — replaced by Source Serif 4 + Geist + IBM Plex Mono
+**⛔ Retired (do not reintroduce):** mint `#00D68F`, 6-colour cluster rainbow, orange `#D96B1A` as accent (legacy `--brand-orange*` names now resolve to gold), DM Sans / Syne / Playfair Display.
 
 **Border radius (only these are permitted):**
-- `--radius` (default): **0px** — buttons, cards, panels, inputs, modals
-- `--radius-sm`: 2px — mini-badges, category chips
-- `--radius-full`: 9999px — avatars, status dots, pill toggles
-- 8–16px mid-range radius is **forbidden** (mid-tokens collapsed to 0)
+- `rounded-sm` / `rounded` = **4px** — buttons, inputs, chips (r-control)
+- `rounded-md` = **8px** — cards, panels, modals (r-card)
+- `rounded-lg` = **12px** — media, large surfaces (r-media)
+- `rounded-full` — avatars, status dots, pills
+- `rounded-none` — deliberate edge-to-edge bands/rows only
 
-**Fonts (canonical, matches `tokens.css` + DESIGN.md Typography table):**
-- Display / headings: **Source Serif 4** (both languages, primary)
-- Body / UI: **Geist** (both languages, primary)
+**Fonts (canonical, matches `tokens.css`):**
+- Display / headings: **Outfit** (Latin)
+- Body / UI: **Manrope** (Latin + Cyrillic; also carries RU headings per-glyph)
 - Numerics / data / mono: **IBM Plex Mono** with `font-feature-settings: "tnum"`
-- Locale fallback (RU): Unbounded → Golos Text → Noto Serif / Noto Sans
-- Locale fallback (EN): Noto Serif → Noto Sans → Georgia / system-ui
-- Thai glyphs: **Noto Sans Thai**, supplied by the canonical font stylesheet; Latin text retains Source Serif 4 / Geist.
-- Legacy fallback: JetBrains Mono may remain after IBM Plex Mono in the canonical stack. Cormorant Garamond is allowed only in the existing `/newbuilds/` luxury exception.
+- Fallbacks: Golos Text / Unbounded (RU) · Noto Sans / Noto Serif / Noto Sans SC (EN/ZH) · Noto Sans Thai (TH)
+- Legacy: Source Serif 4 / Geist / JetBrains Mono stay allowed in fallbacks only. Cormorant Garamond only in `/newbuilds/`.
 - ⛔ Forbidden font families: Syne, DM Sans, Playfair Display.
 
 **Other rules:**

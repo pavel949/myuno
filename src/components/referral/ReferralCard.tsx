@@ -53,7 +53,7 @@ export function ReferralCard() {
 
   if (isLoading) {
     return (
-      <div className="rounded-none bg-card border border-border p-5 space-y-4">
+      <div className="rounded-md bg-card border border-border p-5 space-y-4">
         <Skeleton className="h-6 w-40" />
         <Skeleton className="h-12 w-full" />
         <Skeleton className="h-10 w-full" />

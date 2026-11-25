@@ -77,7 +77,7 @@ export default function MCSettingsPage() {
           <AccordionItem
             key={id}
             value={id}
-            className="border border-border/60 rounded-none bg-card px-4 data-[state=open]:shadow-sm transition-shadow"
+            className="border border-border/60 rounded-md bg-card px-4 data-[state=open]:shadow-sm transition-shadow"
           >
             <AccordionTrigger className="hover:no-underline py-4 gap-3">
               <div className="flex min-w-0 items-center gap-3 text-left">

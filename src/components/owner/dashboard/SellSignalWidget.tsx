@@ -56,7 +56,7 @@ export function SellSignalWidget() {
 
   if (isLoading) {
     return (
-      <div className="rounded-none border bg-card p-4 space-y-2">
+      <div className="rounded-md border bg-card p-4 space-y-2">
         <Skeleton className="h-5 w-40" />
         <Skeleton className="h-12 w-full" />
         <Skeleton className="h-12 w-full" />
@@ -67,7 +67,7 @@ export function SellSignalWidget() {
   const deals = data ?? [];
 
   return (
-    <div className="rounded-none border bg-card text-card-foreground shadow-sm">
+    <div className="rounded-md border bg-card text-card-foreground shadow-sm">
       <div className="flex items-center justify-between p-4 pb-2">
         <div className="flex items-center gap-2">
           <Sparkles className="h-4 w-4 text-primary" />

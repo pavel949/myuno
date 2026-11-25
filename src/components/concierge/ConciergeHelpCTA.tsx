@@ -130,7 +130,7 @@ export function ConciergeHelpCTA(props: ConciergeHelpCTAProps) {
       <>
         <div
           className={cn(
-            'flex items-center justify-between gap-3 rounded-none border bg-card px-4 py-3 text-sm',
+            'flex items-center justify-between gap-3 rounded-md border bg-card px-4 py-3 text-sm',
             className,
           )}
         >

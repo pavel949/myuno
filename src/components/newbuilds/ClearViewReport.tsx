@@ -105,7 +105,7 @@ export function ClearViewReport({ projectId, isBrokered, publicView = false }: P
   const ownerView = !publicView && !isAdmin && isProjectDeveloper;
 
   return (
-    <section className="border border-border bg-card p-5 sm:p-6 space-y-5 rounded-none">
+    <section className="border border-border bg-card p-5 sm:p-6 space-y-5 rounded-md">
       {/* Header */}
       <header className="flex items-start justify-between gap-3">
         <div className="flex items-center gap-2.5">

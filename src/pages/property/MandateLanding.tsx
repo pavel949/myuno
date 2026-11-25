@@ -67,7 +67,7 @@ const MandateLanding = () => {
             { ru: 'NDA подписывается до раскрытия объектов', en: 'NDA signed before any disclosure' },
             { ru: 'Юрист, налоговый консультант, asset manager — единый договор', en: 'Lawyer, tax advisor, asset manager — single engagement' },
           ].map((item, i) => (
-            <div key={i} className="rounded-none border border-border bg-card p-4">
+            <div key={i} className="rounded-md border border-border bg-card p-4">
               <p className="text-sm text-foreground/90">{t(item)}</p>
             </div>
           ))}

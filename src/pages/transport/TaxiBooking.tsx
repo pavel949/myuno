@@ -354,7 +354,7 @@ export default function TaxiBooking() {
 
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Route Selection */}
-          <div className="p-4 rounded-none bg-card border border-border/50 space-y-3">
+          <div className="p-4 rounded-md bg-card border border-border/50 space-y-3">
             {/* Current Location Quick Button */}
             <button
               type="button"
@@ -466,7 +466,7 @@ export default function TaxiBooking() {
               <Users className="w-4 h-4" />
               {language === 'ru' ? 'Пассажиры' : 'Passengers'}
             </Label>
-            <div className="flex items-center gap-4 p-4 rounded-none bg-card border border-border/50">
+            <div className="flex items-center gap-4 p-4 rounded-md bg-card border border-border/50">
               <button
                 type="button"
                 onClick={() => handlePassengerChange(-1)}

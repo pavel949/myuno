@@ -212,7 +212,7 @@ export function IntakeFileUpload({
             return (
               <div
                 key={file.id}
-                className="relative group border rounded-none overflow-hidden bg-card"
+                className="relative group border rounded-md overflow-hidden bg-card"
               >
                 {/* Preview */}
                 <div className="aspect-square flex items-center justify-center bg-muted/50">

@@ -19,7 +19,7 @@ export default function ReferralPage() {
         <ReferralCard />
 
         {/* How it works */}
-        <div className="rounded-none bg-card border border-border p-5 space-y-4">
+        <div className="rounded-md bg-card border border-border p-5 space-y-4">
           <h3 className="font-semibold text-foreground">
             {isRu ? 'Как это работает' : 'How it works'}
           </h3>
@@ -43,7 +43,7 @@ export default function ReferralPage() {
 
         {/* Referral history */}
         {referrals.length > 0 && (
-          <div className="rounded-none bg-card border border-border p-5 space-y-3">
+          <div className="rounded-md bg-card border border-border p-5 space-y-3">
             <h3 className="font-semibold text-foreground">
               {isRu ? 'Кого вы уже пригласили' : 'Friends you invited'}
             </h3>

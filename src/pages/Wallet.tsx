@@ -288,7 +288,7 @@ const Wallet = () => {
                 key={idx}
                 onClick={action.onClick}
                 data-testid={idx === 0 ? 'topup-button' : undefined}
-                className="flex flex-col items-center gap-2 p-4 bg-card rounded-none border border-border hover:border-primary/50 transition-colors"
+                className="flex flex-col items-center gap-2 p-4 bg-card rounded-md border border-border hover:border-primary/50 transition-colors"
               >
                 <div className={`w-12 h-12 rounded-full ${action.color} flex items-center justify-center`}>
                   <Icon className="w-6 h-6 text-white" />

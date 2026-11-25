@@ -34,7 +34,7 @@ export function StaysSubscriptionCard({ propertyId, isRu }: StaysSubscriptionCar
   const slotsLeft = Math.max(paidSlots - usedSlots, 0);
 
   return (
-    <div className="rounded-none border bg-card text-card-foreground shadow-sm p-4 mb-6">
+    <div className="rounded-md border bg-card text-card-foreground shadow-sm p-4 mb-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div className="flex gap-3">
           <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-none bg-primary/10 text-primary">

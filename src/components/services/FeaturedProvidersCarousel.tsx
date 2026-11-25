@@ -54,7 +54,7 @@ export function FeaturedProvidersCarousel() {
             onClick={() => navigate(`/services/provider/${provider.id}?category=${provider.business_category}`)}
             className={cn(
               "w-[200px] shrink-0 snap-center",
-              "bg-card rounded-none border border-border overflow-hidden",
+              "bg-card rounded-md border border-border overflow-hidden",
               "shadow-sm hover:shadow-md ",
               "transition-all duration-200 group touch-manipulation text-left"
             )}

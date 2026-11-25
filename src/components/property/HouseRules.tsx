@@ -164,7 +164,7 @@ export function HouseRules({
 
         {/* Written rules */}
         {(rules || rules_ru) && (
-          <div className="p-3 rounded-none bg-card border border-border/50">
+          <div className="p-3 rounded-md bg-card border border-border/50">
             <p className="text-sm whitespace-pre-line">
               {isRu ? rules_ru || rules : rules}
             </p>

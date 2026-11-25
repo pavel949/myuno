@@ -143,7 +143,7 @@ export function PoiClaimSheet({ open, onOpenChange, poi }: Props) {
               id="target_vertical"
               value={form.target_vertical}
               onChange={(e) => setForm({ ...form, target_vertical: e.target.value })}
-              className="w-full h-10 rounded-none border border-input bg-background px-3 text-sm"
+              className="w-full h-10 rounded-sm border border-input bg-background px-3 text-sm"
             >
               {VERTICALS.map((opt) => (
                 <option key={opt.v} value={opt.v}>{language === 'ru' ? opt.ru : opt.en}</option>

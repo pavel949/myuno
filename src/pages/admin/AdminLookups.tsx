@@ -258,7 +258,7 @@ export default function AdminLookups() {
                 {values.map((item) => (
                   <div
                     key={item.id}
-                    className="flex items-center gap-3 p-3 rounded-none border bg-card hover:bg-accent/50 transition-colors"
+                    className="flex items-center gap-3 p-3 rounded-md border bg-card hover:bg-accent/50 transition-colors"
                   >
                     <GripVertical className="h-4 w-4 text-muted-foreground cursor-move" />
                     

@@ -360,7 +360,7 @@ export function OdooCrmSettingsImportModal({
       size="lg"
     >
       <div className="space-y-4">
-        <div className="rounded-none border border-border/60 p-4 bg-card">
+        <div className="rounded-md border border-border/60 p-4 bg-card">
           <p className="text-sm font-medium mb-2">{isRu ? 'Загрузите CSV из ODOO' : 'Upload CSV export from ODOO'}</p>
           <p className="text-xs text-muted-foreground mb-3">
             {isRu
@@ -390,7 +390,7 @@ export function OdooCrmSettingsImportModal({
         </div>
 
         {rows.length > 0 && (
-          <div className="rounded-none border border-border/60 p-4 space-y-3 bg-card">
+          <div className="rounded-md border border-border/60 p-4 space-y-3 bg-card">
             <div className="flex flex-wrap items-center gap-2">
               <Badge variant="secondary">{isRu ? `Строк: ${rows.length}` : `Rows: ${rows.length}`}</Badge>
               <Badge variant="secondary">{isRu ? `Опции: ${parsed.options.length}` : `Options: ${parsed.options.length}`}</Badge>

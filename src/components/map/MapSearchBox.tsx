@@ -278,7 +278,7 @@ export const MapSearchBox = forwardRef<MapSearchBoxHandle, MapSearchBoxProps>(fu
           aria-controls="map-search-listbox"
           aria-autocomplete="list"
           aria-activedescendant={activeIdx >= 0 ? `map-search-opt-${activeIdx}` : undefined}
-          className={`w-full h-10 pl-9 ${selectedId ? 'pr-20' : 'pr-9'} rounded-none bg-card border text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/40 ${selectedId ? 'border-primary' : 'border-border'}`}
+          className={`w-full h-10 pl-9 ${selectedId ? 'pr-20' : 'pr-9'} rounded-md bg-card border text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/40 ${selectedId ? 'border-primary' : 'border-border'}`}
         />
         {selectedId && !loading && (
           <span
@@ -305,7 +305,7 @@ export const MapSearchBox = forwardRef<MapSearchBoxHandle, MapSearchBoxProps>(fu
       {open && (
         <div
           ref={scrollRef}
-          className="absolute left-0 right-0 mt-1 bg-card border border-border rounded-none shadow-xl z-30 max-h-80 overflow-y-auto"
+          className="absolute left-0 right-0 mt-1 bg-card border border-border rounded-md shadow-xl z-30 max-h-80 overflow-y-auto"
           style={{ scrollPaddingTop: listOffsetTop, scrollPaddingBottom: listOffsetBottom }}
         >
           {results.length > 0 && (

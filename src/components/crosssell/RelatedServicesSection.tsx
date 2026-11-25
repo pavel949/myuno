@@ -27,7 +27,7 @@ const RelatedServicesCard = memo(function RelatedServicesCard({ entity, index }:
       animate={{ opacity: 1 }}
       transition={{ delay: index * 0.06, duration: 0.25 }}
       onClick={() => navigate(entity.path)}
-      className="flex-shrink-0 w-[200px] bg-card border border-border rounded-none overflow-hidden hover:shadow-lg hover:border-primary/30 transition-all duration-200 text-left snap-start"
+      className="flex-shrink-0 w-[200px] bg-card border border-border rounded-md overflow-hidden hover:shadow-lg hover:border-primary/30 transition-all duration-200 text-left snap-start"
     >
       {/* Image */}
       <div className="relative h-[120px] w-full overflow-hidden">

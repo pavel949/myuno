@@ -173,7 +173,7 @@ export default function ServiceBooking() {
       <PageContainer className="pb-32">
         <PageHeader title={ruLang ? 'Запись к специалисту' : 'Book a specialist'} showBack />
 
-        <div className="flex items-center gap-3 p-4 bg-card rounded-none border mt-4 mb-6">
+        <div className="flex items-center gap-3 p-4 bg-card rounded-md border mt-4 mb-6">
           <img src={provider.logo_url || PLACEHOLDER_IMAGES.provider} alt={provider.name} className="w-12 h-12 rounded-full object-cover" />
           <div>
             <h3 className="font-semibold">{provider.name}</h3>
@@ -189,7 +189,7 @@ export default function ServiceBooking() {
           </div>
         )}
 
-        <div className="bg-card rounded-none border p-5 mb-4">
+        <div className="bg-card rounded-md border p-5 mb-4">
           <div className="flex items-center justify-between mb-4">
             <h3 className="font-semibold">{ruLang ? 'Услуги' : 'Services'}</h3>
             {bookable && selectedServices.length > 0 && (
@@ -228,13 +228,13 @@ export default function ServiceBooking() {
 
         {bookable && (
           <>
-            <div className="bg-card rounded-none border p-5 mb-4">
+            <div className="bg-card rounded-md border p-5 mb-4">
               <h3 className="font-semibold mb-4">{ruLang ? 'Дата и время' : 'Date & Time'}</h3>
               <BookingDateTimeSelect date={date} time={time} onDateChange={setDate} onTimeChange={setTime}
                 availableTimes={UNRESOLVED_FIXED_TIME_SLOTS} showQuickDates />
             </div>
 
-            <div className="bg-card rounded-none border p-5 mb-4">
+            <div className="bg-card rounded-md border p-5 mb-4">
               <Label className="font-semibold mb-4 flex items-center gap-2">
                 <Home className="w-5 h-5 text-primary" />
                 {ruLang ? 'Адрес' : 'Address'}
@@ -243,18 +243,18 @@ export default function ServiceBooking() {
                 placeholder={ruLang ? 'Адрес оказания услуги' : 'Service address'} className="mt-2" required />
             </div>
 
-            <div className="bg-card rounded-none border p-5 mb-4">
+            <div className="bg-card rounded-md border p-5 mb-4">
               <h3 className="font-semibold mb-4">{ruLang ? 'Контактные данные' : 'Contact Information'}</h3>
               <BookingContactForm data={contactData} onChange={setContactData} showNotes />
             </div>
 
-            <div className="bg-card rounded-none border p-5 mb-4">
+            <div className="bg-card rounded-md border p-5 mb-4">
               <h3 className="font-semibold mb-4">{ruLang ? 'Способ оплаты' : 'Payment Method'}</h3>
               <BookingPaymentSelect selected={paymentMethod} onSelect={setPaymentMethod} amount={totalAmount} currency="THB" showWallet showCash />
             </div>
 
             {selected.length > 0 && (
-              <div className="bg-card rounded-none border p-5 mb-4">
+              <div className="bg-card rounded-md border p-5 mb-4">
                 <div className="space-y-2 text-sm">
                   {selected.map(service => (
                     <div key={service.id} className="flex justify-between">
