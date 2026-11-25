@@ -97,6 +97,10 @@ export interface Property {
   booking_window_months?: number | null;
 }
 
+/** Columns of `property_projects` safe for public property pages (keep in sync with PropertyProject). */
+export const PUBLIC_PROJECT_COLUMNS =
+  'id, name_en, name_ru, description_en, description_ru, address, district, lat, lng, developer_name, year_built, total_units, cover_image, images, video_url, amenities, infrastructure';
+
 export interface PropertyProject {
   id: string;
   name_en: string;
@@ -551,9 +555,12 @@ export function usePropertyWithRentalTerms(marketplacePropertyId?: string) {
       // Get project info if property has project_id
       let projectData: PropertyProject | null = null;
       if (property.project_id) {
+        // Explicit public columns only (matches PropertyProject). `select('*')`
+        // shipped the juristic person's bank account / PromptPay ids to every
+        // anonymous visitor of a property page inside a project.
         const { data: project, error: projectError } = await supabase
           .from('property_projects')
-          .select('*')
+          .select(PUBLIC_PROJECT_COLUMNS)
           .eq('id', property.project_id)
           .single();
         if (projectError) throw projectError;
