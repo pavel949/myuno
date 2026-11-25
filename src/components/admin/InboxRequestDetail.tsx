@@ -67,7 +67,9 @@ export function InboxRequestDetail({ source, requestId, onClose }: { source: str
     <Sheet open onOpenChange={open => { if (!open) onClose(); }}>
       <SheetContent side="bottom" className="max-h-[85dvh] overflow-y-auto" closeLabel={isRu ? 'Закрыть' : 'Close'}>
         <SheetHeader>
-          <SheetTitle>{source === 'help_requests' ? (isRu ? 'Помощь myUNO' : 'myUNO Help request') : (isRu ? 'Обращение' : 'Request')}</SheetTitle>
+          <SheetTitle>{source === 'help_requests' ? (isRu ? 'Помощь myUNO' : 'myUNO Help request')
+            : source === 'service_orders' ? pickLang(language, { en: 'Service request', ru: 'Заявка на услугу', th: 'คำขอบริการ' })
+            : (isRu ? 'Обращение' : 'Request')}</SheetTitle>
           <SheetDescription className="break-all font-mono">{requestId}</SheetDescription>
         </SheetHeader>
         <div className="mt-4">
@@ -82,7 +84,17 @@ export function InboxRequestDetail({ source, requestId, onClose }: { source: str
                 {([['status', 'Status', 'Статус'], ['created_at', 'Created', 'Создано'], ...(isInboxSource(source) ? INBOX_DETAIL_FIELDS[source] : [])] as readonly (readonly string[])[]).map(([field, en, ru]) => {
                   const value = data[field];
                   if (typeof value !== 'string' && typeof value !== 'number') return null;
-                  return <div key={field} className="grid gap-1 sm:grid-cols-[10rem_1fr]"><dt className="text-sm text-muted-foreground">{isRu ? ru : en}</dt><dd className="whitespace-pre-wrap break-words text-sm">{value}</dd></div>;
+                  let display = value;
+                  if (source === 'service_orders' && field === 'scheduled_at' && typeof value === 'string') {
+                    const requestedTime = new Date(value);
+                    if (!Number.isFinite(requestedTime.getTime())) return null;
+                    const phuketTime = new Intl.DateTimeFormat(language, {
+                      timeZone: 'Asia/Bangkok', dateStyle: 'medium', timeStyle: 'short', hourCycle: 'h23',
+                    }).format(requestedTime);
+                    const zone = pickLang(language, { en: 'Phuket time', ru: 'время Пхукета', th: 'เวลาภูเก็ต' });
+                    display = `${phuketTime} · ${zone}`;
+                  }
+                  return <div key={field} className="grid gap-1 sm:grid-cols-[10rem_1fr]"><dt className="text-sm text-muted-foreground">{isRu ? ru : en}</dt><dd className="whitespace-pre-wrap break-words text-sm">{display}</dd></div>;
                 })}
               </dl>
               {nextHelpStatus && <div className="mt-4">

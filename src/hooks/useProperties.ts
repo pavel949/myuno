@@ -7,6 +7,7 @@ import { PUBLIC_CATALOG_APPROVAL_STATUS } from '@/lib/real-estate/canonicalModel
 import { districtFilterAliases } from '@/lib/taxonomies';
 import { sanitizeSearchTerm } from '@/lib/sanitizeSearch';
 import { selectPropertyCatalogFirst } from '@/lib/publicPropertyCatalog';
+import { GUEST_PROJECT_COLUMNS } from './usePropertyProjects';
 import {
   normalizePropertyTaxonomyArrays,
   normalizeListingAmenities,
@@ -553,11 +554,12 @@ export function usePropertyWithRentalTerms(marketplacePropertyId?: string) {
       if (property.project_id) {
         const { data: project, error: projectError } = await supabase
           .from('property_projects')
-          .select('*')
+          .select(GUEST_PROJECT_COLUMNS + ',developer_name,year_built,total_units')
           .eq('id', property.project_id)
-          .single();
+          .eq('is_active', true)
+          .maybeSingle();
         if (projectError) throw projectError;
-        projectData = project as PropertyProject | null;
+        projectData = project as unknown as PropertyProject | null;
       }
 
       // With unified table, rental terms are directly on the property

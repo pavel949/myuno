@@ -77,9 +77,19 @@ export function serviceMatchesSituation(service: ServiceEntry, code: string) {
   return !code || Boolean(service.situationCodes?.includes(code));
 }
 
-/** The published provider layer has no category/situation IDs in its reader contract.
- * Share text matching, but never invent those associations.
+/**
+ * Reuse only canonical taxonomy slugs from the returned public catalogue.
+ * A synthetic home request template and a provider offer are not the same
+ * thing, so do not infer a category association from a template identifier.
  */
+export function providerOfferCategorySlugs(categories: CategoryEntry[], categoryId: string, childId = ''): string[] {
+  const category = categories.find(item => item.id === categoryId);
+  if (!category) return [];
+  if (childId) return category.services.some(service => service.id === childId) ? [childId] : [];
+  return [category.id, ...category.services.map(service => service.id)];
+}
+
+/** Text matching is limited to the already admitted public offer scope. */
 export function filterMarketplaceServices<T extends { name_en: string; name_ru?: string | null; provider?: { name: string } | null }>(items: T[], query: string): T[] {
   return items.filter(item => matchesServiceQuery(query, [item.name_en, item.name_ru ?? undefined, item.provider?.name]));
 }

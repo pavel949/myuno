@@ -78,10 +78,10 @@ if (
   Object.keys(result.metafile.inputs).some(
     (input) =>
       !input.startsWith("synthetic:") &&
-      input.endsWith("integrations/supabase/client.ts"),
+      (input.endsWith("integrations/supabase/client.ts") || input.endsWith("hooks/useUniversalLead.ts")),
   )
 )
-  throw Error("Live backend module included");
+  throw Error("Live backend or enquiry writer included");
 const routeCss = await readFile(path.join(output, "fixture.css"), "utf8");
 const css = await postcss([
   postcssImport(),

@@ -24,7 +24,7 @@ import { SERVICE_CATEGORIES } from '@/lib/config/homeServiceFunctions';
 import { homeServiceCategoryLabel } from '@/lib/services/servicePresentation';
 import { isHomeServiceCategoryId } from '@/lib/services/publicServiceCategories';
 import { readServiceDiscoveryQuery, updateServiceDiscoveryQuery, clearServiceDiscoveryQuery } from '@/lib/services/serviceDiscoveryQuery';
-import { filterMarketplaceServices, matchesServiceQuery, projectServiceDiscovery, resolveHomeServiceCategory, serviceDiscoveryCategories, serviceDiscoveryMenu, serviceDiscoverySituations } from '@/lib/services/serviceDiscoveryProjection';
+import { filterMarketplaceServices, matchesServiceQuery, projectServiceDiscovery, providerOfferCategorySlugs, resolveHomeServiceCategory, serviceDiscoveryCategories, serviceDiscoveryMenu, serviceDiscoverySituations } from '@/lib/services/serviceDiscoveryProjection';
 import { PUBLIC_CATALOG_COMPACT_GRID, PUBLIC_CATALOG_GRID, PUBLIC_DISCOVERY_MENU_GRID, ECOSYSTEM_HEADER_TITLE } from '@/design-system/ecosystemLayout';
 import '@/styles/public-commerce.css';
 import '@/styles/premium-services.css';
@@ -52,7 +52,6 @@ export default function ServicesIndex({ embedded = false }: { embedded?: boolean
   const filters = readServiceDiscoveryQuery(params);
   const catalog = useCatalogFromDB();
   const { functions } = useServiceFunctions();
-  const offers = useMarketplaceServices();
   const [helpOpen, setHelpOpen] = useState(false);
   const [limit, setLimit] = useState(12);
   const [showAllRequests, setShowAllRequests] = useState(false);
@@ -101,10 +100,16 @@ export default function ServicesIndex({ embedded = false }: { embedded?: boolean
   const visibleRequests = child || filters.query.trim() || showAllRequests ? requests : requestPreviews.slice(0, 8);
   const filtered = Boolean(filters.query || filters.category || filters.situation || params.has('sort'));
   const ready = !catalog.isLoading && !catalog.error && catalog.isFromDB;
-  const showOffers = !filters.category && !filters.situation;
+  const offerSlugs = filters.category
+    ? providerOfferCategorySlugs(categories, category, child?.id)
+    : undefined;
+  // Life-situation assignments to offer records are not verified. Do not
+  // silently turn a situation (or an unknown category) into a global listing.
+  const showOffers = !filters.situation && (!filters.category || (ready && Boolean(offerSlugs?.length)));
+  const offers = useMarketplaceServices(offerSlugs, showOffers);
   const matchingOffers = showOffers ? filterMarketplaceServices(offers.data ?? [], filters.query) : [];
   const hasOverviewMenu = overview && (menu.primary.length > 0 || menu.more.length > 0 || Boolean(menu.yacht));
-  const noResults = ready && (!knownSituation || !knownCategory || (!hasOverviewMenu && !rows.length && !requests.length && (!showOffers || (!offers.isLoading && !offers.isError && !matchingOffers.length))));
+  const noResults = ready && (!knownSituation || !knownCategory || (!hasOverviewMenu && !rows.length && !requests.length && (!showOffers || (!offers.isLoading && !offers.isError && !offers.hasMore && !matchingOffers.length))));
 
   const focusResults = useRef(false);
   useEffect(() => {
@@ -183,7 +188,7 @@ export default function ServicesIndex({ embedded = false }: { embedded?: boolean
         : situations.map(item => ({ id: item.code, label: pickLang(language, { ru: item.titleRu, en: item.titleEn }) }))}
       onSelect={id => { focusResults.current = true; update(filters.view === 'categories' ? 'category' : 'situation', id); }}
     />}
-    {showOffers && <MarketplaceServiceGrid search={filters.query} returnTo={returnTo} onConcierge={() => setHelpOpen(true)} />}
+    {showOffers && <MarketplaceServiceGrid key={offerSlugs?.join('|') ?? 'all'} categorySlugs={offerSlugs} search={filters.query} returnTo={returnTo} onConcierge={() => setHelpOpen(true)} />}
     {ready && home && category === home?.id && <section aria-labelledby="home-categories-title" className="space-y-3">
       <h2 id="home-categories-title" tabIndex={-1} className="font-display text-h3">{t('Услуги для дома', 'Home services', 'บริการสำหรับบ้าน')}</h2>
       <div className={PUBLIC_DISCOVERY_MENU_GRID} role="group" aria-labelledby="home-categories-title" data-testid="home-category-menu">

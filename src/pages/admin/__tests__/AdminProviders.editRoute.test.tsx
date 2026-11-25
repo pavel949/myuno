@@ -71,6 +71,29 @@ describe('provider edit query route', () => {
     fireEvent.change(screen.getByPlaceholderText('Search...'), { target: { value: 'new search' } });
     expect(screen.queryByRole('dialog')).toBeNull();
   });
+  it('keeps approval separate from editing and saves language selection and explicit contact clears', async () => {
+    state.update.mockResolvedValue({ error: null });
+    render(view('/admin/providers?edit=provider-b'));
+    const dialog = await screen.findByRole('dialog', { name: 'Edit Provider' });
+    fireEvent.change(within(dialog).getByDisplayValue('provider-b@example.test'), { target: { value: ' ' } });
+    fireEvent.click(within(dialog).getByRole('button', { name: 'Thai' }));
+    fireEvent.click(within(dialog).getByRole('button', { name: /^Save$/ }));
+    await waitFor(() => expect(state.update).toHaveBeenCalledWith('provider-b', expect.objectContaining({
+      email: null, languages: ['th'], is_verified: false, is_active: false,
+    })));
+    expect(state.update.mock.calls[0][1]).not.toHaveProperty('approval_status');
+  });
+
+  it('publishes a saved non-demo provider only through the explicit action and does not verify silently', async () => {
+    state.update.mockResolvedValue({ error: null });
+    render(view('/admin/providers?edit=provider-b'));
+    const dialog = await screen.findByRole('dialog', { name: 'Edit Provider' });
+    fireEvent.click(within(dialog).getByRole('button', { name: 'Approve and publish' }));
+    await waitFor(() => expect(state.update).toHaveBeenCalledWith('provider-b', expect.objectContaining({
+      approval_status: 'approved', is_active: true, is_verified: false,
+    })));
+  });
+
   it('does not treat an unknown edit target as a create command', async () => {
     render(view('/admin/providers?edit=unavailable&action=new&q=keep'));
     await waitFor(() => expect(state.error).toHaveBeenCalledWith('Provider not found or unavailable'));

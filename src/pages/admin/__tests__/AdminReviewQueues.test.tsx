@@ -135,7 +135,14 @@ describe('AdminProjects review views', () => {
     expect(screen.queryByText(pendingProject.name_en)).not.toBeInTheDocument();
     expect(screen.getByRole('button', { name: /^No updates for 45 days 1$/ })).toHaveAttribute('aria-pressed', 'true');
   });
+  it('shows projects with no linked developer even if they have a legacy text label', () => {
+    mocks.projects = [{ ...pendingProject, developer_id: null, developer_name: 'Legacy text' }, { ...approvedProject, developer_id: 'developer-b' }];
+    renderPage('projects', ['/admin/projects?filter=orphan']);
+    expect(screen.getByText(pendingProject.name_en)).toBeInTheDocument();
+    expect(screen.queryByText(approvedProject.name_en)).not.toBeInTheDocument();
+  });
   it('does not call filtered absence an empty catalogue', () => {
+    mocks.projects = [{ ...pendingProject, developer_id: 'developer-a' }, { ...approvedProject, developer_id: 'developer-b' }];
     renderPage('projects', ['/admin/projects?filter=orphan']);
     expect(screen.getByText('No projects found')).toBeInTheDocument();
     expect(screen.queryByText('No projects yet. Create your first!')).not.toBeInTheDocument();
