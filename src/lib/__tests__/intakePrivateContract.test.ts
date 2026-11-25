@@ -35,4 +35,23 @@ describe('private intake contract', () => {
     expect(hasPrivateIntakeReference('data:image/png;base64,AAAA')).toBe(true);
     expect(hasPrivateIntakeReference(actor + '/' + file + '.png')).toBe(true);
   });
+
+  it.each(['text/plain', 'text/csv'])('rejects a PDF renamed as %s even when valid UTF-8', (mime) => {
+    for (const prefix of ['', '\ufeff', ' '.repeat(1000)]) {
+      const bytes = new TextEncoder().encode(prefix + '%PDF-1.4\n1 0 obj\n<< /Type /Catalog >>\nendobj\n%%EOF');
+      expect(() => validateIntakeBytes(mime, bytes)).toThrow();
+    }
+    expect(() => validateIntakeBytes(mime, new TextEncoder().encode('PDF brochure for a villa'))).not.toThrow();
+  });
+  it('rejects repeatedly encoded private references and fails closed at the decoding bound', () => {
+    for (let level = 1; level <= 20; level++) {
+      const encoded = '%' + '25'.repeat(level - 1) + '2D';
+      const privateUrl = 'https://project.test/storage/v1/object/sign/intake' + encoded + 'uploads/file.png';
+      expect(hasPrivateIntakeReference(privateUrl)).toBe(true);
+      expect(publicIntakeImages([privateUrl])).toEqual([]);
+    }
+    const publicUrl = 'https://project.test/storage/v1/object/public/property-images/one%20villa.jpg';
+    expect(publicIntakeImages([publicUrl])).toEqual([publicUrl]);
+    expect(hasPrivateIntakeReference('Price changed by 5%25')).toBe(false);
+  });
 });

@@ -42,14 +42,15 @@ export function validateIntakeFileMetadata(files: ReadonlyArray<{ name: string; 
 export function hasPrivateIntakeReference(value: unknown): boolean {
   if (typeof value === 'string') {
     let decoded = value;
-    for (let i = 0; i < 4; i++) {
+    // Bound decoding work and fail closed on unresolved nested encodings.
+    for (let i = 0; i < 8; i++) {
       if (/intake-uploads|intake-private:|(?:^|\s)data:|(?:^|\s)blob:|(?:^|\s)intake\//i.test(decoded)) return true;
       if (/^[0-9a-f-]{36}\/[0-9a-f-]{36}\.(?:jpg|jpeg|png|webp|txt|csv)$/i.test(decoded)) return true;
       const normalized = decoded.replace(/%([0-9a-f]{2})/gi, (_, code: string) => String.fromCharCode(parseInt(code, 16)));
-      if (normalized === decoded) break;
+      if (normalized === decoded) return false;
       decoded = normalized;
     }
-    return false;
+    return true;
   }
   if (Array.isArray(value)) return value.some(hasPrivateIntakeReference);
   if (value && typeof value === 'object') return Object.values(value).some(hasPrivateIntakeReference);
@@ -66,6 +67,9 @@ export function validateIntakeBytes(mime: string, bytes: Uint8Array): void {
   if (mime === 'image/webp' && at(0, [82, 73, 70, 70]) && at(8, [87, 69, 66, 80])) return;
   if (mime === 'text/plain' || mime === 'text/csv') {
     const text = new TextDecoder('utf-8', { fatal: true }).decode(bytes);
+    // An ASCII PDF can be valid UTF-8; a renamed document is not plain text.
+    const pdfHeader = text.indexOf('%PDF-');
+    if (pdfHeader >= 0 && pdfHeader < 1024) throw new Error('Unsupported PDF intake format');
     if (!text.includes('\0') && text.length <= INTAKE_MAX_TEXT && text.trim()) return;
   }
   throw new Error('Invalid or unsupported intake file content');
