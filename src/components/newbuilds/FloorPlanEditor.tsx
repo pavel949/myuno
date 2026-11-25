@@ -122,7 +122,9 @@ function AddFloorModal({
     setUploading(true);
     try {
       const ext = file.name.split('.').pop();
-      const path = `developer-uploads/floorplans/${crypto.randomUUID()}.${ext}`;
+      const { data: authData, error: authError } = await supabase.auth.getUser();
+      if (authError || !authData.user) throw new Error('Authentication required');
+      const path = `${authData.user.id}/developer-uploads/floorplans/${crypto.randomUUID()}.${ext}`;
       const { error } = await supabase.storage.from('property-images').upload(path, file, { upsert: false });
       if (error) throw error;
       const { data: pub } = supabase.storage.from('property-images').getPublicUrl(path);
