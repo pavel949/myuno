@@ -14,6 +14,7 @@ const root = process.cwd(),
 await mkdir(output, { recursive: true });
 const virtual = {
   "@/contexts/LanguageContext": `export const useLanguage=()=>({language:new URLSearchParams(location.search).get('lang')||'en'});`,
+  "@/contexts/AuthContext": `export const useAuth=()=>({user:null,session:null,isLoading:false});`,
   "@/components/seo": `export const SEOHead=()=>null;`,
   "@/hooks/useProperties": `import {useState} from 'react';export function useProperties(filters,limit){const[retried,set]=useState(false);const state=new URLSearchParams(location.search).get('state');window.fixtureRentRead={filters,limit};return{data:state==='empty'?[]:[{id:'synthetic-home',project_id:'synthetic-community'}],isLoading:state==='loading',isError:state==='error'&&!retried,refetch:()=>{set(true);return Promise.resolve()}}}`,
   "@/hooks/usePropertyProjects": `export const usePublicPropertyProjects=(limit,district,ids)=>{window.fixtureProjectRead={limit,district,ids};return{data:ids.length?[{id:'synthetic-community',name_en:'Synthetic rental community',name_ru:'Тестовый жилой комплекс',district:'rawai'}]:[],isLoading:false,isError:false,refetch:()=>Promise.resolve()}};`,
@@ -23,7 +24,7 @@ const virtual = {
 };
 const result = await build({
   stdin: {
-    contents: `import React from'react';import{createRoot}from'react-dom/client';import{MemoryRouter,Routes,Route,useLocation}from'react-router-dom';import Page from'${root}/src/pages/property/PropertyLanding.tsx';function Probe(){let l=useLocation();return <output hidden data-testid="location">{l.pathname+l.search+l.hash}</output>}createRoot(document.getElementById('root')).render(<MemoryRouter initialEntries={['/property/rent']}><main className="ds-frame ds-frame-catalogue"><Routes><Route path="/property/rent" element={<Page/>}/><Route path="*" element={<h1>Canonical destination boundary</h1>}/></Routes><Probe/></main></MemoryRouter>);`,
+    contents: `import React from'react';import{createRoot}from'react-dom/client';import{MemoryRouter,Routes,Route,useLocation}from'react-router-dom';import{QueryClient,QueryClientProvider}from'@tanstack/react-query';import Page from'${root}/src/pages/property/PropertyLanding.tsx';function Probe(){let l=useLocation();return <output hidden data-testid="location">{l.pathname+l.search+l.hash}</output>}const queryClient=new QueryClient({defaultOptions:{queries:{retry:false},mutations:{retry:false}}});createRoot(document.getElementById('root')).render(<QueryClientProvider client={queryClient}><MemoryRouter initialEntries={['/property/rent']}><main className="ds-frame ds-frame-catalogue"><Routes><Route path="/property/rent" element={<Page/>}/><Route path="*" element={<h1>Canonical destination boundary</h1>}/></Routes><Probe/></main></MemoryRouter></QueryClientProvider>);`,
     loader: "tsx",
     resolveDir: root,
   },
@@ -66,6 +67,8 @@ for (const file of [
   "src/pages/property/PropertyLanding.tsx",
   "src/components/home/HomeDiscoverySearch.tsx",
   "src/components/home/HomeSearchDateRange.tsx",
+  "src/components/search/SearchLeadRequest.tsx",
+  "src/hooks/useUniversalLead.ts",
   "src/styles/rental-landing.css",
 ])
   if (
@@ -102,6 +105,8 @@ const files = [
   "src/styles/rental-landing.css",
   "src/content/property/rentalLanding.ts",
   "src/components/home/HomeDiscoverySearch.tsx",
+  "src/components/search/SearchLeadRequest.tsx",
+  "src/hooks/useUniversalLead.ts",
 ];
 await writeFile(
   path.join(output, "provenance.json"),
@@ -119,7 +124,7 @@ await writeFile(
       ),
       syntheticBoundaries: Object.keys(virtual),
       limits:
-        "Actual page, editorial copy, stored-media fallback and shared search. Synthetic public homes/project reads and taxonomy; no live backend, full AppLayout or production acceptance. Fallback fonts.",
+        "Actual page, editorial copy, stored-media fallback, shared search and request form with real lead hook/QueryClient. Synthetic guest auth, public homes/project reads and taxonomy; backend capability throws. No live backend, full AppLayout or production acceptance. Fallback fonts.",
     },
     null,
     2,

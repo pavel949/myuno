@@ -20,7 +20,9 @@ async def main():
      if r.request.url.startswith(base+'/'):await r.continue_()
      else:blocked.append(r.request.url);await r.abort()
     await context.route('**/*',route);page=await context.new_page();page.on('pageerror',lambda e:errors.append(str(e)))
-    await page.goto(f'{base}/fixture.html?lang={lang}');await expect(page.locator('#rental-title')).to_be_visible()
+    await page.goto(f'{base}/fixture.html?lang={lang}')
+    try:await expect(page.locator('#rental-title')).to_be_visible()
+    except AssertionError as e:raise AssertionError(f'Rental mount failed {lang}/{width}; pageErrors={errors}; blocked={blocked}') from e
     await page.evaluate('document.fonts.ready');await expect(page.locator('.rental-community')).to_have_count(1)
     assert await page.evaluate('document.documentElement.scrollWidth<=innerWidth'),f'overflow {lang}/{width}'
     for id in ['rental-areas','rental-communities','rental-search','rental-guide','rental-life']:await expect(page.locator('#'+id)).to_have_count(1)
@@ -37,6 +39,11 @@ async def main():
     assert await page.evaluate('window.fixtureRentRead.filters.listingType')=='rent'
     assert await page.evaluate('window.fixtureProjectRead.ids')==['synthetic-community']
     await page.screenshot(path=str(out/f'{lang}-{width}.png'),full_page=True)
+    # The real request form must mount and reject incomplete data without any backend call.
+    request_form=page.locator('form').filter(has=page.locator('input[type="tel"]'))
+    await expect(request_form).to_have_count(1)
+    await request_form.locator('button[type="submit"]').click()
+    await expect(request_form.get_by_role('alert')).to_be_visible()
     # Native controls use the existing canonical search; optional dates stay absent.
     await page.locator('#rental-search input[type="search"]').fill('Synthetic home')
     await page.locator('#rental-search button[type="submit"]').click()
