@@ -40,7 +40,7 @@ const stable = (value: unknown): string => value === null || typeof value !== 'o
 /** General writer uses an explicit, default-off protocol. Never fall back to
  * the legacy writer when the durable endpoint is absent or times out. */
 export function createGeneralConsultationIntakeAttempt() {
-  const durable = import.meta.env.VITE_CONSULTATION_DURABLE_INTAKE === 'true';
+  const durable = import.meta.env?.VITE_CONSULTATION_DURABLE_INTAKE === 'true';
   return createConsultationIntakeAttempt({ durable, allowUncertainRetry: durable });
 }
 
