@@ -35,15 +35,14 @@ it.each(['consultation', 'universal'])('allows corrected %s input after definiti
   await act(async()=>{expect(await submit('Corrected synthetic owner')).toMatchObject({id:'synthetic-receipt'});});
   expect(fixture.rpc).toHaveBeenCalledTimes(2);expect(fixture.success).toHaveBeenCalledOnce();
 });
-it('can recover the original request after an edited network retry is safely blocked',async()=>{
+it('blocks unchanged and edited replay when the general writer has no verified idempotency',async()=>{
   fixture.rpc.mockRejectedValueOnce(new Error('synthetic lost response')).mockResolvedValue({data:'synthetic-receipt',error:null});
   const {result}=renderHook(useConsultationRequests,{wrapper});
   await act(async()=>{await expect(result.current.requestFullManagement.mutateAsync(input)).rejects.toThrow('lost response');});
   await act(async()=>{await expect(result.current.requestFullManagement.mutateAsync({...input,notes:'Edited'})).rejects.toThrow('outcome is uncertain');});
   expect(fixture.rpc).toHaveBeenCalledOnce();expect(fixture.success).not.toHaveBeenCalled();
-  await act(async()=>{expect(await result.current.requestFullManagement.mutateAsync(input)).toMatchObject({id:'synthetic-receipt'});});
-  expect(fixture.rpc).toHaveBeenCalledTimes(2);
-  expect(fixture.rpc.mock.calls[0][1].payload.intake_request_key).toBe(fixture.rpc.mock.calls[1][1].payload.intake_request_key);
+  await act(async()=>{await expect(result.current.requestFullManagement.mutateAsync(input)).rejects.toThrow('outcome is uncertain');});
+  expect(fixture.rpc).toHaveBeenCalledOnce();expect(fixture.success).not.toHaveBeenCalled();expect(fixture.invoke).not.toHaveBeenCalled();
 });
 it.each([null, '', '   ', 42])('rejects an unconfirmed consultation receipt %s without success acknowledgement', async data => {
   fixture.rpc.mockResolvedValue({ data, error: null }); const { result } = renderHook(useConsultationRequests, { wrapper });
@@ -77,14 +76,21 @@ it('acknowledges the owner marketing receipt without claiming notification deliv
   expect(fixture.rpc).toHaveBeenCalledOnce();
 });
 
-it('reuses the same key after lost response and does not redispatch after acknowledged replay', async () => {
+it('does not repeat an uncertain general lead after a remount or dispatch notifications', async () => {
   fixture.rpc.mockRejectedValueOnce(new Error('synthetic lost response')).mockResolvedValue({data:'synthetic-receipt',error:null});
-  const {result}=renderHook(useUniversalLead,{wrapper});
   const request={...input,vertical_id:'properties',lead_source:'cta' as const,entry_point:'synthetic-idempotent'};
-  await act(async()=>{await expect(result.current.submitLead.mutateAsync(request)).rejects.toThrow('lost response');});
+  const first=renderHook(useUniversalLead,{wrapper});
+  await act(async()=>{await expect(first.result.current.submitLead.mutateAsync(request)).rejects.toThrow('lost response');});
+  first.unmount();
+  const second=renderHook(useUniversalLead,{wrapper});
+  await act(async()=>{await expect(second.result.current.submitLead.mutateAsync(request)).rejects.toThrow('outcome is uncertain');});
+  expect(fixture.rpc).toHaveBeenCalledOnce();expect(fixture.invoke).not.toHaveBeenCalled();
+});
+it('does not redispatch a confirmed receipt for the same mounted intent', async () => {
+  const {result}=renderHook(useUniversalLead,{wrapper});
+  const request={...input,vertical_id:'properties',lead_source:'cta' as const,entry_point:'synthetic-confirmed'};
   await act(async()=>{await result.current.submitLead.mutateAsync(request);});
   const notifications=fixture.invoke.mock.calls.length;
   await act(async()=>{await result.current.submitLead.mutateAsync(request);});
-  expect(fixture.rpc).toHaveBeenCalledTimes(2);expect(fixture.rpc.mock.calls[0][1].payload.intake_request_key).toBe(fixture.rpc.mock.calls[1][1].payload.intake_request_key);
-  expect(fixture.invoke.mock.calls.length).toBe(notifications);
+  expect(fixture.rpc).toHaveBeenCalledOnce();expect(fixture.invoke.mock.calls.length).toBe(notifications);
 });

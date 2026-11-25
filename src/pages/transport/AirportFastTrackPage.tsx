@@ -274,10 +274,19 @@ export default function AirportFastTrackPage() {
     setIsSubmitting(true);
     try {
       const serviceName = isRu ? selectedService.name_ru : selectedService.name_en;
+      // One stable key for the signed-in actor's unresolved draft. No passport
+      // details or contact fields are stored with the key.
+      const receiptKey = `myuno:fasttrack-pending:v1:${user.id}`;
+      let requestKey = sessionStorage.getItem(receiptKey);
+      if (!requestKey) {
+        requestKey = globalThis.crypto.randomUUID();
+        sessionStorage.setItem(receiptKey, requestKey);
+      }
 
-      const { data, error } = await supabase.functions.invoke('notify-fasttrack-booking', {
+      const { data, error } = await supabase.functions.invoke('submit-fasttrack-request', {
         body: {
           user_id: user.id,
+          request_key: requestKey,
           service_id: selectedService.id,
           service_name: serviceName,
           direction,
@@ -311,9 +320,10 @@ export default function AirportFastTrackPage() {
       if (error || data?.success !== true || !data.booking_id) throw error || new Error(data?.error || "Booking was not accepted");
 
       toast(tr('Request received', 'Заявка получена', 'ได้รับคำขอแล้ว'), {
-        description: isRu ? 'Мы свяжемся с вами для подтверждения' : "We'll contact you to confirm",
+        description: tr('Request ID','Номер заявки','หมายเลขคำขอ') + ': ' + data.booking_id,
       });
 
+      sessionStorage.removeItem(receiptKey);
       clearDraft();
 
       if (direction === 'arrival') {
@@ -321,8 +331,8 @@ export default function AirportFastTrackPage() {
       } else {
         navigate('/bookings');
       }
-    } catch (err) {
-      console.error('Fast Track submission could not be confirmed:', err);
+    } catch {
+      console.error('Fast Track submission could not be confirmed');
       setSubmissionError(true);
     } finally {
       submitLock.current = false;
@@ -389,15 +399,15 @@ export default function AirportFastTrackPage() {
             {selectedService ? <span className="text-2xl font-semibold tabular-nums">{formatPrice(pricing.total, selectedService.currency)}</span> : <span className="text-sm font-medium text-muted-foreground">{isRu ? "Выберите услугу" : "Select a service"}</span>}
           </div>
           {submissionError && <p role="alert" className="text-sm text-destructive">{tr(
-            'We could not verify receipt. Open My Bookings or contact myUNO before sending again.',
-            'Не удалось подтвердить получение. Проверьте «Мои бронирования» или свяжитесь с myUNO перед повторной отправкой.',
-            'ยืนยันการรับคำขอไม่ได้ โปรดตรวจสอบการจองของฉันหรือติดต่อ myUNO ก่อนส่งอีกครั้ง',
+            'We could not verify receipt. Retry the same request without changing its details, or open My Bookings.',
+            'Не удалось подтвердить получение. Повторите ту же заявку без изменения данных или проверьте «Мои бронирования».',
+            'ยืนยันการรับคำขอไม่ได้ ลองส่งคำขอเดิมโดยไม่เปลี่ยนข้อมูล หรือตรวจสอบการจองของฉัน',
           )} <a className="underline" href="/bookings">{tr('My bookings', 'Мои бронирования', 'การจองของฉัน')}</a></p>}
           {step === 'review' ? (
-            <Button onClick={handleSubmit} className="text-base font-semibold" disabled={cutoffViolated || isSubmitting || showUpsell || submissionError}>
+            <Button onClick={handleSubmit} className="text-base font-semibold" disabled={cutoffViolated || isSubmitting || showUpsell}>
               {isSubmitting
                 ? tr('Sending…', 'Отправка…', 'กำลังส่ง…')
-                : tr('Send request', 'Отправить заявку', 'ส่งคำขอ')}
+                : submissionError ? tr('Retry same request', 'Повторить ту же заявку', 'ส่งคำขอเดิมอีกครั้ง') : tr('Send request', 'Отправить заявку', 'ส่งคำขอ')}
             </Button>
           ) : (
             <Button onClick={handleNext} className="text-base font-semibold" disabled={isSubmitting}>

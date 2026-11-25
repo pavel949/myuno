@@ -44,7 +44,7 @@ const modules = {
     functions: { invoke: async (name, { body }) => {
       window.writes.push({ name, body });
       if (name === 'create-checkout') return { error: new Error('Fixture checkout unavailable') };
-      if (name === 'notify-fasttrack-booking' && !window.failRequest) return { data: { success: true, booking_id: 'fixture-fast-track' } };
+      if (name === 'submit-fasttrack-request' && !window.failRequest) return { data: { success: true, booking_id: 'fixture-fast-track' } };
       return { data: { success: true } };
     } }
   };`,
@@ -185,13 +185,20 @@ async function fastTrack(page, direction, width, simulateFailure) {
   await page.getByRole('button', { name: 'Send request' }).click();
   if (simulateFailure) {
     await expect(page.getByRole('alert')).toContainText('could not verify receipt');
-    await expect(page.getByRole('button', { name: 'Send request' })).toBeDisabled();
+    await expect(page.getByRole('button', { name: 'Retry same request' })).toBeEnabled();
+    await page.evaluate(() => { window.failRequest = false; });
+    await page.getByRole('button', { name: 'Retry same request' }).click();
+    await expect(page.getByText(direction === 'arrival' ? 'Fixture: transfer upsell opened' : 'Fixture: bookings')).toBeVisible();
   } else {
     await expect(page.getByText(direction === 'arrival' ? 'Fixture: transfer upsell opened' : 'Fixture: bookings')).toBeVisible();
   }
   const writes = await page.evaluate(() => window.writes);
-  assert.equal(writes.length, 1);
-  assert.equal(writes[0].name, 'notify-fasttrack-booking');
+  assert.equal(writes.length, simulateFailure ? 2 : 1);
+  if (simulateFailure) {
+    assert.equal(writes[0].body.request_key, writes[1].body.request_key);
+    assert.equal(writes[1].name, 'submit-fasttrack-request');
+  }
+  assert.equal(writes[0].name, 'submit-fasttrack-request');
   assert.equal(writes[0].body.direction, direction);
   assert.equal(writes[0].body.service_id, 'bundle');
 }

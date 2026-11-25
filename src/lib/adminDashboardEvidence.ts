@@ -26,10 +26,25 @@ export function summarizeDashboardSnapshots(rows: DashboardSnapshot[], dates: st
 }
 
 export type PlatformStatus = 'configured' | 'not_configured' | 'verified' | 'needs_review' | 'unknown';
-export interface PlatformStatusItem { key: string; status: PlatformStatus }
+export type StripeStatusDetail = 'missing_secret_key' | 'missing_webhook_secret' | 'test_mode' | 'live_mode';
+export interface PlatformStatusItem { key: string; status: PlatformStatus; detail?: StripeStatusDetail }
 
-export function configurationStatus(value: unknown, kind: 'stripe' | 'email' | 'whatsapp'): PlatformStatus {
-  if (kind === 'stripe') return value === 'live' ? 'configured' : 'not_configured';
+/**
+ * Card payments are configured when the edge runtime actually holds a usable
+ * secret key and webhook secret. A feature switch or a stored mode label is
+ * not evidence of either, so neither is consulted here.
+ */
+export function stripeStatusFromSecrets(payload: unknown): Pick<PlatformStatusItem, 'status' | 'detail'> {
+  const stripe = typeof payload === 'object' && payload !== null && 'stripe' in payload ? payload.stripe : null;
+  if (typeof stripe !== 'object' || stripe === null || !('secret_key' in stripe) || !('webhook_secret' in stripe)) return { status: 'unknown' };
+  if (stripe.secret_key !== 'live' && stripe.secret_key !== 'test') {
+    return stripe.secret_key === 'missing' ? { status: 'not_configured', detail: 'missing_secret_key' } : { status: 'unknown' };
+  }
+  if (stripe.webhook_secret !== true) return { status: 'not_configured', detail: 'missing_webhook_secret' };
+  return { status: 'configured', detail: stripe.secret_key === 'live' ? 'live_mode' : 'test_mode' };
+}
+
+export function configurationStatus(value: unknown, kind: 'email' | 'whatsapp'): PlatformStatus {
   if (kind === 'whatsapp') return typeof value === 'string' && value.trim().length > 5 ? 'configured' : 'not_configured';
   try {
     const parsed: unknown = typeof value === 'string' ? JSON.parse(value) : value;

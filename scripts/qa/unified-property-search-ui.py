@@ -79,11 +79,10 @@ async def main():
                 async def visible_search(focused=False):
                     # Submission closes the editor and focuses results; criteria can be reopened.
                     if focused:
-                        results_heading = re.compile(
-                            r'^(?:Найдено объектов|Проверено, подходит по датам):\s+\d+$' if ru
-                            else r'^(?:Places found|Checked date matches):\s+\d+$'
-                        )
-                        await expect(page.get_by_role('heading',level=2,name=results_heading)).to_be_focused()
+                        results_name = 'Проверено, подходит по датам: 1' if ru else 'Checked date matches: 1'
+                        results_heading = page.get_by_role('heading', level=2, name=results_name, exact=True)
+                        await expect(results_heading).to_have_count(1)
+                        await expect(results_heading).to_be_focused()
                         await expect(page.locator('.premium-search-criteria')).not_to_have_attribute('open','')
                     await open_editor()
                     await expect(page.get_by_role('combobox', name=type_label)).to_be_visible()

@@ -1,0 +1,54 @@
+name: Connected release generated-source evidence
+on:
+  pull_request:
+    branches: [main]
+permissions:
+  contents: read
+concurrency:
+  group: connected-register-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+jobs:
+  registers:
+    if: startsWith(github.head_ref, 'release/347-connected-system-')
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      VITE_SUPABASE_URL: http://127.0.0.1:54321
+      VITE_SUPABASE_PUBLISHABLE_KEY: isolated-verification-placeholder
+      VITE_SUPABASE_PROJECT_ID: isolated-verification
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - name: Canonical generator and source-only delta
+        run: |
+          cp docs/design-system/primitive-adoption-register.json /tmp/prior-primitive-register.json
+          node scripts/design-system-adoption-register.mjs
+          node --input-type=module <<'JS'
+          import fs from 'node:fs';
+          import crypto from 'node:crypto';
+          const prior=JSON.parse(fs.readFileSync('/tmp/prior-primitive-register.json','utf8'));
+          const path='docs/design-system/primitive-adoption-register.json';
+          const rendered=fs.readFileSync(path,'utf8');
+          const next=JSON.parse(rendered);
+          const old=new Map(prior.consumers.map(row=>[row.file,row]));
+          const {consumers,...header}=next;
+          console.log('REGISTER_HEADER '+JSON.stringify(header));
+          for (const [index,row] of consumers.entries()) {
+            if(JSON.stringify(row)!==JSON.stringify(old.get(row.file))) console.log('REGISTER_ROW '+JSON.stringify({index,row}));
+            old.delete(row.file);
+          }
+          console.log('REGISTER_REMOVED '+JSON.stringify([...old.keys()]));
+          console.log('REGISTER_ORDER '+JSON.stringify(consumers.map(row=>row.file)));
+          console.log('REGISTER_SHA256 '+crypto.createHash('sha256').update(rendered).digest('hex'));
+          JS
+          node scripts/design-system-adoption-register.mjs --check
+      - name: Retain canonical generated source inventory
+        uses: actions/upload-artifact@v4
+        with:
+          name: generated-source-register
+          path: docs/design-system/primitive-adoption-register.json
+          retention-days: 7

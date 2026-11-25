@@ -1,5 +1,5 @@
 import { useRef } from 'react';
-import { createConsultationIntakeAttempt, consultationIntakeErrorCopy } from '@/lib/consultationIntake';
+import { createGeneralConsultationIntakeAttempt, consultationIntakeErrorCopy } from '@/lib/consultationIntake';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -169,8 +169,8 @@ export function useConsultationRequests() {
   const saved = () => toast.success(pickLang(language, { ru: 'Заявка сохранена. Ответ команды ожидается.', en: 'Request saved. A team reply is pending.', th: 'บันทึกคำขอแล้ว ยังรอการตอบกลับจากทีม' }));
   const unconfirmed = (error: unknown) => toast.error(pickLang(language, consultationIntakeErrorCopy(error)));
   const queryClient = useQueryClient();
-  const intake = useRef<ReturnType<typeof createConsultationIntakeAttempt> | null>(null);
-  if (!intake.current) intake.current = createConsultationIntakeAttempt();
+  const intake = useRef<ReturnType<typeof createGeneralConsultationIntakeAttempt> | null>(null);
+  if (!intake.current) intake.current = createGeneralConsultationIntakeAttempt();
 
   // Fetch user's consultation requests
   const { data: requests, isLoading } = useQuery({
@@ -215,6 +215,8 @@ export function useConsultationRequests() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['consultation-requests'] });
       queryClient.invalidateQueries({ queryKey: ['admin-consultations'] });
+      queryClient.invalidateQueries({ queryKey: ['admin-inbox'] });
+      if (user?.id) queryClient.invalidateQueries({ queryKey: ['me-requests', user.id] });
     },
   });
 

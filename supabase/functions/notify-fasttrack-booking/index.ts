@@ -6,6 +6,7 @@ import { requireAuth } from '../_shared/auth-guard.ts';
 
 interface FastTrackBookingPayload {
   user_id: string;
+  request_key: string;
   service_id: string;
   service_name: string;
   direction: 'arrival' | 'departure';
@@ -99,14 +100,19 @@ Deno.serve(async (req) => {
   const authResult = await requireAuth(req, corsHeaders);
   if (authResult instanceof Response) return authResult;
 
-  const ADMIN_EMAIL = (await getAdminEmails())[0];
-  const ADMIN_WHATSAPP = await getAdminWhatsApp();
-
   try {
     const supabase = createServiceClient();
     const payload: FastTrackBookingPayload = { ...(await req.json()), user_id: authResult.user.id };
 
-    console.info('[FastTrack] Creating booking for flight:', payload.flight_number);
+    const respond = (status: number, result: Record<string, unknown>) =>
+      new Response(JSON.stringify(result), { status, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+    if (typeof payload.request_key !== 'string' || !/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(payload.request_key))
+      return respond(409, { success: false, error: 'FASTTRACK_REQUEST_KEY_REQUIRED' });
+    if (!Array.isArray(payload.passengers) || payload.passengers.length < 1 || payload.passengers.length > 50 ||
+        !Array.isArray(payload.addon_ids) || !payload.passengers.every(p =>
+          p && [p.first_name,p.last_name,p.passport_number,p.nationality,p.date_of_birth].every(v=>typeof v==='string' && v.trim() && v.length<=200)) ||
+        ![payload.base_price,payload.night_surcharge,payload.addons_total,payload.total_price].every(n=>typeof n==='number' && Number.isFinite(n) && n>=0))
+      return respond(422, { success:false,error:'INVALID_FASTTRACK_REQUEST' });
 
     // public.airport_booking_addons was dropped (migration 20260429025702) and never
     // recreated, so selected add-ons are recorded on the booking itself: operations
@@ -120,85 +126,54 @@ Deno.serve(async (req) => {
       addonLabels.length > 0 ? `Add-ons: ${addonLabels.join(', ')}` : '',
     ].filter(Boolean).join('\n') || null;
 
-    // 1. Insert airport_bookings
-    const { data: booking, error: bookingError } = await supabase
-      .from('airport_bookings')
-      .insert({
-        user_id: payload.user_id,
-        service_id: payload.service_id,
-        direction: payload.direction,
-        flight_number: payload.flight_number,
-        airline: payload.airline || null,
-        flight_date: payload.flight_date,
-        flight_time: payload.flight_time,
+    // The SQL writer is service-role-only. It owns receipt, booking and
+    // passenger transaction. Never fall back to two independent inserts.
+    const { data: rows, error: writeError } = await supabase.rpc('create_fasttrack_request', {
+      p_actor: authResult.user.id, p_request_key: payload.request_key,
+      p_booking: {
+        service_id: payload.service_id, direction: payload.direction,
+        flight_number: payload.flight_number, airline: payload.airline || null,
+        flight_date: payload.flight_date, flight_time: payload.flight_time,
         is_night_flight: payload.is_night_flight,
-        contact_whatsapp: payload.contact_whatsapp || null,
-        contact_email: payload.contact_email || null,
-        preferred_language: payload.preferred_language,
-        special_notes: bookingNotes,
-        base_price: payload.base_price,
-        night_surcharge: payload.night_surcharge,
-        addons_total: payload.addons_total,
-        total_price: payload.total_price,
-        currency: payload.currency,
-        airport_code: 'HKT',
-        // 'draft' is the table's canonical initial state — the status CHECK
-        // constraint (draft|paid|confirmed|assigned|in_progress|completed|
-        // cancelled|no_show) does NOT allow 'pending', so inserting it threw a
-        // check_violation and silently broke every fast-track booking.
-        status: 'draft',
-      })
-      .select('id')
-      .single();
-
-    if (bookingError) {
-      console.error('[FastTrack] Booking insert error:', bookingError);
-      throw new Error(`Failed to create booking: ${bookingError.message}`);
+        contact_whatsapp: payload.contact_whatsapp || null, contact_email: payload.contact_email || null,
+        preferred_language: payload.preferred_language, special_notes: bookingNotes,
+        base_price: payload.base_price, night_surcharge: payload.night_surcharge,
+        addons_total: payload.addons_total, total_price: payload.total_price, currency: payload.currency,
+      },
+      p_passengers: payload.passengers.map(p=>({first_name:p.first_name,last_name:p.last_name,
+        passport_number:p.passport_number,nationality:p.nationality,date_of_birth:p.date_of_birth})),
+    });
+    if (writeError || !Array.isArray(rows) || rows.length !== 1 || typeof rows[0]?.booking_id !== 'string' || typeof rows[0]?.created !== 'boolean') {
+      const code = writeError?.code;
+      return respond(code === '23505' ? 409 : code === '22023' || code === '23502' || code === '22007' ? 422 : 503,
+        {success:false,error:code === '23505' ? 'FASTTRACK_REQUEST_CHANGED' : 'FASTTRACK_RECEIPT_UNCONFIRMED'});
     }
-
-    const bookingId = booking.id;
-    console.info('[FastTrack] Booking created:', bookingId);
-
-    // 2. Insert passengers
-    const passengersToInsert = payload.passengers.map((p, i) => ({
-      booking_id: bookingId,
-      first_name: p.first_name,
-      last_name: p.last_name,
-      passport_number: p.passport_number,
-      nationality: p.nationality,
-      date_of_birth: p.date_of_birth,
-      is_primary: i === 0,
-      sort_order: i,
-    }));
-
-    const { error: passError } = await supabase
-      .from('airport_passengers')
-      .insert(passengersToInsert);
-
-    if (passError) {
-      console.error('[FastTrack] Passengers insert error:', passError);
-      // Don't throw - booking is already created
-    }
+    const bookingId = rows[0].booking_id;
+    // A replay recovers the exact receipt, without re-sending notifications.
+    if (!rows[0].created) return respond(200,{success:true,booking_id:bookingId,created:false});
+    // In-app admin notification is already in the same database transaction.
+    // External provider acceptance is separate; never turn a saved booking into
+    // a failed receipt if settings or transport are unavailable.
+    let ADMIN_EMAIL: string | undefined;
+    let ADMIN_WHATSAPP = '';
+    try { ADMIN_EMAIL = (await getAdminEmails())[0]; } catch { console.warn('[FastTrack] Email configuration unavailable'); }
+    try { ADMIN_WHATSAPP = await getAdminWhatsApp() || ''; } catch { console.warn('[FastTrack] WhatsApp configuration unavailable'); }
 
     // 4. Send WhatsApp (non-blocking). ADMIN_WHATSAPP is handler-scoped, so it
     // must be passed in — referencing it from the module-level helper threw a
     // ReferenceError that silently swallowed every admin WhatsApp alert.
-    sendWhatsAppNotification({ ...payload, special_notes: bookingNotes ?? undefined }, bookingId, ADMIN_WHATSAPP).catch(err =>
-      console.error('[WhatsApp] Failed:', err)
-    );
+    if (ADMIN_WHATSAPP) await sendWhatsAppNotification({ ...payload, special_notes: bookingNotes ?? undefined }, bookingId, ADMIN_WHATSAPP);
 
     // 5. Send email notification
     const resendKey = Deno.env.get('RESEND_API_KEY');
-    if (resendKey) {
+    if (resendKey && ADMIN_EMAIL) {
       try {
         const resend = new Resend(resendKey);
         const dirLabel = payload.direction === 'arrival' ? '✈️ Arrival' : '🛫 Departure';
         const passengerRows = payload.passengers.map(p =>
           `<tr>
             <td style="padding:8px;border:1px solid #e5e7eb;">${escHtml(p.first_name)} ${escHtml(p.last_name)}</td>
-            <td style="padding:8px;border:1px solid #e5e7eb;">${escHtml(p.passport_number)}</td>
             <td style="padding:8px;border:1px solid #e5e7eb;">${escHtml(p.nationality)}</td>
-            <td style="padding:8px;border:1px solid #e5e7eb;">${escHtml(p.date_of_birth)}</td>
           </tr>`
         ).join('');
 
@@ -228,12 +203,12 @@ Deno.serve(async (req) => {
               <div class="d">
                 <div class="l">Service</div>
                 <div style="font-size:16px;font-weight:600">${escHtml(payload.service_name)}</div>
-                <div class="t">${escHtml(payload.currency)} ${payload.total_price.toLocaleString()}</div>
+                <div class="t">${escHtml(payload.currency)} ${payload.total_price.toLocaleString()}</div><div>Requested quote; not paid or confirmed.</div>
               </div>
               <div class="d">
                 <div class="l">Passengers (${payload.passengers.length})</div>
                 <table>
-                  <tr><th>Name</th><th>Passport</th><th>Nationality</th><th>DOB</th></tr>
+                  <tr><th>Name</th><th>Nationality</th></tr>
                   ${passengerRows}
                 </table>
               </div>
@@ -251,14 +226,14 @@ Deno.serve(async (req) => {
           </div>
           </body></html>`;
 
-        await resend.emails.send({
+        const result = await resend.emails.send({
           from: 'myUNO Fast Track <noreply@resend.dev>',
           to: [ADMIN_EMAIL],
           subject: `✈️ Fast Track ${dirLabel} — ${payload.flight_number} · ${payload.flight_date}`,
           html: emailHtml,
         });
 
-        console.info('[Email] Sent to', ADMIN_EMAIL);
+        if (result.error || !result.data?.id) console.warn('[FastTrack] Email acceptance unconfirmed');
       } catch (emailErr) {
         console.error('[Email] Error:', emailErr);
       }
@@ -267,12 +242,12 @@ Deno.serve(async (req) => {
     }
 
     return new Response(
-      JSON.stringify({ success: true, booking_id: bookingId }),
+      JSON.stringify({ success: true, booking_id: bookingId, created: true }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   } catch (error: unknown) {
-    console.error('[FastTrack] Error:', error);
-    const msg = error instanceof Error ? error.message : 'Unknown error';
+    console.error('[FastTrack] Request processing failed');
+    const msg = 'FASTTRACK_RECEIPT_UNCONFIRMED';
     return new Response(
       JSON.stringify({ success: false, error: msg }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }

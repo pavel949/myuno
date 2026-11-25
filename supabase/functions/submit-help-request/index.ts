@@ -2,15 +2,14 @@
  * submit-help-request — единая точка обращений «Помощь myUNO».
  *
  * Принимает заявку от пользователя (или гостя), создаёт строку в
- * help_requests, UPSERT-ит CRM-контакт, создаёт CRM-задачу на менеджера,
- * рассылает алерт в WhatsApp + email.
+ * help_requests. The reviewed trigger queues CRM projection and independent
+ * WhatsApp copies; the scheduler owns transport outcomes.
  */
 
 import { z } from "https://deno.land/x/zod@v3.23.8/mod.ts";
 import { createServiceClient } from "../_shared/supabase.ts";
 import { getCorsHeaders } from "../_shared/cors.ts";
-import { getAdminEmails, getAdminWhatsApp, getMailFrom } from "../_shared/admin-config.ts";
-import { sendWhatsApp } from "../_shared/whatsapp.ts";
+import { getAdminEmails, getMailFrom } from "../_shared/admin-config.ts";
 
 const BodySchema = z.object({
   topic: z.enum(["visa", "invest", "business", "relocation", "property", "legal", "finance", "general"]),
@@ -38,13 +37,6 @@ const TOPIC_LABEL_RU: Record<string, string> = {
   legal: "Юридические вопросы",
   finance: "Финансы",
   general: "Общий вопрос",
-};
-
-const URGENCY_EMOJI: Record<string, string> = {
-  low: "🟢",
-  normal: "🔵",
-  high: "🟠",
-  urgent: "🔴",
 };
 
 Deno.serve(async (req) => {
@@ -86,7 +78,6 @@ Deno.serve(async (req) => {
   let userId: string | null = null;
   let userEmail: string | null = null;
   let userPhone: string | null = null;
-  let userName: string | null = null;
   const authHeader = req.headers.get("Authorization");
   if (authHeader?.startsWith("Bearer ")) {
     const token = authHeader.replace("Bearer ", "");
@@ -95,8 +86,6 @@ Deno.serve(async (req) => {
       userId = userData.user.id;
       userEmail = userData.user.email ?? null;
       userPhone = userData.user.phone ?? null;
-      const meta = userData.user.user_metadata ?? {};
-      userName = (meta.full_name as string | undefined) ?? (meta.name as string | undefined) ?? null;
     }
   }
 
@@ -143,31 +132,9 @@ Deno.serve(async (req) => {
     });
   }
 
-  // CRM auto-routing is multi-tenant (company_id required) and handled by
-  // a separate workflow. For now we only persist help_requests + alert admins;
-  // /admin/help-requests dashboard converts to CRM tasks manually.
-
-  // 4) Notify admins — WhatsApp + email (fire and forget)
-  try {
-    const adminWa = await getAdminWhatsApp();
-    const waBody = [
-      `${URGENCY_EMOJI[input.urgency]} *myUNO Help Request*`,
-      `Тема: *${TOPIC_LABEL_RU[input.topic]}*`,
-      input.subject ? `Заголовок: ${input.subject}` : null,
-      `Срочность: ${input.urgency}`,
-      `Канал: ${input.preferred_channel}`,
-      finalEmail ? `Email: ${finalEmail}` : null,
-      finalPhone ? `Phone: ${finalPhone}` : null,
-      input.source_route ? `Откуда: ${input.source_route}` : null,
-      "",
-      input.message.slice(0, 600),
-      "",
-      `ID: ${hr.id}`,
-    ].filter(Boolean).join("\n");
-    sendWhatsApp({ to: adminWa, body: waBody }).catch((e) => console.warn("[submit-help-request] wa send failed:", e));
-  } catch (e) {
-    console.warn("[submit-help-request] whatsapp prep failed:", e);
-  }
+  // CRM + both WhatsApp copies are persisted by the reviewed DB trigger/outbox.
+  // Deploy this handler only with the coordinated queue activation; no direct
+  // send here, so scheduler retries cannot duplicate a legacy notification.
 
   try {
     const adminEmails = await getAdminEmails();

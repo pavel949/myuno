@@ -3,6 +3,12 @@
  * Single source of truth for all phone numbers, emails, and addresses
  */
 
+/** Approved concierge recipients; both receive request copies, languages describe support. */
+export const CONCIERGE_CONTACTS = [
+  { id: 'thai-english', name: null, phone: '+66630827085', display: '+66 63 082 7085', languages: ['th', 'en'], whatsapp: 'https://wa.me/66630827085' },
+  { id: 'pavel', name: 'Pavel', phone: '+66954243332', display: '+66 95 424 3332', languages: ['ru', 'en'], whatsapp: 'https://wa.me/66954243332' },
+] as const;
+
 export const COMPANY_CONTACTS = {
   contactPerson: 'Pavel',
   contactLanguages: ['en', 'ru'],
