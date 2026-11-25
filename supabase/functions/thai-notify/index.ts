@@ -23,23 +23,15 @@ import { getCorsHeaders } from "../_shared/cors.ts";
 import { sendWhatsApp } from "../_shared/whatsapp.ts";
 import { sendEmail, buildEmailHtml } from "../_shared/notify-utils.ts";
 import { getAdminWhatsApp, getAdminEmails, getMailFrom } from "../_shared/admin-config.ts";
-import { requireServiceCaller } from "../_shared/internal-secret.ts";
-import { optionalAuth } from "../_shared/auth-guard.ts";
+import { resolveNotifyCaller } from "../_shared/notify-caller.ts";
 import {
   canNotifyBooking,
   canNotifyMessage,
   canNotifyPartnerLead,
   isThaiNotifyKind,
-  type ThaiNotifyCaller,
 } from "../_shared/thai-notify-auth.ts";
 
 const SITE_URL = "https://myuno.app";
-
-async function resolveCaller(req: Request, corsHeaders: Record<string, string>): Promise<ThaiNotifyCaller> {
-  if ((await requireServiceCaller(req, corsHeaders)) === null) return { mode: "service" };
-  const user = await optionalAuth(req);
-  return user ? { mode: "user", userId: user.id } : { mode: "anonymous" };
-}
 
 interface Section { label: string; value: string }
 
@@ -91,7 +83,7 @@ Deno.serve(async (req) => {
       return json({ success: false, error: "missing id" }, 400, corsHeaders);
     }
 
-    const caller = await resolveCaller(req, corsHeaders);
+    const caller = await resolveNotifyCaller(req, corsHeaders);
     // Chat alerts are server-dispatched only: reject before touching the DB.
     if (kind === "new_message" && !canNotifyMessage(caller)) {
       return json({ success: false, error: "Forbidden" }, 403, corsHeaders);

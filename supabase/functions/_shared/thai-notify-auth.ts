@@ -15,15 +15,16 @@
  *                 the admin channel.
  */
 
+import { isFresh, NOTIFY_FRESH_WINDOW_MS, type NotifyCaller } from "./notify-guards.ts";
+
+export { isFresh };
+
 export type ThaiNotifyKind = "new_booking" | "booking_status" | "new_message" | "partner_lead";
 
-export type ThaiNotifyCaller =
-  | { mode: "service" }
-  | { mode: "user"; userId: string }
-  | { mode: "anonymous" };
+export type ThaiNotifyCaller = NotifyCaller;
 
 /** A notification for a just-created record must be requested promptly. */
-export const THAI_NOTIFY_FRESH_WINDOW_MS = 10 * 60 * 1000;
+export const THAI_NOTIFY_FRESH_WINDOW_MS = NOTIFY_FRESH_WINDOW_MS;
 
 export interface BookingFacts {
   customerId: string | null;
@@ -39,16 +40,6 @@ export interface PartnerLeadFacts {
 export function isThaiNotifyKind(value: unknown): value is ThaiNotifyKind {
   return value === "new_booking" || value === "booking_status" ||
     value === "new_message" || value === "partner_lead";
-}
-
-/** True when `createdAt` is a valid timestamp no older than the fresh window. */
-export function isFresh(createdAt: string | null, now: number): boolean {
-  if (!createdAt) return false;
-  const created = Date.parse(createdAt);
-  if (Number.isNaN(created)) return false;
-  const age = now - created;
-  // Allow small clock skew into the future; reject anything older than the window.
-  return age >= -60_000 && age <= THAI_NOTIFY_FRESH_WINDOW_MS;
 }
 
 export function canNotifyBooking(

@@ -7,6 +7,7 @@
  */
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { getAdminEmails, getAdminWhatsApp } from "../_shared/admin-config.ts";
+import { withRateLimit } from "../_shared/rate-limit.ts";
 
 const NOTIFY_CORS = {
   "Access-Control-Allow-Origin": "*",
@@ -56,6 +57,10 @@ async function sendWhatsApp(phone: string, body: string): Promise<void> {
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: NOTIFY_CORS });
+
+  // Reachable with the public anon key and only messages the admin: throttle.
+  const limited = await withRateLimit(req, "notify-admin-onboarding", { maxRequests: 5, windowSeconds: 60 }, NOTIFY_CORS);
+  if (limited) return limited;
 
   try {
     const p = (await req.json()) as Payload;

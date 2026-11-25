@@ -2,12 +2,19 @@
 // a manual RUB payment request. Mirrors notify-admin-order patterns:
 // Resend email + UltraMsg WhatsApp + supabase.from('notifications').insert.
 //
-// Triggered from PropertyInquiry.tsx after a successful INSERT into
-// manual_payment_requests + orders. Service-role only via Authorization header.
+// Triggered from DepositPaymentOptions.tsx after a successful INSERT into
+// manual_payment_requests + orders. The browser sends `{ order_id }`; service
+// callers may send `{ request_id }` or `{ order_id }`.
+//
+// Authorization (gateway accepts the public anon key, so enforced here):
+// service callers, or the signed-in guest who owns the request while it is
+// fresh and still awaiting the admin. Nothing is sent before the check.
 
 import { Resend } from 'npm:resend@2.0.0';
 import { createServiceClient } from '../_shared/supabase.ts';
 import { getAdminEmails, getAdminWhatsApp } from '../_shared/admin-config.ts';
+import { resolveNotifyCaller } from '../_shared/notify-caller.ts';
+import { canNotifyManualPayment, isUuid } from '../_shared/notify-guards.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -15,7 +22,14 @@ const corsHeaders = {
 };
 
 interface Payload {
-  request_id: string;
+  request_id?: unknown;
+  order_id?: unknown;
+}
+
+function jsonError(error: string, status: number): Response {
+  return new Response(JSON.stringify({ error }), {
+    status, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+  });
 }
 
 async function sendWhatsApp(message: string, toPhone: string): Promise<void> {
@@ -52,16 +66,19 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const { request_id } = (await req.json()) as Payload;
-    if (!request_id) {
-      return new Response(JSON.stringify({ error: 'request_id required' }), {
-        status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
+    const payload = ((await req.json().catch(() => null)) ?? {}) as Payload;
+    const lookupColumn = isUuid(payload.request_id) ? 'id' : isUuid(payload.order_id) ? 'order_id' : null;
+    const lookupValue = lookupColumn === 'id' ? payload.request_id : payload.order_id;
+    if (!lookupColumn || typeof lookupValue !== 'string') {
+      return jsonError('request_id or order_id required', 400);
     }
+
+    const caller = await resolveNotifyCaller(req, corsHeaders);
+    if (caller.mode === 'anonymous') return jsonError('Unauthorized', 401);
 
     const sb = createServiceClient();
 
-    // Fetch request + joined order + property info
+    // Fetch request + joined order + property info (latest request for an order).
     const { data: req_, error: reqErr } = await sb
       .from('manual_payment_requests')
       .select(`
@@ -69,15 +86,24 @@ Deno.serve(async (req) => {
         orders ( order_number, metadata ),
         properties:property_id ( id, owner_id, title_en, title_ru )
       `)
-      .eq('id', request_id)
-      .single();
+      .eq(lookupColumn, lookupValue)
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle();
 
     if (reqErr || !req_) {
       console.error('[notify-manual-payment-request] not found:', reqErr);
-      return new Response(JSON.stringify({ error: 'Request not found' }), {
-        status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
+      return jsonError('Request not found', 404);
     }
+
+    const allowed = canNotifyManualPayment(caller, {
+      userId: (req_ as { user_id?: string | null }).user_id ?? null,
+      status: (req_ as { status?: string | null }).status ?? null,
+      createdAt: (req_ as { created_at?: string | null }).created_at ?? null,
+    });
+    if (!allowed) return jsonError('Forbidden', 403);
+
+    const request_id = (req_ as { id: string }).id;
 
     const orderNumber = (req_ as any).orders?.order_number || request_id.slice(0, 8);
     const orderMeta = ((req_ as any).orders?.metadata || {}) as Record<string, any>;
