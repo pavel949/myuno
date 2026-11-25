@@ -11,7 +11,7 @@ describe('private intake contract', () => {
     expect(() => parseIntakePaths(other, [path])).toThrow();
     expect(() => parseIntakePaths(actor, [path, path])).toThrow();
   });
-  it.each(['https://example.test/x.png', actor + '/../x.png', actor + '/a.png', actor + '/' + file + '.pdf', actor + '/' + file + '.png?token=a'])('rejects unsafe path %s', (path) => {
+  it.each(['https://example.test/x.png', actor + '/../x.png', actor + '/a.png', actor + '/' + file + '.pdf', actor + '/' + file + '.constructor', actor + '/' + file + '.png?token=a'])('rejects unsafe path %s', (path) => {
     expect(() => parseIntakePaths(actor, [path])).toThrow();
   });
   it('rejects unsupported files and oversized batches before upload', () => {
@@ -33,5 +33,6 @@ describe('private intake contract', () => {
     expect(hasPrivateIntakeReference({ images: [signed] })).toBe(true);
     expect(hasPrivateIntakeReference('intake-private:' + actor + '/' + file + '.png')).toBe(true);
     expect(hasPrivateIntakeReference('data:image/png;base64,AAAA')).toBe(true);
+    expect(hasPrivateIntakeReference(actor + '/' + file + '.png')).toBe(true);
   });
 });

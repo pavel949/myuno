@@ -1,6 +1,6 @@
 import { requireInternalOrStaff, requireActorRpc } from "../_shared/authz.ts";
 import { createActorClient } from "../_shared/operating-space-auth.ts";
-import { INTAKE_FILE_CONTRACT, INTAKE_MAX_TOTAL_BYTES, INTAKE_MAX_TEXT, parseIntakePaths, intakeMime, validateIntakeBytes, hasPrivateIntakeReference } from "../_shared/intake-private-contract.ts";
+import { INTAKE_FILE_CONTRACT, INTAKE_MAX_TOTAL_BYTES, INTAKE_MAX_FILE_BYTES, INTAKE_MAX_TEXT, parseIntakePaths, intakeMime, validateIntakeBytes, hasPrivateIntakeReference } from "../_shared/intake-private-contract.ts";
 import { validateExternalUrlForSSRF } from "../_shared/ssrf-guard.ts";
 // Deno.serve used (native edge runtime)
 import { createClient } from "../_shared/supabase.ts";
@@ -742,6 +742,7 @@ Return valid JSON only.`;
           confidence: parsed.confidence || 0.5,
         };
       } catch (e) {
+        if (strictFileMode) throw new Error('Private file analysis failed');
         console.error('[INTAKE] Failed to parse AI response:', e);
       }
     }
@@ -964,9 +965,9 @@ Deno.serve(async (req) => {
       catch { return new Response(JSON.stringify({ error: 'Invalid private file paths' }), { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }); }
     }
     if (sessionId) {
-      const { data: existingSession } = await supabase
+      const { data: existingSession, error: existingSessionError } = await supabase
         .from('ai_intake_sessions').select('admin_id').eq('id', sessionId).maybeSingle();
-      if (existingSession && existingSession.admin_id && existingSession.admin_id !== userId) {
+      if (existingSessionError || !existingSession || existingSession.admin_id !== userId) {
         return new Response(JSON.stringify({ error: "Forbidden" }), { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } });
       }
     }
@@ -1031,6 +1032,7 @@ Deno.serve(async (req) => {
       for (const path of privatePaths) {
         const { data: blob, error: downloadError } = await actor.storage.from('intake-uploads').download(path);
         if (downloadError || !blob) throw new Error('Private file inaccessible');
+        if (blob.size > INTAKE_MAX_FILE_BYTES || blob.size === 0) throw new Error('Invalid private file size');
         total += blob.size;
         if (total > INTAKE_MAX_TOTAL_BYTES) throw new Error('Private files exceed total size limit');
         const bytes = new Uint8Array(await blob.arrayBuffer());

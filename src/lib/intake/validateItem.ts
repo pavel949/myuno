@@ -82,6 +82,7 @@ export function describeValidation(
 ): { missingText: string; warningText: string } {
   const missingText = result.missing
     .map((f) => {
+      if (f === 'private_media_reference') return isRu ? 'приватная ссылка (замените на разрешённое фото)' : 'private reference (replace with reviewed media)';
       const lbl = fieldLabels?.[f];
       if (lbl) return isRu ? lbl.ru : lbl.en;
       return f;

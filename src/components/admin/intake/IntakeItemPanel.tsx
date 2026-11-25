@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { PanelSection } from '@/components/uno/PersistentPanelLayout';
 import { IntakeItem } from '@/hooks/useIntakeAgent';
+import { IntakePrivateFiles } from './IntakePrivateFiles';
 import { IntakeVerticalBadge } from './IntakeVerticalBadge';
 import { IntakeConfidenceBar } from './IntakeConfidenceBar';
 import { INTAKE_VERTICALS } from '@/lib/intakeVerticals';
@@ -75,6 +76,8 @@ export function IntakeItemPanel({
           </a>
         )}
       </div>
+
+      <IntakePrivateFiles paths={item.sourceFilePaths} />
 
       {/* Confidence */}
       <PanelSection title={isRu ? 'Уверенность' : 'Confidence'}>

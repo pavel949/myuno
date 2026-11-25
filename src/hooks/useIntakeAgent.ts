@@ -7,7 +7,7 @@ import { isValidIntakeTable, VALID_INTAKE_TABLES } from '@/lib/providerIdMapping
 import { useActiveCompany } from '@/hooks/useActiveCompany';
 import { getVerticalById } from '@/lib/intakeVerticals';
 import { validateIntakeItem } from '@/lib/intake/validateItem';
-import { INTAKE_FILE_CONTRACT, intakeMime, makeIntakePath, validateIntakeFileMetadata, publicIntakeImages, hasPrivateIntakeReference } from '../../../supabase/functions/_shared/intake-private-contract';
+import { INTAKE_FILE_CONTRACT, intakeMime, makeIntakePath, validateIntakeFileMetadata, publicIntakeImages, hasPrivateIntakeReference } from '../../supabase/functions/_shared/intake-private-contract';
 
 export interface IntakeProgress {
   total: number;

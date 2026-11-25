@@ -9,7 +9,10 @@ const TYPES: Record<string, string> = {
   txt: 'text/plain', csv: 'text/csv',
 };
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-export function intakeMime(ext: string): string | undefined { return TYPES[ext.toLowerCase()]; }
+export function intakeMime(ext: string): string | undefined {
+  const key = ext.toLowerCase();
+  return Object.prototype.hasOwnProperty.call(TYPES, key) ? TYPES[key] : undefined;
+}
 export function intakeExtension(name: string): string {
   const ext = name.split('.').pop()?.toLowerCase() || '';
   if (!intakeMime(ext)) throw new Error('Unsupported intake format: use JPEG, PNG, WebP, TXT or CSV; spreadsheet import is separate.');
@@ -41,6 +44,7 @@ export function hasPrivateIntakeReference(value: unknown): boolean {
     let decoded = value;
     for (let i = 0; i < 4; i++) {
       if (/intake-uploads|intake-private:|(?:^|\s)data:|(?:^|\s)blob:|(?:^|\s)intake\//i.test(decoded)) return true;
+      if (/^[0-9a-f-]{36}\/[0-9a-f-]{36}\.(?:jpg|jpeg|png|webp|txt|csv)$/i.test(decoded)) return true;
       const normalized = decoded.replace(/%([0-9a-f]{2})/gi, (_, code: string) => String.fromCharCode(parseInt(code, 16)));
       if (normalized === decoded) break;
       decoded = normalized;
