@@ -24,13 +24,23 @@ jobs:
           node-version: '22'
       - name: Install pinned Deno and resolve only parser dependencies
         run: |
-          npm install --prefix "$RUNNER_TEMP/intake-deno" --no-audit --no-fund --save-exact deno@2.9.8
-          DENO="$RUNNER_TEMP/intake-deno/node_modules/.bin/deno"
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/intake-deno"
+          cd "$RUNNER_TEMP/intake-deno"
+          RELEASE="https://github.com/denoland/deno/releases/download/v2.9.8/deno-x86_64-unknown-linux-gnu.zip"
+          curl --fail --silent --show-error --location "$RELEASE" -o deno.zip
+          curl --fail --silent --show-error --location "$RELEASE.sha256sum" -o deno.zip.sha256sum
+          EXPECTED="$(awk 'NR==1{print $1}' deno.zip.sha256sum)"
+          [[ "$EXPECTED" =~ ^[a-fA-F0-9]{64}$ ]]
+          printf "%s  deno.zip\n" "$EXPECTED" | sha256sum -c -
+          unzip -q deno.zip deno
+          DENO="$RUNNER_TEMP/intake-deno/deno"
+          cd "$GITHUB_WORKSPACE"
           "$DENO" --version
           "$DENO" cache --lock="$RUNNER_TEMP/intake-document-deno.lock" docs/hardening/344-345/intake-documents.deno.ts
       - name: Actual PDF DOCX XLSX parsing, without runtime network or filesystem permissions
         run: |
-          DENO="$RUNNER_TEMP/intake-deno/node_modules/.bin/deno"
+          DENO="$RUNNER_TEMP/intake-deno/deno"
           "$DENO" test --cached-only --no-prompt --lock="$RUNNER_TEMP/intake-document-deno.lock" --frozen docs/hardening/344-345/intake-documents.deno.ts
       - name: Retain actual resolved parser dependency lock for review
         if: always()
