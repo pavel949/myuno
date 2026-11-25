@@ -25,10 +25,17 @@ const PACKAGE_REL = "http://schemas.openxmlformats.org/package/2006/relationship
 const CONTENT_TYPES = "http://schemas.openxmlformats.org/package/2006/content-types";
 
 function reject(message: string): never { throw new Error(message); }
+function hasControlCharacter(value: string, allowTextWhitespace = false): boolean {
+  for (let i = 0; i < value.length; i++) {
+    const code = value.charCodeAt(i);
+    if (code < 32 && !(allowTextWhitespace && (code === 9 || code === 10 || code === 13))) return true;
+  }
+  return false;
+}
 class TextBudget {
   private value = "";
   add(text: string) {
-    if (/[\u0000-\u0008\u000b\u000c\u000e-\u001f]/.test(text)) reject("Invalid document control character");
+    if (hasControlCharacter(text, true)) reject("Invalid document control character");
     if (this.value.length + text.length > INTAKE_MAX_TEXT) reject("Document text exceeds analysis limit");
     this.value += text;
   }
@@ -71,11 +78,11 @@ function hasTag(stack: readonly SaxesTagNS[], ns: ReadonlySet<string>, names: re
   return stack.some(t => ns.has(t.uri) && names.includes(t.local));
 }
 function safePartName(name: string) {
-  return !!name && name.length <= 240 && !/[\u0000-\u001f\\:%]/.test(name) &&
+  return !!name && name.length <= 240 && !hasControlCharacter(name) && !/[\\:%]/.test(name) &&
     !name.startsWith("/") && !name.split("/").some(p => p === "." || p === ".." || p === "");
 }
 function resolvePart(base: string, target: string) {
-  if (!target || /[\u0000-\u001f\\:%?#]/.test(target) || target.startsWith("//")) reject("Unsafe document relationship");
+  if (!target || hasControlCharacter(target) || /[\\:%?#]/.test(target) || target.startsWith("//")) reject("Unsafe document relationship");
   const parts = target.startsWith("/") ? [] : base.split("/").slice(0, -1);
   for (const part of target.replace(/^\//, "").split("/")) {
     if (part === ".") continue;
@@ -116,7 +123,7 @@ async function withOffice<T>(bytes: Uint8Array, kind: "docx" | "xlsx",
       const name = entry.filename;
       const folded = name.normalize("NFC").toLowerCase();
       if (!safePartName(name) || names.has(folded) || entry.encrypted) reject("Unsafe, duplicate or encrypted Office entry");
-      if (/(?:^|\/)(?:embeddings|activex|externallinks|customui|vbaproject[^\/]*|vbadata[^\/]*)(?:\/|$)/i.test(name)) reject("Active or embedded Office content is forbidden");
+      if (/(?:^|\/)(?:embeddings|activex|externallinks|customui|vbaproject[^/]*|vbadata[^/]*)(?:\/|$)/i.test(name)) reject("Active or embedded Office content is forbidden");
       names.add(folded);
       if (!Number.isSafeInteger(entry.uncompressedSize) || entry.uncompressedSize < 0 ||
           !Number.isSafeInteger(entry.compressedSize) || entry.compressedSize < 0 ||
