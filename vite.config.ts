@@ -357,6 +357,10 @@ export default defineConfig(({ mode, command }) => {
            *    in production → runtime "is not a function" from bad import order.
            *  - Application code (`src/**`) is left to Rollup's automatic splitting,
            *    which respects per-route lazy() boundaries from pageRegistry.ts.
+           *  - Icons are no longer forced into one chunk (see lucide branch). This
+           *    yields more small shared chunks; `experimentalMinChunkSize` was
+           *    tried (2026-11-25) and rejected: it merged them into the entry
+           *    (+41 KB gz initial JS). Many small HTTP/2 requests are cheaper.
            */
           manualChunks(id: string) {
             if (!id.includes('node_modules')) return undefined;
@@ -423,7 +427,13 @@ export default defineConfig(({ mode, command }) => {
               if (/lucide-react\/dist\/esm\/dynamicIconImports\.js$/.test(id)) {
                 return 'vendor-icons-dynamic-map';
               }
-              return 'vendor-icons';
+              // 2026-11-25: no forced chunk for icons. Pinning every icon used
+              // anywhere (~1,450 import sites across 685 pages) into one
+              // preloaded `vendor-icons` chunk shipped ~122 KB gz on every
+              // first load. Returning undefined lets Rollup tree-shake each
+              // icon into the chunk(s) that actually use it, so the entry only
+              // carries shell icons and route icons load with their route.
+              return undefined;
             }
             if (
               id.includes('react-hook-form') ||
