@@ -74,12 +74,12 @@ async def main():
                     if await criteria.get_attribute('open') is None:
                         await criteria.locator(':scope > summary').click()
                     await expect(criteria).to_have_attribute('open','')
-                    await expect(page.get_by_role('form')).to_have_count(1)
-                    await expect(page.get_by_role('form')).to_be_visible()
+                    await expect(page.locator('.premium-search-criteria').get_by_role('form')).to_have_count(1)
+                    await expect(page.locator('.premium-search-criteria').get_by_role('form')).to_be_visible()
                 async def visible_search(focused=False):
                     # Submission closes the editor and focuses results; criteria can be reopened.
                     if focused:
-                        await expect(page.get_by_role('heading',level=2)).to_be_focused()
+                        await expect(page.locator('h2[tabindex="-1"]')).to_be_focused()
                         await expect(page.locator('.premium-search-criteria')).not_to_have_attribute('open','')
                     await open_editor()
                     await expect(page.get_by_role('combobox', name=type_label)).to_be_visible()
@@ -87,7 +87,7 @@ async def main():
                     await bounds()
                 async def hydrated(kind, area, guests=None, mode='rent'):
                     await open_editor()
-                    await expect(page.get_by_role('form')).to_have_count(1)
+                    await expect(page.locator('.premium-search-criteria').get_by_role('form')).to_have_count(1)
                     await expect(page.get_by_role('combobox', name=type_label)).to_contain_text(kind)
                     await expect(page.get_by_role('combobox', name=area_label)).to_contain_text(area)
                     modes = page.get_by_role('group', name='Аренда или покупка' if ru else 'Rent or buy', exact=True)
@@ -108,13 +108,15 @@ async def main():
                     await expect(page.locator('.premium-search-criteria')).to_have_attribute('open','')
                     await expect(page.get_by_role('button', name=date_label)).to_be_visible()
                     await expect(page.get_by_role('button', name=search_label)).to_be_visible()
+                    # Keep the real lead section mounted; this is a read-only fixture.
+                    await expect(page.get_by_role('heading', name='Подбор жилья в аренду' if ru else 'Get help finding a rental', exact=True)).to_be_visible()
                     initial = {'lang':lang,'mode':'rent','tenancy':'short','district':'layan','types':'villa',
                         'guests':'3','checkIn':'2026-11-10T00:00:00.000Z','checkOut':'2026-11-15T00:00:00.000Z','company':'synthetic-company','source':'fixture-bookmark'}
                     await page.goto('http://localhost:8080/fixture?'+urlencode(initial),wait_until='networkidle')
                     # Results-first entry keeps the canonical editor mounted but collapsed.
                     await expect(page.locator('.premium-search-criteria')).not_to_have_attribute('open','')
-                    await expect(page.get_by_role('form',include_hidden=True)).to_have_count(1)
-                    await expect(page.get_by_role('form',include_hidden=True)).not_to_be_visible()
+                    await expect(page.locator('.premium-search-criteria').get_by_role('form',include_hidden=True)).to_have_count(1)
+                    await expect(page.locator('.premium-search-criteria').get_by_role('form',include_hidden=True)).not_to_be_visible()
                     await expect(page.locator('[data-catalog-kind][data-listing-id]')).to_have_count(1)
                     summary = page.locator('.premium-search-criteria > summary')
                     await expect(summary).to_contain_text('Вилла' if ru else 'Villa')
@@ -344,6 +346,7 @@ async def main():
                     except Exception as capture:
                         failure['captureError']=str(capture)
                     (OUTPUT/f'{lang}-{width}-failure.json').write_text(json.dumps(failure,ensure_ascii=False,indent=2))
+                    print(json.dumps(failure,ensure_ascii=False), file=sys.stderr, flush=True)
                     raise
                 await context.close()
         await browser.close()
