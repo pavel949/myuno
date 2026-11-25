@@ -35,13 +35,22 @@ jobs:
           printf "%s  deno.zip\n" "$EXPECTED" | sha256sum -c -
           unzip -q deno.zip deno
           DENO="$RUNNER_TEMP/intake-deno/deno"
-          cd "$GITHUB_WORKSPACE"
+          # Isolate npm resolution from the application package.json and node_modules.
+          FIXTURE="$RUNNER_TEMP/intake-document-fixture"
+          for file in supabase/functions/_shared/intake-private-contract.ts supabase/functions/_shared/intake-documents.ts docs/hardening/344-345/intake-documents.deno.ts; do
+            install -D "$GITHUB_WORKSPACE/$file" "$FIXTURE/$file"
+            cmp "$GITHUB_WORKSPACE/$file" "$FIXTURE/$file"
+          done
+          export DENO_DIR="$RUNNER_TEMP/intake-deno-cache"
+          cd "$FIXTURE"
           "$DENO" --version
-          "$DENO" cache --lock="$RUNNER_TEMP/intake-document-deno.lock" docs/hardening/344-345/intake-documents.deno.ts
+          "$DENO" cache --no-config --node-modules-dir=none --lock="$RUNNER_TEMP/intake-document-deno.lock" docs/hardening/344-345/intake-documents.deno.ts
       - name: Actual PDF DOCX XLSX parsing, without runtime network or filesystem permissions
         run: |
           DENO="$RUNNER_TEMP/intake-deno/deno"
-          "$DENO" test --cached-only --no-prompt --lock="$RUNNER_TEMP/intake-document-deno.lock" --frozen docs/hardening/344-345/intake-documents.deno.ts
+          export DENO_DIR="$RUNNER_TEMP/intake-deno-cache"
+          cd "$RUNNER_TEMP/intake-document-fixture"
+          "$DENO" test --no-config --node-modules-dir=none --cached-only --no-prompt --lock="$RUNNER_TEMP/intake-document-deno.lock" --frozen docs/hardening/344-345/intake-documents.deno.ts
       - name: Retain actual resolved parser dependency lock for review
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
