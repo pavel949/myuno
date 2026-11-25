@@ -30,6 +30,7 @@ import { EmptyState } from '@/components/uno/EmptyState';
 import { SectionCard } from '@/components/uno/SectionCard';
 import { AnimatedList, AnimatedItem } from '@/components/layout/AnimatedList';
 import { FavoriteCollections } from '@/components/favorites/FavoriteCollections';
+import { SavedSearchesSummary } from '@/components/favorites/SavedSearchesSummary';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { cn } from '@/lib/utils';
 import { APP_ROUTES } from '@/lib/config/routes';
@@ -146,6 +147,10 @@ export default function Favorites() {
               </div>
             }
           />
+
+          <div className="mb-4">
+            <SavedSearchesSummary />
+          </div>
 
           {/* Tabs */}
           <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as 'items' | 'collections')} className="mb-4">
