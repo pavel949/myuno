@@ -50,12 +50,13 @@ window.fixtureProperties=[
  {...common,id:'draft',title_en:'Draft coastal home',title_ru:'Черновик объекта',approval_status:'draft',is_active:false},
  {...common,id:'unknown',title_en:'Unknown coastal home',title_ru:'Объект без статуса'}
 ];
-const projectCommon={cover_image:${JSON.stringify(image)},address:'Synthetic area',developer_name:'Synthetic developer',project_status:'offplan'};
+const linkedDeveloperId='6f6bdde4-1604-48ce-8bb1-1a3d0bd46fe1';
+const projectCommon={developer_id:linkedDeveloperId,cover_image:${JSON.stringify(image)},address:'Synthetic area',developer_name:'Synthetic developer',project_status:'offplan'};
 window.fixtureProjects=[
  {...projectCommon,id:'pending',name_en:'Pending coastal project',name_ru:'Проект на модерации',is_approved:false,is_active:false,needs_review:true,developer_id:'00000000-0000-0000-0000-000000000001',address:''},
  {...projectCommon,id:'stale',name_en:'Approved older project',name_ru:'Проект без обновлений',is_approved:true,is_active:true,project_status:'completed',updated_at:'2020-01-01T00:00:00Z'},
  {...projectCommon,id:'recent',name_en:'Approved current project',name_ru:'Одобренный проект',is_approved:true,is_active:false,project_status:'under_construction',updated_at:new Date().toISOString()},
- {...projectCommon,id:'unknown',name_en:'Unknown coastal project',name_ru:'Проект без статуса',address:''}
+ {...projectCommon,id:'unknown',developer_id:null,name_en:'Unknown coastal project',name_ru:'Проект без статуса',address:''}
 ];
 function Boundary(){const l=useLocation();return <div hidden data-testid="route-boundary">{l.pathname+l.search}</div>}
 createRoot(document.getElementById('root')).render(<QueryClientProvider client={new QueryClient()}><MemoryRouter initialEntries={['/admin/'+page+(params.get('route')||'')]} future={{v7_startTransition:true,v7_relativeSplatPath:true}}><aside className="border-b border-border px-4 py-2 text-sm text-muted-foreground">Synthetic data only / Только тестовые данные</aside>{page==='projects'?<AdminProjects/>:<AdminProperties/>}<Boundary/></MemoryRouter></QueryClientProvider>);`,loader:'tsx',resolveDir:root },

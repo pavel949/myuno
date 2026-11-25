@@ -108,12 +108,19 @@ async def main():
                 await expect(page.get_by_role('heading', name='Проект без обновлений' if is_ru else 'Approved older project', exact=True)).to_be_visible()
                 await expect(page.get_by_role('heading', name=pending_project, exact=True)).to_have_count(0)
                 await capture('projects-stale')
-                # Existing KPI predicates, not new status assignments.
-                for review in ['orphan', 'needs_review']:
-                    await load('projects', '?filter=' + review)
-                    await expect(page.get_by_role('heading', name=pending_project, exact=True)).to_be_visible()
-                    await expect(page.get_by_role('button', name=('Проверить' if is_ru else 'Review details' if lang != 'th' else 'ตรวจสอบข้อมูล'), exact=True)).to_have_count(1)
-                    await no_writes()
+                # A legacy developer name without a canonical link is still orphaned.
+                review_button = 'Проверить' if is_ru else 'Review details' if lang != 'th' else 'ตรวจสอบข้อมูล'
+                unlinked_project = 'Проект без статуса' if is_ru else 'Unknown coastal project'
+                await load('projects', '?filter=orphan')
+                await expect(page.get_by_role('heading', name=pending_project, exact=True)).to_be_visible()
+                await expect(page.get_by_role('heading', name=unlinked_project, exact=True)).to_be_visible()
+                await expect(page.get_by_role('button', name=review_button, exact=True)).to_have_count(2)
+                await no_writes()
+                await load('projects', '?filter=needs_review')
+                await expect(page.get_by_role('heading', name=pending_project, exact=True)).to_be_visible()
+                await expect(page.get_by_role('heading', name=unlinked_project, exact=True)).to_have_count(0)
+                await expect(page.get_by_role('button', name=review_button, exact=True)).to_have_count(1)
+                await no_writes()
                 await load('projects')
                 await capture('projects-all')
                 stage = page.get_by_role('combobox', name=('Стадия строительства' if is_ru else 'Construction stage' if lang != 'th' else 'สถานะการก่อสร้าง'))

@@ -24273,7 +24273,7 @@
     },
     {
       "file": "src/pages/admin/AdminProjects.tsx",
-      "sha256": "551635c5c574666b4af4aa35c5b99a7bfb1b9786e88b3cc430431969dc78b4e4",
+      "sha256": "e2785f829f108f385cd2265790a5e97a71c94a118ff176884ab5e711b96b4e2d",
       "directRouteDeclarations": [
         {
           "id": "3bc95514306401ef",

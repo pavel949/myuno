@@ -75,7 +75,7 @@ import {
   ShieldCheck,
 } from 'lucide-react';
 import { Link, useSearchParams } from 'react-router-dom';
-import { PROJECT_REVIEW_FILTERS, PROJECT_STAGE_FILTERS, UNASSIGNED_DEVELOPER_ID, matchesProjectReview, readFilter, updateReviewParams } from '@/lib/admin/reviewFilters';
+import { PROJECT_REVIEW_FILTERS, PROJECT_STAGE_FILTERS, UNASSIGNED_DEVELOPER_ID, isUnassignedProjectDeveloper, matchesProjectReview, readFilter, updateReviewParams } from '@/lib/admin/reviewFilters';
 import { Checkbox } from '@/components/ui/checkbox';
 import { TranslatableInput } from '@/components/forms/TranslatableInput';
 import { TranslatableTextarea } from '@/components/forms/TranslatableTextarea';
@@ -571,7 +571,7 @@ export default function AdminProjects() {
         ) : (
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {filteredProjects.map((project) => {
-              const isOrphan = !project.developer_id || project.developer_id === UNASSIGNED_DEVELOPER_ID;
+              const isOrphan = isUnassignedProjectDeveloper(project.developer_id);
               const isSelected = selectedIds.has(project.id);
               return (
               <Card 

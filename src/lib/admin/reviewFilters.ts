@@ -5,6 +5,11 @@ export const PROJECT_REVIEW_FILTERS = ['all', 'pending', 'needs_review', 'orphan
 export const PROJECT_STAGE_FILTERS = ['all', 'offplan', 'under_construction', 'completed'] as const;
 export const UNASSIGNED_DEVELOPER_ID = '00000000-0000-0000-0000-000000000001';
 
+/** A missing projection is unknown, not evidence that a project is unassigned. */
+export function isUnassignedProjectDeveloper(developerId: string | null | undefined) {
+  return developerId === null || developerId === UNASSIGNED_DEVELOPER_ID;
+}
+
 export function readFilter<T extends string>(value: string | null, allowed: readonly T[]): T {
   return allowed.find(option => option === value) ?? allowed[0];
 }
@@ -53,7 +58,7 @@ export function matchesProjectReview(project: ProjectReviewRecord, filters: {
   if (!matchesSearch(filters.q, [project.name_en, project.name_ru, project.address, project.district, project.developer_name])) return false;
   if (filters.stage !== 'all' && project.project_status !== filters.stage) return false;
   switch (filters.review) {
-    case 'orphan': return !project.developer_id || project.developer_id === UNASSIGNED_DEVELOPER_ID;
+    case 'orphan': return isUnassignedProjectDeveloper(project.developer_id);
     case 'needs_review': return project.needs_review === true;
     case 'pending': return project.is_approved === false;
     case 'approved': return project.is_approved === true;

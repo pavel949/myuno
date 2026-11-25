@@ -211,7 +211,9 @@ async def main():
             await expect(page.get_by_role('heading',name='Provider offers',exact=True)).to_be_visible()
             await expect(page.get_by_text('No services found',exact=True)).to_have_count(0)
             await expect(page.get_by_text('Synthetic AC service',exact=True)).to_be_visible()
-            await expect(page.get_by_role('link',name='Synthetic team',exact=True)).to_have_attribute('href','/services/provider/provider-synthetic?returnTo=%2Fdiscover%2Fservices%3Fq%3Dsynthetic%26ref%3Dprovider')
+            await expect(page.get_by_text('Synthetic legal service',exact=True)).to_be_visible()
+            await expect(page.get_by_text('Synthetic unpublished service',exact=True)).to_have_count(0)
+            await expect(page.get_by_role('link',name='Synthetic team',exact=True).first).to_have_attribute('href','/services/provider/provider-synthetic?returnTo=%2Fdiscover%2Fservices%3Fq%3Dsynthetic%26ref%3Dprovider')
             await expect(page.get_by_text('Request a suitable time. The MyUNO concierge will check availability. Please wait for booking confirmation.',exact=True)).to_be_visible()
             await expect(page.get_by_text('The provider must confirm',exact=False)).to_have_count(0)
             assert await page.evaluate('document.documentElement.scrollWidth<=innerWidth')
@@ -220,11 +222,13 @@ async def main():
             await page.locator('#service-view-trigger').press('Enter')
             await page.get_by_role('option',name='Home services',exact=True).click()
             await close_catalog_filters(page,'en')
-            await expect(page.get_by_text('Synthetic AC service',exact=True)).to_have_count(0)
-            await expect(page.get_by_text('Clear the category and situation',exact=False)).to_be_visible()
-            await page.get_by_role('button',name='Browse provider offers',exact=True).click()
+            await expect(page.get_by_test_id('location')).to_contain_text('category=cat-home-services')
             await expect(page.get_by_role('searchbox')).to_have_value('synthetic')
             await expect(page.get_by_text('Synthetic AC service',exact=True)).to_be_visible()
+            await expect(page.get_by_text('Synthetic legal service',exact=True)).to_have_count(0)
+            await expect(page.get_by_text('Synthetic unpublished service',exact=True)).to_have_count(0)
+            await expect(page.get_by_role('link',name='Synthetic team',exact=True)).to_have_attribute(
+                'href','/services/provider/provider-synthetic?returnTo='+quote(await page.get_by_test_id('location').text_content(),safe=''))
             await page.get_by_role('searchbox').fill('zz-no-match')
             await expect(page.get_by_text('No services found',exact=True)).to_have_count(1)
             # Provider filters remain available when their current result is empty.
@@ -232,6 +236,24 @@ async def main():
             await expect(page.get_by_text('Synthetic AC service',exact=True)).to_have_count(0)
             await page.get_by_role('searchbox').fill('synthetic')
             await expect(page.get_by_text('Synthetic AC service',exact=True)).to_be_visible()
+            await expect(page.get_by_text('Synthetic legal service',exact=True)).to_have_count(0)
+            await expect(page.get_by_test_id('location')).to_contain_text('category=cat-home-services')
+
+            # An older offer is not hidden by the first 60 results or a false
+            # global no-match message. Check the same Cyrillic provider query.
+            old_query='/discover/services?q='+quote('Старинный Пхукет',safe='')+'&ref=older'
+            await page.goto('http://localhost:8080/fixture?lang=en&phase=provider-paged&entry='+quote(old_query,safe=''),wait_until='networkidle')
+            await expect(page.get_by_text('No matches on this page.',exact=True)).to_be_visible()
+            await expect(page.get_by_text('No services found',exact=True)).to_have_count(0)
+            await expect(page.get_by_text('Older fixture',exact=True)).to_have_count(0)
+            await page.get_by_role('button',name='Next offers',exact=True).click()
+            await expect(page.get_by_text('Older fixture',exact=True)).to_be_visible()
+            await expect(page.get_by_role('searchbox')).to_have_value('Старинный Пхукет')
+            await expect(page.get_by_test_id('location')).to_contain_text('ref=older')
+            await page.get_by_role('button',name='Previous offers',exact=True).click()
+            await expect(page.get_by_text('No matches on this page.',exact=True)).to_be_visible()
+            await expect(page.get_by_text('Older fixture',exact=True)).to_have_count(0)
+            assert await page.evaluate('document.documentElement.scrollWidth<=innerWidth')
             assert not errors, errors
             results.append({'lang':'en','width':width,'scenario':'provider-layer','passed':True})
             await context.close()
