@@ -8546,6 +8546,35 @@ export type Database = {
         }
         Relationships: []
       }
+      fasttrack_request_receipts: {
+        Row: {
+          booking_id: string | null
+          request_digest: string
+          request_key: string
+          user_id: string
+        }
+        Insert: {
+          booking_id?: string | null
+          request_digest: string
+          request_key: string
+          user_id: string
+        }
+        Update: {
+          booking_id?: string | null
+          request_digest?: string
+          request_key?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fasttrack_request_receipts_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: true
+            referencedRelation: "airport_bookings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       favorites: {
         Row: {
           created_at: string
@@ -37197,6 +37226,18 @@ export type Database = {
           p_user_id: string
         }
         Returns: string
+      }
+      create_fasttrack_request: {
+        Args: {
+          p_actor: string
+          p_booking: Json
+          p_passengers: Json
+          p_request_key: string
+        }
+        Returns: {
+          booking_id: string
+          created: boolean
+        }[]
       }
       create_managed_property_checked: {
         Args: {

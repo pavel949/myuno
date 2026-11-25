@@ -20877,7 +20877,7 @@
     },
     {
       "file": "src/pages/Wallet.tsx",
-      "sha256": "d267a731fcd843a0fb1b18c610225ce9c0101246b27704695da21942633b749e",
+      "sha256": "841dfba71d973f5e0803e36c6fd75670877c2bf5611fc19e0ac4b242aeea3c40",
       "directRouteDeclarations": [
         {
           "id": "60d21f7b4f38c17f",
@@ -20894,9 +20894,9 @@
           "source": "@/components/ui/button",
           "instances": 3,
           "lines": [
-            322,
-            430,
-            465
+            334,
+            442,
+            479
           ]
         },
         {
@@ -20904,9 +20904,9 @@
           "source": "@/components/ui/card",
           "instances": 3,
           "lines": [
-            242,
-            294,
-            393
+            254,
+            306,
+            405
           ]
         },
         {
@@ -20914,7 +20914,7 @@
           "source": "@/components/ui/dialog",
           "instances": 1,
           "lines": [
-            413
+            425
           ]
         },
         {
@@ -20922,7 +20922,7 @@
           "source": "@/components/ui/input",
           "instances": 1,
           "lines": [
-            447
+            459
           ]
         }
       ]
