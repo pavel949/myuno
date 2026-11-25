@@ -10,15 +10,22 @@ vi.mock('@/components/market/MiniCart', () => ({ MiniCart: () => null }));
 vi.mock('@/components/layout/UserAvatarMenu', () => ({ UserAvatarMenu: (props: Record<string, unknown>) => { state.props = props; return <button>Account menu</button>; } }));
 vi.mock('@/hooks/useFeedbackSettings', () => ({ getFeedbackSettings: () => ({}) }));
 afterEach(() => { cleanup(); state.user = null; state.props = {}; });
-it('uses only the existing account menu for authenticated consumer navigation', () => {
+it('keeps the public task navigation distinct from the signed-in account controls', () => {
  state.user = { id: 'synthetic' };
  const search = vi.fn();
  render(<MemoryRouter initialEntries={['/discover/services']}><ConsumerHeader onSearch={search} /></MemoryRouter>);
- expect(screen.queryByRole('button', { name: 'Open menu' })).not.toBeInTheDocument();
  expect(screen.getByRole('button', { name: 'Account menu' })).toBeInTheDocument();
- const links = state.props.consumerNavigation as {to:string; active?:boolean}[];
- expect(links).toEqual(expect.arrayContaining([expect.objectContaining({to:'/discover/services',active:true}), expect.objectContaining({to:'/cart'}), expect.objectContaining({to:'/for-owners'})]));
- expect(state.props.consumerSearch).toBe(search);
+ expect(state.props).toEqual({ consumerHeader: true });
+ fireEvent.click(screen.getByRole('button', {name:'Open menu'}));
+ const menu = screen.getByRole('dialog', {name:'myUNO'});
+ expect(within(menu).getByRole('link', { name: 'Cart' })).toHaveAttribute('href','/cart');
+ expect(within(menu).getByRole('link', { name: 'Requests and bookings' })).toHaveAttribute('href','/bookings');
+ expect(menu.querySelector('a[href="/discover/services"]')).toHaveAttribute('aria-current','page');
+ expect(within(menu).queryByRole('link',{name:'Sign in'})).not.toBeInTheDocument();
+ expect(within(menu).queryByRole('button',{name:'Account menu'})).not.toBeInTheDocument();
+ fireEvent.click(within(menu).getByRole('button', {name:'Search myUNO'}));
+ expect(search).toHaveBeenCalledTimes(1);
+ expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
 });
 it('keeps guest preferences, cart, owner path and exact sign-in return inside the Sheet', () => {
  render(<MemoryRouter initialEntries={['/bookings?tab=services#orders']}><ConsumerHeader overlay /></MemoryRouter>);
@@ -52,4 +59,32 @@ it('closes the sheet before invoking the existing search', () => {
  fireEvent.click(screen.getByRole('button', {name:'Search myUNO'}));
  expect(search).toHaveBeenCalledTimes(1);
  expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+});
+
+it('closes the desktop partner disclosure on Escape and returns focus to its trigger', () => {
+ const { container } = render(<MemoryRouter><ConsumerHeader /></MemoryRouter>);
+ const details = container.querySelector<HTMLDetailsElement>('.consumer-partner-menu')!;
+ const trigger = details.querySelector('summary')!;
+ details.open = true;
+ const owner = within(details).getByRole('link', {name:'For owners'});
+ owner.focus();
+ fireEvent.keyDown(owner, {key:'Escape'});
+ expect(details.open).toBe(false);
+ expect(trigger).toHaveFocus();
+});
+it('allows focus within partners, and dismisses without stealing focus when focus or pointer goes outside', () => {
+ const { container } = render(<MemoryRouter><ConsumerHeader /><button>Outside</button></MemoryRouter>);
+ const details = container.querySelector<HTMLDetailsElement>('.consumer-partner-menu')!;
+ details.open = true;
+ const owner = within(details).getByRole('link', {name:'For owners'});
+ owner.focus();
+ expect(details.open).toBe(true);
+ const outside = screen.getByRole('button', {name:'Outside'});
+ outside.focus();
+ expect(details.open).toBe(false);
+ expect(outside).toHaveFocus();
+ details.open = true;
+ fireEvent.pointerDown(outside);
+ expect(details.open).toBe(false);
+ expect(outside).toHaveFocus();
 });

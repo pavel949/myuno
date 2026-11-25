@@ -13,13 +13,11 @@ import {
   Building2,
   List,
   Map,
-  SlidersHorizontal,
   X,
   Search,
 } from 'lucide-react';
 import { SEOHead, createBreadcrumbSchema } from '@/components/seo';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Input } from '@/components/ui/input';
 import {
@@ -29,14 +27,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-  SheetClose,
-} from '@/components/ui/sheet';
+import { MarketplaceFilterSheet } from '@/components/services/MarketplaceFilterSheet';
+import { useCataloguePanelDraft } from '@/hooks/useCataloguePanelDraft';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useOffplanProjects, useProjectDistricts } from '@/hooks/useOffplanProjects';
 import { useDevelopers } from '@/hooks/useDevelopers';
@@ -86,8 +78,15 @@ export default function OffplanIndex() {
     if (next.toString() === params.toString()) return;
     navigate({ pathname: location.pathname, search: next.toString(), hash: location.hash }, { replace, state: location.state, preventScrollReset: true });
   };
-  const setSelectedDistrict = (value: string) => updateFilters({ district: value });
-  const setSelectedDeveloper = (value: string) => updateFilters({ developer: value });
+  const panelKeys = ['district', 'developer', 'developerName', 'budget'] as const;
+  const panel = useCataloguePanelDraft(panelKeys, params, next => {
+    navigate({ pathname: location.pathname, search: next.toString(), hash: location.hash }, { state: location.state, preventScrollReset: true });
+  });
+  const editPanel = (key: typeof panelKeys[number], value: string) => panel.setValues(next => {
+    if (value) next.set(key, value); else next.delete(key);
+    return next;
+  });
+  const resetPanel = () => panel.setValues(next => { panelKeys.forEach(key => next.delete(key)); return next; });
 
   // Apply saved search filters when navigated from /account/saved-searches
   useEffect(() => {
@@ -174,95 +173,51 @@ export default function OffplanIndex() {
         </div>
 
         <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide pb-1">
-          <Sheet>
-            <SheetTrigger asChild>
-              <Button variant="outline" size="sm" className="shrink-0 rounded-full gap-1.5">
-                <SlidersHorizontal className="w-4 h-4" />
-                {pickLang(language, {"ru": "Фильтры", "en": "Filters", "th": "ตัวกรอง"})}
-                {totalFilterBadge > 0 && (
-                  <Badge variant="secondary" className="ml-1 h-5 min-w-[1.25rem] px-1 justify-center">
-                    {totalFilterBadge}
-                  </Badge>
-                )}
-              </Button>
-            </SheetTrigger>
-            <SheetContent side="bottom" className="h-[80vh] overflow-y-auto">
-              <SheetHeader>
-                <SheetTitle>{pickLang(language, {"ru": "Фильтры", "en": "Filters", "th": "ตัวกรอง"})}</SheetTitle>
-              </SheetHeader>
-              <div className="space-y-5 mt-6 pb-8">
-                <div>
-                  <label className="text-sm font-medium mb-2 block">{pickLang(language, {"ru": "Район", "en": "District", "th": "ย่าน"})}</label>
-                  <Select
-                    value={selectedDistrict || '_all'}
-                    onValueChange={(v) => setSelectedDistrict(v === '_all' ? '' : v)}
-                  >
-                    <SelectTrigger aria-label={pickLang(language, { ru: 'Район', en: 'District', th: 'ย่าน' })}>
-                      <SelectValue placeholder={pickLang(language, {"ru": "Все районы", "en": "All districts", "th": "ทุกย่าน"})} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="_all">{pickLang(language, {"ru": "Все районы", "en": "All districts", "th": "ทุกย่าน"})}</SelectItem>
-                      {districts?.map((d) => (
-                        <SelectItem key={d} value={d}>
-                          {d}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div>
-                  <label className="text-sm font-medium mb-2 block">{pickLang(language, {"ru": "Застройщик", "en": "Developer", "th": "ผู้พัฒนา"})}</label>
-                  <Select
-                    value={selectedDeveloper || '_all'}
-                    onValueChange={(v) => setSelectedDeveloper(v === '_all' ? '' : v)}
-                  >
-                    <SelectTrigger aria-label={pickLang(language, { ru: 'Застройщик', en: 'Developer', th: 'ผู้พัฒนา' })}>
-                      <SelectValue placeholder={pickLang(language, {"ru": "Все", "en": "All", "th": "ทั้งหมด"})} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="_all">{pickLang(language, {"ru": "Все застройщики", "en": "All developers", "th": "ผู้พัฒนาทั้งหมด"})}</SelectItem>
-                      {developers?.map((d) => (
-                        <SelectItem key={d.id} value={d.id}>
-                          {isRu ? d.nameRu : d.nameEn}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div>
-                  <label className="text-sm font-medium mb-2 block">{pickLang(language, {"ru": "Поиск застройщика (текст)", "en": "Developer contains", "th": "ค้นหาชื่อผู้พัฒนา"})}</label>
-                  <Input
-                    aria-label={pickLang(language, { ru: 'Название застройщика', en: 'Developer name', th: 'ชื่อผู้พัฒนา' })}
-                    value={ui.fDev}
-                    onChange={(e) => updateFilters({ developerName: e.target.value })}
-                    placeholder="Sansiri, Laguna…"
-                  />
-                </div>
-
-                {([
-                  ['budget', budget, BUDGET_OPTIONS, { ru: 'Бюджет', en: 'Budget', th: 'งบประมาณ' }],
-                ] as const).map(([key, value, options, label]) => (
-                  <div key={key}>
-                    <label className="text-sm font-medium mb-2 block">{pickLang(language, label)}</label>
-                    <Select value={value || '_all'} onValueChange={(v) => updateFilters({ [key]: v === '_all' ? '' : v })}>
-                      <SelectTrigger aria-label={pickLang(language, label)}><SelectValue /></SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="_all">{pickLang(language, { ru: 'Любой', en: 'Any', th: 'ทั้งหมด' })}</SelectItem>
-                        {options.map((o) => <SelectItem key={o.value} value={o.value}>{pickLang(language, o.label)}</SelectItem>)}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                ))}
-
-                <SheetClose asChild><Button className="w-full">{pickLang(language, {"ru": "Показать проекты", "en": "Show projects", "th": "ดูโครงการ"})}</Button></SheetClose>
-                <Button variant="outline" className="w-full" onClick={clearAll}>
-                  {pickLang(language, {"ru": "Сбросить всё", "en": "Clear all", "th": "ล้างทั้งหมด"})}
-                </Button>
-              </div>
-            </SheetContent>
-          </Sheet>
+          <MarketplaceFilterSheet showLabel title={pickLang(language, { ru: 'Фильтры', en: 'Filters', th: 'ตัวกรอง' })} activeCount={totalFilterBadge}
+            applyLabel={pickLang(language, { ru: 'Показать проекты', en: 'Show projects', th: 'ดูโครงการ' })}
+            onOpenChange={panel.openChange} onApply={() => panel.apply()} onReset={resetPanel}>
+            <div className="space-y-2">
+              <label htmlFor="offplan-filter-district" className="block text-sm font-medium">{pickLang(language, { ru: 'Район', en: 'District', th: 'ย่าน' })}</label>
+              <Select value={panel.values.get('district') || '_all'} onValueChange={value => editPanel('district', value === '_all' ? '' : value)}>
+                <SelectTrigger id="offplan-filter-district" className="min-h-11"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="_all">{pickLang(language, { ru: 'Все районы', en: 'All districts', th: 'ทุกย่าน' })}</SelectItem>
+                  {panel.values.get('district') && !districts?.includes(panel.values.get('district')!) && <SelectItem value={panel.values.get('district')!}>{panel.values.get('district')}</SelectItem>}
+                  {districts?.map(d => <SelectItem key={d} value={d}>{d}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <label htmlFor="offplan-filter-developer" className="block text-sm font-medium">{pickLang(language, { ru: 'Застройщик', en: 'Developer', th: 'ผู้พัฒนา' })}</label>
+              <Input id="offplan-filter-developer" list="offplan-filter-developers" className="min-h-11"
+                value={panel.values.get('developerName') ?? (panel.values.get('developer') ? (developers?.find(d => d.id === panel.values.get('developer'))?.[isRu ? 'nameRu' : 'nameEn'] || (isRu ? 'Застройщик из ссылки' : language === 'th' ? 'ผู้พัฒนาจากลิงก์' : 'Developer from link')) : '')}
+                onChange={event => {
+                  const value = event.target.value;
+                  const matches = developers?.filter(d => (isRu ? d.nameRu : d.nameEn) === value) ?? [];
+                  panel.setValues(next => {
+                    next.delete('developer');
+                    next.delete('developerName');
+                    if (matches.length === 1) next.set('developer', matches[0].id);
+                    else if (value) next.set('developerName', value);
+                    return next;
+                  });
+                }}
+                placeholder={pickLang(language, { ru: 'Введите или выберите название', en: 'Enter or choose a name', th: 'พิมพ์หรือเลือกชื่อ' })}
+              />
+              <datalist id="offplan-filter-developers">{developers?.map(d => <option key={d.id} value={isRu ? d.nameRu : d.nameEn}>{isRu ? d.nameRu : d.nameEn}</option>)}</datalist>
+            </div>
+            <div className="space-y-2">
+              <label htmlFor="offplan-filter-budget" className="block text-sm font-medium">{pickLang(language, { ru: 'Бюджет', en: 'Budget', th: 'งบประมาณ' })}</label>
+              <Select value={panel.values.get('budget') || '_all'} onValueChange={value => editPanel('budget', value === '_all' ? '' : value)}>
+                <SelectTrigger id="offplan-filter-budget" className="min-h-11"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="_all">{pickLang(language, { ru: 'Любой', en: 'Any', th: 'ทั้งหมด' })}</SelectItem>
+                  {panel.values.get('budget') && !BUDGET_OPTIONS.some(option => option.value === panel.values.get('budget')) && <SelectItem value={panel.values.get('budget')!}>{pickLang(language, { ru: 'Проверьте бюджет', en: 'Check budget', th: 'ตรวจสอบงบประมาณ' })}</SelectItem>}
+                  {BUDGET_OPTIONS.map(option => <SelectItem key={option.value} value={option.value}>{pickLang(language, option.label)}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            </div>
+          </MarketplaceFilterSheet>
 
           {BUDGET_OPTIONS.map((o) => (
             <Button key={o.value} variant={budget === o.value ? 'default' : 'outline'} size="sm" className="shrink-0 rounded-full"

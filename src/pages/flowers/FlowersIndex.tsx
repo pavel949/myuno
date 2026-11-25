@@ -17,6 +17,7 @@ import { useFlowerFilterOptions } from '@/hooks/useDynamicFilterOptions';
 import { ActiveFilters, FilterValues } from '@/components/filters/UniversalFilter';
 import { mapBouquetToCatalogCard } from '@/lib/adapters/catalogCardAdapters';
 import { APP_ROUTES } from '@/lib/config/routes';
+import { PersonaFilterChip } from '@/components/landings/PersonaFilterChip';
 import { usePersonaFilter } from '@/hooks/usePersonaFilter';
 import { useDebouncedValue } from '@/hooks/useDebouncedValue';
 import { MarketplaceRequestSteps } from '@/components/services/MarketplaceRequestSteps';
@@ -47,7 +48,7 @@ export default function FlowersIndex() {
   };
   const t = (ru: string, en: string, th: string) => pickLang(language, { ru, en, th });
   const isRu = language === 'ru';
-  const { applyFilter: applyPersonaFilter } = usePersonaFilter();
+  const { applyFilter: applyPersonaFilter, personaTags, clearPersona } = usePersonaFilter();
 
   const { categoryRibbon, filterConfig: rawFilterConfig } = useFlowerFilterOptions();
   // Expose only filters implemented against the catalogue, never inert size/delivery promises.
@@ -144,7 +145,7 @@ export default function FlowersIndex() {
     () => applyPersonaFilter(structurallyFiltered, (b) => {
       const tags = (b.occasion_tags as string[] | null) ?? [];
       return [...tags, b.style].filter(Boolean) as string[];
-    }),
+    }, { strict: true }),
     [structurallyFiltered, applyPersonaFilter],
   );
 
@@ -202,6 +203,7 @@ export default function FlowersIndex() {
         <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{t('Выберите букет по поводу, цветам и бюджету. Фотографии, состав и варианты размера — в карточке предложения.', 'Choose a bouquet by occasion, flowers and budget. Explore photos, composition and size options on its page.', 'เลือกช่อดอกไม้ตามโอกาส ชนิดและงบประมาณ ดูรูป ส่วนประกอบและขนาดในหน้าข้อเสนอ')}</p>
         <p className="mt-3 flex items-start gap-2 text-sm text-muted-foreground"><Info className="mt-0.5 size-4 shrink-0" aria-hidden="true" />{t('myUNO согласует наличие, состав букета и время доставки. Они требуют подтверждения.', 'myUNO confirms availability, bouquet composition and delivery time before fulfilment.', 'myUNO จะยืนยันความพร้อม ส่วนประกอบและเวลาจัดส่งก่อนให้บริการ')}</p>
       </section>
+      {personaTags.length > 0 && <PersonaFilterChip className="mb-4" />}
       {hasFilters && <div className="flex flex-wrap items-center justify-between gap-3 border border-border p-4"><p className="text-sm">{t('Выбраны условия поиска', 'Search filters selected', 'เลือกตัวกรองการค้นหาแล้ว')}</p><Button variant="outline" onClick={handleClearAll}>{t('Сбросить всё', 'Clear all', 'ล้างทั้งหมด')}</Button></div>}
 
       {activeFilterCount > 0 && (
@@ -228,11 +230,13 @@ export default function FlowersIndex() {
         <EmptyState
           icon={Flower2}
           title={isRu ? 'Букеты не найдены' : 'No bouquets found'}
-          description={isRu
+          description={personaTags.length > 0
+            ? t('Нет букетов, подходящих под этот сценарий и остальные условия.', 'No bouquets match this scenario and your other selections.', 'ไม่มีช่อดอกไม้ที่ตรงกับสถานการณ์และตัวเลือกอื่น ๆ ของคุณ')
+            : isRu
             ? activeFilterCount > 0 ? 'Попробуйте изменить фильтры' : 'В этой категории пока нет букетов'
             : activeFilterCount > 0 ? 'Try adjusting your filters' : 'No bouquets in this category yet'
           }
-          action={hasFilters ? (
+          action={personaTags.length > 0 ? <Button variant="outline" onClick={clearPersona}>{t('Искать без сценария', 'Search without scenario', 'ค้นหาโดยไม่เลือกสถานการณ์')}</Button> : hasFilters ? (
             <Button variant="outline" onClick={handleClearAll}>
               {isRu ? 'Сбросить фильтры' : 'Reset filters'}
             </Button>

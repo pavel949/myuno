@@ -103,6 +103,16 @@ identity migrations.
 Top level: **RENT | BUY** only. Never **Stay | Rent | Buy**.
 This is the target information architecture, not a new route tree in this tranche.
 
+**Catalogue controls.** Quick filters outside a panel apply immediately. A panel
+contains draft choices until Apply; closing it or pressing Escape discards the
+draft. Show committed criteria beside the results and encode public criteria in
+the URL without discarding unrelated parameters or route context. Keep the apply
+action reachable while the panel body scrolls. Keep legacy bookmarks readable.
+An unrestricted price search includes unknown rates; an explicit comparable
+price range does not, and an unknown price is never zero. Show a confirmed
+no-match separately from loading or failure. Internal contact searches do not
+belong in browser navigation URLs; they still use the existing authorized query.
+
 | Context | Primary questions | Secondary filters / shortcuts |
 |---|---|---|
 | RENT | Where / When / Who | Duration inferred from dates; short/monthly/long-term, amenities, budget and home type refine discovery or commercial eligibility |

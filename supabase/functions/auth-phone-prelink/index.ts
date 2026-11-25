@@ -121,22 +121,12 @@ Deno.serve(async (req) => {
       );
     }
 
-    const phoneNoPlus = phone.startsWith('+') ? phone.slice(1) : phone;
-    // Only attach a phone to an account that has none. Never replace an
-    // existing (possibly verified) phone from an unauthenticated request.
-    if (!userRes.user.phone) {
-      const { error: updErr } = await supabase.auth.admin.updateUserById(profile.id, {
-        phone: phoneNoPlus,
-        phone_confirm: false, // OTP will confirm
-      });
-      if (updErr) {
-        console.error('[auth-phone-prelink] updateUserById failed', updErr);
-        // Even if linking fails, OTP still works — Supabase will match by phone
-      }
-    }
-
+    // Unauthenticated callers cannot prove they own this phone or the matched
+    // account, so this endpoint never changes Auth identities. Linking a phone
+    // to an existing account must happen from that signed-in account.
+    void userRes;
     return new Response(
-      JSON.stringify({ linked: true }),
+      JSON.stringify({ linked: false }),
       {
         status: 200,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },

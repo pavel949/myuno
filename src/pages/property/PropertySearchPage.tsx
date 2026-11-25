@@ -7,6 +7,7 @@ import '@/styles/public-commerce.css';
  */
 import { pickLang } from '@/lib/i18n/pickLang';
 import React, { useState, useMemo, useCallback, useEffect, useRef, lazy, Suspense } from 'react';
+import { SearchLeadRequest } from '@/components/search/SearchLeadRequest';
 import { Link, useSearchParams, useLocation, useNavigate } from 'react-router-dom';
 import { Home, SlidersHorizontal, Loader2, Check, Map as MapIcon, List } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -299,6 +300,8 @@ export default function PropertySearchPage() {
     ? `${dateLabel(searchParams.checkIn)} – ${dateLabel(searchParams.checkOut)}`
     : (text('Без дат', 'Any dates', 'ไม่ระบุวันที่'));
   const summaryExtraFilters = advancedFilterCount + (selectedCompanyId ? 1 : 0);
+  const filterCountPlural = new Intl.PluralRules('ru').select(summaryExtraFilters);
+  const filterCountLabel = text(filterCountPlural === 'one' ? 'фильтр' : filterCountPlural === 'few' ? 'фильтра' : 'фильтров', summaryExtraFilters === 1 ? 'filter' : 'filters', 'ตัวกรอง');
   const summaryDuration = rentTenancy === 'medium' ? (text('Помесячно', 'Monthly', 'รายเดือน')) : rentTenancy === 'long' ? (text('Надолго', 'Long stay', 'ระยะยาว')) : (text('Посуточно', 'Nightly', 'รายคืน'));
 
   const pageTitle = catalogueAll
@@ -338,7 +341,7 @@ export default function PropertySearchPage() {
           </nav>}
           {catalogueAll && [...searchParamsUrl.keys()].every(key => ['mode', 'lang', 'source'].includes(key)) && <PlatformJourneyLinks journey="property" />}
           <details open={criteriaOpen} className="premium-search-criteria">
-            <summary className="property-discovery-search-summary" onClick={event => { event.preventDefault(); setCriteriaOpen(open => !open); }}><span><strong>{summaryTypes} · {summaryAreas}</strong><small>{searchText ? `«${searchText}» · ` : ''}{!catalogueAll && propertyMode === 'rent' ? `${summaryDuration} · ${summaryDates} · ${state.hasGuestFilter ? `${text('Гостей', 'Guests', 'ผู้เข้าพัก')}: ${searchParams.guests}` : text('Гости не указаны', 'Guests not specified', 'ไม่ระบุจำนวนผู้เข้าพัก')}` : text('Параметры и район можно изменить', 'Refine the area and preferences', 'ปรับย่านและความต้องการ')}{summaryExtraFilters ? ` · ${summaryExtraFilters} ${text('фильтров', 'filters', 'ตัวกรอง')}` : ''}</small></span><span>{criteriaOpen ? text('Свернуть', 'Collapse', 'ย่อ') : text('Изменить поиск', 'Change search', 'แก้ไขการค้นหา')}</span></summary>
+            <summary className="property-discovery-search-summary" onClick={event => { event.preventDefault(); setCriteriaOpen(open => !open); }}><span><strong>{summaryTypes} · {summaryAreas}</strong><small>{searchText ? `«${searchText}» · ` : ''}{!catalogueAll && propertyMode === 'rent' ? `${summaryDuration} · ${summaryDates} · ${state.hasGuestFilter ? `${text('Гостей', 'Guests', 'ผู้เข้าพัก')}: ${searchParams.guests}` : text('Гости не указаны', 'Guests not specified', 'ไม่ระบุจำนวนผู้เข้าพัก')}` : text('Параметры и район можно изменить', 'Refine the area and preferences', 'ปรับย่านและความต้องการ')}{summaryExtraFilters ? ` · ${summaryExtraFilters} ${filterCountLabel}` : ''}</small></span><span>{criteriaOpen ? text('Свернуть', 'Collapse', 'ย่อ') : text('Изменить поиск', 'Change search', 'แก้ไขการค้นหา')}</span></summary>
             <div className="property-search-editor property-discovery-editor">
               <HomeDiscoverySearch key={searchEditorKey} hideModeSwitch catalogue showGuestsInline initialParams={searchParamsUrl} onSearch={submitSearch} />
             </div>
@@ -498,6 +501,7 @@ export default function PropertySearchPage() {
             </div>
           )}
 
+          {!catalogueAll && (propertyMode === 'rent' || propertyMode === 'buy') && !isError && <SearchLeadRequest kind={propertyMode} params={searchParamsUrl} className="mt-8" />}
           {propertyMode === 'buy' && !isError && <OffplanCTASection className="mt-8" />}
           {properties.length > 0 && !isError && <CrossSellSection currentVertical="property" className="mt-8 px-4" />}
 

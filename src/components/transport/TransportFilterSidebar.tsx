@@ -3,17 +3,18 @@
  * Price range, transmission, fuel, seats, brand, delivery, driver
  */
 
-import { useState, useMemo } from 'react';
-import { X, SlidersHorizontal, ChevronDown } from 'lucide-react';
+import { useId, useState, useMemo } from 'react';
+import { ChevronDown } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { Button } from '@/components/ui/button';
-import { Slider } from '@/components/ui/slider';
+import { Input } from '@/components/ui/input';
+import { pickLang } from '@/lib/i18n/pickLang';
 import { Checkbox } from '@/components/ui/checkbox';
 import { cn } from '@/lib/utils';
 import type { Vehicle } from '@/hooks/useVehicles';
 
 export interface TransportFilters {
-  priceRange: [number, number];
+  minPrice: string;
+  maxPrice: string;
   transmissions: string[];
   fuelTypes: string[];
   brands: string[];
@@ -23,7 +24,8 @@ export interface TransportFilters {
 }
 
 export const DEFAULT_FILTERS: TransportFilters = {
-  priceRange: [0, 5000],
+  minPrice: '',
+  maxPrice: '',
   transmissions: [],
   fuelTypes: [],
   brands: [],
@@ -36,8 +38,6 @@ interface TransportFilterSidebarProps {
   filters: TransportFilters;
   onChange: (filters: TransportFilters) => void;
   vehicles: Vehicle[];
-  open: boolean;
-  onClose: () => void;
 }
 
 const TRANSMISSIONS = [
@@ -63,8 +63,6 @@ export function TransportFilterSidebar({
   filters,
   onChange,
   vehicles,
-  open,
-  onClose,
 }: TransportFilterSidebarProps) {
   const { language } = useLanguage();
   const isRu = language === 'ru';
@@ -78,18 +76,6 @@ export function TransportFilterSidebar({
     return Array.from(set).sort();
   }, [vehicles]);
 
-  const activeCount = useMemo(() => {
-    let count = 0;
-    if (filters.priceRange[0] > 0 || filters.priceRange[1] < 5000) count++;
-    if (filters.transmissions.length > 0) count++;
-    if (filters.fuelTypes.length > 0) count++;
-    if (filters.brands.length > 0) count++;
-    if (filters.minSeats) count++;
-    if (filters.deliveryOnly) count++;
-    if (filters.withDriverOnly) count++;
-    return count;
-  }, [filters]);
-
   const update = (partial: Partial<TransportFilters>) => {
     onChange({ ...filters, ...partial });
   };
@@ -98,70 +84,24 @@ export function TransportFilterSidebar({
     return arr.includes(value) ? arr.filter(v => v !== value) : [...arr, value];
   };
 
-  const reset = () => onChange(DEFAULT_FILTERS);
+  const t = (ru: string, en: string, th: string) => pickLang(language, { ru, en, th });
+  const { valid } = parseTransportPriceRange(filters);
+  const priceError = useId();
 
   return (
-    <>
-      {/* Backdrop */}
-      {open && (
-        <div
-          className="fixed inset-0 z-40 bg-black/30 lg:hidden"
-          onClick={onClose}
-        />
-      )}
-
-      {/* Sidebar */}
-      <aside
-        className={cn(
-          "fixed top-0 right-0 z-50 h-full w-[320px] max-w-full bg-background border-l border-border shadow-2xl transition-[transform,visibility] duration-300 overflow-y-auto",
-          "lg:static lg:z-auto lg:shadow-none lg:border-l-0 lg:border-r lg:border-border/50 lg:rounded-none lg:h-auto lg:w-[280px] lg:shrink-0",
-          // Closed on mobile: `invisible` takes the off-canvas controls out of
-          // the tab order and the accessibility tree, not just out of sight.
-          open ? "translate-x-0 visible" : "translate-x-full invisible lg:translate-x-0 lg:hidden"
-        )}
-        aria-label={isRu ? 'Фильтры' : 'Filters'}
-      >
-        {/* Header */}
-        <div className="sticky top-0 z-10 bg-background border-b border-border/50 px-4 py-3 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <SlidersHorizontal className="w-4 h-4 text-primary" />
-            <h2 className="font-semibold text-sm">{isRu ? 'Фильтры' : 'Filters'}</h2>
-            {activeCount > 0 && (
-              <span className="px-1.5 py-0.5 rounded-full bg-primary text-primary-foreground text-[10px] font-bold">
-                {activeCount}
-              </span>
-            )}
-          </div>
-          <div className="flex items-center gap-2">
-            {activeCount > 0 && (
-              <button type="button" onClick={reset} className="min-h-11 px-2 text-xs text-primary hover:underline">
-                {isRu ? 'Сбросить' : 'Reset'}
-              </button>
-            )}
-            <button type="button" onClick={onClose} aria-label={isRu ? 'Закрыть фильтры' : 'Close filters'} className="lg:hidden inline-flex min-h-11 min-w-11 items-center justify-center rounded-none hover:bg-muted">
-              <X className="w-4 h-4" aria-hidden="true" />
-            </button>
-          </div>
+    <div className="space-y-6">
+      <FilterSection title={t('Цена за день, ฿', 'Daily price, THB', 'ราคาต่อวัน (บาท)')}>
+        <div className="grid grid-cols-2 gap-3">
+          {([
+            ['minPrice', t('От', 'Minimum', 'ต่ำสุด')],
+            ['maxPrice', t('До', 'Maximum', 'สูงสุด')],
+          ] as const).map(([key, label]) => <label key={key} className="space-y-1">
+            <span className="block text-sm">{label}</span>
+            <Input type="text" inputMode="decimal" value={filters[key]} onChange={event => update({ [key]: event.target.value })} aria-invalid={!valid || undefined} aria-describedby={!valid ? priceError : undefined} placeholder={key === 'maxPrice' ? t('Без ограничений', 'No maximum', 'ไม่จำกัด') : '0'} />
+          </label>)}
         </div>
-
-        <div className="p-4 space-y-6">
-          {/* Price Range */}
-          <FilterSection title={isRu ? 'Цена за день' : 'Daily price'}>
-            <div className="px-1">
-              <Slider
-                value={filters.priceRange}
-                min={0}
-                max={5000}
-                step={100}
-                onValueChange={(v) => update({ priceRange: v as [number, number] })}
-                className="mb-2"
-              />
-              <div className="flex justify-between text-xs text-muted-foreground">
-                <span>฿{filters.priceRange[0].toLocaleString()}</span>
-                <span>฿{filters.priceRange[1].toLocaleString()}</span>
-              </div>
-            </div>
-          </FilterSection>
+        {!valid && <p id={priceError} role="alert" className="mt-2 text-sm text-destructive">{t('Проверьте диапазон цены: укажите неотрицательные суммы, от меньшей к большей.', 'Enter non-negative amounts, with the minimum no greater than the maximum.', 'กรอกจำนวนเงินที่ไม่ติดลบ โดยค่าต่ำสุดต้องไม่เกินค่าสูงสุด')}</p>}
+      </FilterSection>
 
           {/* Transmission */}
           <FilterSection title={isRu ? 'Трансмиссия' : 'Transmission'}>
@@ -199,9 +139,11 @@ export function TransportFilterSidebar({
               {SEAT_OPTIONS.map(s => (
                 <button
                   key={s.id}
+                  type="button"
+                  aria-pressed={filters.minSeats === s.id}
                   onClick={() => update({ minSeats: filters.minSeats === s.id ? null : s.id })}
                   className={cn(
-                    "px-3 py-1.5 rounded-full text-xs font-medium border transition-colors",
+                    "min-h-11 px-3 py-1.5 rounded-full text-xs font-medium border transition-colors",
                     filters.minSeats === s.id
                       ? "bg-foreground text-background border-foreground"
                       : "bg-background text-muted-foreground border-border hover:border-foreground/30"
@@ -249,33 +191,34 @@ export function TransportFilterSidebar({
               </label>
             </div>
           </FilterSection>
-        </div>
-      </aside>
-    </>
+    </div>
   );
 }
 
 function FilterSection({ title, children }: { title: string; children: React.ReactNode }) {
   const [open, setOpen] = useState(true);
+  const contentId = useId();
   return (
     <div>
-      <button
-        onClick={() => setOpen(!open)}
-        className="w-full flex items-center justify-between mb-2.5"
-      >
-        <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{title}</h3>
-        <ChevronDown className={cn("w-3.5 h-3.5 text-muted-foreground transition-transform", !open && "-rotate-90")} />
-      </button>
-      {open && children}
+      <h3>
+        <button type="button" aria-expanded={open} aria-controls={contentId} onClick={() => setOpen(!open)} className="mb-2 flex min-h-11 w-full items-center justify-between text-sm font-semibold">
+          {title}<ChevronDown aria-hidden="true" className={cn("size-4 text-muted-foreground transition-transform", !open && "-rotate-90")} />
+        </button>
+      </h3>
+      <div id={contentId} hidden={!open}>{children}</div>
     </div>
   );
 }
 
 /** Utility: apply filters to vehicle array */
 export function applyTransportFilters(vehicles: Vehicle[], filters: TransportFilters): Vehicle[] {
+  const { min, max, valid } = parseTransportPriceRange(filters);
+  if (!valid) return [];
   return vehicles.filter(v => {
-    const price = v.price_per_day || 0;
-    if (price < filters.priceRange[0] || price > filters.priceRange[1]) return false;
+    if (min !== null || max !== null) {
+      const price = comparableDailyPrice(v);
+      if (price === null || (min !== null && price < min) || (max !== null && price > max)) return false;
+    }
 
     if (filters.transmissions.length > 0 && !filters.transmissions.includes(v.transmission || '')) return false;
     if (filters.fuelTypes.length > 0 && !filters.fuelTypes.includes(v.fuel_type || '')) return false;
@@ -286,4 +229,32 @@ export function applyTransportFilters(vehicles: Vehicle[], filters: TransportFil
 
     return true;
   });
+}
+
+export function parseTransportPriceRange(filters: Pick<TransportFilters, 'minPrice' | 'maxPrice'>) {
+  const read = (value: string) => {
+    const normalized = value.trim().replace(',', '.');
+    if (!normalized) return null;
+    if (!/^\d+(?:\.\d{1,2})?$/.test(normalized)) return NaN;
+    return Number(normalized);
+  };
+  const min = read(filters.minPrice);
+  const max = read(filters.maxPrice);
+  return { min, max, valid: (min === null || Number.isFinite(min)) && (max === null || Number.isFinite(max)) && (min === null || max === null || min <= max) };
+}
+
+export function dailyPrice(vehicle: Pick<Vehicle, 'price_per_day'>) {
+  const price = vehicle.price_per_day;
+  return typeof price === 'number' && Number.isFinite(price) && price > 0 ? price : null;
+}
+
+function comparableDailyPrice(vehicle: Pick<Vehicle, 'price_per_day' | 'currency'>) {
+  return (vehicle.currency || 'THB').trim().toUpperCase() === 'THB' ? dailyPrice(vehicle) : null;
+}
+
+export function compareTransportDailyPrice(a: Vehicle, b: Vehicle, descending: boolean) {
+  const left = comparableDailyPrice(a);
+  const right = comparableDailyPrice(b);
+  if (left === null || right === null) return left === right ? 0 : left === null ? 1 : -1;
+  return descending ? right - left : left - right;
 }

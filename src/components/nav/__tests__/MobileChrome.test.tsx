@@ -40,7 +40,7 @@ it.each([320, 360, 390, 430, 768])('keeps one mobile row at %ipx with secondary 
  expect(declarations.get('.consumer-utilities:flex-wrap') ?? 'nowrap').toBe('nowrap');
  expect(declarations.get('.consumer-menu:position')).toBe('static');
  expect(declarations.get('.consumer-secondary-utilities:display')).toBe('none');
- expect(declarations.get('.consumer-account-navigation:display')).toBe('block');
+ expect(declarations.get('.consumer-menu:min-width')).toBe('44px');
  expect(declarations.get('.consumer-header .consumer-account-trigger:min-width')).toBe('44px');
  expect(declarations.has('.consumer-utilities:grid-row')).toBe(false);
 });

@@ -55,7 +55,7 @@ export function useProfileDetails() {
   const { user } = useAuth();
   const queryClient = useQueryClient();
 
-  const { data: details, isLoading, error } = useQuery({
+  const { data: details, isLoading, error, dataUpdatedAt } = useQuery({
     queryKey: ['profile', 'details', user?.id],
     queryFn: async (): Promise<ProfileDetails | null> => {
       if (!user?.id) return null;
@@ -149,6 +149,7 @@ export function useProfileDetails() {
 
   return {
     details: detailsWithAlias,
+    dataUpdatedAt,
     isLoading,
     error,
     updateDetails: updateDetails.mutate,

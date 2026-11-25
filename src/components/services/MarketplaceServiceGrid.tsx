@@ -1,5 +1,6 @@
 import { PUBLIC_CATALOG_GRID } from '@/design-system/ecosystemLayout';
 import '@/styles/premium-services.css';
+import { useCataloguePanelDraft } from '@/hooks/useCataloguePanelDraft';
 import { useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { CalendarCheck } from 'lucide-react';
@@ -41,24 +42,28 @@ export function MarketplaceServiceGrid({ search = '', returnTo = '/discover/serv
   const popular = !search.trim() && !filters.active ? popularProviderOffers(list) : [];
   const popularIds = new Set(popular.map(service => service.id));
   const rest = list.filter(service => !popularIds.has(service.id));
-  const update = (key: MarketplaceFilterKey, value: string) => {
-    const next = new URLSearchParams(pending.current.params);
+  const panel = useCataloguePanelDraft(MARKETPLACE_FILTER_KEYS, params, next => {
+    pending.current.params = next;
+    navigate({ pathname: location.pathname, search: next.toString(), hash: location.hash }, { state: location.state, preventScrollReset: true });
+  });
+  const update = (key: MarketplaceFilterKey, value: string) => panel.setValues(next => {
     if (value) next.set(key, value); else next.delete(key);
     if (key === 'date') next.delete('today');
     if (key === 'today') next.delete('date');
-    pending.current.params = next;
-    navigate({ pathname: location.pathname, search: next.toString(), hash: location.hash }, { state: location.state, replace: key === 'minPrice' || key === 'maxPrice' });
-  };
-  const clear = () => {
-    const next = new URLSearchParams(pending.current.params);
+    return next;
+  });
+  const clear = () => panel.setValues(next => {
     MARKETPLACE_FILTER_KEYS.forEach(key => next.delete(key));
-    pending.current.params = next;
-    navigate({ pathname: location.pathname, search: next.toString(), hash: location.hash }, { state: location.state });
-  };
-  const filtersUI = <MarketplaceFilterSheet showLabel title={L('Фильтры предложений', 'Offer filters', 'ตัวกรองข้อเสนอ')} activeCount={MARKETPLACE_FILTER_KEYS.filter(key => params.has(key)).length}><MarketplaceFilters filters={filters} params={params}
-    districts={[...new Set((data ?? []).flatMap(serviceDistricts))].sort()}
-    currencies={[...new Set((data ?? []).flatMap(service => service.currency && /^[A-Z]{3}$/.test(service.currency.trim().toUpperCase()) ? [service.currency.trim().toUpperCase()] : []))].sort()}
-    onChange={update} onClear={clear} /></MarketplaceFilterSheet>;
+    return next;
+  });
+  const panelFilters = readMarketplaceFilters(panel.values);
+  const filtersUI = <MarketplaceFilterSheet showLabel title={L('Фильтры предложений', 'Offer filters', 'ตัวกรองข้อเสนอ')} activeCount={MARKETPLACE_FILTER_KEYS.filter(key => params.has(key)).length}
+    onOpenChange={panel.openChange} onApply={() => panel.apply(pending.current.params)} applyDisabled={panelFilters.invalid}>
+    <MarketplaceFilters filters={panelFilters} params={panel.values}
+      districts={[...new Set((data ?? []).flatMap(serviceDistricts))].sort()}
+      currencies={[...new Set((data ?? []).flatMap(service => service.currency && /^[A-Z]{3}$/.test(service.currency.trim().toUpperCase()) ? [service.currency.trim().toUpperCase()] : []))].sort()}
+      onChange={update} onClear={clear} />
+  </MarketplaceFilterSheet>;
   const fallback = onConcierge && <Button variant="outline" className="h-auto min-h-11 max-w-full whitespace-normal text-center" onClick={onConcierge}>{L('Подобрать услугу с консьержем', 'Find a service with concierge', 'ให้คอนเซียร์จช่วยหาบริการ')}</Button>;
   const renderCards = (services: MarketplaceService[]) => <div className={PUBLIC_CATALOG_GRID}>
     {services.map(service => <MarketplaceServiceCard key={service.id} service={service} returnTo={returnTo}
