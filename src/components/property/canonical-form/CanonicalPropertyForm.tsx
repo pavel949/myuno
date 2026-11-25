@@ -535,8 +535,8 @@ export function CanonicalPropertyForm({
         <div className="mb-4">
           <AdminDraftPreview
             language={language}
-            title={formData.title}
-            description={formData.description}
+            title={isRu ? formData.title_ru || formData.title : formData.title || formData.title_ru}
+            description={isRu ? formData.description_ru || formData.description : formData.description || formData.description_ru}
           />
         </div>
       )}

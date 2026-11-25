@@ -77,7 +77,7 @@ describe('provider edit query route', () => {
     const dialog = await screen.findByRole('dialog', { name: 'Edit Provider' });
     fireEvent.change(within(dialog).getByDisplayValue('provider-b@example.test'), { target: { value: ' ' } });
     fireEvent.click(within(dialog).getByRole('button', { name: 'Thai' }));
-    fireEvent.click(within(dialog).getByRole('button', { name: 'Save', exact: true }));
+    fireEvent.click(within(dialog).getByRole('button', { name: /^Save$/ }));
     await waitFor(() => expect(state.update).toHaveBeenCalledWith('provider-b', expect.objectContaining({
       email: null, languages: ['th'], is_verified: false, is_active: false,
     })));

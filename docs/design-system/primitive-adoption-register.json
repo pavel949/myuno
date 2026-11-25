@@ -16407,7 +16407,7 @@
     },
     {
       "file": "src/components/property/canonical-form/CanonicalPropertyForm.tsx",
-      "sha256": "2b60ac9d5a377afef31ec93cebd8fb5303b9d97e4e1f809a747beb90195925d5",
+      "sha256": "82f6bd5d501c56d03245ea1431f5d27800fe37dc5e2e36a690c6a4b893a88878",
       "directRouteDeclarations": [],
       "runtime": "NOTTESTED",
       "visual": "NOTTESTED",

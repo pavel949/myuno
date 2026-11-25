@@ -72,7 +72,7 @@ describe('service catalogue authoring entry', () => {
     expect(within(dialog).getByRole('combobox', { name: 'Currency' })).toHaveTextContent('EUR');
     fireEvent.change(within(dialog).getByLabelText('Description (EN)'), { target: { value: '' } });
     fireEvent.click(within(dialog).getByRole('button', { name: 'Remove last fixture photo' }));
-    fireEvent.click(within(dialog).getByRole('button', { name: 'Save', exact: true }));
+    fireEvent.click(within(dialog).getByRole('button', { name: /^Save$/ }));
     await waitFor(() => expect(state.update).toHaveBeenCalledWith('service-a', expect.objectContaining({
       currency: 'EUR', price: 84.5, description_en: null, images: [], is_active: false,
     })));
@@ -83,7 +83,7 @@ describe('service catalogue authoring entry', () => {
     const dialog = await edit();
     const price = within(dialog).getByLabelText('Price');
     fireEvent.change(price, { target: { value: '123x' } });
-    fireEvent.click(within(dialog).getByRole('button', { name: 'Save', exact: true }));
+    fireEvent.click(within(dialog).getByRole('button', { name: /^Save$/ }));
     expect(state.update).not.toHaveBeenCalled();
     fireEvent.change(price, { target: { value: '85' } });
     state.provider.is_active = false;
