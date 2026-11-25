@@ -13,8 +13,8 @@ vi.mock('@/hooks/useHapticFeedback', () => ({ triggerHaptic: vi.fn() }));
 vi.mock('@/hooks/useSoundEffects', () => ({ playSound: vi.fn() }));
 import PmsTodayPage from '../PmsTodayPage';
 function Boundary() {
-  const { pathname, search, hash } = useLocation();
-  return <output data-testid="route-boundary">{pathname}{search}{hash}</output>;
+  const { pathname, search, hash, state } = useLocation();
+  return <><output data-testid="route-boundary">{pathname}{search}{hash}</output><output data-testid="chat-return">{state?.bookingChatReturnTo}</output></>;
 }
 function mount(entry: string = APP_ROUTES.MC_TODAY) { render(<MemoryRouter initialEntries={[entry]} future={{ v7_startTransition: true, v7_relativeSplatPath: true }}><PmsTodayPage /><Boundary /></MemoryRouter>); }
 beforeEach(() => { vi.clearAllMocks(); mocks.scenario = 'populated'; mocks.unknownGuests = false; });
@@ -23,14 +23,16 @@ afterEach(() => { expect(mocks.database).not.toHaveBeenCalled(); cleanup(); });
 describe.each(['ru', 'en'] as const)('isolated Today (%s)', language => {
   beforeEach(() => { mocks.language = language; });
   it('opens the exact stay and its conversation from Today', () => {
-    mount();
+    mount('/mc/today?keep=yes');
     fireEvent.click(screen.getAllByRole('button', { name: /Открыть бронирование|Open booking/ })[0]);
     const booking = within(screen.getByRole('dialog'));
     expect(booking.getByRole('link', { name: /переписку с гостем|guest conversation/ }))
       .toHaveAttribute('href', '/mc/chat/booking/synthetic-booking');
     expect(booking.getByRole('link', { name: /Календарь и задачи|Property calendar/ }))
       .toHaveAttribute('href', '/mc/calendar?property=synthetic-property&date=2026-10-17');
-    expect(screen.getByTestId('route-boundary')).toHaveTextContent('/mc/today');
+    fireEvent.click(booking.getByRole('link', { name: /переписку с гостем|guest conversation/ }));
+    expect(screen.getByTestId('route-boundary')).toHaveTextContent('/mc/chat/booking/synthetic-booking');
+    expect(screen.getByTestId('chat-return')).toHaveTextContent('/mc/today?keep=yes');
   });
   it('keeps property destinations for request and unit rows', () => {
     mount();

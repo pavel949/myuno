@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -30,7 +30,7 @@ export function usePropertyChat(options: { propertyId?: string; bookingId?: stri
   const { user } = useAuth();
   const queryClient = useQueryClient();
 
-  const queryKey = ['property-chat', propertyId, bookingId];
+  const queryKey = useMemo(() => ['property-chat', user?.id, propertyId, bookingId], [user?.id, propertyId, bookingId]);
 
   const { data: messages, isLoading } = useQuery({
     queryKey,
