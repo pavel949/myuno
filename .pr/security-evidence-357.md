@@ -35,3 +35,7 @@ These are static assertions on the migration SQL plus unit tests with mocked tra
 
 - `admin_process_payout` does not yet require a payout-run approval above ฿1M. This would change a live money RPC.
 - Existing published reports can still have their content edited by an admin under the `FOR ALL` policy. Only the publish transition is guarded.
+
+## Full-suite run (merged tree `ad8e29d`)
+
+`npx vitest run`: **551 files / 5621 tests passed**, 207 skipped. 12 files failed to load, all `src/lib/__tests__/*.postgres.test.ts`. They need a local `postgres` binary (`Command failed: which postgres`), which this container lacks. These DB-backed suites run in CI.
