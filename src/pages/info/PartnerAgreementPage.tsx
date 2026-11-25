@@ -1,4 +1,5 @@
 import { AppLayout } from '@/components/layout/AppLayout';
+import { LegalDocumentNav } from '@/components/legal/LegalDocumentNav';
 import { PageContainer } from '@/components/uno/PageContainer';
 import { PageHeader } from '@/components/uno/PageHeader';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -24,6 +25,7 @@ export default function PartnerAgreementPage() {
           title={isRu ? 'Условия партнёрства' : 'Partnership Terms'} 
           showBack 
         />
+        <LegalDocumentNav current="/partner-agreement" />
 
         {/* Hero Card */}
         <Card className="mb-6 bg-gradient-to-br from-primary/5 to-accent/5 border-primary/20">

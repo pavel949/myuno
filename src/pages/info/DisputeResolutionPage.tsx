@@ -1,4 +1,5 @@
 import { AppLayout } from '@/components/layout/AppLayout';
+import { LegalDocumentNav } from '@/components/legal/LegalDocumentNav';
 import { COMPANY_CONTACTS } from '@/lib/config/contacts';
 import { PageContainer } from '@/components/uno/PageContainer';
 import { PageHeader } from '@/components/uno/PageHeader';
@@ -161,6 +162,7 @@ export default function DisputeResolutionPage() {
           title={isRu ? 'Разрешение споров' : 'Dispute Resolution'} 
           showBack 
         />
+        <LegalDocumentNav current="/dispute-resolution" updatedRu="Январь 2026" updatedEn="January 2026" />
 
         {/* Header */}
         <Card className="mb-6">

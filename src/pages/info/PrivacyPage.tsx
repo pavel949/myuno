@@ -1,4 +1,5 @@
 import { AppLayout } from '@/components/layout/AppLayout';
+import { LegalDocumentNav } from '@/components/legal/LegalDocumentNav';
 import { PageContainer } from '@/components/uno/PageContainer';
 import { PageHeader } from '@/components/uno/PageHeader';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -181,6 +182,7 @@ export default function PrivacyPage() {
           title={isRu ? 'Политика конфиденциальности' : 'Privacy Policy'} 
           showBack 
         />
+        <LegalDocumentNav current="/privacy" version="2.0" updatedRu="Январь 2026" updatedEn="January 2026" />
 
         {/* Header */}
         <Card className="mb-6">

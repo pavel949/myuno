@@ -1,4 +1,5 @@
 import { AppLayout } from '@/components/layout/AppLayout';
+import { LegalDocumentNav } from '@/components/legal/LegalDocumentNav';
 import { PageContainer } from '@/components/uno/PageContainer';
 import { PageHeader } from '@/components/uno/PageHeader';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -298,6 +299,7 @@ export default function IPPolicyPage() {
           title={isRu ? 'IP & Политика контента' : 'IP & Content Policy'} 
           showBack 
         />
+        <LegalDocumentNav current="/ip-policy" updatedRu="Январь 2026" updatedEn="January 2026" />
 
         {/* Header */}
         <Card className="mb-6 border-primary/30 bg-gradient-to-r from-primary/5 to-transparent">

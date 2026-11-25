@@ -14,11 +14,69 @@ import { useGlobalSearch, SearchResult } from '@/hooks/useGlobalSearch';
 import { useBrowseByType } from '@/hooks/useBrowseByType';
 import { publicJourneyState } from '@/lib/real-estate/publicJourney';
 import { searchTypeConfig, trendingSearches } from '@/lib/searchData';
+import { groupResultsByType } from '@/lib/search/groupResults';
+
+const RESULTS_PER_GROUP = 4;
+
+function SearchResultRow({ item }: { item: SearchResult }) {
+  const location = useLocation();
+  const { language } = useLanguage();
+  const isRu = language === 'ru';
+  const config = searchTypeConfig[item.type];
+  const Icon = config?.icon || SearchIcon;
+  const title = isRu ? item.titleRu : item.titleEn;
+  return (
+    <Link
+      to={item.path}
+      state={publicJourneyState(location)}
+      className="flex gap-3 p-3 rounded-md bg-card border border-border hover:border-primary/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring transition-colors"
+    >
+      {item.image ? (
+        <img
+          src={item.image}
+          alt={title}
+          loading="lazy"
+          width={80}
+          height={80}
+          className="w-20 h-20 rounded-lg object-cover flex-shrink-0"
+        />
+      ) : (
+        <div className="w-20 h-20 rounded-lg flex items-center justify-center bg-muted flex-shrink-0">
+          <Icon className="w-8 h-8 text-muted-foreground" aria-hidden="true" />
+        </div>
+      )}
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center gap-2 mb-1">
+          <Badge variant="secondary" className="text-xs gap-1">
+            <Icon className="w-3 h-3" aria-hidden="true" />
+            {isRu ? config?.label?.ru : config?.label?.en}
+          </Badge>
+          {item.rating && (
+            <span className="text-xs text-muted-foreground flex items-center gap-0.5">
+              <Star className="w-3 h-3 fill-warning text-warning" aria-hidden="true" />
+              {item.rating}
+            </span>
+          )}
+        </div>
+        <h3 className="font-semibold truncate">{title}</h3>
+        {(item.locationEn || item.locationRu) && (
+          <p className="text-sm text-muted-foreground truncate">
+            {isRu ? item.locationRu : item.locationEn}
+          </p>
+        )}
+        {item.price && item.price > 0 && (
+          <span className="text-sm font-medium text-primary font-mono tabular-nums">
+            ฿{item.price.toLocaleString()}
+          </span>
+        )}
+      </div>
+    </Link>
+  );
+}
 
 export default function Search() {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
-  const location = useLocation();
   const { language } = useLanguage();
   const query = searchParams.get('q') || '';
   const selectedType = searchParams.get('type');
@@ -218,63 +276,50 @@ export default function Search() {
                   </div>
                 </div>
               ) : (
-                <AnimatedList className="space-y-3">
-                  {filteredResults.map(item => {
-                    const config = searchTypeConfig[item.type];
-                    const Icon = config?.icon || SearchIcon;
-                    return (
+                selectedType ? (
+                  <AnimatedList className="space-y-3">
+                    {filteredResults.map(item => (
                       <AnimatedItem key={item.id}>
-                        <Link
-                          to={item.path}
-                          state={publicJourneyState(location)}
-                          className="flex gap-3 p-3 rounded-md bg-card border border-border hover:border-primary/30 transition-all"
-                        >
-                          {item.image ? (
-                            <img
-                              src={item.image}
-                              alt={isRu ? item.titleRu : item.titleEn}
-                              className="w-20 h-20 rounded-none object-cover flex-shrink-0"
-                            />
-                          ) : (
-                            <div className={cn(
-                              "w-20 h-20 rounded-none flex items-center justify-center bg-gradient-to-br flex-shrink-0",
-                              config?.color || 'from-gray-500 to-gray-600'
-                            )}>
-                              <Icon className="w-8 h-8 text-white" />
-                            </div>
-                          )}
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-2 mb-1">
-                              <Badge variant="secondary" className="text-xs gap-1">
-                                <Icon className="w-3 h-3" />
-                                {language === 'ru' ? config?.label?.ru : config?.label?.en}
-                              </Badge>
-                              {item.rating && (
-                                <span className="text-xs text-muted-foreground flex items-center gap-0.5">
-                                  <Star className="w-3 h-3 fill-warning text-warning" />
-                                  {item.rating}
-                                </span>
-                              )}
-                            </div>
-                            <h3 className="font-semibold truncate">
-                              {isRu ? item.titleRu : item.titleEn}
-                            </h3>
-                            {(item.locationEn || item.locationRu) && (
-                              <p className="text-sm text-muted-foreground truncate">
-                                {isRu ? item.locationRu : item.locationEn}
-                              </p>
-                            )}
-                            {item.price && item.price > 0 && (
-                              <span className="text-sm font-medium text-primary">
-                                ฿{item.price.toLocaleString()}
-                              </span>
+                        <SearchResultRow item={item} />
+                      </AnimatedItem>
+                    ))}
+                  </AnimatedList>
+                ) : (
+                  <div className="space-y-8">
+                    {groupResultsByType(filteredResults, RESULTS_PER_GROUP).map(group => {
+                      const config = searchTypeConfig[group.type];
+                      const label = config ? config.label[isRu ? 'ru' : 'en'] : group.type;
+                      return (
+                        <section key={group.type} aria-labelledby={`search-group-${group.type}`}>
+                          <div className="flex items-baseline justify-between gap-3 mb-3 border-b border-border pb-2">
+                            <h2
+                              id={`search-group-${group.type}`}
+                              className="text-xs font-semibold uppercase tracking-wider text-muted-foreground"
+                            >
+                              {label} · <span className="font-mono tabular-nums">{group.total}</span>
+                            </h2>
+                            {group.total > group.items.length && config && (
+                              <button
+                                type="button"
+                                onClick={() => setSelectedType(group.type)}
+                                className="min-h-11 text-sm font-medium text-primary hover:underline"
+                              >
+                                {isRu ? `Все в разделе «${label}»` : `See all in ${label}`}
+                              </button>
                             )}
                           </div>
-                        </Link>
-                      </AnimatedItem>
-                    );
-                  })}
-                </AnimatedList>
+                          <ul className="space-y-3">
+                            {group.items.map(item => (
+                              <li key={item.id}>
+                                <SearchResultRow item={item} />
+                              </li>
+                            ))}
+                          </ul>
+                        </section>
+                      );
+                    })}
+                  </div>
+                )
               )}
             </div>
           )}

@@ -15,7 +15,8 @@ export default function KnowledgeHub() {
   const navigate = useNavigate();
   const { currentCity, getCityName } = useLocation();
   const { language } = useLanguage();
-  const { data: sections, isLoading } = useKnowledgeSections();
+  const { data: sections, isLoading, isError, refetch } = useKnowledgeSections();
+  const isRu = language === 'ru';
 
   const cityName = getCityName(language as 'en' | 'ru' | 'th');
   const pageTitle = language === 'ru'
@@ -41,6 +42,13 @@ export default function KnowledgeHub() {
       };
     })
     .filter(section => section.count > 0);
+
+  const tracks = [
+    { to: APP_ROUTES.KNOWLEDGE_PILLARS, ru: 'Покупка', en: 'Buying', subRu: 'Квоты, сделки, налоги', subEn: 'Quotas, deals, taxes' },
+    { to: APP_ROUTES.RELOCATION_GUIDES, ru: 'Переезд', en: 'Moving', subRu: 'Визы, жильё, школы', subEn: 'Visas, housing, schools' },
+    { to: APP_ROUTES.AREA_INDEX, ru: 'Районы', en: 'Areas', subRu: 'Путеводители по районам', subEn: 'Area guides' },
+    { to: APP_ROUTES.CLEARVIEW, ru: 'ClearView', en: 'ClearView', subRu: 'Методика оценки проектов', subEn: 'Project rating method' },
+  ];
 
   return (
     <>
@@ -69,6 +77,29 @@ export default function KnowledgeHub() {
           </div>
         </div>
 
+        <p className="-mt-3 mb-6 text-sm text-muted-foreground">
+          {isRu
+            ? 'Гайды о жизни и покупке недвижимости в Таиланде. У каждой статьи указана дата обновления.'
+            : 'Guides for living in and buying property in Thailand. Every article shows its update date.'}
+        </p>
+
+        {/* Tracks (design MK4) */}
+        <nav aria-label={isRu ? 'Направления' : 'Tracks'} className="mb-8">
+          <ul className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+            {tracks.map((track) => (
+              <li key={track.to}>
+                <Link
+                  to={track.to}
+                  className="flex h-full min-h-20 flex-col justify-between rounded-md border border-border bg-card p-3 transition-colors hover:border-primary/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                >
+                  <span className="text-sm font-semibold text-foreground">{isRu ? track.ru : track.en}</span>
+                  <span className="mt-1 text-xs text-muted-foreground">{isRu ? track.subRu : track.subEn}</span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </nav>
+
         {/* Quick Facts */}
         <section className="mb-8">
           <h2 className="text-lg font-semibold mb-3 text-foreground">
@@ -82,7 +113,7 @@ export default function KnowledgeHub() {
           <button
             type="button"
             onClick={() => navigate(APP_ROUTES.KNOWLEDGE_PILLARS)}
-            className="w-full text-left rounded-none border border-primary/30 bg-gradient-to-br from-primary/10 via-card to-card p-5 hover:border-primary/60 transition-colors flex items-center gap-4"
+            className="w-full text-left rounded-md border border-primary/30 bg-card p-5 hover:border-primary/60 transition-colors flex items-center gap-4"
           >
             <div className="h-12 w-12 rounded-none bg-primary/15 flex items-center justify-center shrink-0">
               <Compass className="h-6 w-6 text-primary" />
@@ -125,7 +156,20 @@ export default function KnowledgeHub() {
         </section>
 
         {/* Knowledge Sections Grid */}
-        {(isLoading || sectionGroups.length > 0) && (
+        {isError && (
+          <section role="alert" className="mb-8 border border-border bg-card p-4">
+            <p className="text-sm text-foreground">
+              {isRu
+                ? 'Не удалось загрузить разделы справочника. Проверьте соединение и попробуйте снова.'
+                : "We couldn't load the knowledge sections. Check your connection and try again."}
+            </p>
+            <button type="button" onClick={() => void refetch()} className="mt-2 min-h-11 text-sm font-medium text-primary hover:underline">
+              {isRu ? 'Повторить' : 'Try again'}
+            </button>
+          </section>
+        )}
+
+        {!isError && (isLoading || sectionGroups.length > 0) && (
           <section className="mb-8">
             <h2 className="text-lg font-semibold mb-3 text-foreground">
               {language === 'ru' ? 'Разделы справочника' : 'Knowledge Sections'}

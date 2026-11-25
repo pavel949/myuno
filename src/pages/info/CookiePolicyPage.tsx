@@ -1,4 +1,5 @@
 import { AppLayout } from '@/components/layout/AppLayout';
+import { LegalDocumentNav } from '@/components/legal/LegalDocumentNav';
 import { PageContainer } from '@/components/uno/PageContainer';
 import { PageHeader } from '@/components/uno/PageHeader';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -82,6 +83,7 @@ export default function CookiePolicyPage() {
           title={isRu ? 'Политика Cookie' : 'Cookie Policy'} 
           showBack 
         />
+        <LegalDocumentNav current="/cookies" updatedRu="Январь 2026" updatedEn="January 2026" />
 
         {/* Intro */}
         <Card className="mb-6">
