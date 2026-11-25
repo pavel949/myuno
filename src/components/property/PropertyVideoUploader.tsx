@@ -25,7 +25,7 @@ const BUCKET = 'property-videos';
 export interface PropertyVideoUploaderProps {
   value?: string | null;
   onChange: (url: string | null) => void;
-  /** Property id used in storage path (fallback to anon path) */
+  /** Property id used in storage path; the authenticated actor supplies the folder. */
   propertyId?: string | null;
   ownerId?: string | null;
   isRu: boolean;
@@ -45,7 +45,6 @@ export function PropertyVideoUploader({
   value,
   onChange,
   propertyId,
-  ownerId,
   isRu,
   className,
 }: PropertyVideoUploaderProps) {
@@ -72,15 +71,16 @@ export function PropertyVideoUploader({
     try {
       const ext = file.name.split('.').pop() || 'mp4';
       // Storage policy requires the first folder to be the uploader's own id.
-      const { data: authData } = await supabase.auth.getUser();
-      const folder = authData.user?.id ?? ownerId ?? 'anon';
-      const fname = `${propertyId || crypto.randomUUID()}-${Date.now()}.${ext}`;
+      const { data: authData, error: authError } = await supabase.auth.getUser();
+      if (authError || !authData.user) throw new Error('Authentication required');
+      const folder = authData.user.id;
+      const fname = `${propertyId || 'new'}-${crypto.randomUUID()}.${ext}`;
       const path = `${folder}/${fname}`;
 
       setProgress(30);
       const { error: upErr } = await supabase.storage
         .from(BUCKET)
-        .upload(path, file, { contentType: file.type, upsert: true });
+        .upload(path, file, { contentType: file.type, upsert: false });
       if (upErr) throw upErr;
 
       setProgress(80);
