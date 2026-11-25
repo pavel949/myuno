@@ -7,11 +7,29 @@ import { Link } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { CLEARVIEW_LABELS, GOV_BUTTONS } from '@/lib/copy/govStyle';
 import { APP_ROUTES } from '@/lib/config/routes';
-import { ArrowLeft, ShieldCheck, FileText, ListChecks } from 'lucide-react';
+import { ArrowLeft, ShieldCheck, FileText } from 'lucide-react';
+import { CLEARVIEW_CATEGORIES } from '@/lib/clearview/methodology';
 
 export default function ClearViewLanding() {
   const { language } = useLanguage();
   const isRu = language === 'ru';
+  const steps = [
+    {
+      ru: 'Подача проекта', en: 'Submit the project',
+      bodyRu: 'Застройщик подаёт заявку и документы по проекту.',
+      bodyEn: 'The developer submits an application and the project documents.',
+    },
+    {
+      ru: 'Оценка по 8 областям', en: 'Assessment in 8 areas',
+      bodyRu: 'Каждая область оценивается отдельно с учётом её веса.',
+      bodyEn: 'Each area is scored separately and weighted.',
+    },
+    {
+      ru: 'Отчёт', en: 'Report',
+      bodyRu: 'Отчёт готов в течение 15 рабочих дней.',
+      bodyEn: 'The report is ready within 15 business days.',
+    },
+  ];
 
   return (
     <div className="min-h-screen bg-background pb-16">
@@ -44,26 +62,44 @@ export default function ClearViewLanding() {
         </div>
       </section>
 
-      <section className="px-4 pb-5">
-        <h3 className="font-display text-[14px] font-semibold text-foreground mb-2">
-          {isRu ? CLEARVIEW_LABELS.methodology.ru : CLEARVIEW_LABELS.methodology.en}
-        </h3>
-        <ul className="space-y-1.5 text-[13px] text-foreground/90">
-          {[
-            { ru: 'Юридический статус — 20%', en: 'Legal status — 20%' },
-            { ru: 'Девелопер и репутация — 20%', en: 'Developer and track record — 20%' },
-            { ru: 'Строительство — 15%', en: 'Construction — 15%' },
-            { ru: 'Локация — 15%', en: 'Location — 15%' },
-            { ru: 'Финансы — 10%', en: 'Financial — 10%' },
-            { ru: 'ROI и доходность — 10%', en: 'ROI and yield — 10%' },
-            { ru: 'Продажи — 5%', en: 'Sales — 5%' },
-            { ru: 'Ликвидность — 5%', en: 'Liquidity — 5%' },
-          ].map((line, i) => (
-            <li key={i} className="flex items-start gap-2">
-              <ListChecks className="w-3.5 h-3.5 text-muted-foreground mt-1 shrink-0" />
-              <span>{isRu ? line.ru : line.en}</span>
+      <section className="px-4 pb-5" aria-labelledby="cv-steps">
+        <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+          {isRu ? 'Как это работает' : 'How it works'}
+        </p>
+        <h2 id="cv-steps" className="sr-only">{isRu ? 'Как это работает' : 'How it works'}</h2>
+        <ol className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-3">
+          {steps.map((step, index) => (
+            <li key={step.en} className="border border-border bg-card p-3">
+              <span className="font-mono text-xs tabular-nums text-muted-foreground">{String(index + 1).padStart(2, '0')}</span>
+              <p className="mt-1 text-sm font-semibold text-foreground">{isRu ? step.ru : step.en}</p>
+              <p className="mt-1 text-[13px] leading-snug text-muted-foreground">{isRu ? step.bodyRu : step.bodyEn}</p>
             </li>
           ))}
+        </ol>
+      </section>
+
+      <section className="px-4 pb-5" aria-labelledby="cv-method">
+        <h3 id="cv-method" className="font-display text-[14px] font-semibold text-foreground mb-1">
+          {isRu ? CLEARVIEW_LABELS.methodology.ru : CLEARVIEW_LABELS.methodology.en}
+        </h3>
+        <p className="mb-3 text-[13px] text-muted-foreground">
+          {isRu ? 'Восемь областей с весами; итоговая оценка — взвешенная сумма.' : 'Eight weighted areas; the overall score is the weighted sum.'}
+        </p>
+        <ul className="space-y-2.5">
+          {CLEARVIEW_CATEGORIES.map((category) => {
+            const percent = Math.round(category.weight * 100);
+            return (
+              <li key={category.code}>
+                <div className="flex items-baseline justify-between gap-3 text-[13px]">
+                  <span className="text-foreground">{isRu ? category.nameRu : category.nameEn}</span>
+                  <span className="font-mono tabular-nums text-muted-foreground">{percent}%</span>
+                </div>
+                <div className="mt-1 h-1.5 w-full bg-muted" aria-hidden="true">
+                  <div className="h-full bg-primary" style={{ width: `${percent * 5}%` }} />
+                </div>
+              </li>
+            );
+          })}
         </ul>
       </section>
 
