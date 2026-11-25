@@ -50,7 +50,7 @@ async def main():
      await sort.click();await page.get_by_role('option',name='Price: High → Low'if lang=='en'else'Цена: по убыванию',exact=True).click();await assert_draft();assert urlparse(page.url).fragment=='results';assert json.loads(await page.get_by_test_id('navigation-state').text_content())=={'origin':'synthetic-home'};assert parse_qs(urlparse(page.url).query)['q']==['Synthetic']
      await page.get_by_test_id('history-back').click();await expect(sort).to_contain_text('Price: Low'if lang=='en'else'Цена: по возрастанию');await assert_draft();assert urlparse(page.url).fragment=='results'
      await page.get_by_test_id('history-forward').click();await expect(sort).to_contain_text('Price: High'if lang=='en'else'Цена: по убыванию');await assert_draft();assert urlparse(page.url).fragment=='results'
-     await page.get_by_role('form').screenshot(path=str(OUT/f'{prefix}-staged-draft-form.png'));await sort.screenshot(path=str(OUT/f'{prefix}-staged-draft-sort.png'))
+     await page.locator('.premium-search-criteria').get_by_role('form').screenshot(path=str(OUT/f'{prefix}-staged-draft-form.png'));await sort.screenshot(path=str(OUT/f'{prefix}-staged-draft-sort.png'))
      await page.get_by_role('button',name='Find a home'if lang=='en'else'Найти жильё',exact=True).click();submitted=parse_qs(urlparse(page.url).query)
      for key,value in {'q':'Draft Synthetic','guests':'5','checkIn':'2027-05-30','checkOut':'2027-05-31','sort':'price_desc','opaque':'keep','district':'unknown-fixture'}.items():assert submitted[key]==[value],submitted
      await page.get_by_test_id('history-back').click()
