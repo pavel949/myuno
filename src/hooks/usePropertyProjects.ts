@@ -26,7 +26,7 @@ export interface PropertyProject {
   district?: string;
   lat?: number;
   lng?: number;
-  developer_id?: string;
+  developer_id?: string | null;
   developer_name?: string;
   year_built?: number;
   total_units?: number;
@@ -61,6 +61,7 @@ export interface PropertyProject {
 }
 
 export interface CreatePropertyProjectData {
+  developer_id?: string | null;
   name_en: string;
   name_ru: string;
   description_en?: string;
@@ -137,6 +138,8 @@ export function usePublicPropertyProjects(limit = 24, district?: string, project
   });
 }
 
+const GUEST_PROJECT_DETAIL_COLUMNS = `${GUEST_PROJECT_COLUMNS},gallery_urls` as const;
+
 export function usePropertyProject(id?: string, publicOnly = false) {
   return useQuery({
     queryKey: ['property-project', id, publicOnly],
@@ -144,7 +147,7 @@ export function usePropertyProject(id?: string, publicOnly = false) {
       if (!id) return null;
       
       let query = supabase.from('property_projects')
-        .select(publicOnly ? GUEST_PROJECT_COLUMNS : '*')
+        .select(publicOnly ? GUEST_PROJECT_DETAIL_COLUMNS : '*')
         .eq('id', id);
       if (publicOnly) query = query.eq('is_active', true);
       const { data, error } = await query.maybeSingle();
@@ -192,6 +195,9 @@ export function useCreatePropertyProject() {
         .single();
 
       if (error) throw error;
+      if (!data?.id || (projectData.developer_id !== undefined && data.developer_id !== projectData.developer_id)) {
+        throw new Error('Project update was not confirmed');
+      }
       return data as PropertyProject;
     },
     onSuccess: (data) => {
@@ -217,6 +223,9 @@ export function useUpdatePropertyProject() {
         .single();
 
       if (error) throw error;
+      if (data?.id !== id || (projectData.developer_id !== undefined && data.developer_id !== projectData.developer_id)) {
+        throw new Error('Project update was not confirmed');
+      }
       return data as PropertyProject;
     },
     onSuccess: (data) => {

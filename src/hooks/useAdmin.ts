@@ -74,15 +74,17 @@ export function useAdminProviders(options?: ProviderQueryOptions) {
 
   const invalidate = useCallback(() => {
     queryClient.invalidateQueries({ queryKey: QUERY_KEYS.providers });
+    queryClient.invalidateQueries({ queryKey: ['marketplace-services'] });
   }, [queryClient]);
 
   const createProvider = useCallback(async (providerData: Partial<ProviderInsert>) => {
     const insertData: ProviderInsert = {
       name: providerData.name ?? '',
       ...providerData,
-      is_active: providerData.is_active ?? true,
-      is_verified: true,
-      approval_status: 'approved',
+      // Ordinary authoring never publishes or verifies, including on-behalf.
+      is_active: false,
+      is_verified: false,
+      approval_status: 'pending',
       created_by_uno_team: true,
       rating: 0,
       review_count: 0,
@@ -153,8 +155,9 @@ export function useAdminServices(providerId?: string) {
   });
 
   const invalidate = useCallback(() => {
-    queryClient.invalidateQueries({ queryKey: QUERY_KEYS.services(providerId) });
-  }, [queryClient, providerId]);
+    queryClient.invalidateQueries({ queryKey: ['admin', 'services'] });
+    queryClient.invalidateQueries({ queryKey: ['marketplace-services'] });
+  }, [queryClient]);
 
   const createService = useCallback(async (serviceData: Partial<ServiceInsert>) => {
     const insertData: ServiceInsert = {
@@ -162,10 +165,10 @@ export function useAdminServices(providerId?: string) {
       name_ru: serviceData.name_ru ?? '',
       provider_id: serviceData.provider_id ?? '',
       ...serviceData,
-      currency: serviceData.currency || 'THB',
-      is_active: serviceData.is_active ?? true,
-      is_verified: true,
-      approval_status: 'approved',
+      currency: serviceData.currency ?? null,
+      is_active: false,
+      is_verified: false,
+      approval_status: 'pending',
       created_by_uno_team: true,
     };
 

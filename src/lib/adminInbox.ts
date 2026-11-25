@@ -3,11 +3,13 @@ import { typedFrom } from '@/lib/untypedTables';
 import { LEAD_STATUS_BUCKETS, LEAD_STATUS_NEW, type InboxStatusBucket } from '@/config/leadStatus';
 import { APP_ROUTES } from '@/lib/config/routes';
 
-export type InboxSource = 'partner_applications' | 'listing_applications' | 'consultation_requests' | 'nb_leads' | 'property_inquiries' | 'help_requests';
+export type InboxSource = 'partner_applications' | 'listing_applications' | 'consultation_requests' | 'nb_leads' | 'property_inquiries' | 'help_requests' | 'service_orders';
 
 export type InboxStatus = InboxStatusBucket;
 
-export const INBOX_SOURCES: readonly InboxSource[] = ['partner_applications', 'listing_applications', 'consultation_requests', 'nb_leads', 'property_inquiries', 'help_requests'];
+const MARKETPLACE_SERVICE_TYPE = 'marketplace';
+
+export const INBOX_SOURCES: readonly InboxSource[] = ['partner_applications', 'listing_applications', 'consultation_requests', 'nb_leads', 'property_inquiries', 'help_requests', 'service_orders'];
 export function isInboxSource(value: string | null): value is InboxSource {
   return INBOX_SOURCES.some(source => source === value);
 }
@@ -26,20 +28,24 @@ export const INBOX_DETAIL_FIELDS: Record<InboxSource, readonly (readonly [string
   consultation_requests: [['name', 'Name', 'Имя'], ['email', 'Email', 'Email'], ['phone', 'Phone', 'Телефон'], ['request_type', 'Request type', 'Тип обращения'], ['vertical_id', 'Service', 'Направление'], ['notes', 'Client notes', 'Пожелания клиента'], ['admin_notes', 'Admin notes', 'Внутренние заметки']],
   nb_leads: [['full_name', 'Name', 'Имя'], ['email', 'Email', 'Email'], ['phone', 'Phone', 'Телефон'], ['project_id', 'Project ID', 'ID проекта'], ['source', 'Source', 'Источник'], ['message', 'Message', 'Сообщение']],
   help_requests: [['subject', 'Subject', 'Тема'], ['topic', 'Category', 'Категория'], ['urgency', 'Urgency', 'Срочность'], ['message', 'Message', 'Сообщение'], ['contact_email', 'Customer email', 'Email клиента'], ['contact_phone', 'Customer phone', 'Телефон клиента'], ['preferred_channel', 'Preferred channel', 'Канал связи'], ['language', 'Language', 'Язык'], ['source_page', 'Source page', 'Страница'], ['source_route', 'Source route', 'Маршрут']],
+  service_orders: [['order_number', 'Reference', 'Номер'], ['service_name', 'Service', 'Услуга'], ['scheduled_at', 'Requested time', 'Запрошенное время'], ['guest_name', 'Customer', 'Клиент'], ['guest_phone', 'Customer phone', 'Телефон клиента'], ['notes', 'Request details', 'Детали заявки']],
   property_inquiries: [['name', 'Name', 'Имя'], ['email', 'Email', 'Email'], ['phone', 'Phone', 'Телефон'], ['property_id', 'Property ID', 'ID объекта'], ['check_in', 'Check-in', 'Заезд'], ['check_out', 'Check-out', 'Выезд'], ['guests', 'Guests', 'Гости'], ['message', 'Message', 'Сообщение']],
 };
 export async function fetchInboxRequest(source: InboxSource, id: string): Promise<Record<string, unknown> | null> {
   if (!isInboxSource(source) || !isInboxRequestId(id)) throw new Error('Invalid request selection');
   const fields = ['id', 'status', 'created_at', ...INBOX_DETAIL_FIELDS[source].map(([field]) => field)];
   if (source === 'consultation_requests') fields.push('vertical_metadata');
+  if (source === 'service_orders') fields.push('service_type');
   const query = source === 'help_requests'
     ? typedFrom('help_requests').select(fields.join(','))
     : supabase.from(source).select(fields.join(','));
-  const { data, error } = await query.eq('id', id).maybeSingle();
+  const exact = query.eq('id', id);
+  const { data, error } = await (source === 'service_orders' ? exact.eq('service_type', MARKETPLACE_SERVICE_TYPE) : exact).maybeSingle();
   if (error) throw error;
   const record: unknown = data;
   if (record === null) return null;
   if (typeof record !== 'object' || Array.isArray(record) || !('id' in record) || record.id !== id) throw new Error('Request identity mismatch');
+  if (source === 'service_orders' && (!('service_type' in record) || record.service_type !== MARKETPLACE_SERVICE_TYPE)) throw new Error('Request type mismatch');
   return record as Record<string, unknown>;
 }
 
@@ -60,15 +66,19 @@ const LISTING_STATUSES = ['draft', 'pending', 'under_review', 'approved', 'rejec
 const HELP_STATUSES: Record<InboxStatus, string[]> = {
   new: ['new'], in_progress: ['triaged', 'in_progress', 'waiting_user'], closed: ['closed', 'spam'], escalated: [],
 };
+const SERVICE_STATUSES: Record<InboxStatus, string[]> = {
+  new: ['pending'], in_progress: ['assigned', 'in_progress'], closed: ['completed', 'cancelled'], escalated: [],
+};
 function storedStatuses(source: InboxSource, bucket: InboxStatus) {
   if (source === 'help_requests') return HELP_STATUSES[bucket];
+  if (source === 'service_orders') return SERVICE_STATUSES[bucket];
   const statuses = bucket === 'new' ? LEAD_STATUS_NEW : LEAD_STATUS_BUCKETS[bucket];
   return source === 'listing_applications' ? statuses.filter(status => LISTING_STATUSES.includes(status)) : statuses;
 }
 export function inboxStatusForStoredValue(source: InboxSource, raw: string | null): InboxStatus | 'other' {
   // Match the server predicates exactly. Domain-specific, padded and differently
   // cased statuses remain visible under All instead of being relabelled New.
-  if (raw === null && source !== 'listing_applications' && source !== 'help_requests') return 'new';
+  if (raw === null && !['listing_applications', 'help_requests', 'service_orders'].includes(source)) return 'new';
   for (const bucket of ['new', 'closed', 'escalated', 'in_progress'] as const) {
     if (raw !== null && storedStatuses(source, bucket).includes(raw)) return bucket;
   }
@@ -78,17 +88,19 @@ export function inboxStatusForStoredValue(source: InboxSource, raw: string | nul
 export async function fetchInbox(source: InboxSource, page: number, status: InboxStatus | 'all', search = '') {
   const fields: Record<InboxSource, string[]> = {
     help_requests: ['subject', 'topic', 'contact_email', 'contact_phone'],
+    service_orders: ['order_number', 'service_name', 'service_name_ru'],
     partner_applications: ['business_name', 'contact_name', 'contact_email', 'business_category'], listing_applications: ['applicant_name', 'applicant_email', 'service_category', 'product_category', 'property_type'],
     consultation_requests: ['name', 'email', 'request_type', 'vertical_id'], nb_leads: ['full_name', 'email', 'phone'], property_inquiries: ['name', 'email', 'phone', 'message'],
   };
   const term = search.trim().replace(/[,%()_*\\"]/g, ' ').trim().slice(0, 120);
   const searchClauses = fields[source].map(field => field + '.ilike.%' + term + '%');
-  if (source === 'help_requests' && isInboxRequestId(term)) searchClauses.unshift('id.eq.' + term.toLowerCase());
+  if ((source === 'help_requests' || source === 'service_orders') && isInboxRequestId(term)) searchClauses.unshift('id.eq.' + term.toLowerCase());
   if (source === 'listing_applications' && ['property', 'service', 'product'].includes(term)) searchClauses.push('listing_type.eq.' + term);
   const text = term ? 'or(' + searchClauses.join(',') + ')' : '';
   const statuses = status === 'all' ? [] : storedStatuses(source, status).filter(Boolean);
-  if (status !== 'all' && (source === 'listing_applications' || source === 'help_requests') && statuses.length === 0) return { items: [] as InboxItem[], total: 0 };
-  const state = status === 'all' ? '' : 'or(status.in.(' + statuses.join(',') + ')' + (status === 'new' && source !== 'listing_applications' && source !== 'help_requests' ? ',status.is.null,status.eq.""' : '') + ')';
+  const hasExplicitStatuses = ['listing_applications', 'help_requests', 'service_orders'].includes(source);
+  if (status !== 'all' && hasExplicitStatuses && statuses.length === 0) return { items: [] as InboxItem[], total: 0 };
+  const state = status === 'all' ? '' : 'or(status.in.(' + statuses.join(',') + ')' + (status === 'new' && !hasExplicitStatuses ? ',status.is.null,status.eq.""' : '') + ')';
   const expression = state && text ? 'and(' + state + ',' + text + ')' : state || text;
   const filter = <T,>(apply: (expression: string) => T, all: () => T) => expression ? apply(expression) : all();
   const start = Math.max(0, page) * 50;
@@ -110,6 +122,27 @@ export async function fetchInbox(source: InboxSource, page: number, status: Inbo
         createdAt: row.created_at, title: row.subject || row.topic,
         subtitle: row.topic, contact: null, href: inboxRequestHref('help_requests', row.id),
         vertical: row.urgency,
+      })),
+      total: count,
+    };
+  }
+  if (source === 'service_orders') {
+    // Exclude unrelated stay/staff orders. The operator queue is a read-only
+    // projection of marketplace requests, under the existing admin gate and RLS.
+    const query = supabase.from('service_orders')
+      .select('id, status, created_at, service_type, order_number, service_name', { count: 'exact' })
+      .eq('service_type', MARKETPLACE_SERVICE_TYPE);
+    const { data, count, error } = await (expression ? query.or(expression) : query)
+      .order('created_at', { ascending: false }).order('id', { ascending: false }).range(start, start + 49);
+    if (error) throw error;
+    if (count === null) throw new Error('Application count unavailable');
+    if (data?.some(row => row.service_type !== MARKETPLACE_SERVICE_TYPE)) throw new Error('Request type mismatch');
+    return {
+      items: (data ?? []).map((row): InboxItem => ({
+        id: row.id, source, rawStatus: row.status,
+        status: inboxStatusForStoredValue(source, row.status),
+        createdAt: row.created_at, title: row.service_name,
+        subtitle: row.order_number, contact: null, href: inboxRequestHref(source, row.id),
       })),
       total: count,
     };

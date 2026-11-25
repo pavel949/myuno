@@ -32,7 +32,7 @@ export function ProjectUnitsTab({ projectId }: Props) {
   const [showAdd, setShowAdd] = useState(false);
   const [form, setForm] = useState({
     unit_id: '', unit_type: '1BR', floor: '', area_sqm: '', price: '', status: 'inactive',
-    view: '', bedrooms: '1', bathrooms: '1',
+    bedrooms: '1', bathrooms: '1',
   });
 
   const { data: units = [], isLoading, error, refetch } = useQuery({
@@ -73,8 +73,8 @@ export function ProjectUnitsTab({ projectId }: Props) {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['admin-project-properties', projectId] });
       setShowAdd(false);
-      setForm({ unit_id: '', unit_type: '1BR', floor: '', area_sqm: '', price: '', status: 'inactive', view: '', bedrooms: '1', bathrooms: '1' });
-      toast.success(isRu ? 'Юнит добавлен' : 'Unit added');
+      setForm({ unit_id: '', unit_type: '1BR', floor: '', area_sqm: '', price: '', status: 'inactive', bedrooms: '1', bathrooms: '1' });
+      toast.success(isRu ? 'Объявление сохранено для модерации' : 'Listing saved for review');
     },
     onError: (err: Error) => { toast.error(err.message || 'Failed to add unit'); },
   });
@@ -103,7 +103,7 @@ export function ProjectUnitsTab({ projectId }: Props) {
       </div>
 
       {/* Search + Add */}
-      <div className="flex gap-2">
+      <div className="flex flex-wrap gap-2">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
@@ -115,10 +115,11 @@ export function ProjectUnitsTab({ projectId }: Props) {
         </div>
         <Button size="sm" onClick={() => setShowAdd(true)}>
           <Plus className="h-4 w-4 mr-1" />
-          {isRu ? 'Юнит' : 'Unit'}
+          {isRu ? 'Добавить объявление' : 'Add sale listing'}
         </Button>
       </div>
 
+      <p className="text-sm text-muted-foreground">{isRu ? 'Здесь создаётся объявление о продаже. Наличие и планировки в каталоге новостроек ведутся отдельно.' : 'This creates a sale listing. Newbuild availability and floor plans are managed separately.'}</p>
       <ProjectUnitIdentityReview projectId={projectId} />
 
       {/* Units List */}
@@ -169,10 +170,10 @@ export function ProjectUnitsTab({ projectId }: Props) {
       )}
 
       {/* Add Unit Modal */}
-      <ResponsiveModal open={showAdd} onOpenChange={setShowAdd} title={isRu ? 'Добавить юнит' : 'Add Unit'} size="md"
+      <ResponsiveModal open={showAdd} onOpenChange={setShowAdd} title={isRu ? 'Новое объявление о продаже' : 'New sale listing'} size="md"
         footer={
           <Button onClick={() => addUnit.mutate()} disabled={addUnit.isPending || !form.unit_id.trim()}>
-            {addUnit.isPending ? '...' : (isRu ? 'Добавить' : 'Add Unit')}
+            {addUnit.isPending ? '...' : (isRu ? 'Сохранить объявление' : 'Save listing')}
           </Button>
         }
       >

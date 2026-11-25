@@ -3,7 +3,7 @@ import { describe, expect, it, vi, beforeEach } from 'vitest';
 import { renderHook, waitFor, cleanup } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { usePropertiesByProject } from '../useProperties';
-import { GUEST_PROJECT_COLUMNS, usePropertyProject } from '../usePropertyProjects';
+import { usePropertyProject, usePublicPropertyProjects } from '../usePropertyProjects';
 const mock = vi.hoisted(() => ({ from: vi.fn(), eq: vi.fn(), or: vi.fn(), gt: vi.fn(), select: vi.fn(), order: vi.fn(), limit: vi.fn(), maybeSingle: vi.fn() }));
 vi.mock('@/integrations/supabase/client', () => ({ supabase: { from: mock.from } }));
 vi.mock('@/contexts/AuthContext', () => ({ useAuth: () => ({ user: null }) }));
@@ -61,12 +61,28 @@ describe('guest complex catalog boundaries', () => {
     expect(result.current.data?.properties.map(row => row.id)).toEqual(['dual-priced', 'legacy-sale', 'legacy-null-modes']);
     expect(result.current.data?.total).toBe(3);
   });
-  it('loads only active descriptive project fields for guest pages', async () => {
+  const publicCardColumns = 'id,name_en,name_ru,description_en,description_ru,address,district,lat,lng,cover_image,images,video_url,amenities,infrastructure,is_active';
+
+  it('loads only active descriptive fields and the editorial gallery for the exact guest detail', async () => {
+    const gallery = ['/catalog/complex/first.jpg', '/catalog/complex/second.jpg'];
+    mock.maybeSingle.mockResolvedValue({ data: { id: 'project', gallery_urls: gallery }, error: null });
     const { result } = renderHook(() => usePropertyProject('project', true), { wrapper: Wrapper });
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
-    expect(mock.select).toHaveBeenCalledWith(GUEST_PROJECT_COLUMNS);
+
+    expect(mock.from).toHaveBeenCalledExactlyOnceWith('property_projects');
+    expect(mock.select).toHaveBeenCalledExactlyOnceWith(`${publicCardColumns},gallery_urls`);
+    expect(mock.eq).toHaveBeenCalledWith('id', 'project');
     expect(mock.eq).toHaveBeenCalledWith('is_active', true);
-    expect(GUEST_PROJECT_COLUMNS).not.toMatch(/price|risk|score|units_available/);
+    expect(result.current.data?.gallery_urls).toEqual(gallery);
+  });
+
+  it('does not fetch full galleries or private fields for the active guest collection', async () => {
+    const { result } = renderHook(() => usePublicPropertyProjects(), { wrapper: Wrapper });
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+
+    expect(mock.from).toHaveBeenCalledExactlyOnceWith('property_projects');
+    expect(mock.select).toHaveBeenCalledExactlyOnceWith(publicCardColumns);
+    expect(mock.eq).toHaveBeenCalledWith('is_active', true);
   });
   it('does not query an absent project', () => {
     renderHook(() => usePropertiesByProject(undefined, 24, { mode: 'rent' }), { wrapper: Wrapper });

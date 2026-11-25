@@ -37,6 +37,7 @@ export default function ComplexesPage() {
       <h1 className="flex items-start gap-2 font-display text-2xl font-semibold leading-tight text-foreground sm:text-3xl"><Building2 className="h-6 w-6 shrink-0 text-primary" />{text('Property Complexes', 'Жилые комплексы', 'โครงการที่พักอาศัย')}</h1>
       <p className="text-sm text-muted-foreground mt-1">{text('Complex content and publication review.', 'Данные комплексов и проверка перед публикацией.', 'ข้อมูลโครงการและการตรวจสอบก่อนเผยแพร่')}</p>
     </div>
+    <p className="text-sm text-muted-foreground">{text('This workspace manages complex information. To group offers on the marketplace, link each listing to its verified public project. A matching name does not link the records.', 'Здесь редактируются данные комплекса. Чтобы объединить объявления на маркетплейсе, привяжите каждое к проверенному публичному проекту. Совпадение названий не связывает записи.', 'ส่วนนี้ใช้จัดการข้อมูลโครงการ หากต้องการจัดกลุ่มประกาศในตลาด ให้เชื่อมโยงแต่ละประกาศกับโครงการสาธารณะที่ตรวจสอบแล้ว ชื่อที่ตรงกันไม่ใช่การเชื่อมโยง')}</p>
     <ManagedComplexDrafts />
     <section className="space-y-4">
       <h2 className="font-semibold">{text('Existing complexes you manage', 'Существующие комплексы в вашем управлении', 'โครงการเดิมที่คุณดูแล')}</h2>

@@ -41,8 +41,15 @@ describe('read-only admin review filters', () => {
     expect(matchesProjectReview(p, { q: ' COASTAL ', stage: 'offplan', review: 'pending' })).toBe(true);
     expect(matchesProjectReview(p, { q: '', stage: 'completed', review: 'orphan' })).toBe(false);
     expect(matchesProjectReview(p, { q: '', stage: 'offplan', review: 'needs_review' })).toBe(true);
-    expect(matchesProjectReview({ developer_id: null }, { q: '', stage: 'all', review: 'orphan' })).toBe(false);
     expect(matchesProjectReview({}, { q: '', stage: 'all', review: 'pending' })).toBe(false);
+  });
+  it('requires a canonical developer link; legacy names do not resolve orphan projects', () => {
+    const filter = { q: '', stage: 'all', review: 'orphan' } as const;
+    const named = { developer_name: 'Legacy display name' };
+    expect(matchesProjectReview(named, filter)).toBe(false);
+    expect(matchesProjectReview({ ...named, developer_id: null }, filter)).toBe(true);
+    expect(matchesProjectReview({ ...named, developer_id: UNASSIGNED_DEVELOPER_ID }, filter)).toBe(true);
+    expect(matchesProjectReview({ ...named, developer_id: '6f6bdde4-1604-48ce-8bb1-1a3d0bd46fe1' }, filter)).toBe(false);
   });
   it('matches the existing 45-day KPI boundary without treating missing/invalid dates as stale', () => {
     const now = Date.parse('2026-10-19T00:00:00Z');

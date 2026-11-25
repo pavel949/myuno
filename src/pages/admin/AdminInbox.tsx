@@ -8,6 +8,7 @@
  *   • consultation_requests    — заявки на консультации (legal, visa, real estate, ...)
  *   • nb_leads                 — лиды по новостройкам
  *   • property_inquiries       — запросы по property
+ *   • service_orders           — заявки маркетплейса услуг
  *
  * Каждый источник нормализуется в `InboxItem`. Без realtime пока — простой
  * refetch через React Query (staleTime 60s). Realtime-канал добавим, когда
@@ -37,6 +38,7 @@ const SOURCE_META: Record<InboxSource, { labelRu: string; labelEn: string; icon:
   listing_applications:  { labelRu: 'Листинги',     labelEn: 'Listings',     icon: Building2,     color: 'hsl(var(--cluster-manage))' },
   consultation_requests: { labelRu: 'Консультации', labelEn: 'Consults',     icon: MessageSquare, color: 'hsl(var(--cluster-legal))' },
   nb_leads:              { labelRu: 'Новостройки',  labelEn: 'Newbuilds',    icon: Sparkles,      color: 'hsl(var(--cluster-invest))' },
+  service_orders:        { labelRu: 'Услуги',       labelEn: 'Services',     icon: Briefcase,    color: 'hsl(var(--cluster-build))' },
   property_inquiries:    { labelRu: 'Property',     labelEn: 'Property',     icon: Home,          color: 'hsl(var(--cluster-live))' },
 };
 
@@ -53,6 +55,7 @@ const SEARCH_HINTS: Record<InboxSource, [string, string]> = {
   listing_applications: ['Name, email, exact type, category', 'Имя, email, точный тип, категория'],
   consultation_requests: ['Name, email, request type, vertical', 'Имя, email, тип запроса, направление'],
   nb_leads: ['Name, email, phone', 'Имя, email, телефон'],
+  service_orders: ['Reference or service name', 'Номер или название услуги'],
   property_inquiries: ['Name, email, phone, message', 'Имя, email, телефон, сообщение'],
 };
 
@@ -209,7 +212,7 @@ export default function AdminInbox() {
                   )}
                   style={!isActive ? { borderLeftWidth: 2, borderLeftColor: m.color } : undefined}
                 >
-                  {isRu ? m.labelRu : m.labelEn}
+                  {src === 'service_orders' && language === 'th' ? 'บริการ' : isRu ? m.labelRu : m.labelEn}
                 </button>
               );
             })}
@@ -286,7 +289,7 @@ export default function AdminInbox() {
                   <div className="flex-1 min-w-0">
                     <div className="flex items-baseline gap-2 flex-wrap">
                       <span className="font-mono text-[10px] uppercase tracking-[0.12em] text-muted-foreground">
-                        {isRu ? meta.labelRu : meta.labelEn}
+                        {item.source === 'service_orders' && language === 'th' ? 'บริการ' : isRu ? meta.labelRu : meta.labelEn}
                       </span>
                       <span
                         className={cn(

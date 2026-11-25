@@ -44,8 +44,11 @@ vi.mock('@/components/owner/property-wizard/steps', async () => {
   const { PhotosStep } = await import('@/components/owner/property-wizard/steps/PhotosStep');
   return {
     PhotosStep,
-    BasicInfoStep: ({ formData, updateFormData }: { formData: { title: string; project_id?: string; unit_number?: string; floor?: number; total_floors?: number; bedrooms?: number }; updateFormData: (data: Record<string, unknown>) => void }) => <>
+    BasicInfoStep: ({ formData, updateFormData }: { formData: { title: string; title_ru?: string; description_ru?: string; project_id?: string; unit_number?: string; floor?: number; total_floors?: number; bedrooms?: number; highlights: string[] }; updateFormData: (data: Record<string, unknown>) => void }) => <>
+      {formData.highlights.length > 0 && <button onClick={() => updateFormData({ highlights: [] })}>Remove fixture highlight</button>}
       <label htmlFor="fixture-title">Fixture title<input id="fixture-title" value={formData.title} onChange={event => updateFormData({ title: event.target.value })} /></label>
+      <label htmlFor="fixture-title-ru">Fixture Russian title<input id="fixture-title-ru" value={formData.title_ru || ''} onChange={event => updateFormData({ title_ru: event.target.value })} /></label>
+      <label htmlFor="fixture-description-ru">Fixture Russian description<textarea id="fixture-description-ru" value={formData.description_ru || ''} onChange={event => updateFormData({ description_ru: event.target.value })} /></label>
       <label htmlFor="fixture-project">Fixture project<input id="fixture-project" value={formData.project_id || ''} onChange={event => updateFormData({ project_id: event.target.value || undefined })} /></label>
       <label htmlFor="fixture-unit">Fixture unit<input id="fixture-unit" value={formData.unit_number || ''} onChange={event => updateFormData({ unit_number: event.target.value })} /></label>
       <label htmlFor="fixture-floor">Fixture floor<input id="fixture-floor" type="number" value={formData.floor ?? ''} onChange={event => updateFormData({ floor: event.target.value === '' ? undefined : Number(event.target.value) })} /></label>
@@ -122,6 +125,24 @@ describe('contained admin property editor', () => {
     }
   });
 
+  it('previews the edited Russian listing text without saving or using the English copy', async () => {
+    mocks.language = 'ru';
+    mocks.properties = [{ ...mocks.properties[0], title_en: 'Existing English title', description_en: 'Existing English description' }];
+    renderEditor();
+    const editor = await screen.findByRole('dialog');
+    const summary = within(editor).getByText('Предпросмотр черновика');
+    fireEvent.click(summary);
+    const preview = within(summary.closest('details')!);
+    expect(preview.getByText('Existing English title')).toBeVisible();
+    fireEvent.change(within(editor).getByLabelText('Fixture Russian title'), { target: { value: 'Новый русский заголовок' } });
+    fireEvent.change(within(editor).getByLabelText('Fixture Russian description'), { target: { value: 'Новое русское описание' } });
+    expect(preview.getByText('Новый русский заголовок')).toBeVisible();
+    expect(preview.getByText('Новое русское описание')).toBeVisible();
+    expect(preview.queryByText('Existing English title')).toBeNull();
+    expect(mocks.update).not.toHaveBeenCalled();
+    expect(mocks.create).not.toHaveBeenCalled();
+  });
+
   it('explicitly clears the last gallery photo and cover without deleting storage', async () => {
     const photo = mocks.properties[0].images[0];
     mocks.properties = [{ ...mocks.properties[0], images: [photo], cover_image: photo }];
@@ -147,6 +168,23 @@ describe('contained admin property editor', () => {
     fireEvent.click(within(editor).getByRole('button', { name: 'Save' }));
     await waitFor(() => expect(mocks.update).toHaveBeenCalled());
     expect(mocks.update.mock.calls[0][1]).toMatchObject({ images: mocks.properties[0].images, cover_image: photo });
+  });
+
+  it('persists the explicit removal of the last highlight and reopens without it', async () => {
+    mocks.properties = [{ ...mocks.properties[0], highlights: ['sea_view'] }];
+    mocks.update.mockImplementation(async (_id, payload) => {
+      mocks.properties = [{ ...mocks.properties[0], ...JSON.parse(JSON.stringify(payload)) }];
+      return { error: null };
+    });
+    renderEditor();
+    const editor = await screen.findByRole('dialog');
+    fireEvent.click(within(editor).getByRole('button', { name: 'Remove fixture highlight' }));
+    fireEvent.click(within(editor).getByRole('button', { name: 'Save' }));
+    await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
+    expect(mocks.update.mock.calls[0][1]).toMatchObject({ highlights: [] });
+    await waitFor(() => expect(screen.getByTestId('location')).not.toHaveTextContent('edit='));
+    fireEvent.click(screen.getByRole('button', { name: 'Edit fixture property' }));
+    expect(within(await screen.findByRole('dialog')).queryByRole('button', { name: 'Remove fixture highlight' })).not.toBeInTheDocument();
   });
 
   it('preserves fractional square metres when saving unrelated property metadata', async () => {

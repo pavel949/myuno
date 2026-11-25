@@ -79,7 +79,7 @@ if (
   Object.keys(result.metafile.inputs).some(
     (input) =>
       !input.startsWith("synthetic:") &&
-      input.endsWith("integrations/supabase/client.ts"),
+      (input.endsWith("integrations/supabase/client.ts") || input.endsWith("contexts/AuthContext.tsx")),
   )
 )
   throw Error("Live backend module included");
