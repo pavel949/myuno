@@ -13,6 +13,7 @@ import { PhotoLightbox } from '@/components/property/PhotoLightbox';
 import { PropertyAttributeChip } from '@/components/property/PropertyAttributeChip';
 import { getProjectFacilityLabel, normalizeProjectFacilityIds, PROJECT_FACILITY_LABELS } from '@/lib/propertyAttributeRegistry';
 import { getPropertyTypeLabel } from '@/lib/taxonomies';
+import { projectEditorialImages, publicProjectMediaUrl } from '@/lib/real-estate/projectEditorialMedia';
 import { complexMediaUrl, complexVideoSource } from '@/lib/real-estate/complexMedia';
 import { publicJourneyReturn, readPublicJourneyOrigin } from '@/lib/real-estate/publicJourney';
 import { propertyCatalogHref } from '@/lib/real-estate/propertyDetailIntent';
@@ -52,7 +53,8 @@ export default function GuestComplexDetail() {
 
   const name = (isRu ? project.name_ru || project.name_en : project.name_en || project.name_ru) || (pickLang(language, {"ru": "Жилой комплекс", "en": "Residential complex", "th": "โครงการที่พักอาศัย"}));
   const description = isRu ? project.description_ru || project.description_en : project.description_en || project.description_ru;
-  const photos = [...new Set([project.cover_image, ...(project.images || [])].map(complexMediaUrl).filter((url): url is string => Boolean(url)))];
+  // Match the editor's source/order, retaining accepted public legacy complex media.
+  const photos = projectEditorialImages(project, (url, kind) => publicProjectMediaUrl(url, kind) ?? complexMediaUrl(url));
   const video = complexVideoSource(project.video_url);
   const units = unitsQuery.data?.properties || [];
   // This mixed legacy array also carries project metadata. Only registered

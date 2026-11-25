@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import { AdminDraftPreview, ADMIN_EDITOR_HEADER, ADMIN_EDITOR_BODY, ADMIN_EDITOR_FOOTER } from '@/components/admin/AdminDraftPreview';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { APP_ROUTES } from '@/lib/config/routes';
 import { useAuth } from '@/contexts/AuthContext';
@@ -8,6 +9,8 @@ import { useAdminFormHotkeys, useFormProgress } from '@/hooks/useAdminFormHotkey
 import { useAutoTranslate } from '@/hooks/useAutoTranslate';
 import { useOnBehalfContext } from '@/hooks/useAdminContentCreation';
 import { useCityCurrency } from '@/hooks/useCityCurrency';
+import { CURRENCIES } from '@/lib/config/currencies';
+import { optionalAuthoringText, positiveAuthoringNumber, servicePriceForSave, supplierIsPublishable } from '@/lib/services/adminAuthoring';
 
 import { PageContainer } from '@/components/uno/PageContainer';
 import { PageHeader } from '@/components/uno/PageHeader';
@@ -24,7 +27,6 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import {
   Select,
   SelectContent,
@@ -55,7 +57,6 @@ import {
   Search,
   Loader2,
   Clock,
-  Star,
   Building2,
   Copy,
   Image,
@@ -70,7 +71,7 @@ export default function AdminServices() {
   const [searchParams] = useSearchParams();
   const { user, isLoading: authLoading } = useAuth();
   const { language } = useLanguage();
-  const { code: cityCurrencyCode, symbol: curSym } = useCityCurrency();
+  const { code: cityCurrencyCode } = useCityCurrency();
   const { isAdmin, isLoading: adminLoading } = useAdminCheck();
   const { providers } = useAdminProviders();
   const { categories } = useAdminCategories();
@@ -95,14 +96,15 @@ export default function AdminServices() {
     description_en: '',
     description_ru: '',
     price: '',
+    currency: cityCurrencyCode as string | null,
     duration_minutes: '',
-    max_capacity: '1',
     images: [] as string[],
-    is_active: true,
-    is_featured: false,
+    is_active: false,
   });
 
   const isRussian = language === 'ru';
+  const serviceCurrency = formData.currency;
+  const availableCurrencyCodes = [...new Set([...(serviceCurrency ? [serviceCurrency] : []), ...Object.keys(CURRENCIES)])];
 
   // Handle URL params for provider-first workflow
   const urlProviderId = searchParams.get('provider');
@@ -141,23 +143,21 @@ export default function AdminServices() {
       description_en: '',
       description_ru: '',
       price: '',
+      currency: cityCurrencyCode,
       duration_minutes: '',
-      max_capacity: '1',
       images: [],
-      is_active: true,
-      is_featured: false,
+      is_active: false,
     });
     setEditingService(null);
   };
 
-  const openEditDialog = (service: Service) => {
-    setEditingService(service);
+  const existingServiceForm = (service: Service): typeof formData => {
     // Determine if category_id is actually a subcategory
     const catId = service.category_id || '';
     const cat = categories.find(c => c.id === catId);
     const isSubcat = cat?.parent_id != null;
     
-    setFormData({
+    return {
       provider_id: service.provider_id,
       category_id: isSubcat ? (cat?.parent_id || '') : catId,
       subcategory_id: isSubcat ? catId : '',
@@ -166,12 +166,16 @@ export default function AdminServices() {
       description_en: service.description_en || '',
       description_ru: service.description_ru || '',
       price: service.price?.toString() || '',
+      currency: service.currency,
       duration_minutes: service.duration_minutes?.toString() || '',
-      max_capacity: (service as Record<string, unknown>).max_capacity?.toString() || '1',
       images: service.images || [],
-      is_active: service.is_active ?? true,
-      is_featured: ((service as Record<string, unknown>).is_featured as boolean) ?? false,
-    });
+      is_active: service.is_active === true,
+    };
+  };
+
+  const openEditDialog = (service: Service) => {
+    setEditingService(service);
+    setFormData(existingServiceForm(service));
     setIsDialogOpen(true);
   };
 
@@ -187,53 +191,67 @@ export default function AdminServices() {
   }, [categories, formData.category_id]);
 
   // Duplicate functionality
-  const handleDuplicate = useCallback(() => {
-    if (!editingService) return;
-    
+  const handleDuplicate = (source?: Service) => {
+    if (!source && !editingService) return;
+    const origin = source ? existingServiceForm(source) : formData;
     setEditingService(null);
-    setFormData(prev => ({
-      ...prev,
-      name_en: `${prev.name_en} (copy)`,
-      name_ru: prev.name_ru ? `${prev.name_ru} (копия)` : '',
-    }));
+    setFormData({
+      ...origin,
+      name_en: `${origin.name_en} (copy)`,
+      name_ru: origin.name_ru ? `${origin.name_ru} (копия)` : '',
+      is_active: false,
+    });
+    setIsDialogOpen(true);
     toast.info(isRussian ? 'Создание копии...' : 'Creating a copy...');
-  }, [editingService, isRussian]);
+  };
 
-  const handleSubmit = async () => {
-    if (!formData.name_en || !formData.price || !formData.provider_id) {
-      toast.error(isRussian ? 'Заполните обязательные поля' : 'Please fill required fields');
+  const handleSubmit = async (approveAndPublish = false) => {
+    if (!user || !isAdmin || adminLoading || authLoading || isSubmitting) return;
+    const name = formData.name_en.trim();
+    const provider = providers.find(item => item.id === formData.provider_id);
+    const categoryId = formData.subcategory_id || formData.category_id || null;
+    const price = servicePriceForSave(formData.price, editingService?.price);
+    const duration = positiveAuthoringNumber(formData.duration_minutes, true);
+
+    if (!name || !provider || price === undefined || duration === undefined) {
+      toast.error(isRussian ? 'Проверьте исполнителя, название, цену и длительность' : 'Check the provider, name, price and duration');
+      return;
+    }
+
+    if (approveAndPublish && (!editingService || !supplierIsPublishable(provider)
+      || !categories.some(category => category.id === categoryId)
+      || price == null || price <= 0 || !serviceCurrency || !/^[A-Z]{3}$/.test(serviceCurrency))) {
+      toast.error(isRussian
+        ? 'Для публикации нужны действующий одобренный поставщик, категория, положительная цена и валюта'
+        : 'Publishing requires an active approved provider, category, positive price and currency');
       return;
     }
 
     setIsSubmitting(true);
     try {
-      // Use subcategory if selected, otherwise parent category
-      const finalCategoryId = formData.subcategory_id || formData.category_id || undefined;
-      
       const serviceData = {
-        provider_id: formData.provider_id,
-        category_id: finalCategoryId,
-        name_en: formData.name_en,
-        name_ru: formData.name_ru || formData.name_en,
-        description_en: formData.description_en || undefined,
-        description_ru: formData.description_ru || undefined,
-        price: parseFloat(formData.price),
-        currency: cityCurrencyCode,
-        duration_minutes: formData.duration_minutes ? parseInt(formData.duration_minutes) : undefined,
-        max_capacity: parseInt(formData.max_capacity) || 1,
-        images: formData.images.length > 0 ? formData.images : undefined,
-        is_active: formData.is_active,
-        is_featured: formData.is_featured,
+        provider_id: provider.id,
+        category_id: categoryId,
+        name_en: name,
+        name_ru: optionalAuthoringText(formData.name_ru) || name,
+        description_en: optionalAuthoringText(formData.description_en),
+        description_ru: optionalAuthoringText(formData.description_ru),
+        price,
+        currency: serviceCurrency,
+        duration_minutes: duration,
+        images: formData.images,
+        is_active: approveAndPublish || (editingService?.approval_status === 'approved' && formData.is_active),
+        ...(approveAndPublish ? { approval_status: 'approved', rejection_reason: null } : {}),
       };
 
       if (editingService) {
         const { error } = await updateService(editingService.id, serviceData);
         if (error) throw error;
-        toast.success(isRussian ? 'Услуга обновлена' : 'Service updated');
+        toast.success(approveAndPublish ? (isRussian ? 'Услуга опубликована' : 'Service published') : (isRussian ? 'Услуга обновлена' : 'Service updated'));
       } else {
         const { error } = await createService(serviceData);
         if (error) throw error;
-        toast.success(isRussian ? 'Услуга создана' : 'Service created');
+        toast.success(isRussian ? 'Черновик услуги сохранён' : 'Service draft saved');
       }
 
       setIsDialogOpen(false);
@@ -291,7 +309,7 @@ export default function AdminServices() {
 
   // Form progress tracking
   const { progress, filled, total } = useFormProgress(formData, 
-    ['provider_id', 'name_en', 'price'],
+    ['provider_id', 'name_en'],
     ['name_ru', 'description_en', 'description_ru', 'duration_minutes']
   );
 
@@ -433,9 +451,6 @@ export default function AdminServices() {
                         <h3 className="font-medium">
                           {isRussian ? (service.name_ru || service.name_en) : service.name_en}
                         </h3>
-                        {(service as Record<string, unknown>).is_featured && (
-                          <Star className="h-4 w-4 text-warning fill-warning" />
-                        )}
                       </div>
                       
                       {!providerId && (
@@ -453,7 +468,7 @@ export default function AdminServices() {
                       
                       <div className="flex items-center gap-4 text-sm">
                         <span className="font-bold text-primary">
-                          {curSym}{service.price?.toLocaleString()}
+                          {[service.currency, service.price?.toLocaleString()].filter(Boolean).join(' ')}
                         </span>
                         {service.duration_minutes && (
                           <span className="flex items-center gap-1 text-muted-foreground">
@@ -480,10 +495,7 @@ export default function AdminServices() {
                           <Edit className="h-4 w-4 mr-2" />
                           {isRussian ? 'Редактировать' : 'Edit'}
                         </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => {
-                          openEditDialog(service);
-                          setTimeout(() => handleDuplicate(), 100);
-                        }}>
+                        <DropdownMenuItem onClick={() => handleDuplicate(service)}>
                           <Copy className="h-4 w-4 mr-2" />
                           {isRussian ? 'Дублировать' : 'Duplicate'}
                         </DropdownMenuItem>
@@ -505,8 +517,8 @@ export default function AdminServices() {
 
         {/* Add/Edit Dialog */}
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-          <DialogContent className="max-h-[90vh] p-0">
-            <DialogHeader className="p-6 pb-0">
+          <DialogContent className="flex max-h-[calc(100dvh-1rem)] flex-col gap-0 overflow-hidden p-0 sm:p-0 sm:max-w-[var(--layout-width-form)]">
+            <DialogHeader className={ADMIN_EDITOR_HEADER}>
               <DialogTitle>
                 {editingService 
                   ? (isRussian ? 'Редактировать услугу' : 'Edit Service')
@@ -514,23 +526,25 @@ export default function AdminServices() {
               </DialogTitle>
             </DialogHeader>
 
-            <div className="px-6 pt-2">
+            <div data-admin-editor-scroll="" className={ADMIN_EDITOR_BODY}>
+            <div className="mb-4"><AdminDraftPreview language={language} title={isRussian ? formData.name_ru || formData.name_en : formData.name_en || formData.name_ru} description={isRussian ? formData.description_ru || formData.description_en : formData.description_en || formData.description_ru} /></div>
+            <div className="pb-2">
               <ServiceBilingualHint isRu={isRussian} />
             </div>
 
-            <div className="px-6 pt-4">
+            <div className="pb-4">
               <AdminFormToolbar
                 progress={progress}
                 filled={filled}
                 total={total}
                 onTranslate={handleAutoTranslate}
-                onDuplicate={handleDuplicate}
+                onDuplicate={() => handleDuplicate()}
                 isTranslating={isTranslating}
                 isEditing={!!editingService}
               />
             </div>
 
-            <ScrollArea className="max-h-[calc(90vh-240px)] px-6">
+            <div className="min-w-0">
               <div className="space-y-6 pb-4">
                 
                 {/* === Provider & Category === */}
@@ -559,7 +573,7 @@ export default function AdminServices() {
                       </Select>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid min-w-0 gap-4 sm:grid-cols-2 [&>*]:min-w-0">
                       <div className="space-y-2">
                         <Label>{isRussian ? 'Категория' : 'Category'}</Label>
                         <Select
@@ -617,10 +631,10 @@ export default function AdminServices() {
                   badge={isRussian ? 'Обязательно' : 'Required'}
                 >
                   <div className="space-y-4">
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid min-w-0 gap-4 sm:grid-cols-2 [&>*]:min-w-0">
                       <div className="space-y-2">
-                        <Label>{isRussian ? 'Название (EN) *' : 'Name (EN) *'}</Label>
-                        <Input
+                        <Label htmlFor="admin-service-name-en">{isRussian ? 'Название (EN) *' : 'Name (EN) *'}</Label>
+                        <Input id="admin-service-name-en"
                           value={formData.name_en}
                           onChange={(e) => setFormData(prev => ({ ...prev, name_en: e.target.value }))}
                           placeholder="Thai Massage"
@@ -636,10 +650,10 @@ export default function AdminServices() {
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid min-w-0 gap-4 sm:grid-cols-2 [&>*]:min-w-0">
                       <div className="space-y-2">
-                        <Label>{isRussian ? 'Описание (EN)' : 'Description (EN)'}</Label>
-                        <Textarea
+                        <Label htmlFor="admin-service-description-en">{isRussian ? 'Описание (EN)' : 'Description (EN)'}</Label>
+                        <Textarea id="admin-service-description-en"
                           value={formData.description_en}
                           onChange={(e) => setFormData(prev => ({ ...prev, description_en: e.target.value }))}
                           rows={3}
@@ -684,15 +698,28 @@ export default function AdminServices() {
                   icon={<DollarSign className="h-4 w-4" />}
                   badge={isRussian ? 'Обязательно' : 'Required'}
                 >
-                  <div className="grid grid-cols-3 gap-4">
+                  <div className="grid min-w-0 gap-4 sm:grid-cols-3 [&>*]:min-w-0">
                     <div className="space-y-2">
-                      <Label>{isRussian ? `Цена (${curSym}) *` : `Price (${curSym}) *`}</Label>
+                      <Label htmlFor="admin-service-price">{isRussian ? 'Цена' : 'Price'}</Label>
                       <Input
-                        type="number"
+                        inputMode="decimal"
+                        id="admin-service-price"
                         value={formData.price}
                         onChange={(e) => setFormData(prev => ({ ...prev, price: e.target.value }))}
                         placeholder="1000"
                       />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="admin-service-currency">{isRussian ? 'Валюта' : 'Currency'}</Label>
+                      <Select value={serviceCurrency || 'unknown'} onValueChange={value => setFormData(prev => ({ ...prev, currency: value === 'unknown' ? null : value }))}>
+                        <SelectTrigger id="admin-service-currency">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="unknown">{isRussian ? 'Не указана' : 'Not set'}</SelectItem>
+                          {availableCurrencyCodes.map(code => <SelectItem key={code} value={code}>{code}</SelectItem>)}
+                        </SelectContent>
+                      </Select>
                     </div>
                     <div className="space-y-2">
                       <Label>{isRussian ? 'Длительность (мин)' : 'Duration (min)'}</Label>
@@ -701,15 +728,6 @@ export default function AdminServices() {
                         value={formData.duration_minutes}
                         onChange={(e) => setFormData(prev => ({ ...prev, duration_minutes: e.target.value }))}
                         placeholder="60"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label>{isRussian ? 'Макс. клиентов' : 'Max Capacity'}</Label>
-                      <Input
-                        type="number"
-                        value={formData.max_capacity}
-                        onChange={(e) => setFormData(prev => ({ ...prev, max_capacity: e.target.value }))}
-                        placeholder="1"
                       />
                     </div>
                   </div>
@@ -732,33 +750,28 @@ export default function AdminServices() {
                       </div>
                       <Switch
                         checked={formData.is_active}
+                        disabled={editingService?.approval_status !== 'approved'}
                         onCheckedChange={(checked) => setFormData(prev => ({ ...prev, is_active: checked }))}
                       />
                     </div>
 
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <Label>{isRussian ? 'Рекомендуемая' : 'Featured'}</Label>
-                        <p className="text-xs text-muted-foreground">
-                          {isRussian ? 'Показывать в топе' : 'Show in featured section'}
-                        </p>
-                      </div>
-                      <Switch
-                        checked={formData.is_featured}
-                        onCheckedChange={(checked) => setFormData(prev => ({ ...prev, is_featured: checked }))}
-                      />
-                    </div>
                   </div>
                 </VendorFormSection>
 
               </div>
-            </ScrollArea>
+            </div>
+            </div>
 
-            <DialogFooter className="p-6 pt-0">
+            <DialogFooter className={ADMIN_EDITOR_FOOTER}>
               <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
                 {isRussian ? 'Отмена' : 'Cancel'}
               </Button>
-              <Button onClick={handleSubmit} disabled={isSubmitting}>
+              {editingService && editingService.approval_status !== 'approved' && (
+                <Button variant="outline" onClick={() => void handleSubmit(true)} disabled={isSubmitting}>
+                  {isRussian ? 'Одобрить и опубликовать' : 'Approve and publish'}
+                </Button>
+              )}
+              <Button onClick={() => void handleSubmit()} disabled={isSubmitting}>
                 {isSubmitting && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
                 {isRussian ? 'Сохранить' : 'Save'}
               </Button>

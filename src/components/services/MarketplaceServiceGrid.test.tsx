@@ -6,15 +6,16 @@ import type { MarketplaceService } from '@/hooks/useServiceMarketplace';
 let data: MarketplaceService[] = [];
 let isLoading = false;
 let isError = false;
+let laterOffers: MarketplaceService[] | undefined;
 const refetch = vi.fn();
 const locale = vi.hoisted(() => ({ language: 'en' }));
 vi.mock('@/contexts/LanguageContext', () => ({ useLanguage: () => locale }));
-vi.mock('@/hooks/useServiceMarketplace', () => ({ useMarketplaceServices: () => ({ data, isLoading, isError, refetch }) }));
+vi.mock('@/hooks/useServiceMarketplace', () => ({ useMarketplaceServices: (_?: string[], _enabled?: boolean, pageIndex = 0) => ({ data: pageIndex === 0 ? data : laterOffers, hasMore: pageIndex === 0 && !!laterOffers, isLoading, isError, refetch }) }));
 vi.mock('@/hooks/useMarketplaceAvailability', () => ({ useMarketplaceAvailability: () => ({ data: {}, isFetching: false, refetch: vi.fn() }) }));
 vi.mock('./ServiceBookingSheet', () => ({ ServiceBookingSheet: () => null }));
 const service = { id: 'test-service', name_en: 'Fixture cleaning', provider_id: 'provider-1', provider: { id: 'provider-1', name: 'Fixture provider' } } as MarketplaceService;
 const mount = (search = '') => render(<MemoryRouter><MarketplaceServiceGrid search={search} returnTo="/discover/services?q=cleaning" /></MemoryRouter>);
-beforeEach(() => { locale.language = 'en'; data = []; isLoading = false; isError = false; refetch.mockClear(); });
+beforeEach(() => { locale.language = 'en'; data = []; laterOffers = undefined; isLoading = false; isError = false; refetch.mockClear(); });
 describe('provider catalogue states', () => {
   it.each(['ru', 'en', 'th'])('routes booking coordination through MyUNO in %s', language => {
     locale.language = language; data = [service]; mount();
@@ -31,6 +32,17 @@ describe('provider catalogue states', () => {
   it('shows no matches only when supply exists', () => {
     data = [service]; mount('plumbing');
     expect(screen.getByText(/No services match your search/)).toBeInTheDocument();
+  });
+  it('continues the same multilingual/provider-name filter on older pages before declaring no matches', () => {
+    data = [service];
+    laterOffers = [{ ...service, id: 'old', name_en: 'Older fixture', provider: { ...service.provider!, name: 'Старинный Пхукет' } }];
+    mount('Старинный Пхукет');
+    expect(screen.getByText('No matches on this page.')).toBeVisible();
+    expect(screen.queryByText(/No services match your search/)).toBeNull();
+    fireEvent.click(screen.getByRole('button', { name: 'Next offers' }));
+    expect(screen.getByRole('link', { name: 'Старинный Пхукет' })).toBeVisible();
+    fireEvent.click(screen.getByRole('button', { name: 'Previous offers' }));
+    expect(screen.queryByRole('link', { name: 'Старинный Пхукет' })).toBeNull();
   });
   it('keeps loading distinct from empty', () => {
     isLoading = true; mount();

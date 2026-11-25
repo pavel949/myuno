@@ -1,3 +1,4 @@
+import { UNASSIGNED_DEVELOPER_ID } from '@/lib/admin/reviewFilters';
 /**
  * Admin KPI hook for /admin/newbuilds dashboard
  */
@@ -15,7 +16,7 @@ export function useAdminNewbuildsKpi() {
       const [pendingProjects, pendingDevs, orphan, needsReview, stale, leadsToday, leadsWeek, totalProjects, totalDevs] = await Promise.all([
         supabase.from('property_projects').select('id', { count: 'exact', head: true }).eq('is_approved', false),
         supabase.from('developers').select('id', { count: 'exact', head: true }).eq('is_active', false).eq('is_verified', false),
-        supabase.from('property_projects').select('id', { count: 'exact', head: true }).eq('developer_id', '00000000-0000-0000-0000-000000000001'),
+        supabase.from('property_projects').select('id', { count: 'exact', head: true }).or(`developer_id.is.null,developer_id.eq.${UNASSIGNED_DEVELOPER_ID}`),
         supabase.from('property_projects' as any).select('id', { count: 'exact', head: true }).eq('needs_review', true),
         supabase.from('property_projects').select('id', { count: 'exact', head: true }).eq('is_approved', true).lte('updated_at', day45Ago),
         supabase.from('nb_leads').select('id', { count: 'exact', head: true }).gte('created_at', day1Ago),

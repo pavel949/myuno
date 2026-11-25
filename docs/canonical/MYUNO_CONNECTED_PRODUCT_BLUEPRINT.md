@@ -213,3 +213,14 @@ are adaptation candidates, not ADOPTED code. Sequence small presentation-only
 tranches from the UX audit; each requires scope, regression evidence and explicit
 approval before implementation. Done means a verified real workflow, not a new
 screen, schema or API alone.
+
+## Marketplace service request handoff
+
+The existing admin Inbox Services source is a read-only projection of canonical
+`service_orders` with `service_type = 'marketplace'`. Its link carries both
+`source=service_orders` and the exact saved request UUID; opening it never
+depends on the current queue page. Both reads use the existing administrator
+admission and database RLS. The queue omits contact details; the exact record
+shows only what's needed for operator follow-up. It never creates an `orders`
+row, confirms a booking, records a payment or dispatches a message. Existing
+provider access is not changed by this internal projection.
