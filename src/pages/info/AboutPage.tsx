@@ -15,7 +15,8 @@ import {
   MapPin,
   ArrowRight,
 } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { APP_ROUTES } from '@/lib/config/routes';
 import { COMPANY_CONTACTS, getTelLink } from '@/lib/config/contacts';
 
 export default function AboutPage() {
@@ -85,6 +86,39 @@ export default function AboutPage() {
     },
   ];
 
+  const verification = [
+    {
+      to: APP_ROUTES.G_TRUST,
+      title: t('Сервисы и партнёры', 'Services and partners', 'บริการและพันธมิตร'),
+      body: t(
+        'До публикации проверяем документы и лицензии партнёра. Правила защиты платежей описаны в G-Trust.',
+        'Before listing, we check the partner\'s documents and licences. Payment protection rules are set out in G-Trust.',
+        'ก่อนเผยแพร่ เราตรวจสอบเอกสารและใบอนุญาตของพันธมิตร กฎการคุ้มครองการชำระเงินอยู่ใน G-Trust',
+      ),
+      cta: t('Как работает G-Trust', 'How G-Trust works', 'G-Trust ทำงานอย่างไร'),
+    },
+    {
+      to: APP_ROUTES.CLEARVIEW,
+      title: t('Строящиеся проекты', 'Off-plan projects', 'โครงการก่อนสร้างเสร็จ'),
+      body: t(
+        'Проекты оцениваются по методологии ClearView™: 8 категорий, оценки от AAA до CCC.',
+        'Projects are assessed with the ClearView™ method: 8 categories, grades from AAA to CCC.',
+        'โครงการได้รับการประเมินด้วยวิธี ClearView™: 8 หมวด เกรดตั้งแต่ AAA ถึง CCC',
+      ),
+      cta: t('Методология ClearView', 'ClearView method', 'วิธี ClearView'),
+    },
+    {
+      to: APP_ROUTES.TERMS,
+      title: t('Правила и документы', 'Rules and documents', 'กฎและเอกสาร'),
+      body: t(
+        'Условия, конфиденциальность, возвраты и порядок споров — с версией и датой обновления.',
+        'Terms, privacy, refunds and disputes — each with its version and update date.',
+        'ข้อกำหนด ความเป็นส่วนตัว การคืนเงิน และข้อพิพาท พร้อมเวอร์ชันและวันที่อัปเดต',
+      ),
+      cta: t('Юридические документы', 'Legal documents', 'เอกสารทางกฎหมาย'),
+    },
+  ];
+
   return (
     <AppLayout usePageContainer={false}>
       <PageContainer className="max-w-5xl">
@@ -143,6 +177,33 @@ export default function AboutPage() {
           ))}
         </div>
 
+        <section aria-labelledby="about-verify" className="mb-6">
+          <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+            {t('Проверка', 'Verification', 'การตรวจสอบ')}
+          </p>
+          <h2 id="about-verify" className="mb-3 mt-1 text-base font-semibold">
+            {t('Как мы проверяем то, что вы видите', 'How we check what you see', 'เราตรวจสอบสิ่งที่คุณเห็นอย่างไร')}
+          </h2>
+          <ol className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+            {verification.map((item, index) => (
+              <li key={item.to}>
+                <Link
+                  to={item.to}
+                  className="flex h-full min-h-11 flex-col rounded-md border border-border bg-card p-4 transition-colors hover:border-primary/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                >
+                  <span className="font-mono text-xs tabular-nums text-muted-foreground">{String(index + 1).padStart(2, '0')}</span>
+                  <span className="mt-1 text-sm font-semibold text-foreground">{item.title}</span>
+                  <span className="mt-1 flex-1 text-sm text-muted-foreground">{item.body}</span>
+                  <span className="mt-3 inline-flex items-center text-sm font-medium text-primary">
+                    {item.cta}
+                    <ArrowRight className="ml-1 h-4 w-4" aria-hidden="true" />
+                  </span>
+                </Link>
+              </li>
+            ))}
+          </ol>
+        </section>
+
         <SectionCard className="mb-6">
           <h2 className="mb-2 text-base font-semibold">
             {t('Где мы', 'Where we operate', "พื้นที่ให้บริการ")}
@@ -169,7 +230,7 @@ export default function AboutPage() {
             )}
           </p>
           <div className="flex flex-wrap gap-2">
-            <Button onClick={() => navigate('/info/contact')}>
+            <Button onClick={() => navigate(APP_ROUTES.CONTACT)}>
               {t('Контакты', 'Contacts', "ข้อมูลติดต่อ")}
               <ArrowRight className="ml-2 h-4 w-4" />
             </Button>
