@@ -302,6 +302,20 @@
       "when": 1795519536558,
       "tag": "0042_enforce_mc_slot_limit_and_close_public_listing",
       "breakpoints": true
+    },
+    {
+      "idx": 43,
+      "version": "7",
+      "when": 1795519536559,
+      "tag": "0043_drop_permissive_select_gyms_legal_services",
+      "breakpoints": true
+    },
+    {
+      "idx": 44,
+      "version": "7",
+      "when": 1795519536560,
+      "tag": "0044_restrict_public_bucket_listing",
+      "breakpoints": true
     }
   ]
 }
