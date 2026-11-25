@@ -31,6 +31,8 @@ export interface LocalizedKnowledge {
   summary: string;
   icon: string | null;
   sort_order: number;
+  /** ISO timestamp of the last edit; set by the single-article query. */
+  updatedAt?: string | null;
 }
 
 // Knowledge section types
@@ -155,6 +157,7 @@ export function useKnowledgeArticle(section: string, slug: string) {
         summary: language === 'ru' ? (data.summary_ru || data.summary_en || '') : (data.summary_en || ''),
         icon: data.icon,
         sort_order: data.sort_order || 0,
+        updatedAt: data.updated_at ?? null,
       };
     },
     enabled: !!currentCity?.id && !!section && !!slug,
