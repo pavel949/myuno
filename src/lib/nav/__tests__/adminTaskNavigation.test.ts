@@ -20,6 +20,7 @@ const EXISTING_ADMIN_PATHS = `
 /admin/life-situations /admin/users /admin/uno-team /admin/cities
 /admin/location-knowledge /admin/translations /admin/relocation-articles
 /admin/api-keys /admin/settings /admin/settings/forms /admin/settings/google-maps /admin/review
+/admin/clearview /admin/content
 `.trim().split(/\s+/).sort();
 
 describe('task-first platform navigation', () => {

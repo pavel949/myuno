@@ -60,6 +60,8 @@ const navigationItems: CmdItem[] = [
   { id: 'settings', titleEn: 'System Settings', titleRu: 'Настройки', path: '/admin/settings', icon: Settings, group: 'main', keywords: ['config', 'system', 'audit', 'logs'] },
 
   // Tools (accessible via Cmd+K)
+  { id: 'clearview', titleEn: 'ClearView reviews', titleRu: 'Проверки ClearView', path: '/admin/clearview', icon: Building2, group: 'tools', keywords: ['rating', 'due diligence', 'review', 'publish'] },
+  { id: 'content', titleEn: 'Content manager', titleRu: 'Контент-менеджер', path: '/admin/content', icon: Languages, group: 'tools', keywords: ['articles', 'guides', 'seo', 'copy', 'legal', 'news'] },
   { id: 'cities', titleEn: 'Cities & Regions', titleRu: 'Города', path: '/admin/cities', icon: MapPin, group: 'tools', keywords: ['location', 'region'] },
   { id: 'translations', titleEn: 'Translations', titleRu: 'Переводы', path: '/admin/translations', icon: Languages, group: 'tools', keywords: ['i18n'] },
   { id: 'taxonomy', titleEn: 'Taxonomy', titleRu: 'Таксономии', path: '/admin/taxonomy', icon: FolderTree, group: 'tools', keywords: ['categories', 'tags'] },

@@ -32,8 +32,9 @@ const NotFound = () => {
       <SEOHead title={title} noindex />
       <div className="premium-system flex flex-col items-center justify-center min-h-[70vh] px-6 text-center">
         {/* 404 — calm, not aggressive */}
-        <div className="mb-8">
-          <span className="text-7xl font-bold leading-none tracking-tight text-muted-foreground/30 select-none">
+        {/* S1 · 404 state: brand tile, calm copy, next actions (Design Bible Round 4A) */}
+        <div className="mb-8 flex h-20 w-40 items-center justify-center rounded-md bg-primary" aria-hidden="true">
+          <span className="font-display text-4xl leading-none tracking-tight text-accent select-none">
             404
           </span>
         </div>

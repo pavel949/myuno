@@ -90,6 +90,9 @@ export const adminRoutes = (
     <Route path="/admin/uno-team" element={<Pages.AdminUnoTeam />} />
     <Route path="/admin/leads" element={<AdminLeadsRedirect />} />
     <Route path="/admin/finance" element={<Pages.AdminFinance />} />
+    <Route path="/admin/clearview" element={<Pages.AdminClearViewQueue />} />
+    <Route path="/admin/clearview/:reportId" element={<Pages.AdminClearViewReview />} />
+    <Route path="/admin/content" element={<Pages.AdminContent />} />
     <Route path="/admin/disputes" element={<Pages.AdminDisputes />} />
     <Route path="/admin/investor-metrics" element={<AdminTabRedirect to="/admin/analytics" tab="revenue" />} />
     <Route path="/admin/settings" element={<Pages.AdminSystemSettings />} />

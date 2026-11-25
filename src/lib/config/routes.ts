@@ -578,6 +578,11 @@ export const APP_ROUTES = {
   ADMIN_INBOX: '/admin/inbox',
   ADMIN_CATALOG: '/admin/catalog',
   ADMIN_FINANCE: '/admin/finance',
+  /** Round 4A · H1 — ClearView review queue and editor. */
+  ADMIN_CLEARVIEW: '/admin/clearview',
+  ADMIN_CLEARVIEW_REVIEW: (reportId: string) => `/admin/clearview/${reportId}`,
+  /** Round 4A · H3 — unified content manager. */
+  ADMIN_CONTENT: '/admin/content',
   ADMIN_OPERATIONS: '/admin/operations',
   ADMIN_PROVIDERS: '/admin/providers',
   ADMIN_PROVIDER_DETAIL: (id: string) => `/admin/providers/${id}`,

@@ -3,9 +3,10 @@ import React from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { SectionHeader } from '@/components/ds';
-import { Users, Shield } from 'lucide-react';
+import { Users, Shield, Grid3x3 } from 'lucide-react';
 import { ControlUsersTab } from '@/components/admin/control/ControlUsersTab';
 import { ControlRolesTab } from '@/components/admin/control/ControlRolesTab';
+import { AccessMatrix } from '@/components/admin/hq/AccessMatrix';
 
 export default function AdminUsersAccess() {
   const { language } = useLanguage();
@@ -30,6 +31,10 @@ export default function AdminUsersAccess() {
             <Shield className="h-4 w-4" />
             {isRu ? 'Роли и RBAC' : 'Roles & RBAC'}
           </TabsTrigger>
+          <TabsTrigger value="matrix" className="gap-1.5">
+            <Grid3x3 className="h-4 w-4" />
+            {isRu ? 'Матрица доступа' : 'Access matrix'}
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="users" className="mt-4">
@@ -37,6 +42,9 @@ export default function AdminUsersAccess() {
         </TabsContent>
         <TabsContent value="roles" className="mt-4">
           <ControlRolesTab />
+        </TabsContent>
+        <TabsContent value="matrix" className="mt-4">
+          <AccessMatrix />
         </TabsContent>
       </Tabs>
     </PageShell>

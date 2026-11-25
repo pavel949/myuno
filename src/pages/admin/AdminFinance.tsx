@@ -1,17 +1,18 @@
 import React from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { DollarSign, BarChart3, Rocket, Wallet } from 'lucide-react';
+import { DollarSign, BarChart3, Rocket, Wallet, ListChecks } from 'lucide-react';
 import { ControlFinanceTab } from '@/components/admin/control/ControlFinanceTab';
 import { ControlAnalyticsTab } from '@/components/admin/control/ControlAnalyticsTab';
 import { AdminPromotionsTab } from '@/components/admin/finance/AdminPromotionsTab';
 import { ReconciliationStatus } from '@/components/admin/finance/ReconciliationStatus';
 import { ManualPaymentForm } from '@/components/admin/finance/ManualPaymentForm';
 import { PayoutManager } from '@/components/admin/PayoutManager';
+import { PayoutRunPanel } from '@/components/admin/finance/PayoutRunPanel';
 import { PageShell, PageHeader } from '@/components/page';
 
 export default function AdminFinance() {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
 
   return (
     <PageShell width="wide">
@@ -26,8 +27,12 @@ export default function AdminFinance() {
         }
       />
 
-      <Tabs defaultValue="finance" className="w-full">
+      <Tabs defaultValue="run" className="w-full">
         <TabsList>
+          <TabsTrigger value="run" className="gap-1.5">
+            <ListChecks className="h-4 w-4" />
+            {language === 'ru' ? 'Выплаты и сверка' : 'Payouts & reconciliation'}
+          </TabsTrigger>
           <TabsTrigger value="finance" className="gap-1.5">
             <DollarSign className="h-4 w-4" />
             {t('admin.finance.tabs.transactions')}
@@ -46,6 +51,9 @@ export default function AdminFinance() {
           </TabsTrigger>
         </TabsList>
 
+        <TabsContent value="run" className="mt-4">
+          <PayoutRunPanel />
+        </TabsContent>
         <TabsContent value="finance" className="mt-4">
           <ControlFinanceTab />
         </TabsContent>
