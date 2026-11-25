@@ -103,7 +103,7 @@ INSERT INTO public.ai_intake_sessions VALUES(1,'00000000-0000-0000-0000-00000000
 \ir intake-cutover-hold.STAGED-NOT-IN-JOURNAL.sql
 SET LOCAL ROLE authenticated;
 SELECT set_config('request.jwt.claim.sub','00000000-0000-0000-0000-000000000003',true);
-DO $BEGIN BEGIN INSERT INTO storage.objects VALUES('intake-uploads','during-hold','00000000-0000-0000-0000-000000000003'); RAISE EXCEPTION 'unexpected hold insert success' USING ERRCODE='XX000'; EXCEPTION WHEN insufficient_privilege THEN NULL; END; END$;
+DO $hold$BEGIN BEGIN INSERT INTO storage.objects VALUES('intake-uploads','during-hold','00000000-0000-0000-0000-000000000003'); RAISE EXCEPTION 'unexpected hold insert success' USING ERRCODE='XX000'; EXCEPTION WHEN insufficient_privilege THEN NULL; END; END$hold$;
 RESET ROLE;
 UPDATE storage.buckets SET public=false WHERE id='intake-uploads';
 \ir intake-private.STAGED-NOT-IN-JOURNAL.sql
@@ -121,6 +121,20 @@ SELECT public.assert_true((SELECT count(*) FROM storage.objects WHERE bucket_id=
 SELECT public.assert_true((SELECT count(*) FROM public.ai_intake_sessions)=0,'other admin cannot read private sessions');
 SELECT set_config('request.jwt.claim.sub','00000000-0000-0000-0000-000000000003',true);
 DO $$BEGIN BEGIN INSERT INTO storage.objects VALUES('intake-uploads','wrong-prefix/file','00000000-0000-0000-0000-000000000003'); RAISE EXCEPTION 'unexpected insert success' USING ERRCODE='XX000'; EXCEPTION WHEN insufficient_privilege THEN NULL; END; END$$;
+DO $path_guard$BEGIN
+  BEGIN
+    INSERT INTO storage.objects VALUES('intake-uploads','00000000-0000-0000-0000-000000000003/cccccccc-cccc-4ccc-8ccc-cccccccccccc.png.exe','00000000-0000-0000-0000-000000000003');
+    RAISE EXCEPTION 'unsafe suffix unexpectedly accepted' USING ERRCODE='XX000';
+  EXCEPTION WHEN insufficient_privilege THEN NULL; END;
+  BEGIN
+    INSERT INTO storage.objects VALUES('intake-uploads','00000000-0000-0000-0000-000000000005/dddddddd-dddd-4ddd-8ddd-dddddddddddd.png','00000000-0000-0000-0000-000000000003');
+    RAISE EXCEPTION 'foreign prefix unexpectedly accepted' USING ERRCODE='XX000';
+  EXCEPTION WHEN insufficient_privilege THEN NULL; END;
+  BEGIN
+    INSERT INTO storage.objects VALUES('intake-uploads','00000000-0000-0000-0000-000000000003/eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee.png',NULL);
+    RAISE EXCEPTION 'ownerless client insert unexpectedly accepted' USING ERRCODE='XX000';
+  EXCEPTION WHEN insufficient_privilege THEN NULL; END;
+END$path_guard$;
 SELECT set_config('request.jwt.claim.sub','00000000-0000-0000-0000-000000000001',true);
 SELECT public.assert_true((SELECT count(*) FROM storage.objects WHERE bucket_id='intake-uploads')=0,'nonadmin cannot read intake');
 SELECT public.assert_true((SELECT count(*) FROM public.ai_intake_sessions)=0,'nonadmin cannot read sessions');
