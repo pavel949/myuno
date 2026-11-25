@@ -169,10 +169,10 @@ const MCOnboarding: React.FC = () => {
     setLoading(true);
     try {
       const ext = logoFile.name.split('.').pop();
-      const path = `mc-logos/${companyId}.${ext}`;
+      const path = `${companyId}/mc-logos/${crypto.randomUUID()}.${ext || "png"}`;
       const { error: uploadError } = await supabase.storage
         .from('company-assets')
-        .upload(path, logoFile, { upsert: true });
+        .upload(path, logoFile, { upsert: false });
       if (uploadError) throw uploadError;
 
       const { data: urlData } = supabase.storage.from('company-assets').getPublicUrl(path);
