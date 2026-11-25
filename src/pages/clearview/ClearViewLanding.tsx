@@ -72,17 +72,17 @@ export default function ClearViewLanding() {
             <li key={step.en} className="border border-border bg-card p-3">
               <span className="font-mono text-xs tabular-nums text-muted-foreground">{String(index + 1).padStart(2, '0')}</span>
               <p className="mt-1 text-sm font-semibold text-foreground">{isRu ? step.ru : step.en}</p>
-              <p className="mt-1 text-[13px] leading-snug text-muted-foreground">{isRu ? step.bodyRu : step.bodyEn}</p>
+              <p className="mt-1 text-sm leading-snug text-muted-foreground">{isRu ? step.bodyRu : step.bodyEn}</p>
             </li>
           ))}
         </ol>
       </section>
 
       <section className="px-4 pb-5" aria-labelledby="cv-method">
-        <h3 id="cv-method" className="font-display text-[14px] font-semibold text-foreground mb-1">
+        <h3 id="cv-method" className="font-display text-sm font-semibold text-foreground mb-1">
           {isRu ? CLEARVIEW_LABELS.methodology.ru : CLEARVIEW_LABELS.methodology.en}
         </h3>
-        <p className="mb-3 text-[13px] text-muted-foreground">
+        <p className="mb-3 text-sm text-muted-foreground">
           {isRu ? 'Восемь областей с весами; итоговая оценка — взвешенная сумма.' : 'Eight weighted areas; the overall score is the weighted sum.'}
         </p>
         <ul className="space-y-2.5">
@@ -90,7 +90,7 @@ export default function ClearViewLanding() {
             const percent = Math.round(category.weight * 100);
             return (
               <li key={category.code}>
-                <div className="flex items-baseline justify-between gap-3 text-[13px]">
+                <div className="flex items-baseline justify-between gap-3 text-sm">
                   <span className="text-foreground">{isRu ? category.nameRu : category.nameEn}</span>
                   <span className="font-mono tabular-nums text-muted-foreground">{percent}%</span>
                 </div>

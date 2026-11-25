@@ -129,7 +129,7 @@ export default function KnowledgeArticlePage() {
         </header>
 
         {isLoading ? (
-          <div className="max-w-[680px] space-y-4" aria-busy="true">
+          <div className="space-y-4" aria-busy="true">
             <Skeleton className="h-4 w-full" />
             <Skeleton className="h-4 w-3/4" />
             <Skeleton className="h-4 w-5/6" />
@@ -149,7 +149,7 @@ export default function KnowledgeArticlePage() {
             </CardContent>
           </Card>
         ) : article ? (
-          <div className="grid gap-8 lg:grid-cols-[200px_minmax(0,680px)_260px] lg:items-start">
+          <div className="grid gap-8 lg:grid-cols-[200px_minmax(0,1fr)_260px] lg:items-start">
             {/* TOC — sticky on desktop, inline on mobile */}
             <aside className={showToc ? 'lg:sticky lg:top-24' : 'hidden lg:block'}>
               {showToc && <TableOfContents headings={headings} isRu={isRu} />}

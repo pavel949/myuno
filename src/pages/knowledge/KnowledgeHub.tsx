@@ -77,7 +77,7 @@ export default function KnowledgeHub() {
           </div>
         </div>
 
-        <p className="-mt-3 mb-6 max-w-2xl text-sm text-muted-foreground">
+        <p className="-mt-3 mb-6 text-sm text-muted-foreground">
           {isRu
             ? 'Гайды о жизни и покупке недвижимости в Таиланде. У каждой статьи указана дата обновления.'
             : 'Guides for living in and buying property in Thailand. Every article shows its update date.'}
