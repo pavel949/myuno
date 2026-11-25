@@ -20,25 +20,26 @@ const result = await build({ entryPoints: [resolve('supabase/functions/notify-fa
       ? 'export class Resend{emails={send:async()=>({data:{id:"m"},error:null})}}' : sdk }));
   } }] });
 const file = `${dir}/fasttrack.cjs`; await writeFile(file, result.outputFiles[0].text);
-let handler, valid = true, inserts = [];
+let handler, valid = true, calls = [], created = true, rpcError = null;
 globalThis.Deno = { env: { get: k => ({ SUPABASE_URL: 'http://localhost', SUPABASE_ANON_KEY: 'a' })[k] }, serve: fn => { handler = fn; } };
 globalThis.fetch = () => { throw new Error('Network forbidden'); };
 globalThis.__sdk = key => ({
   auth: { getUser: async () => ({ data: { user: valid ? { id: 'verified-user', email: 'u@example.test' } : null }, error: valid ? null : new Error('bad') }) },
-  from: table => { const c = { insert(v) { inserts.push({ table, v }); return c; }, select() { return c; },
-    single: async () => ({ data: { id: 'booking-1' }, error: null }),
-    then: fn => fn({ data: null, error: null }) }; return c; },
+  rpc: async (name,args)=>{calls.push({name,args});return {data:rpcError?null:[{booking_id:'booking-1',created}],error:rpcError};},
+  from:()=>{throw Error('Independent direct writes forbidden')},
 });
 require(file);
-const body = { user_id: 'attacker-chosen', service_id: 's', service_name: 'FT', direction: 'arrival', flight_number: 'TG1', flight_date: '2026-12-01', flight_time: '10:00', is_night_flight: false, preferred_language: 'en', special_notes: 'note', base_price: 1, night_surcharge: 0, addons_total: 2, total_price: 3, currency: 'THB', passengers: [{ first_name: 'A', last_name: 'B', passport_number: 'X', nationality: 'GB', date_of_birth: '1990-01-01', is_primary: true }], addon_ids: ['a1'], addon_names: ['Porter'] };
+const body = { request_key:'11111111-2222-4333-8444-555555555555', user_id: 'attacker-chosen', service_id: 's', service_name: 'FT', direction: 'arrival', flight_number: 'TG1', flight_date: '2026-12-01', flight_time: '10:00', is_night_flight: false, preferred_language: 'en', special_notes: 'note', base_price: 1, night_surcharge: 0, addons_total: 2, total_price: 3, currency: 'THB', passengers: [{ first_name: 'A', last_name: 'B', passport_number: 'X', nationality: 'GB', date_of_birth: '1990-01-01', is_primary: true }], addon_ids: ['a1'], addon_names: ['Porter'] };
 const req = (token) => new Request('http://localhost', { method: 'POST', headers: token ? { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' } : { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
 let passed = 0;
-inserts = []; assert.equal((await handler(req(null))).status, 401); assert.equal(inserts.length, 0); passed++;
-valid = false; inserts = []; assert.equal((await handler(req('bad'))).status, 401); assert.equal(inserts.length, 0); passed++;
-valid = true; inserts = []; const ok = await handler(req('good')); assert.equal(ok.status, 200); passed++;
-const booking = inserts.find(i => i.table === 'airport_bookings').v;
-assert.equal(booking.user_id, 'verified-user', 'owner comes from the token, not the body'); passed++;
-assert.ok(booking.special_notes.includes('note') && booking.special_notes.includes('Add-ons: Porter')); passed++;
-assert.ok(!inserts.some(i => i.table === 'airport_booking_addons'), 'dropped table must not be written'); passed++;
-assert.ok(inserts.some(i => i.table === 'airport_passengers')); passed++;
+calls=[]; assert.equal((await handler(req(null))).status,401); assert.equal(calls.length,0); passed++;
+valid=false; calls=[]; assert.equal((await handler(req('bad'))).status,401); assert.equal(calls.length,0); passed++;
+valid=true; calls=[]; const ok=await handler(req('good')); assert.equal(ok.status,200); passed++;
+assert.equal(calls.length,1); assert.equal(calls[0].name,'create_fasttrack_request'); passed++;
+const args=calls[0].args; assert.equal(args.p_actor,'verified-user'); assert.equal(args.p_request_key,body.request_key); passed++;
+assert.ok(args.p_booking.special_notes.includes('note')&&args.p_booking.special_notes.includes('Add-ons: Porter')); passed++;
+assert.equal(args.p_passengers.length,1);assert.equal(args.p_passengers[0].passport_number,'X'); passed++;
+created=false; const replay=await handler(req('good')); assert.equal(replay.status,200);assert.equal((await replay.json()).created,false);passed++;
+rpcError={code:'23505'};assert.equal((await handler(req('good'))).status,409);passed++;
+rpcError={code:'PGRST202'};assert.equal((await handler(req('good'))).status,503);passed++;
 console.log(`fasttrack-booking-handler: ${passed}/${passed} cases passed; synthetic SDK only, network forbidden`);

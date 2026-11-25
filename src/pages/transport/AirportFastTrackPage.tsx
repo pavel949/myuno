@@ -274,10 +274,19 @@ export default function AirportFastTrackPage() {
     setIsSubmitting(true);
     try {
       const serviceName = isRu ? selectedService.name_ru : selectedService.name_en;
+      // One stable key for the signed-in actor's unresolved draft. No passport
+      // details or contact fields are stored with the key.
+      const receiptKey = `myuno:fasttrack-pending:v1:${user.id}`;
+      let requestKey = sessionStorage.getItem(receiptKey);
+      if (!requestKey) {
+        requestKey = globalThis.crypto.randomUUID();
+        sessionStorage.setItem(receiptKey, requestKey);
+      }
 
       const { data, error } = await supabase.functions.invoke('notify-fasttrack-booking', {
         body: {
           user_id: user.id,
+          request_key: requestKey,
           service_id: selectedService.id,
           service_name: serviceName,
           direction,
@@ -311,9 +320,10 @@ export default function AirportFastTrackPage() {
       if (error || data?.success !== true || !data.booking_id) throw error || new Error(data?.error || "Booking was not accepted");
 
       toast(tr('Request received', 'Заявка получена', 'ได้รับคำขอแล้ว'), {
-        description: isRu ? 'Мы свяжемся с вами для подтверждения' : "We'll contact you to confirm",
+        description: tr('Request ID','Номер заявки','หมายเลขคำขอ') + ': ' + data.booking_id,
       });
 
+      sessionStorage.removeItem(receiptKey);
       clearDraft();
 
       if (direction === 'arrival') {

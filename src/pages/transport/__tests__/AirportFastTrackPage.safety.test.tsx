@@ -45,3 +45,16 @@ describe('Fast Track review and submission with synthetic boundary',()=>{
  it('omits a malformed restored passport without crashing or submitting it',async()=>{mount('arrival','2099-12-01',null);await screen.findByText('Synthetic Guest');fireEvent.click(screen.getByRole('button',{name:'Send request'}));expect(f.invoke).not.toHaveBeenCalled();});
  it('blocks a normalised invalid calendar date restored at review',async()=>{mount('arrival','2099-02-30');await screen.findByText('Synthetic Guest');expect(screen.getByRole('button',{name:'Send request'})).toBeDisabled();expect(f.invoke).not.toHaveBeenCalled();});
 });
+
+it('keeps a stable request key through a lost receipt and removes it only after recovery',async()=>{
+ f.invoke.mockResolvedValueOnce({data:null,error:new Error('Synthetic lost response')}).mockResolvedValue({data:{success:true,booking_id:'synthetic-booking'},error:null});
+ mount();const button=await screen.findByRole('button',{name:'Send request'});fireEvent.click(button);
+ await waitFor(()=>expect(screen.getByRole('alert')).toBeVisible());
+ const first=f.invoke.mock.calls[0][1].body.request_key;
+ expect(first).toMatch(/^[0-9a-f-]{36}$/i);
+ expect(sessionStorage.getItem('myuno:fasttrack-pending:v1:synthetic-user')).toBe(first);
+ fireEvent.click(screen.getByRole('button',{name:'Send request'}));
+ await waitFor(()=>expect(f.invoke).toHaveBeenCalledTimes(2));
+ expect(f.invoke.mock.calls[1][1].body.request_key).toBe(first);
+ await waitFor(()=>expect(sessionStorage.getItem('myuno:fasttrack-pending:v1:synthetic-user')).toBeNull());
+});
