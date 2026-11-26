@@ -772,7 +772,7 @@
 - **5 дубликатов в корне репо** (`_AUDIT.md`, `project.md` lowercase, `ARCHITECTURE_AUDIT.md`, `OS_system_prompt.md`, `DEVELOPER_MODULE_SPEC.md`) → `archive/2026-04-cleanup/root-duplicates/`. Заменены `PROJECT.md` + canonical 07/08 + architecture/ARCHITECTURE_V2.md.
 
 ### Notes
-- Полный реестр перенесённого: см. [`archive/2026-04-cleanup/INDEX.md`](../../archive/2026-04-cleanup/INDEX.md).
+- Исторический архив сохранён в Git по фиксированному коммиту и не входит в активное дерево. Полный реестр перенесённого: см. [`archive/2026-04-cleanup/INDEX.md`](https://github.com/pavel949/myuno/blob/c162008277b0f7bd73346c494fb1f3517f63ad81/archive/2026-04-cleanup/INDEX.md).
 - Правило: файлы из `archive/2026-04-cleanup/` нельзя возвращать в активное дерево; полезный контент поднимается в канон, источник цитируется.
 
 ---
