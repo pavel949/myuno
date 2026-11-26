@@ -1,15 +1,23 @@
-import type { ReactNode } from 'react';
 import { ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { pickLang, type LangValues } from '@/lib/i18n/pickLang';
+import '@/styles/marketplace-unity.css';
 import coast from '@/assets/hero-phuket-coast-editorial.webp';
 import housing from '@/assets/solutions/property-tour.webp';
 import islands from '@/assets/solutions/islands.webp';
 import transfer from '@/assets/solutions/transfer.webp';
 
-const entries: Record<string, { image: string; title: LangValues; lead: LangValues }> = {
+type MarketplaceKind = 'rent' | 'buy' | 'experiences' | 'services' | 'property' | 'discovery' | 'live';
+
+const entries: Record<MarketplaceKind, { image: string; title: LangValues; lead: LangValues }> = {
+  property: { image: housing, title: { ru: 'Недвижимость на Пхукете', en: 'Homes in Phuket', th: 'อสังหาริมทรัพย์ในภูเก็ต' },
+    lead: { ru: 'Аренда, покупка и управление. Выберите задачу и сравните предложения.', en: 'Rent, buy or manage a property. Choose your next step and compare homes.', th: 'เช่า ซื้อ หรือจัดการอสังหาริมทรัพย์ เลือกสิ่งที่ต้องการและเปรียบเทียบที่พัก' } },
+  discovery: { image: coast, title: { ru: 'Начните с вашей задачи', en: 'Start with your goal', th: 'เริ่มจากเป้าหมายของคุณ' },
+    lead: { ru: 'Жильё, переезд, услуги и впечатления — выберите направление.', en: 'Homes, moving, services and experiences — choose your next step.', th: 'ที่พัก การย้ายมาอยู่ บริการ และประสบการณ์ เลือกสิ่งที่ต้องการ' } },
+  live: { image: housing, title: { ru: 'Переезд и жизнь на Пхукете', en: 'Moving to and living in Phuket', th: 'ย้ายมาและใช้ชีวิตในภูเก็ต' },
+    lead: { ru: 'Жильё, документы и повседневные задачи. Найдите подходящий раздел.', en: 'Homes, documents and everyday needs. Find the right place to start.', th: 'ที่พัก เอกสาร และสิ่งจำเป็นในชีวิตประจำวัน ค้นหาจุดเริ่มต้นที่เหมาะสม' } },
   rent: { image: coast, title: { ru: 'Аренда на Пхукете', en: 'Rent in Phuket', th: 'เช่าที่พักในภูเก็ต' },
     lead: { ru: 'Выберите даты и жильё. Команда myUNO поможет проверить условия и доступность.', en: 'Choose an area, dates and a place to stay. The myUNO team can help check availability and terms.', th: 'เลือกย่าน วันที่ และที่พัก ทีม myUNO ช่วยตรวจสอบที่ว่างและเงื่อนไขได้' } },
   buy: { image: housing, title: { ru: 'Купить недвижимость на Пхукете', en: 'Buy property in Phuket', th: 'ซื้ออสังหาริมทรัพย์ในภูเก็ต' },
@@ -23,7 +31,7 @@ const entries: Record<string, { image: string; title: LangValues; lead: LangValu
 type EntryAction = { label: LangValues; href: string };
 
 export function MarketplaceEntry({ kind, headingId, actions = [] }: {
-  kind: 'rent' | 'buy' | 'experiences' | 'services';
+  kind: MarketplaceKind;
   headingId?: string;
   actions?: EntryAction[];
 }) {
@@ -31,15 +39,15 @@ export function MarketplaceEntry({ kind, headingId, actions = [] }: {
   const { image, title, lead } = entries[kind];
   return (
     <section data-marketplace-entry={kind} aria-labelledby={headingId ?? `marketplace-${kind}-title`}
-      className="grid min-w-0 gap-4 border-b border-border py-4 sm:grid-cols-[minmax(0,1.35fr)_minmax(0,1fr)] sm:items-center sm:gap-6 sm:py-6">
-      <div className="min-w-0 space-y-2">
-        <p className="text-sm font-medium text-muted-foreground">
+      className="marketplace-entry">
+      <div className="marketplace-heading">
+        <p className="marketplace-eyebrow">
           {pickLang(language, { ru: 'Пхукет · Команда myUNO', en: 'Phuket · myUNO team', th: 'ภูเก็ต · ทีม myUNO' })}
         </p>
-        <h1 id={headingId ?? `marketplace-${kind}-title`} className="break-words font-display text-3xl font-normal leading-tight tracking-tight text-foreground sm:text-5xl">
+        <h1 id={headingId ?? `marketplace-${kind}-title`} className="marketplace-title">
           {pickLang(language, title)}
         </h1>
-        <p className="text-base leading-normal text-foreground">{pickLang(language, lead)}</p>
+        <p className="marketplace-lead">{pickLang(language, lead)}</p>
         {actions.length > 0 && <div className="grid grid-cols-2 gap-2 pt-2 min-[480px]:flex min-[480px]:flex-wrap">
           {actions.map(({ href, label }, index) => {
             const content = <>{pickLang(language, label)}<ArrowRight className="size-4 shrink-0" aria-hidden="true" /></>;
@@ -49,7 +57,7 @@ export function MarketplaceEntry({ kind, headingId, actions = [] }: {
           })}
         </div>}
       </div>
-      <div className="hidden overflow-hidden bg-muted sm:block">
+      <div className="marketplace-entry-art">
         <img src={image} alt="" width="640" height="320" decoding="async"
           className="aspect-[8/3] w-full object-cover" />
       </div>

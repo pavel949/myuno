@@ -1,3 +1,4 @@
+import { radixOverlayAliases } from '../radix-overlay-resolution.mjs';
 import { build } from 'esbuild';
 import postcss from 'postcss';
 import postcssImport from 'postcss-import';
@@ -17,19 +18,22 @@ await build({
     import {BrowserRouter,Route,Routes} from 'react-router-dom';
     import {HomeHeroChoices} from '@/components/home/HomeHeroChoices';
     import {MarketplaceEntry} from '@/components/landing/MarketplaceEntry';
+    import DiscoveryHubPage from '@/pages/discover/DiscoveryHubPage';
+    import {PlatformJourneyLinks} from '@/components/landing/PlatformJourneyLinks';
     import GoalEntryPage from '@/pages/discover/GoalEntryPage';
     import '@/styles/homepage-refinement.css';
     const entries = [
       ['/property/rent','rent'], ['/discover/buy','buy'],
       ['/experiences','experiences'], ['/services','services'],
+      ['/property','property'], ['/discover','discovery'], ['/discover/live','live'],
     ];
     createRoot(document.getElementById('root')).render(<BrowserRouter><main>
       <Routes><Route path="/" element={<div className="ds-frame ds-frame-catalogue home-refined"><HomeHeroChoices/></div>}/>
-      {entries.map(([url,kind])=><Route key={url} path={url} element={kind==="buy"?<GoalEntryPage goal="buy"/>:<div className="ds-frame ds-frame-catalogue"><MarketplaceEntry kind={kind}/></div>}/>)}</Routes>
+      {entries.map(([url,kind])=><Route key={url} path={url} element={kind==="discovery"?<DiscoveryHubPage/>:kind==="buy"||kind==="live"?<GoalEntryPage goal={kind}/>:<div className="ds-frame ds-frame-catalogue"><MarketplaceEntry kind={kind}/>{kind==="property"&&<div className="py-4"><PlatformJourneyLinks journey="property"/></div>}</div>}/>)}</Routes>
     </main></BrowserRouter>);
   `},
   bundle: true, format: 'esm', jsx: 'automatic', outfile: path.join(out, 'fixture.js'),
-  loader: { '.webp': 'file', '.svg': 'file', '.png': 'file' },
+  loader: { '.webp': 'file', '.svg': 'file', '.png': 'file' }, alias: radixOverlayAliases,
   plugins: [{ name: 'isolated-buy-boundaries', setup(build) {
     const isolated = {
       '@/contexts/LanguageContext': "export const useLanguage=()=>({language:sessionStorage.getItem('fixture-language')||'en'})",
@@ -68,13 +72,15 @@ try {
       ? route.continue() : (blocked.push(route.request().url()),route.abort()));
     const page = await context.newPage();
     page.on('pageerror', error => errors.push(error.message));
-    for (const [kind, href] of [['rent','/property/rent'],['buy','/discover/buy'],['experiences','/experiences'],['services','/services']]) {
+    for (const [kind, href] of [['rent','/property/rent'],['buy','/discover/buy'],['experiences','/experiences'],['services','/services'],['property','/property'],['discovery','/discover'],['live','/discover/live']]) {
+      if (['property','discovery','live'].includes(kind)) { await page.goto(origin+href); } else {
       await page.goto(origin);
       const link = page.locator(`.home-hero-choice-grid a[href="${href}"]`);
       await link.focus();
       if (!(await link.evaluate(node => node.matches(':focus-visible')))) throw Error('Missing keyboard focus ' + href);
       await page.keyboard.press('Enter');
       await page.waitForURL(origin + href);
+      }
       const intro = page.locator(`[data-marketplace-entry="${kind}"]`);
       await intro.waitFor();
       if (await page.locator('h1').count() !== 1 || !(await intro.innerText()).includes('myUNO')) throw Error('Missing managed marketplace heading ' + href);
@@ -95,7 +101,17 @@ try {
           }
         }
         await page.screenshot({path:path.join(out,`${kind}-${language}-${width}.png`)});
-      } else await intro.screenshot({path:path.join(out,`${kind}-${language}-${width}.png`)});
+      } else await page.screenshot({path:path.join(out,`${kind}-${language}-${width}.png`)});
+      if (kind === 'property') {
+        if (await page.locator('.marketplace-choice').count() !== 4) throw Error('Property journeys lost');
+      }
+      if (kind === 'discovery' && await page.locator('.marketplace-choice').count() !== 4) throw Error('Discovery goals lost');
+      for (const choice of await page.locator('.marketplace-choice').all()) {
+        const box=await choice.boundingBox();
+        if (!box || box.width < 44 || box.height < 44) throw Error('Small category target');
+        const clipped=await choice.evaluate(node=>node.scrollWidth>node.clientWidth+1);
+        if (clipped) throw Error('Clipped category text '+kind+' '+width+' '+language);
+      }
       rows.push({language,width,kind,href,pass:true});
     }
     if (blocked.length || errors.length) throw Error(JSON.stringify({blocked,errors}));

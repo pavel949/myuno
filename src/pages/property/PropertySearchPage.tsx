@@ -42,6 +42,7 @@ import { useSearchPropertyAvailability } from '@/hooks/useSearchPropertyAvailabi
 import '@/styles/property-search.css';
 import '@/styles/premium-public.css';
 import { PUBLIC_CONTENT_LAYOUT, PUBLIC_CATALOG_GRID } from '@/design-system/ecosystemLayout';
+import { MarketplaceEntry } from '@/components/landing/MarketplaceEntry';
 import { PlatformJourneyLinks } from '@/components/landing/PlatformJourneyLinks';
 import { GOAL_ENTRIES } from '@/lib/nav/goalEntries';
 
@@ -318,8 +319,8 @@ export default function PropertySearchPage() {
     <div data-property-mode={catalogueAll ? 'all' : propertyMode} className={cn(PUBLIC_CONTENT_LAYOUT.catalogue, 'public-commerce public-commerce--search premium-search property-discovery min-h-screen bg-background')}>
       <SEOHead title={pageTitle} description={text('Смотрите опубликованные предложения жилья на Пхукете и уточняйте условия поиска.', 'Browse published homes in Phuket and refine your search.', 'ดูประกาศที่พักในภูเก็ตและปรับการค้นหาของคุณ')} />
         <header className="property-discovery-header border-b">
-          <h1 className="property-discovery-title">{pageTitle}</h1>
-          <p className="text-body-sm text-muted-foreground">{text('Сравните предложения и уточните пожелания в поиске.', 'Compare homes and refine your preferences in search.', 'เปรียบเทียบที่พักและปรับความต้องการในการค้นหา')}</p>
+          {catalogueAll ? <MarketplaceEntry kind="property" /> : <h1 className="marketplace-results-title">{pageTitle}</h1>}
+          <p hidden={catalogueAll} className="text-body-sm text-muted-foreground">{text('Сравните предложения и уточните пожелания в поиске.', 'Compare homes and refine your preferences in search.', 'เปรียบเทียบที่พักและปรับความต้องการในการค้นหา')}</p>
           <div className="flex items-center gap-3">
             <BackButton fallbackPath="/property" variant="ghost" size="sm" className="shrink-0 min-h-11 min-w-11" />
             <div className="property-discovery-intent" role="group" aria-label={text('Аренда или покупка', 'Rent or buy', 'เช่าหรือซื้อ')}>
