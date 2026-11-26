@@ -5,6 +5,20 @@ import { parseFiltersFromParams } from '@/lib/propertyBrowseFilters';
 import { parseCivilDate } from '@/lib/hotelDates';
 
 const SORT_KEYS: readonly PropertySortKey[] = ['recommended', 'price_asc', 'price_desc', 'rating', 'newest'];
+export const DEFAULT_HOME_SALE_MAX_PRICE = 10_000_000;
+
+function isSaleSearch(params: URLSearchParams) {
+  return params.get('mode') === 'buy'
+    || (!params.has('mode') && params.get('f.listingType') === 'sale');
+}
+
+export function propertySaleBudgetLabel(amount: number, language: string) {
+  const locale = language === 'ru' ? 'ru-RU' : language === 'th' ? 'th-TH' : 'en-GB';
+  const price = new Intl.NumberFormat(locale, {
+    style: 'currency', currency: 'THB', currencyDisplay: 'narrowSymbol', maximumFractionDigits: 0,
+  }).format(amount);
+  return language === 'ru' ? 'До ' + price : language === 'th' ? 'ไม่เกิน ' + price : 'Up to ' + price;
+}
 export function readPropertySortKey(value: string | null): PropertySortKey {
   return SORT_KEYS.includes(value as PropertySortKey) ? value as PropertySortKey : 'recommended';
 }
@@ -22,6 +36,15 @@ export function normalizePropertySearchQuery(source: URLSearchParams): URLSearch
   const params = new URLSearchParams(source);
   if (params.get('mode') === 'all') {
     for (const key of ['guests', 'instant', 'checkIn', 'checkOut', 'tenancy', 'intent', 'quick', 'f.guestsAtLeast', 'f.instantBooking', 'f.listingType', 'f.priceLevel']) params.delete(key);
+  }
+  const maxPrice = params.get('maxPrice');
+  if (maxPrice != null) {
+    const amount = Number(maxPrice);
+    if (isSaleSearch(params) && /^\d+$/.test(maxPrice) && Number.isSafeInteger(amount) && amount > 0) {
+      params.set('maxPrice', String(amount));
+    } else {
+      params.delete('maxPrice');
+    }
   }
   return params;
 }
@@ -62,12 +85,13 @@ export function readPropertySearchQuery(source: URLSearchParams) {
     !!search.checkIn || !!search.checkOut || hasGuestFilter || search.instantBooking ||
     /^[1-4]$/.test(params.get('f.priceLevel') || '')
   );
-  const mode: 'rent' | 'buy' = params.get('mode') === 'buy' || (!params.has('mode') && params.get('f.listingType') === 'sale') ? 'buy' : 'rent';
+  const mode = isSaleSearch(params) ? 'buy' as const : 'rent' as const;
+  const saleMaxPrice = params.has('maxPrice') ? Number(params.get('maxPrice')) : undefined;
   const intent = params.get('intent');
   const tenancyValue = params.get('tenancy') ?? (intent === 'rent-month' ? 'medium' : intent === 'rent-long' ? 'long' : 'short');
   const tenancy: 'short' | 'medium' | 'long' = tenancyValue === 'medium' ? 'medium' : tenancyValue === 'long' ? 'long' : 'short';
   const saleIntent: 'standard' | 'assignment' | 'quick_sale' | undefined = intent === 'standard' || intent === 'assignment' || intent === 'quick_sale' ? intent : undefined;
-  return { search, hasIntent, hasGuestFilter, sort: readPropertySortKey(params.get('sort')), mode, tenancy, saleIntent, isQuickSale: params.get('quick') === '1' || saleIntent === 'quick_sale', filterValues: legacy.filterValues, categories: [...new Set([...legacy.categories, ...search.amenities])] };
+  return { search, hasIntent, hasGuestFilter, sort: readPropertySortKey(params.get('sort')), mode, tenancy, saleIntent, saleMaxPrice, isQuickSale: params.get('quick') === '1' || saleIntent === 'quick_sale', filterValues: legacy.filterValues, categories: [...new Set([...legacy.categories, ...search.amenities])] };
 }
 
 /** Preserve bookmark parameters; a route alias only supplies its owned defaults. */
@@ -81,7 +105,7 @@ export function propertySearchHref(search: string, defaults: Record<string, stri
 /** Clear only catalogue criteria, retaining unrelated bookmark/view context. */
 export function clearPropertySearchQuery(source: URLSearchParams) {
   const params = new URLSearchParams(source);
-  const owned = new Set(['mode', 'tenancy', 'intent', 'quick', 'district', 'types', 'bedrooms', 'amenities', 'checkIn', 'checkOut', 'guests', 'instant', 'company', 'project', 'q', 'cats', 'sort']);
+  const owned = new Set(['mode', 'tenancy', 'intent', 'quick', 'district', 'types', 'bedrooms', 'amenities', 'checkIn', 'checkOut', 'guests', 'instant', 'company', 'project', 'q', 'cats', 'sort', 'maxPrice']);
   [...params.keys()].forEach(key => { if (owned.has(key) || key.startsWith('f.')) params.delete(key); });
   return params;
 }

@@ -28,7 +28,10 @@ const virtual = {
   `,
   '@/contexts/LanguageContext': `import{lang}from'home-fixture';export const useLanguage=()=>({language:lang,setLanguage:()=>{}});`,
   '@/contexts/AuthContext': `export const useAuth=()=>({user:null});`,
-  '@/contexts/CurrencyContext': `export const currencies=[];export const useCurrency=()=>({currency:'THB',formatPrice:(n)=>'฿'+n.toLocaleString('en'),setCurrency:()=>{}});`,
+  '@/contexts/CurrencyContext': `
+    export const currencies={THB:{code:'THB',symbol:'฿',name:'Thai baht',nameRu:'Тайский бат',rate:1}};
+    export const useCurrency=()=>({currency:'THB',currencies,currencyInfo:currencies.THB,formatPrice:(n)=>'฿'+n.toLocaleString('en'),setCurrency:()=>{}});
+  `,
   '@/contexts/ThemeContext': `export const useTheme=()=>({theme:'light',setTheme:t=>{window.fixtureTheme=t;document.documentElement.classList.toggle('dark',t==='dark')}});`,
   '@/components/layout/UserAvatarMenu': `export const UserAvatarMenu=()=>null;`,
   '@/components/market/MiniCart': `export const MiniCart=()=>null;`,
@@ -41,7 +44,41 @@ const virtual = {
   '@/hooks/useUserCollections': `export const useUserCollections=()=>({isInCollection:()=>false,toggleCollection:()=>{}});`,
   '@/hooks/useOffplanProjects': `import{rows,loading,error,retry}from'home-fixture';export const useOffplanProjects=()=>({data:rows.map((p,i)=>({id:'development-'+i,nameEn:'Fixture development '+(i+1),nameRu:'Тестовая новостройка '+(i+1),district:p.district,coverImage:'http://localhost:8080/fixture-home.svg'})),isLoading:loading,isError:error,refetch:retry});`,
   '@/hooks/usePropertyProjects': `import{rows,loading,error,retry}from'home-fixture';export const usePublicPropertyProjects=()=>({data:rows,isLoading:loading,isError:error,refetch:retry});`,
-  '@/hooks/useProperties': `import{rows,loading,error,retry}from'home-fixture';export const useProperties=()=>({data:rows.map((p,i)=>({id:'home-'+i,title_en:'Fixture home '+(i+1),title_ru:'Тестовое жильё '+(i+1),district:p.district,property_type:'villa',listing_type:'rent',project_id:p.id,cover_image:'http://localhost:8080/fixture-home.svg',images:[],bedrooms:2,area_sqm:120,price:2000,price_period:'night',currency:'THB',created_at:'2026-10-01',updated_at:'2026-10-01'})),isLoading:loading,isError:error,refetch:retry});export const usePropertiesByProject=(id,limit,opts)=>({data:{total:opts.mode==='buy'?1:opts.propertyType==='condo'&&id==='project-0'?0:3},isSuccess:!loading&&!error,isLoading:loading,isError:error});`,
+  '@/hooks/useProperties': `
+    import { rows, loading, error, retry } from 'home-fixture';
+    export function useProperties(filters = {}) {
+      const sale = filters.listingType === 'sale';
+      return {
+        data: rows.map((project, index) => ({
+          id: (sale ? 'sale-' : 'home-') + index,
+          title_en: (sale ? 'Fixture home for sale ' : 'Fixture home ') + (index + 1),
+          title_ru: (sale ? 'Тестовое жильё на продажу ' : 'Тестовое жильё ') + (index + 1),
+          district: project.district,
+          property_type: 'villa',
+          listing_type: sale ? 'sale' : 'rent',
+          project_id: project.id,
+          cover_image: 'http://localhost:8080/fixture-home.svg',
+          images: [],
+          bedrooms: 2,
+          area_sqm: 120,
+          price: sale ? 6000000 + index * 100000 : 2000,
+          price_period: sale ? null : 'night',
+          currency: 'THB',
+          created_at: '2026-10-01',
+          updated_at: '2026-10-01',
+        })),
+        isLoading: loading,
+        isError: error,
+        refetch: retry,
+      };
+    }
+    export const usePropertiesByProject = (id, limit, opts) => ({
+      data: { total: opts.mode === 'buy' ? 1 : opts.propertyType === 'condo' && id === 'project-0' ? 0 : 3 },
+      isSuccess: !loading && !error,
+      isLoading: loading,
+      isError: error,
+    });
+  `,
   '@/hooks/usePropertyFilterOptions': `export const usePropertyFilterOptions=()=>({propertyTypes:[{id:'villa',labelRu:'Вилла',labelEn:'Villa'},{id:'condo',labelRu:'Кондо',labelEn:'Condo'}],isLoading:false});`,
   '@/hooks/usePropertyQuickFilters': `export const usePropertyQuickFilters=()=>({districts:[{id:'rawai',valueKey:'rawai',labelRu:'Равай',labelEn:'Rawai'}],isLoading:false});`,
   '@/hooks/useExperiences': `import{rows,loading,error,retry}from'home-fixture';export const useExperiences=()=>({experiences:rows.map((p,i)=>({id:'experience-'+i,title_en:'Fixture island tour '+(i+1),title_ru:'Тестовый тур '+(i+1),images:['http://localhost:8080/fixture-home.svg']})),isLoading:loading,error:error?new Error('Fixture error'):null,refetch:retry});`,
@@ -63,7 +100,7 @@ if (snapshotArg) {
     `const params=new URLSearchParams(location.search);export const lang=params.get('lang')||'en';export const state=params.get('state')||'data';export const loading=false,error=false,retry=()=>{};export const catalog=${JSON.stringify(snapshot)};export const projects=catalog.projects;export const rows=projects;`;
   virtual['@/hooks/useOffplanProjects'] = `import{catalog}from'home-fixture';export const useOffplanProjects=()=>({data:catalog.offplanProjects??[],isLoading:false,isError:false,refetch:()=>{}});`;
   virtual['@/hooks/useProperties'] =
-    `import{catalog}from'home-fixture';export const useProperties=()=>({data:catalog.homes,isLoading:false,isError:false,refetch:()=>{}});export const usePropertiesByProject=()=>({data:{total:0},isSuccess:true,isLoading:false,isError:false});`;
+    `import{catalog}from'home-fixture';export const useProperties=(filters={})=>({data:filters.listingType==='sale'?(catalog.saleHomes??catalog.homes.filter(home=>home.listing_type==='sale')):catalog.homes,isLoading:false,isError:false,refetch:()=>{}});export const usePropertiesByProject=()=>({data:{total:0},isSuccess:true,isLoading:false,isError:false});`;
   virtual['@/hooks/useExperiences'] =
     `import{catalog}from'home-fixture';export const useExperiences=()=>({experiences:catalog.experiences,isLoading:false,error:null,refetch:()=>{}});`;
   virtual['@/hooks/useServiceMarketplace'] =
@@ -74,7 +111,7 @@ if (snapshotArg) {
 if(snapshotArg) virtual['@/lib/catalog/useCatalogFromDB'] = `import{catalog}from'home-fixture';export const useCatalogFromDB=()=>({categories:catalog.categories||[],isFromDB:true,isLoading:false,error:null,refetch:()=>{}});`;
 const result = await build({
   stdin: {
-    contents: `import React from'react';import{createRoot}from'react-dom/client';import{MemoryRouter,useLocation}from'react-router-dom';import Landing from'${root}/src/pages/Landing.tsx';import{UnifiedChatFAB}from'${root}/src/components/chat/UnifiedChatFAB.tsx';function Fixture(){const loc=useLocation();return <><Landing/><UnifiedChatFAB/><output hidden data-testid="location">{loc.pathname+loc.search}</output></>;}createRoot(document.getElementById('root')).render(<MemoryRouter future={{v7_startTransition:true,v7_relativeSplatPath:true}}><Fixture/></MemoryRouter>);`,
+    contents: `import React from'react';import{createRoot}from'react-dom/client';import{MemoryRouter,useLocation}from'react-router-dom';import Landing from'@/pages/Landing';import{UnifiedChatFAB}from'@/components/chat/UnifiedChatFAB';function Fixture(){const loc=useLocation();return <><Landing/><UnifiedChatFAB/><output hidden data-testid="location">{loc.pathname+loc.search}</output></>;}createRoot(document.getElementById('root')).render(<MemoryRouter future={{v7_startTransition:true,v7_relativeSplatPath:true}}><Fixture/></MemoryRouter>);`,
     loader: 'tsx',
     resolveDir: root,
   },
@@ -88,6 +125,7 @@ const result = await build({
     'process.env.NODE_ENV': '"production"',
     'import.meta.env.DEV': 'false',
     'import.meta.env.VITE_SUPABASE_URL': '"http://127.0.0.1:54321"',
+    'import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY': '"isolated-verification-placeholder"',
   },
   plugins: [
     {
@@ -128,15 +166,13 @@ if (
 // Compile the same stylesheet stack as the actual app entry and Landing.
 const styleSources = ['src/index.css', 'src/styles/cinematic-home.css', 'src/styles/premium-public.css',
   'src/styles/homepage-refinement.css', 'src/styles/home-reference.css', 'src/styles/home-mobile-polish.css'];
-const css = await Promise.all(
-  styleSources.map(file => `/${file}?direct`).map(
-    async (file) => {
-      const r = await fetch(cssOrigin + file);
-      if (!r.ok) throw Error('Missing CSS ' + file);
-      return r.text();
-    },
-  ),
-);
+const compiledIndex = process.env.HOME_GALLERY_INDEX_CSS;
+const css = await Promise.all(styleSources.map(async (file, index) => {
+  if (compiledIndex) return readFile(index === 0 ? compiledIndex : path.join(root, file), 'utf8');
+  const response = await fetch(cssOrigin + '/' + file + '?direct');
+  if (!response.ok) throw Error('Missing CSS ' + file);
+  return response.text();
+}));
 await writeFile(path.join(output, 'fixture.css'), css.join('\n'));
 await writeFile(path.join(output,'source-receipt.json'),JSON.stringify({mode:'Synthetic public data; actual homepage components; no production mutations; local fallback fonts',sources:await Promise.all(['src/pages/Landing.tsx','src/components/home/HomeGallery.tsx','src/components/home/HomeCatalogGalleries.tsx','src/components/home/HomeDiscoveryPreview.tsx','src/components/home/HomeDiscoverySearch.tsx','src/components/home/HomeSearchDateRange.tsx','src/lib/propertySearchQuery.ts','src/lib/services/publicServiceCategories.ts',...styleSources].map(async file=>({file,sha256:(await import('node:crypto')).createHash('sha256').update(await readFile(path.join(root,file))).digest('hex')})))},null,2));
 await writeFile(
@@ -145,7 +181,7 @@ await writeFile(
 );
 if (!process.argv.includes('--build-only')) {
   const r = spawnSync(
-    'python3',
+    process.platform === 'win32' ? 'python' : 'python3',
     [path.join(root, 'scripts/qa/homepage-galleries-ui.py'), output],
     { stdio: 'inherit' },
   );

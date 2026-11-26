@@ -314,7 +314,7 @@ async def run_language(browser, lang, results):
                         bottom = page.locator('nav.fixed.bottom-0')
                         row['bottomBoundsFailures'] = await bounds(page, bottom.locator('a'))
                         assert not row['bottomBoundsFailures'], {'bottomBounds': row['bottomBoundsFailures']}
-                        name = {'ru': 'Бронирования', 'en': 'Bookings', 'th': 'การจอง'}[lang]
+                        name = {'ru': 'Поездки', 'en': 'Trips', 'th': 'ทริป'}[lang]
                         await expect(bottom.get_by_role('link', name=name, exact=True)).to_have_attribute('href', '/bookings')
                 elif surface in ['owners', 'business']:
                     await check_owner_business(page, surface, row, results)

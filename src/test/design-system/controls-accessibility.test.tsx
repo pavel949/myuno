@@ -1,3 +1,4 @@
+import { readFileSync } from 'node:fs';
 import { afterEach, expect, it, vi } from 'vitest';
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
@@ -38,7 +39,13 @@ it('exposes selected property and preserves toggle and clear callbacks', () => {
 });
 it('forwards select invalid, described-by and disabled attributes with invalid focus styling', () => {
  render(<Select><SelectTrigger aria-label="Synthetic choice" aria-invalid aria-describedby="choice-error" disabled><SelectValue /></SelectTrigger></Select>);
- const trigger = screen.getByRole('combobox'); expect(trigger).toHaveAttribute('aria-invalid', 'true'); expect(trigger).toHaveAttribute('aria-describedby', 'choice-error'); expect(trigger).toBeDisabled(); expect(trigger.className).toContain('aria-[invalid=true]:focus:ring-destructive');
+ const trigger = screen.getByRole('combobox');
+ expect(trigger).toHaveAttribute('aria-invalid', 'true');
+ expect(trigger).toHaveAttribute('aria-describedby', 'choice-error');
+ expect(trigger).toBeDisabled();
+ expect(trigger).toHaveClass('ds-input', 'aria-[invalid=true]:border-destructive');
+ const designStyles = readFileSync('src/design-system/index.css', 'utf8');
+ expect(designStyles).toMatch(/\.ds-input\[aria-invalid="true"\]:focus-visible\s*\{[^}]*outline-color:\s*hsl\(var\(--destructive\)\)/);
 });
 it('renders the delegated report destination as a native focusable link', () => {
  render(<MemoryRouter><PropertyMySection /></MemoryRouter>);

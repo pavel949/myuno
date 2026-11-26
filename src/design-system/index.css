@@ -54,3 +54,167 @@
 .ds-page-heading-row{gap:calc(var(--section-heading-gap) * var(--section-space-scale))}
 
 @media(max-width:640px){.ds-section-heading--public>.ds-section-heading-content{flex-basis:100%}}
+
+/* Shared Design Bible v4 primitives. */
+.ds-focus:focus-visible {
+  outline: 1px solid hsl(var(--bible-focus-contrast));
+  outline-offset: 4px;
+  box-shadow: 0 0 0 2px hsl(var(--brand-cream)), 0 0 0 4px hsl(var(--bible-gold));
+}
+
+.ds-input:focus-visible {
+  border-color: hsl(var(--ring));
+  outline: 2px solid hsl(var(--ring));
+  outline-offset: -2px;
+  box-shadow: 0 0 0 3px hsl(var(--ring) / 0.16);
+}
+
+.ds-input[aria-invalid="true"]:focus-visible {
+  border-color: hsl(var(--destructive));
+  outline-color: hsl(var(--destructive));
+  box-shadow: 0 0 0 3px hsl(var(--destructive) / 0.16);
+}
+
+.ds-page-state {
+  display: flex;
+  flex-direction: column;
+  gap: var(--section-heading-gap);
+  width: 100%;
+  max-width: var(--layout-width-form);
+  margin-inline: auto;
+  padding: var(--layout-page-space-y) var(--layout-gutter);
+  overflow-wrap: anywhere;
+}
+
+.ds-page-state-compact {
+  padding-block: var(--section-content-gap);
+}
+
+.ds-page-state-message,
+.ds-page-state-description {
+  display: grid;
+  gap: var(--section-title-gap);
+}
+
+.ds-page-state-figure {
+  display: grid;
+  place-items: center;
+  min-height: var(--bible-state-figure-height);
+  border-radius: var(--bible-radius-card);
+  background: hsl(var(--bible-ivory));
+  color: hsl(var(--bible-status-waiting-fg));
+  font-family: var(--font-display);
+  font-size: var(--type-h2-size);
+}
+
+.ds-page-state[data-tone="warning"] .ds-page-state-figure {
+  background: hsl(var(--bible-status-waiting-bg));
+}
+
+.ds-page-state[data-tone="success"] .ds-page-state-figure {
+  background: hsl(var(--bible-status-done-bg));
+  color: hsl(var(--bible-status-done-fg));
+}
+
+.ds-page-state[data-tone="missing"] .ds-page-state-figure {
+  background: hsl(var(--brand-navy));
+  color: hsl(var(--bible-gold));
+}
+
+.ds-page-state-title {
+  color: hsl(var(--foreground));
+  font-family: var(--font-display);
+  font-size: var(--type-h3-size);
+  font-weight: 500;
+  line-height: var(--type-h3-leading);
+}
+
+.ds-page-state-description {
+  color: hsl(var(--muted-foreground));
+  font-size: var(--type-body-sm-size);
+  line-height: var(--type-body-sm-leading);
+}
+
+.ds-status-tag {
+  --status-bg: var(--bible-ivory);
+  --status-fg: var(--bible-status-neutral-fg);
+  display: inline-flex;
+  align-items: center;
+  max-width: 100%;
+  padding: 0.125rem 0.5rem;
+  border: 1px solid transparent;
+  border-radius: var(--bible-radius-control);
+  background-color: hsl(var(--status-bg));
+  color: hsl(var(--status-fg));
+  font-size: var(--type-caption-size);
+  font-weight: 700;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+
+.ds-status-tag[data-tone="done"] {
+  --status-bg: var(--bible-status-done-bg);
+  --status-fg: var(--bible-status-done-fg);
+}
+
+.ds-status-tag[data-tone="active"] {
+  --status-bg: var(--bible-navy-tint);
+  --status-fg: var(--brand-navy);
+}
+
+.ds-status-tag[data-tone="waiting"] {
+  --status-bg: var(--bible-status-waiting-bg);
+  --status-fg: var(--bible-status-waiting-fg);
+}
+
+.ds-status-tag[data-tone="blocked"] {
+  --status-bg: var(--bible-status-blocked-bg);
+  --status-fg: var(--bible-status-blocked-fg);
+  border-inline-start-color: hsl(var(--bible-status-blocked-line));
+}
+
+@media (forced-colors: active) {
+  .ds-focus:focus-visible,
+  .ds-input:focus-visible {
+    outline: 2px solid Highlight;
+    outline-offset: 2px;
+  }
+
+  .ds-status-tag {
+    border-color: currentColor;
+  }
+}
+
+.myuno-brand-lockup {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-shrink: 0;
+  font-family: var(--font-display);
+  font-size: var(--type-h3-size);
+  line-height: 1;
+  white-space: nowrap;
+  color: hsl(var(--primary));
+}
+.myuno-brand-lockup.myuno-brand-on-navy { color: hsl(var(--brand-cream)); }
+.myuno-brand-mark { width: 1.375rem; height: 1.625rem; flex: none; }
+.myuno-brand-keystone { fill: hsl(var(--bible-gold)); }
+
+.ds-management-mark {
+  display: inline-block;
+  max-width: 100%;
+  padding: 0.125rem 0.375rem;
+  border: 1px solid var(--bible-hairline);
+  border-radius: var(--bible-radius-control);
+  background: hsl(var(--brand-cream));
+  color: hsl(var(--brand-navy));
+  font-size: var(--type-label-size);
+  font-weight: 700;
+  line-height: var(--type-label-leading);
+  overflow-wrap: anywhere;
+}
+.ds-management-mark[data-level="partner"] { background: hsl(var(--bible-navy-tint)); }
+.ds-management-mark[data-level="managed"] {
+  background: hsl(var(--brand-navy));
+  color: hsl(var(--brand-cream));
+}

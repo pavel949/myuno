@@ -53,11 +53,11 @@ const PUBLIC_PROJECT_DOCUMENT_FIELDS = 'id, project_id, category, title, file_ur
 type PublicProjectDocument = Pick<ProjectDocument,
   'id' | 'project_id' | 'category' | 'title' | 'file_url' | 'visibility' | 'version' | 'is_current'>;
 
-export function useProjectDocuments(projectId?: string, opts?: { onlyCurrent?: boolean; publicOnly?: false }): UseQueryResult<ProjectDocument[]>;
+export function useProjectDocuments(projectId?: string, opts?: { onlyCurrent?: boolean; publicOnly?: false; viewerId?: string }): UseQueryResult<ProjectDocument[]>;
 export function useProjectDocuments(projectId: string | undefined, opts: { publicOnly: true }): UseQueryResult<PublicProjectDocument[]>;
-export function useProjectDocuments(projectId?: string, opts?: { onlyCurrent?: boolean; publicOnly?: boolean }) {
+export function useProjectDocuments(projectId?: string, opts?: { onlyCurrent?: boolean; publicOnly?: boolean; viewerId?: string }) {
   return useQuery({
-    queryKey: ['project-documents', projectId, opts?.onlyCurrent ?? true, opts?.publicOnly ?? false],
+    queryKey: ['project-documents', projectId, opts?.onlyCurrent ?? true, opts?.publicOnly ?? false, opts?.viewerId],
     queryFn: async (): Promise<PublicProjectDocument[]> => {
       if (!projectId) return [];
       const documents = supabase.from('project_documents');

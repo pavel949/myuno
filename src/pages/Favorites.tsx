@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { 
   Heart, 
   GraduationCap, 
@@ -14,7 +14,8 @@ import {
   Grid3X3,
   List,
   StickyNote,
-  Share2
+  Share2,
+  AlertTriangle
 } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -25,23 +26,26 @@ import { Badge } from '@/components/ui/badge';
 import { PullToRefresh } from '@/components/ui/pull-to-refresh';
 import { PageContainer } from '@/components/uno/PageContainer';
 import { PageHeader } from '@/components/uno/PageHeader';
-import { LoadingSpinner } from '@/components/uno/LoadingSpinner';
-import { EmptyState } from '@/components/uno/EmptyState';
+import { ContentSkeleton } from '@/components/ui/ContentSkeleton';
+import { EmptyState } from '@/components/page/EmptyState';
+import { PageState } from '@/components/page/PageState';
 import { SectionCard } from '@/components/uno/SectionCard';
 import { AnimatedList, AnimatedItem } from '@/components/layout/AnimatedList';
 import { FavoriteCollections } from '@/components/favorites/FavoriteCollections';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { cn } from '@/lib/utils';
 import { APP_ROUTES } from '@/lib/config/routes';
+import { pickLang } from '@/lib/i18n/pickLang';
 
 type FilterType = 'all' | 'course' | 'tutor' | 'event' | 'property' | 'vehicle' | 'clinic' | 'gym' | 'tour' | 'water_activity' | 'restaurant';
 type ViewMode = 'grid' | 'list';
 
 export default function Favorites() {
   const { language } = useLanguage();
+  const t = (ru: string, en: string, th: string) => pickLang(language, { ru, en, th });
   const { formatPrice } = useCurrency();
   const navigate = useNavigate();
-  const { favorites, loading, toggleFavorite, refetch } = useUserCollections();
+  const { favorites, loading, loadFailed, toggleFavorite, refetch } = useUserCollections();
   const [filter, setFilter] = useState<FilterType>('all');
   const [viewMode, setViewMode] = useState<ViewMode>('list');
   const [selectedCollection, setSelectedCollection] = useState('all');
@@ -67,6 +71,12 @@ export default function Favorites() {
   const filteredFavorites = filter === 'all' 
     ? favorites 
     : favorites.filter(f => f.item_type === filter);
+  const hasSavedItems = favorites.length > 0;
+  const browseDestination = filter === 'property'
+    ? { to: APP_ROUTES.PROPERTY_SEARCH, label: t('Искать недвижимость', 'Search properties', 'ค้นหาอสังหาริมทรัพย์') }
+    : filter === 'all'
+      ? { to: APP_ROUTES.PROPERTY_RENT, label: t('Посмотреть жильё', 'Explore stays', 'ค้นหาที่พัก') }
+      : { to: APP_ROUTES.DISCOVER, label: t('Посмотреть услуги', 'Browse services', 'เรียกดูบริการ') };
 
   const handleNavigate = (item: { item_type: string; item_id: string }) => {
     if (item.item_type === 'property') {
@@ -193,32 +203,49 @@ export default function Favorites() {
 
               {/* Loading */}
               {loading && (
-                <div className="flex items-center justify-center py-12">
-                  <LoadingSpinner size="lg" />
+                <div role="status">
+                  <span className="sr-only">{t('Загружаем сохранённое', 'Loading saved items', 'กำลังโหลดรายการที่บันทึกไว้')}</span>
+                  <div aria-hidden="true">
+                    <ContentSkeleton variant={viewMode === 'grid' ? 'card' : 'list'} count={3} />
+                  </div>
                 </div>
               )}
 
-              {/* Empty state */}
-              {!loading && filteredFavorites.length === 0 && (
+              {!loading && loadFailed && (
+                <PageState
+                  title={t('Не удалось обновить сохранённое', 'Saved items could not be loaded', 'ไม่สามารถโหลดรายการที่บันทึกไว้ได้')}
+                  icon={AlertTriangle}
+                  tone="warning"
+                  announcement="alert"
+                  compact
+                >
+                  <Button className="self-start" onClick={() => void refetch()}>
+                    {t('Повторить', 'Try again', 'ลองอีกครั้ง')}
+                  </Button>
+                </PageState>
+              )}
+
+              {!loading && !loadFailed && filteredFavorites.length === 0 && (
                 <EmptyState
                   icon={Heart}
-                  title={filter === 'property'
-                    ? (language === 'ru' ? 'Нет сохранённой недвижимости' : 'No saved properties yet')
-                    : (language === 'ru' ? 'Пока пусто' : 'No favorites yet')}
-                  description={filter === 'property'
-                    ? (language === 'ru'
-                      ? 'Сохраняйте понравившиеся объекты, чтобы вернуться к ним позже'
-                      : 'Save properties you like to come back to them later')
-                    : (language === 'ru'
-                      ? 'Добавляйте понравившиеся курсы и услуги, нажимая на сердечко'
-                      : 'Add your favorite courses and services by tapping the heart icon')}
-                  action={
-                    <Button onClick={() => navigate(filter === 'property' ? APP_ROUTES.PROPERTY_SEARCH : '/discover')}>
-                      {filter === 'property'
-                        ? (language === 'ru' ? 'Найти недвижимость' : 'Search properties')
-                        : (language === 'ru' ? 'Начать поиск' : 'Browse Services')}
-                    </Button>
-                  }
+                  title={hasSavedItems
+                    ? t('В этой категории ничего нет', 'Nothing saved in this category', 'ยังไม่มีรายการที่บันทึกไว้ในหมวดหมู่นี้')
+                    : t('Пока ничего не сохранено', 'Nothing saved yet', 'ยังไม่มีรายการที่บันทึกไว้')}
+                  description={hasSavedItems
+                    ? t('Посмотрите все сохранённые позиции.', 'See all your saved items.', 'ดูรายการที่คุณบันทึกไว้ทั้งหมด')
+                    : t('Нажмите на сердечко рядом с объявлением, чтобы вернуться к нему позже.', 'Tap the heart on a listing to keep it here.', 'แตะไอคอนหัวใจในประกาศเพื่อบันทึกไว้ที่นี่')}
+                  action={(
+                    <div className="flex flex-wrap gap-2">
+                      {hasSavedItems && (
+                        <Button variant="outline" onClick={() => setFilter('all')}>
+                          {t('Показать всё', 'Show all saved items', 'แสดงรายการที่บันทึกไว้ทั้งหมด')}
+                        </Button>
+                      )}
+                      <Button variant={hasSavedItems ? 'ghost' : 'default'} asChild>
+                        <Link to={browseDestination.to}>{browseDestination.label}</Link>
+                      </Button>
+                    </div>
+                  )}
                 />
               )}
 

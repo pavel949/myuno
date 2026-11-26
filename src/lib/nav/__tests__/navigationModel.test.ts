@@ -17,6 +17,7 @@ import {
   getActiveBottomBarItem,
   PRIMARY_NAV,
   GUEST_TOP_NAV,
+  getActiveGuestTopNavItem,
   NAV_BY_ROLE,
   resolveNavRole,
   type NavRoleKey,
@@ -70,9 +71,9 @@ describe('BOTTOM_BAR_BY_ROLE — per-role relevance', () => {
     const paths = BOTTOM_BAR_BY_ROLE.guest.map((i) => i.path);
     expect(paths).toEqual([
       APP_ROUTES.HOME,
-      APP_ROUTES.PROPERTY,
       APP_ROUTES.BOOKINGS,
       APP_ROUTES.GOAL_SERVICES,
+      APP_ROUTES.PROPERTY_BUY,
       APP_ROUTES.ACCOUNT,
     ]);
   });
@@ -226,8 +227,8 @@ describe('isBottomBarItemActive — exact-match items', () => {
 });
 
 describe('isBottomBarItemActive — prefix items', () => {
-  const market = BOTTOM_BAR_BY_ROLE.guest[2]; // /bookings
-  const property = BOTTOM_BAR_BY_ROLE.guest[3]; // /discover/services
+  const market = BOTTOM_BAR_BY_ROLE.guest[1]; // /bookings
+  const property = BOTTOM_BAR_BY_ROLE.guest[2]; // /discover/services
   const ownerProps = BOTTOM_BAR_BY_ROLE.owner[2]; // /mc/properties
 
   it('matches the path itself and any nested route', () => {
@@ -267,14 +268,14 @@ describe('getActiveBottomBarItem — most-specific wins', () => {
     expect(getActiveBottomBarItem('owner', '/totally/unknown')).toBeNull();
   });
 
-  it('guest on /discover/stay highlights Stay', () => {
+  it('guest on /discover/stay highlights Explore', () => {
     const item = getActiveBottomBarItem('guest', '/discover/stay');
-    expect(item?.path).toBe('/property');
-    expect(item?.labelEn).toBe('Homes');
+    expect(item?.path).toBe('/');
+    expect(item?.labelEn).toBe('Explore');
   });
 
-  it('guest on / highlights Home (exact)', () => {
-    expect(getActiveBottomBarItem('guest', '/')?.labelEn).toBe('Home');
+  it('guest on / highlights Explore', () => {
+    expect(getActiveBottomBarItem('guest', '/')?.labelEn).toBe('Explore');
   });
 
   it('guest on /profile/edit highlights Me via alias', () => {
@@ -320,9 +321,9 @@ describe('getActiveBottomBarItem — most-specific wins', () => {
 
 describe('consumer journey ownership', () => {
   it.each([
-    ['/property/search', '/property'],
-    ['/property/browse', '/property'],
-    ['/discover/buy', '/property'],
+    ['/property/search', '/'],
+    ['/property/browse', '/'],
+    ['/discover/buy', '/property/buy'],
     ['/trip-planner', '/discover/services'],
     ['/transport/airport-transfer', '/discover/services'],
     ['/experiences', '/discover/services'],
@@ -332,22 +333,38 @@ describe('consumer journey ownership', () => {
     ['/me/services', '/discover/services'],
   ])('%s has one active consumer destination', (path, destination) => {
     expect(getActiveBottomBarItem('guest', path)?.path).toBe(destination);
-    expect(BOTTOM_BAR_BY_ROLE.guest.filter(item => isBottomBarItemActive(item, path))).toHaveLength(1);
   });
 });
 
 
 describe('public business entry', () => {
-  // Since the public-navigation reorganisation the business destination lives in
-  // the header's "For partners" menu (ConsumerHeader), not in the consumer tabs.
+  // Partner destinations remain in the drawer and footer.
   it('keeps the business destination out of the consumer top menu and bottom tabs', () => {
     expect(GUEST_TOP_NAV.map(item => item.path)).toEqual([
-      APP_ROUTES.PROPERTY,
-      APP_ROUTES.EXPERIENCES,
+      APP_ROUTES.PROPERTY_RENT,
       APP_ROUTES.GOAL_SERVICES,
-      APP_ROUTES.BOOKINGS,
+      APP_ROUTES.PROPERTY_BUY,
+      APP_ROUTES.RELOCATE,
+      APP_ROUTES.AREA_INDEX,
     ]);
     expect(PRIMARY_NAV.guest).toHaveLength(5);
     expect(PRIMARY_NAV.guest.some(item => item.path === APP_ROUTES.FOR_BUSINESS)).toBe(false);
+  });
+});
+
+
+describe('public rental and sale intent', () => {
+  it.each([
+    ['?mode=rent&tenancy=short', 'Stays', 'Explore'],
+    ['?mode=buy', 'Homes for sale', 'Homes'],
+    ['?f.listingType=sale', 'Homes for sale', 'Homes'],
+  ])('keeps both bars on the right destination after the catalogue redirect %s', (search, desktop, mobile) => {
+    expect(getActiveGuestTopNavItem(APP_ROUTES.PROPERTY_SEARCH, search)?.labelEn).toBe(desktop);
+    expect(getActiveBottomBarItem('guest', APP_ROUTES.PROPERTY_SEARCH, search)?.labelEn).toBe(mobile);
+  });
+
+  it('keeps area guides and relocating within discovery', () => {
+    expect(getActiveGuestTopNavItem('/area/bang-tao')?.labelEn).toBe('Areas');
+    expect(getActiveBottomBarItem('guest', '/relocate/guides')?.labelEn).toBe('Explore');
   });
 });

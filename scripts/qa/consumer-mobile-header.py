@@ -91,7 +91,7 @@ async def main():
      await expect(surface.get_by_role('link',name=cart,exact=True)).to_be_visible()
      prefs=surface.get_by_test_id('global-preferences-controls');await expect(prefs).to_be_visible();assert await prefs.locator('button').count()==3
      holiday=surface.locator('a[href="/property/search?mode=rent&tenancy=short"]');await expect(holiday).to_be_visible()
-     await expect(surface.locator('a[href="/property/search?mode=buy"]')).to_be_visible()
+     await expect(surface.locator('a[href="/property/buy"]')).to_be_visible()
      partners=surface.locator('details.consumer-task-partners');await expect(partners).not_to_have_attribute('open','')
      await partners.locator('summary').focus();await page.keyboard.press('Enter');await expect(partners).to_have_attribute('open','')
      assert await partners.locator('a').count()==5

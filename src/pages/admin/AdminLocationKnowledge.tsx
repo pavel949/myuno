@@ -1,4 +1,4 @@
-import { PageShell } from '@/components/page/PageShell';
+import { PageHeader, PageShell } from '@/components/page';
 import React, { useState } from 'react';
 import { 
   BookOpen, Plus, Globe, Edit2, Trash2, 
@@ -7,12 +7,13 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useCities } from '@/hooks/useCities';
 import { KNOWLEDGE_SECTIONS } from '@/hooks/useLocationKnowledge';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Switch } from '@/components/ui/switch';
@@ -49,6 +50,7 @@ import {
   CollapsibleTrigger,
 } from '@/components/ui/collapsible';
 import { cn } from '@/lib/utils';
+import { pickLang, type LangValues } from '@/lib/i18n/pickLang';
 
 interface KnowledgeItem {
   id: string;
@@ -98,13 +100,26 @@ const initialFormData: FormData = {
   is_published: true,
 };
 
+type PublicationFilter = 'all' | 'published' | 'unpublished';
+
+function getArticleLanguages(item: Pick<KnowledgeItem, 'title_en' | 'title_ru' | 'content_en' | 'content_ru'>) {
+  return [
+    { code: 'EN', hasBody: Boolean(item.title_en?.trim() && item.content_en?.trim()) },
+    { code: 'RU', hasBody: Boolean(item.title_ru?.trim() && item.content_ru?.trim()) },
+  ];
+}
+
 export default function AdminLocationKnowledge() {
+  const { user } = useAuth();
   const { language } = useLanguage();
+  const queryClient = useQueryClient();
+  const t = (values: LangValues) => pickLang(language, values);
   const isRu = language === 'ru';
   const { cities } = useCities();
   
   const [selectedCityId, setSelectedCityId] = useState<string>('');
   const [searchQuery, setSearchQuery] = useState('');
+  const [publicationFilter, setPublicationFilter] = useState<PublicationFilter>('all');
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<KnowledgeItem | null>(null);
@@ -115,8 +130,9 @@ export default function AdminLocationKnowledge() {
   const [openSections, setOpenSections] = useState<string[]>(['overview']);
 
   // Fetch knowledge items
-  const { data: items = [], isLoading, refetch } = useQuery({
-    queryKey: ['admin-location-knowledge', selectedCityId],
+  const { data: items = [], isLoading, isError, isFetching, refetch } = useQuery({
+    queryKey: ['admin-location-knowledge', user?.id, selectedCityId],
+    enabled: Boolean(user?.id),
     queryFn: async () => {
       let query = supabase
         .from('location_knowledge')
@@ -134,25 +150,30 @@ export default function AdminLocationKnowledge() {
     },
   });
 
-  // Group items by section
-  const groupedItems = items.reduce((acc, item) => {
-    if (!acc[item.section]) {
-      acc[item.section] = [];
-    }
-    acc[item.section].push(item);
-    return acc;
-  }, {} as Record<string, KnowledgeItem[]>);
-
-  // Filter by search
-  const filteredSections = Object.entries(groupedItems).filter(([section, sectionItems]) => {
-    if (!searchQuery) return true;
-    const query = searchQuery.toLowerCase();
-    return sectionItems.some(item => 
-      item.title_en.toLowerCase().includes(query) ||
-      item.title_ru.toLowerCase().includes(query) ||
-      item.slug.toLowerCase().includes(query)
-    );
+  const query = searchQuery.trim().toLocaleLowerCase();
+  const hasFilters = Boolean(query) || publicationFilter !== 'all';
+  const matchingItems = items.filter((item) => {
+    if (publicationFilter === 'published' && !item.is_published) return false;
+    if (publicationFilter === 'unpublished' && item.is_published) return false;
+    return !query || [item.title_en, item.title_ru, item.slug].some(value => value?.toLocaleLowerCase().includes(query));
   });
+  const groupedItems = matchingItems.reduce<Record<string, KnowledgeItem[]>>((groups, item) => {
+    (groups[item.section] ??= []).push(item);
+    return groups;
+  }, Object.create(null));
+  const sections = [...new Set([...KNOWLEDGE_SECTIONS.map(section => section.id), ...Object.keys(groupedItems)])];
+  const publishedCount = items.filter(item => item.is_published).length;
+  const publicationOptions: { value: PublicationFilter; label: string; count: number }[] = [
+    { value: 'all', label: t({ en: 'All articles', ru: 'Все статьи', th: 'บทความทั้งหมด' }), count: items.length },
+    { value: 'published', label: t({ en: 'Published', ru: 'Опубликовано', th: 'เผยแพร่แล้ว' }), count: publishedCount },
+    { value: 'unpublished', label: t({ en: 'Unpublished', ru: 'Не опубликовано', th: 'ยังไม่เผยแพร่' }), count: items.length - publishedCount },
+  ];
+  const formatDate = new Intl.DateTimeFormat(language, { dateStyle: 'medium' });
+
+  const refreshArticleLists = () => {
+    void refetch();
+    void queryClient.invalidateQueries({ queryKey: ['location-knowledge'] });
+  };
 
   const getCityName = (cityId: string) => {
     const city = cities.find(c => c.id === cityId);
@@ -234,7 +255,7 @@ export default function AdminLocationKnowledge() {
       }
 
       setIsDialogOpen(false);
-      refetch();
+      refreshArticleLists();
     } catch (error: unknown) {
       console.error('Error saving:', error);
       toast.error((error instanceof Error ? error.message : '') || (isRu ? 'Ошибка сохранения' : 'Error saving'));
@@ -263,7 +284,7 @@ export default function AdminLocationKnowledge() {
       toast.success(isRu ? 'Статья удалена' : 'Article deleted');
       setIsDeleteDialogOpen(false);
       setItemToDelete(null);
-      refetch();
+      refreshArticleLists();
     } catch (error: unknown) {
       console.error('Error deleting:', error);
       toast.error((error instanceof Error ? error.message : '') || (isRu ? 'Ошибка удаления' : 'Error deleting'));
@@ -286,7 +307,7 @@ export default function AdminLocationKnowledge() {
           ? (isRu ? 'Статья скрыта' : 'Article hidden')
           : (isRu ? 'Статья опубликована' : 'Article published')
       );
-      refetch();
+      refreshArticleLists();
     } catch (error: unknown) {
       console.error('Error toggling:', error);
       toast.error((error instanceof Error ? error.message : '') || (isRu ? 'Ошибка' : 'Error'));
@@ -303,28 +324,21 @@ export default function AdminLocationKnowledge() {
 
   return (
     <PageShell width="workspace" className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold flex items-center gap-2">
-            <BookOpen className="h-6 w-6" />
-            {isRu ? 'База знаний локаций' : 'Location Knowledge'}
-          </h1>
-          <p className="text-muted-foreground">
-            {isRu ? 'Управление справочным контентом по городам' : 'Manage reference content for cities'}
-          </p>
-        </div>
-        
-        <Button onClick={handleOpenCreate}>
-          <Plus className="w-4 h-4 mr-2" />
-          {isRu ? 'Добавить статью' : 'Add Article'}
-        </Button>
-      </div>
+      <PageHeader
+        title={t({ en: 'Location knowledge', ru: 'База знаний локаций', th: 'ข้อมูลพื้นที่' })}
+        subtitle={t({ en: 'Manage city guides and their translations.', ru: 'Управляйте путеводителями по городам и их переводами.', th: 'จัดการคู่มือเมืองและคำแปล' })}
+        actions={(
+          <Button onClick={handleOpenCreate}>
+            <Plus className="h-4 w-4" aria-hidden="true" />
+            {t({ en: 'Add article', ru: 'Добавить статью', th: 'เพิ่มบทความ' })}
+          </Button>
+        )}
+      />
 
       {/* Filters */}
       <div className="flex flex-col sm:flex-row gap-3">
         <Select value={selectedCityId || 'all'} onValueChange={(v) => setSelectedCityId(v === 'all' ? '' : v)}>
-          <SelectTrigger className="w-full sm:w-[200px]">
+          <SelectTrigger className="w-full sm:w-auto" aria-label={t({ en: 'Filter by city', ru: 'Фильтр по городу', th: 'กรองตามเมือง' })}>
             <SelectValue placeholder={isRu ? 'Все города' : 'All cities'} />
           </SelectTrigger>
           <SelectContent>
@@ -340,6 +354,8 @@ export default function AdminLocationKnowledge() {
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
+            type="search"
+            aria-label={t({ en: 'Search articles', ru: 'Поиск статей', th: 'ค้นหาบทความ' })}
             placeholder={isRu ? 'Поиск статей...' : 'Search articles...'}
             value={searchQuery}
             onChange={e => setSearchQuery(e.target.value)}
@@ -347,114 +363,126 @@ export default function AdminLocationKnowledge() {
           />
         </div>
 
-        <Button variant="ghost" size="icon" aria-label={isRu ? 'Обновить' : 'Refresh'} onClick={() => refetch()} disabled={isLoading}>
-          <RefreshCcw className={cn("h-4 w-4", isLoading && "animate-spin")} />
+        <Button variant="ghost" size="icon" aria-label={t({ en: 'Refresh articles', ru: 'Обновить статьи', th: 'โหลดบทความอีกครั้ง' })} onClick={() => refetch()} disabled={isFetching}>
+          <RefreshCcw className={cn('h-4 w-4', isFetching && 'animate-spin')} />
         </Button>
       </div>
 
-      {/* Stats */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <Card>
-          <CardContent className="pt-4">
-            <div className="text-2xl font-bold">{items.length}</div>
-            <p className="text-sm text-muted-foreground">{isRu ? 'Всего статей' : 'Total articles'}</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="pt-4">
-            <div className="text-2xl font-bold">{items.filter(i => i.is_published).length}</div>
-            <p className="text-sm text-muted-foreground">{isRu ? 'Опубликовано' : 'Published'}</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="pt-4">
-            <div className="text-2xl font-bold">{Object.keys(groupedItems).length}</div>
-            <p className="text-sm text-muted-foreground">{isRu ? 'Секций' : 'Sections'}</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="pt-4">
-            <div className="text-2xl font-bold">{new Set(items.map(i => i.city_id)).size}</div>
-            <p className="text-sm text-muted-foreground">{isRu ? 'Городов' : 'Cities'}</p>
-          </CardContent>
-        </Card>
+      <div role="group" aria-label={t({ en: 'Publication status', ru: 'Статус публикации', th: 'สถานะการเผยแพร่' })} className="flex flex-wrap gap-2">
+        {publicationOptions.map(option => (
+          <Button
+            key={option.value}
+            variant={option.value === publicationFilter ? 'default' : 'outline'}
+            aria-pressed={option.value === publicationFilter}
+            onClick={() => setPublicationFilter(option.value)}
+          >
+            {option.label}
+            {!isLoading && !isError && <>{' '}<span className="tabular-nums">{option.count}</span></>}
+          </Button>
+        ))}
       </div>
 
       {/* Content */}
-      {isLoading ? (
+      {isError ? (
+        <Card>
+          <CardContent className="space-y-3 py-6">
+            <p role="alert">{t({ en: 'Articles could not be loaded.', ru: 'Не удалось загрузить статьи.', th: 'โหลดบทความไม่ได้' })}</p>
+            <Button variant="outline" onClick={() => refetch()} disabled={isFetching}>
+              {t({ en: 'Try again', ru: 'Повторить', th: 'ลองอีกครั้ง' })}
+            </Button>
+          </CardContent>
+        </Card>
+      ) : isLoading ? (
         <div className="space-y-3">
           {[1, 2, 3].map(i => (
             <Skeleton key={i} className="h-24 rounded-none" />
           ))}
         </div>
-      ) : filteredSections.length === 0 ? (
+      ) : matchingItems.length === 0 ? (
         <Card>
           <CardContent className="py-12 text-center text-muted-foreground">
             <BookOpen className="w-12 h-12 mx-auto mb-4 opacity-50" />
-            <p>{isRu ? 'Нет статей' : 'No articles'}</p>
-            <Button variant="outline" className="mt-4" onClick={handleOpenCreate}>
-              <Plus className="w-4 h-4 mr-2" />
-              {isRu ? 'Добавить первую статью' : 'Add first article'}
+            <p>{hasFilters
+              ? t({ en: 'No articles match these filters.', ru: 'Нет статей по заданным фильтрам.', th: 'ไม่มีบทความตรงกับตัวกรอง' })
+              : t({ en: 'No articles in this selection.', ru: 'В этой подборке нет статей.', th: 'ไม่มีบทความในรายการนี้' })}</p>
+            <Button variant="outline" className="mt-4" onClick={hasFilters ? () => {
+              setSearchQuery('');
+              setPublicationFilter('all');
+            } : handleOpenCreate}>
+              {hasFilters
+                ? t({ en: 'Clear filters', ru: 'Сбросить фильтры', th: 'ล้างตัวกรอง' })
+                : t({ en: 'Add article', ru: 'Добавить статью', th: 'เพิ่มบทความ' })}
             </Button>
           </CardContent>
         </Card>
       ) : (
         <div className="space-y-3">
-          {KNOWLEDGE_SECTIONS.map(section => {
-            const sectionItems = groupedItems[section.id] || [];
-            if (sectionItems.length === 0) return null;
+          {sections.map(section => {
+            const sectionItems = groupedItems[section];
+            if (!sectionItems?.length) return null;
+            const isOpen = hasFilters || openSections.includes(section);
             
             return (
               <Collapsible 
-                key={section.id} 
-                open={openSections.includes(section.id)}
-                onOpenChange={() => toggleSection(section.id)}
+                key={section}
+                open={isOpen}
+                onOpenChange={() => toggleSection(section)}
               >
                 <Card>
-                  <CollapsibleTrigger asChild>
-                    <CardHeader className="cursor-pointer hover:bg-muted/50 transition-colors">
-                      <div className="flex items-center justify-between">
-                        <CardTitle className="flex items-center gap-2 text-lg">
-                          <span>{isRu ? section.labelRu : section.labelEn}</span>
+                  <h2 className="text-lg">
+                    <CollapsibleTrigger asChild>
+                      <Button variant="ghost" disabled={hasFilters} className="h-auto w-full justify-between px-4 py-3 text-start">
+                        <span className="flex min-w-0 items-center gap-2">
+                          <span className="whitespace-normal">{getSectionLabel(section)}</span>
                           <Badge variant="secondary">{sectionItems.length}</Badge>
-                        </CardTitle>
-                        <ChevronDown className={cn(
-                          "h-5 w-5 transition-transform",
-                          openSections.includes(section.id) && "rotate-180"
-                        )} />
-                      </div>
-                    </CardHeader>
-                  </CollapsibleTrigger>
+                        </span>
+                        <ChevronDown aria-hidden="true" className={cn('h-5 w-5 shrink-0 transition-transform', isOpen && 'rotate-180')} />
+                      </Button>
+                    </CollapsibleTrigger>
+                  </h2>
                   <CollapsibleContent>
                     <CardContent className="pt-0">
                       <div className="space-y-2">
-                        {sectionItems.map(item => (
+                        {sectionItems.map(item => {
+                          const title = (isRu ? item.title_ru : item.title_en) || item.title_en;
+                          const updated = new Date(item.updated_at);
+                          return (
                           <div 
                             key={item.id}
-                            className="flex items-center gap-3 p-3 rounded-none border bg-card hover:bg-muted/30 transition-colors"
+                            className="flex flex-col gap-3 border p-3 transition-colors hover:bg-muted/30 sm:flex-row sm:items-center"
                           >
                             <div className="flex-1 min-w-0">
-                              <div className="flex items-center gap-2">
-                                <span className="font-medium truncate">{item.title_en}</span>
+                              <div className="flex flex-wrap items-center gap-2">
+                                <span className="font-medium [overflow-wrap:anywhere]">{title}</span>
                                 {!selectedCityId && (
                                   <Badge variant="outline" className="text-xs">
                                     {getCityName(item.city_id)}
                                   </Badge>
                                 )}
-                                {!item.is_published && (
-                                  <Badge variant="secondary" className="text-xs">
-                                    <EyeOff className="w-3 h-3 mr-1" />
-                                    {isRu ? 'Скрыто' : 'Hidden'}
-                                  </Badge>
-                                )}
+                                <Badge variant={item.is_published ? 'outline' : 'secondary'} className="text-xs">
+                                  {publicationOptions[item.is_published ? 1 : 2].label}
+                                </Badge>
                               </div>
-                              <p className="text-sm text-muted-foreground truncate">
-                                /{item.slug} · {item.title_ru}
+                              <p className="text-sm text-muted-foreground [overflow-wrap:anywhere]">
+                                /{item.slug}
+                                {!Number.isNaN(updated.getTime()) && (
+                                  <> · <time dateTime={updated.toISOString()}>{formatDate.format(updated)}</time></>
+                                )}
                               </p>
+                              <div className="mt-2 flex flex-wrap gap-2">
+                                {getArticleLanguages(item).map(locale => (
+                                  <Badge key={locale.code} variant={locale.hasBody ? 'outline' : 'secondary'}>
+                                    {locale.code} {locale.hasBody
+                                      ? t({ en: 'Content saved', ru: 'Текст сохранён', th: 'บันทึกเนื้อหาแล้ว' })
+                                      : t({ en: 'Content missing', ru: 'Нет текста', th: 'ไม่มีเนื้อหา' })}
+                                  </Badge>
+                                ))}
+                              </div>
                             </div>
 
                             <div className="flex items-center gap-1">
                               <Switch
+                                aria-label={`${publicationOptions[1].label} · ${title}`}
                                 checked={item.is_published}
                                 onCheckedChange={() => handleTogglePublished(item)}
                               />
@@ -477,7 +505,8 @@ export default function AdminLocationKnowledge() {
                               </Button>
                             </div>
                           </div>
-                        ))}
+                          );
+                        })}
                       </div>
                     </CardContent>
                   </CollapsibleContent>
@@ -490,7 +519,7 @@ export default function AdminLocationKnowledge() {
 
       {/* Create/Edit Dialog */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-h-[90dvh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>
               {editingItem 
@@ -502,7 +531,7 @@ export default function AdminLocationKnowledge() {
 
           <div className="space-y-4 py-4">
             {/* City & Section */}
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid gap-3 sm:grid-cols-2">
               <div className="space-y-2">
                 <Label>{isRu ? 'Город *' : 'City *'}</Label>
                 <Select 

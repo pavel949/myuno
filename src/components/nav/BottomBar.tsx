@@ -69,7 +69,7 @@ export const BottomBar = forwardRef<HTMLDivElement, BottomBarProps>(
       if (settings.soundEnabled) playSound('click');
     };
 
-    const activeItem = getActiveBottomBarItem(role, location.pathname);
+    const activeItem = getActiveBottomBarItem(role, location.pathname, location.search);
     const isActive = (item: NavItem) =>
       activeItem !== null && activeItem.path === item.path;
 
@@ -106,7 +106,7 @@ export const BottomBar = forwardRef<HTMLDivElement, BottomBarProps>(
           onFocus={() => handlePrefetch(path)}
           aria-label={label}
           aria-current={active ? 'page' : undefined}
-          className="myuno-bottom-nav-item flex flex-col items-center justify-center gap-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background rounded-none"
+          className="ds-focus myuno-bottom-nav-item flex flex-col items-center justify-center gap-1"
         >
           {active && (
             <div
@@ -134,6 +134,7 @@ export const BottomBar = forwardRef<HTMLDivElement, BottomBarProps>(
       <>
         <nav
           ref={ref}
+          data-variant={role === 'guest' ? 'consumer' : 'workspace'}
           className={cn('myuno-bottom-nav fixed bottom-0 left-0 right-0 z-[100] md:hidden', className)}
           {...props}
         >

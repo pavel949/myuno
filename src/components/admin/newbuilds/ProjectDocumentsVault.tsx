@@ -3,6 +3,9 @@
  * Per-category upload + visibility toggle + versioning.
  */
 import { useState } from 'react';
+import { useAuth } from '@/contexts/AuthContext';
+import { useLanguage } from '@/contexts/LanguageContext';
+import { pickLang, type LangValues } from '@/lib/i18n/pickLang';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -30,7 +33,13 @@ const VISIBILITY_OPTIONS: { value: DocumentVisibility; label: string; icon: type
 ];
 
 export function ProjectDocumentsVault({ projectId }: { projectId: string }) {
-  const { data: docs = [], isLoading } = useProjectDocuments(projectId);
+  const { user } = useAuth();
+  const { language } = useLanguage();
+  const t = (value: LangValues) => pickLang(language, value);
+  const { data: docs = [], isLoading, isError, isFetching, refetch } = useProjectDocuments(user?.id ? projectId : undefined, {
+    onlyCurrent: false,
+    viewerId: user?.id,
+  });
   const upload = useUploadProjectDocument();
   const del = useDeleteProjectDocument();
   const [open, setOpen] = useState(false);
@@ -63,18 +72,26 @@ export function ProjectDocumentsVault({ projectId }: { projectId: string }) {
     ...cat,
     docs: docs.filter((d) => d.category === cat.value),
   }));
+  const currentCount = docs.filter(document => document.is_current).length;
+  const coveredCategoryCount = docsByCategory.filter(category => category.docs.some(document => document.is_current)).length;
+  const evidenceCounts = [
+    { label: t({ en: 'Current documents', ru: 'Актуальные документы', th: 'เอกสารฉบับปัจจุบัน' }), count: currentCount },
+    { label: t({ en: 'Categories with current documents', ru: 'Категории с актуальными документами', th: 'หมวดหมู่ที่มีเอกสารฉบับปัจจุบัน' }), count: coveredCategoryCount },
+    { label: t({ en: 'Previous versions', ru: 'Предыдущие версии', th: 'ฉบับก่อนหน้า' }), count: docs.length - currentCount },
+  ];
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h2 className="text-xl font-semibold">Документы проекта</h2>
-          <p className="text-sm text-muted-foreground">ClearView checklist · версионирование · уровни доступа</p>
+          <h2 className="text-h3">{t({ en: 'Project evidence', ru: 'Подтверждающие документы', th: 'หลักฐานของโครงการ' })}</h2>
+          <p className="text-sm text-muted-foreground">{t({ en: 'Documents, versions and access levels for this project.', ru: 'Документы, версии и уровни доступа для этого проекта.', th: 'เอกสาร ฉบับ และระดับการเข้าถึงของโครงการนี้' })}</p>
         </div>
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
             <Button onClick={() => { setReplacesId(undefined); setOpen(true); }}>
-              <Upload className="w-4 h-4 mr-1" /> Загрузить
+              <Upload className="h-4 w-4" aria-hidden="true" />
+              {t({ en: 'Upload document', ru: 'Загрузить документ', th: 'อัปโหลดเอกสาร' })}
             </Button>
           </DialogTrigger>
           <DialogContent>
@@ -86,7 +103,7 @@ export function ProjectDocumentsVault({ projectId }: { projectId: string }) {
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
                     {DOCUMENT_CATEGORIES.map((c) => (
-                      <SelectItem key={c.value} value={c.value}>{c.label_ru}</SelectItem>
+                      <SelectItem key={c.value} value={c.value}>{language === 'ru' ? c.label_ru : c.label_en}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
@@ -122,18 +139,35 @@ export function ProjectDocumentsVault({ projectId }: { projectId: string }) {
         </Dialog>
       </div>
 
-      {isLoading ? (
-        <div className="text-muted-foreground">Загрузка…</div>
+      {isError ? (
+        <Card className="space-y-3 p-4">
+          <p role="alert">{t({ en: 'Project documents could not be loaded.', ru: 'Не удалось загрузить документы проекта.', th: 'โหลดเอกสารโครงการไม่ได้' })}</p>
+          <Button variant="outline" onClick={() => refetch()} disabled={isFetching}>
+            {t({ en: 'Try again', ru: 'Повторить', th: 'ลองอีกครั้ง' })}
+          </Button>
+        </Card>
+      ) : isLoading ? (
+        <p role="status" className="text-muted-foreground">
+          {t({ en: 'Loading project documents…', ru: 'Загружаем документы проекта…', th: 'กำลังโหลดเอกสารโครงการ…' })}
+        </p>
       ) : (
         <div className="space-y-4">
+          <dl className="grid gap-2 sm:grid-cols-3">
+            {evidenceCounts.map(({ label, count }) => (
+              <div key={label} className="space-y-1 border bg-card p-3">
+                <dt className="text-sm text-muted-foreground">{label}</dt>
+                <dd className="text-h3 tabular-nums">{count}</dd>
+              </div>
+            ))}
+          </dl>
           {docsByCategory.map((cat) => (
             <Card key={cat.value} className="p-4">
-              <div className="flex items-center justify-between mb-2">
-                <h3 className="font-medium">{cat.label_ru}</h3>
-                <Badge variant={cat.docs.length ? 'default' : 'outline'}>{cat.docs.length}</Badge>
+              <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
+                <h3 className="font-medium">{language === 'ru' ? cat.label_ru : cat.label_en}</h3>
+                <Badge variant={cat.docs.some(document => document.is_current) ? 'default' : 'outline'}>{cat.docs.length}</Badge>
               </div>
               {cat.docs.length === 0 ? (
-                <div className="text-xs text-muted-foreground">Нет документов</div>
+                <p className="text-sm text-muted-foreground">{t({ en: 'No documents recorded', ru: 'Документов пока нет', th: 'ยังไม่มีเอกสาร' })}</p>
               ) : (
                 <div className="space-y-2">
                   {cat.docs.map((doc: ProjectDocument) => {
@@ -146,22 +180,26 @@ export function ProjectDocumentsVault({ projectId }: { projectId: string }) {
                             <a href={doc.file_url} target="_blank" rel="noopener noreferrer" className="text-sm font-medium hover:underline truncate block">
                               {doc.title}
                             </a>
-                            <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                              <VIcon className="w-3 h-3" />
+                            <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+                              <VIcon className="h-3 w-3" aria-hidden="true" />
                               <span>v{doc.version}</span>
-                              <span>·</span>
-                              <span>{new Date(doc.uploaded_at).toLocaleDateString()}</span>
+                              <span>{new Date(doc.uploaded_at).toLocaleDateString(language)}</span>
+                              <Badge variant={doc.is_current ? 'outline' : 'secondary'}>
+                                {doc.is_current
+                                  ? t({ en: 'Current version', ru: 'Актуальная версия', th: 'ฉบับปัจจุบัน' })
+                                  : t({ en: 'Previous version', ru: 'Предыдущая версия', th: 'ฉบับก่อนหน้า' })}
+                              </Badge>
                             </div>
                           </div>
                         </div>
-                        <div className="flex gap-1">
-                          <Button size="sm" variant="ghost" onClick={() => { setCategory(doc.category); setTitle(doc.title); setVisibility(doc.visibility); setReplacesId(doc.id); setOpen(true); }}>
-                            <Upload className="w-3 h-3" />
+                        {doc.is_current && <div className="flex gap-1">
+                          <Button size="icon" variant="ghost" aria-label={t({ en: 'Upload a new version', ru: 'Загрузить новую версию', th: 'อัปโหลดฉบับใหม่' })} onClick={() => { setCategory(doc.category); setTitle(doc.title); setVisibility(doc.visibility); setReplacesId(doc.id); setOpen(true); }}>
+                            <Upload className="h-4 w-4" aria-hidden="true" />
                           </Button>
-                          <Button size="sm" variant="ghost" onClick={() => del.mutate({ id: doc.id, projectId })}>
-                            <Trash2 className="w-3 h-3 text-destructive" />
+                          <Button size="icon" variant="ghost" aria-label={t({ en: 'Delete document', ru: 'Удалить документ', th: 'ลบเอกสาร' })} disabled={del.isPending} onClick={() => del.mutate({ id: doc.id, projectId })}>
+                            <Trash2 className="h-4 w-4 text-destructive" aria-hidden="true" />
                           </Button>
-                        </div>
+                        </div>}
                       </div>
                     );
                   })}

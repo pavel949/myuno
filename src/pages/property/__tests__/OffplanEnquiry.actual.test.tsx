@@ -4,6 +4,7 @@ import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-li
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import OffplanDetail from '../OffplanDetail';
+import OffplanUnitDetail from '../OffplanUnitDetail';
 const a='aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa', unit='22222222-2222-4222-8222-222222222222', property='33333333-3333-4333-8333-333333333333';
 const state=vi.hoisted(()=>({desktop:true,rpc:vi.fn(),invoke:vi.fn()}));
 vi.mock('@/contexts/LanguageContext',()=>({useLanguage:()=>({language:'en'})}));
@@ -15,14 +16,71 @@ vi.mock('@/hooks/useOffplanProjects',()=>({useOffplanProject:(id:string)=>({data
 vi.mock('@/hooks/useDevelopers',()=>({useDeveloper:()=>({data:null})}));
 vi.mock('@/hooks/useNewbuildProjects',()=>({useNewbuildProject:()=>({data:null})}));
 vi.mock('@/hooks/useProjectDocuments',()=>({useProjectDocuments:()=>({data:[]}),DOCUMENT_CATEGORIES:[]}));
-vi.mock('@/hooks/useProjectUnits',()=>({useProjectUnits:()=>({data:[{id:'22222222-2222-4222-8222-222222222222',property_id:'33333333-3333-4333-8333-333333333333',name:'Synthetic unit',unit_type:'condo',area_sqm:50,bedrooms:1,bathrooms:1,views:[]}],isLoading:false})}));
+vi.mock('@/hooks/useProjectUnits', () => {
+  const projectUnits = (projectId?: string) => projectId === a ? [{
+    id: unit, property_id: property, unit_code: 'SYNTH-02', name: 'Synthetic unit',
+    unit_type: 'condo', area_sqm: 50, bedrooms: 1, bathrooms: 1, views: [],
+    floor_from: 5, floor_to: 5, floor_plan_url: '/assets/unit-plan.png',
+    price: 9543210, currency: 'THB', status: 'available', available_units: 1,
+  }] : [];
+  return {
+    useProjectUnits: (projectId?: string) => ({ data: projectUnits(projectId), isLoading: false }),
+    usePublicProjectUnit: (projectId?: string, unitId?: string) => ({
+      data: projectUnits(projectId).find(candidate => candidate.id === unitId),
+      isLoading: false,
+    }),
+  };
+});
 vi.mock('@/hooks/useCapitalIntroRequest',()=>({useCapitalIntroRequest:()=>({isPending:false,mutateAsync:()=>{throw Error('Capital writer excluded');}})}));
 vi.mock('@/integrations/supabase/client',()=>({supabase:{rpc:(...args:unknown[])=>state.rpc(...args),functions:{invoke:(...args:unknown[])=>state.invoke(...args)},from:()=>{throw Error('Direct table writes/reads excluded from actual-form fixture');}}}));
 vi.mock('@/components/seo',()=>({SEOHead:()=>null,createRealEstateListingSchema:()=>({}),createBreadcrumbSchema:()=>({})}));
 const records=new Map<string,{id:string,payload:Record<string,unknown>}>();let client:QueryClient;
 beforeEach(()=>{vi.clearAllMocks();sessionStorage.clear();vi.stubGlobal('crypto',webcrypto);records.clear();state.desktop=true;state.invoke.mockResolvedValue({data:null,error:new Error('Synthetic notification not accepted')});state.rpc.mockImplementation(async(name:string,args:{payload:Record<string,unknown>})=>{expect(name).toBe('submit_consultation_request');const key=String(args.payload.intake_request_key);if(!records.has(key))records.set(key,{id:'synthetic-confirmed-request',payload:args.payload});return{data:records.get(key)!.id,error:null};});client=new QueryClient({defaultOptions:{queries:{retry:false},mutations:{retry:false}}});});
 afterEach(()=>{cleanup();client.clear();vi.unstubAllGlobals();});
-function show(){render(<QueryClientProvider client={client}><MemoryRouter initialEntries={[`/property/offplan/${a}`]}><Routes><Route path="/property/offplan/:id" element={<OffplanDetail/>}/></Routes></MemoryRouter></QueryClientProvider>);}
+function show(path = `/property/offplan/${a}`) {
+  render(
+    <QueryClientProvider client={client}>
+      <MemoryRouter initialEntries={[path]}>
+        <Routes>
+          <Route path="/property/offplan/:id" element={<OffplanDetail />} />
+          <Route path="/property/offplan/:id/units/:unitId" element={<OffplanUnitDetail />} />
+        </Routes>
+      </MemoryRouter>
+    </QueryClientProvider>,
+  );
+}
+
+it('opens a published unit detail and submits an enquiry for that exact unit', async () => {
+  state.desktop = true;
+  show(`/property/offplan/${a}?ref=catalogue#project-units`);
+  const unitLink = await screen.findByRole('link', { name: 'Synthetic unit' });
+  expect(unitLink).toHaveAttribute('href', `/property/offplan/${a}/units/${unit}?ref=catalogue`);
+  fireEvent.click(unitLink);
+
+  expect(await screen.findByRole('heading', { name: 'Synthetic unit' })).toBeVisible();
+  expect(screen.getByRole('link', { name: 'Back to project units' })).toHaveAttribute('href', `/property/offplan/${a}?ref=catalogue#project-units`);
+  expect(screen.getByRole('link', { name: 'Open plan in a new tab' })).toHaveAttribute('href', '/assets/unit-plan.png');
+  expect(screen.getByText('Price to be confirmed')).toBeVisible();
+  expect(screen.queryByText(/9,?543,?210|^available$/i)).toBeNull();
+
+  fireEvent.click(screen.getByRole('button', { name: 'Ask about this unit' }));
+  fireEvent.submit(await fill());
+  expect(await screen.findByText('synthetic-confirmed-request')).toBeVisible();
+  const record = [...records.values()][0];
+  expect(record.payload).toMatchObject({
+    request_type: 'property_consultation',
+    entry_point: 'offplan_buyer',
+    vertical_metadata: { project_id: a, unit_id: unit, property_id: property, intent: 'consultation', request_only: true },
+  });
+});
+
+it('shows a missing state when a unit is addressed under another project', async () => {
+  const otherProject = 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb';
+  show(`/property/offplan/${otherProject}/units/${unit}`);
+  expect(await screen.findByRole('heading', { name: 'Unit could not be found' })).toBeVisible();
+  expect(screen.getByRole('link', { name: 'Back to project units' })).toHaveAttribute('href', `/property/offplan/${otherProject}#project-units`);
+  expect(screen.queryByRole('button', { name: 'Ask about this unit' })).toBeNull();
+});
 async function fill(){const dialog=await screen.findByRole('dialog');fireEvent.change(within(dialog).getByLabelText(/Name/),{target:{value:'Synthetic buyer'}});fireEvent.change(within(dialog).getByLabelText(/Phone/),{target:{value:'+66000000000'}});fireEvent.change(within(dialog).getByLabelText('Message'),{target:{value:'Synthetic question'}});return within(dialog).getByRole('button',{name:'Submit request'}).closest('form')!;}
 it.each([true,false])('actual unit card → adaptive modal → shared form → receipt in desktop=%s',async desktop=>{state.desktop=desktop;show();fireEvent.mouseDown(screen.getByRole('tab',{name:'Units and plans'}),{button:0,ctrlKey:false});fireEvent.click(screen.getByRole('button',{name:'Ask about this unit'}));const form=await fill();fireEvent.submit(form);fireEvent.submit(form);expect(await screen.findByText('synthetic-confirmed-request')).toBeVisible();expect(state.rpc).toHaveBeenCalledTimes(1);expect(records.size).toBe(1);expect(state.invoke.mock.calls.map(([name]) => name)).not.toContain('notify-admin-order');const record=[...records.values()][0];expect(record.payload).toMatchObject({request_type:'property_consultation',vertical_id:'properties',entry_point:'offplan_buyer',vertical_metadata:{schema_version:1,project_id:a,unit_id:unit,property_id:property,intent:'consultation',request_only:true,offer_id:null}});expect(screen.getByText(/A team reply is pending/)).toBeVisible();});
 it('preserves actual unit context and inputs after a lost response, and retries the same operation key',async()=>{let lost=true;const normal=state.rpc.getMockImplementation()!;state.rpc.mockImplementation(async(...args:unknown[])=>{const result=await normal(...args);if(lost){lost=false;throw Error('Synthetic response lost after persistence');}return result;});show();fireEvent.mouseDown(screen.getByRole('tab',{name:'Units and plans'}),{button:0,ctrlKey:false});fireEvent.click(screen.getByRole('button',{name:'Ask about this unit'}));const form=await fill();fireEvent.submit(form);await screen.findByRole('alert');expect(screen.queryByText('synthetic-confirmed-request')).toBeNull();expect(screen.getByLabelText('Message')).toHaveValue('Synthetic question');fireEvent.submit(form);expect(await screen.findByText('synthetic-confirmed-request')).toBeVisible();expect(records.size).toBe(1);expect(state.rpc.mock.calls[0][1].payload.intake_request_key).toBe(state.rpc.mock.calls[1][1].payload.intake_request_key);});

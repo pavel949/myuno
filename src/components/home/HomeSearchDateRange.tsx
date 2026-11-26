@@ -1,4 +1,4 @@
-import { useId, useState, useLayoutEffect, useRef } from 'react';
+import { useId, useState, useLayoutEffect, useRef, type ReactNode } from 'react';
 import { format } from 'date-fns';
 import { enUS, ru, th } from 'date-fns/locale';
 import { CalendarDays } from 'lucide-react';
@@ -15,10 +15,11 @@ interface Props {
   checkIn: string;
   checkOut: string;
   onChange: (checkIn: string, checkOut: string) => void;
+  guests?: { count: string; field: ReactNode };
 }
 
 /** Discovery filters only. Availability and inventory remain the catalogue's responsibility. */
-export function HomeSearchDateRange({ checkIn, checkOut, onChange }: Props) {
+export function HomeSearchDateRange({ checkIn, checkOut, onChange, guests }: Props) {
   const { language } = useLanguage();
   const isMobile = useIsMobile();
   const [open, setOpen] = useState(false);
@@ -65,22 +66,40 @@ export function HomeSearchDateRange({ checkIn, checkOut, onChange }: Props) {
   }, [open, isMobile]);
   const titleId = useId();
   const hintId = useId();
+  const summaryId = useId();
   const locale = language === 'ru' ? ru : language === 'th' ? th : enUS;
   const today = bangkokTodayISO();
-  const title = pickLang(language, { ru: 'Даты проживания', en: 'Stay dates', th: 'วันที่เข้าพัก' });
+  const title = guests
+    ? pickLang(language, { ru: 'Даты и гости', en: 'Dates and guests', th: 'วันที่และผู้เข้าพัก' })
+    : pickLang(language, { ru: 'Даты проживания', en: 'Stay dates', th: 'วันที่เข้าพัก' });
   const hint = selectingEnd
     ? pickLang(language, { ru: 'Выберите дату выезда', en: 'Select check-out', th: 'เลือกวันเช็กเอาต์' })
     : pickLang(language, { ru: 'Выберите дату заезда', en: 'Select check-in', th: 'เลือกวันเช็กอิน' });
   const placeholder = pickLang(language, { ru: 'Выберите', en: 'Select', th: 'เลือก' });
   const display = (value: string) => value ? format(parseCivilDate(value), 'd MMM yyyy', { locale }) : placeholder;
+  const datesSummary = checkIn
+    ? display(checkIn) + ' – ' + display(checkOut)
+    : pickLang(language, { ru: 'Любые даты', en: 'Any dates', th: 'ทุกวันที่' });
+  const guestSummary = guests?.count
+    ? pickLang(language, { ru: 'Гости: ' + guests.count, en: 'Guests: ' + guests.count, th: 'ผู้เข้าพัก ' + guests.count })
+    : pickLang(language, { ru: 'Любое число гостей', en: 'Any number of guests', th: 'ไม่จำกัดจำนวนผู้เข้าพัก' });
   const changeOpen = (value: boolean) => {
     setOpen(value);
     if (value) setSelectingEnd(!!checkIn && !checkOut);
   };
   const trigger = (
-    <button ref={triggerRef} type="button" className="home-search-date-trigger" aria-label={title}>
-      <span><span className="home-field-label">{pickLang(language, { ru: 'Заезд', en: 'Check-in', th: 'เช็กอิน' })}</span>{display(checkIn)}</span>
-      <span><span className="home-field-label">{pickLang(language, { ru: 'Выезд', en: 'Check-out', th: 'เช็กเอาต์' })}</span>{display(checkOut)}</span>
+    <button ref={triggerRef} type="button" className="home-search-date-trigger" aria-label={title} aria-describedby={guests ? summaryId : undefined}>
+      {guests ? (
+        <span className="min-w-0">
+          <span className="home-field-label">{title}</span>
+          <span id={summaryId} className="block truncate">{datesSummary} · {guestSummary}</span>
+        </span>
+      ) : (
+        <>
+          <span><span className="home-field-label">{pickLang(language, { ru: 'Заезд', en: 'Check-in', th: 'เช็กอิน' })}</span>{display(checkIn)}</span>
+          <span><span className="home-field-label">{pickLang(language, { ru: 'Выезд', en: 'Check-out', th: 'เช็กเอาต์' })}</span>{display(checkOut)}</span>
+        </>
+      )}
       <CalendarDays size={18} aria-hidden="true" />
     </button>
   );
@@ -107,19 +126,21 @@ export function HomeSearchDateRange({ checkIn, checkOut, onChange }: Props) {
             setSelectingEnd(true);
           } else {
             onChange(checkIn, value);
-            setOpen(false);
+            setSelectingEnd(false);
+            if (!guests) setOpen(false);
           }
         }}
         className="mx-auto w-fit px-0"
         classNames={{ months: 'relative flex flex-col', nav: 'sticky top-0 z-20 -mb-11 flex h-11 items-center justify-between', month_caption: 'sticky top-0 z-10 flex h-11 items-center justify-center bg-popover', weekday: 'w-11 text-muted-foreground font-normal text-xs', day: 'h-11 w-11 text-center text-sm p-0 relative', day_button: 'h-11 w-11 p-0 font-normal focus-visible:outline focus-visible:outline-2 focus-visible:outline-ring touch-manipulation' }}
       />
       </div>
+      {guests && <div className="shrink-0 border-t p-3">{guests.field}</div>}
       <div className="flex shrink-0 justify-between border-t p-3">
         <Button type="button" variant="ghost" onClick={() => { onChange('', ''); setSelectingEnd(false); }}>
           {pickLang(language, { ru: 'Сбросить даты', en: 'Clear dates', th: 'ล้างวันที่' })}
         </Button>
         <Button type="button" variant="outline" onClick={() => setOpen(false)}>
-          {pickLang(language, { ru: 'Закрыть', en: 'Close', th: 'ปิด' })}
+          {guests ? pickLang(language, { ru: 'Готово', en: 'Done', th: 'เสร็จสิ้น' }) : pickLang(language, { ru: 'Закрыть', en: 'Close', th: 'ปิด' })}
         </Button>
       </div>
     </>

@@ -143,8 +143,7 @@ async def main():
                     await goto()
                     active = page.locator('.consumer-nav a[aria-current="page"]')
                     await expect(active).to_have_count(1)
-                    await expect(active).to_have_attribute('href', '/experiences')
-                    await expect(page.locator('.consumer-nav a[href="/discover/services"][aria-current]')).to_have_count(0)
+                    await expect(active).to_have_attribute('href', '/discover/services')
                     if width == 390:
                         await page.get_by_role('button', name=c['menu'], exact=True).click()
                         dialog = page.get_by_role('dialog', name='myUNO', exact=True)
@@ -152,6 +151,7 @@ async def main():
                         await expect(dialog.locator('a[aria-current="page"]')).to_have_attribute('href', '/experiences')
                         await page.keyboard.press('Escape')
                         await expect(dialog).not_to_be_visible()
+                    row['checks'].append('Desktop Services and the direct mobile Experiences link expose their selected state')
                     menu = page.get_by_role('region', name=c['category_menu'], exact=True)
                     # Only groups backed by returned offers are promoted publicly.
                     await expect(menu.locator('[data-category-id]')).to_have_count(3)

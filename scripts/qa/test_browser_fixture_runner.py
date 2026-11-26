@@ -19,7 +19,7 @@ ROOT = Path(__file__).resolve().parents[2]
 
 def declared_fixture_output(source):
     """Resolve supported static declarations with the CI default temporary root."""
-    literal = re.search(r"(?m)^\s*const output\s*=\s*(?:process\.env\.(?:HOME_GALLERY_OUTPUT|SHARED_SURFACES_OUTPUT|SERVICES_DISCOVERY_OUTPUT)\s*\|\|\s*)?'([^']+)'\s*;", source)
+    literal = re.search(r"(?m)^\s*const output\s*=\s*(?:process\.env\.(?:HOME_GALLERY_OUTPUT|SHARED_SURFACES_OUTPUT|SERVICES_DISCOVERY_OUTPUT|PMS_TODAY_FIXTURE_OUTPUT)\s*\|\|\s*)?'([^']+)'\s*;", source)
     if literal:
         return literal.group(1)
     portable = re.search(

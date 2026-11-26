@@ -20,6 +20,18 @@ function mount(entry: string = APP_ROUTES.MC_TODAY) { render(<MemoryRouter initi
 beforeEach(() => { vi.clearAllMocks(); mocks.scenario = 'populated'; mocks.unknownGuests = false; });
 afterEach(() => { expect(mocks.database).not.toHaveBeenCalled(); cleanup(); });
 
+it('shows the offline notice until the browser reconnects', () => {
+  mocks.language = 'en';
+  mount();
+  expect(screen.queryByText('You’re offline')).toBeNull();
+  fireEvent(window, new Event('offline'));
+  const notice = screen.getByText('You’re offline').closest('[role="status"]');
+  expect(notice).toHaveTextContent('Reconnect to refresh today’s workspace.');
+  expect(screen.getByRole('heading', { name: 'Today', level: 1 })).toBeVisible();
+  fireEvent(window, new Event('online'));
+  expect(screen.queryByText('You’re offline')).toBeNull();
+});
+
 describe.each(['ru', 'en'] as const)('isolated Today (%s)', language => {
   beforeEach(() => { mocks.language = language; });
   it('opens the exact stay and its conversation from Today', () => {

@@ -11,6 +11,7 @@ import { useLegacyUnitTablesEnabled } from '@/lib/real-estate/unitSourceFlag';
 export interface ProjectUnit {
   id: string;
   property_id: string | null;
+  unit_code?: string | null;
   name: string;
   name_ru: string | null;
   unit_type: string;
@@ -49,11 +50,14 @@ interface ProjectUnitRow {
   unit_status: string | null;
 }
 
+const PROJECT_UNIT_COLUMNS = 'id, property_id, unit_code, unit_type, area_sqm, bedrooms, bathrooms, price, price_per_sqm, currency, floor, floor_number, floor_plan_url, view_type, status, unit_status';
+
 function mapRow(u: ProjectUnitRow): ProjectUnit {
   const floor = u.floor ?? u.floor_number ?? null;
   return {
     id: u.id,
     property_id: u.property_id ?? null,
+    unit_code: u.unit_code?.trim() || null,
     name: u.unit_code || u.unit_type || 'Unit',
     name_ru: null,
     unit_type: u.unit_type || 'studio',
@@ -85,9 +89,7 @@ export function useProjectUnits(projectId?: string) {
       // Primary source — `project_units` (canonical)
       const { data, error } = await supabase
         .from('project_units')
-        .select(
-          'id, property_id, unit_code, unit_type, area_sqm, bedrooms, bathrooms, price, price_per_sqm, currency, floor, floor_number, floor_plan_url, view_type, status, unit_status',
-        )
+        .select(PROJECT_UNIT_COLUMNS)
         .eq('project_id', projectId)
         .order('id');
 
@@ -131,6 +133,27 @@ export function useProjectUnits(projectId?: string) {
       }));
     },
     enabled: !!projectId,
+    staleTime: 5 * 60 * 1000,
+  });
+}
+
+export function usePublicProjectUnit(projectId?: string, unitId?: string) {
+  return useQuery({
+    queryKey: ['public-project-unit', projectId, unitId],
+    queryFn: async (): Promise<ProjectUnit | null> => {
+      if (!projectId || !unitId) return null;
+
+      const { data, error } = await supabase
+        .from('project_units')
+        .select(PROJECT_UNIT_COLUMNS)
+        .eq('project_id', projectId)
+        .eq('id', unitId)
+        .maybeSingle();
+
+      if (error) throw error;
+      return data?.unit_code?.trim() ? publicNewbuildUnit(mapRow(data)) : null;
+    },
+    enabled: Boolean(projectId && unitId),
     staleTime: 5 * 60 * 1000,
   });
 }

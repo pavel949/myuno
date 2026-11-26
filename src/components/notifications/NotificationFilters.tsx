@@ -1,8 +1,9 @@
 import React from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { cn } from '@/lib/utils';
+import { pickLang } from '@/lib/i18n/pickLang';
 
-export type NotificationFilterType = 'all' | 'booking' | 'promotion' | 'status';
+export type NotificationFilterType = 'all' | 'booking' | 'order' | 'promotion' | 'status';
 
 interface NotificationFiltersProps {
   activeFilter: NotificationFilterType;
@@ -12,23 +13,26 @@ interface NotificationFiltersProps {
 
 export function NotificationFilters({ activeFilter, onFilterChange, counts }: NotificationFiltersProps) {
   const { language } = useLanguage();
-  const isRu = language === 'ru';
+  const local = (ru: string, en: string, th: string) => pickLang(language, { ru, en, th });
 
   const filters: { key: NotificationFilterType; label: string }[] = [
-    { key: 'all', label: isRu ? 'Все' : 'All' },
-    { key: 'booking', label: isRu ? 'Бронирования' : 'Bookings' },
-    { key: 'promotion', label: isRu ? 'Акции' : 'Promotions' },
-    { key: 'status', label: isRu ? 'Статусы' : 'Status' },
+    { key: 'all', label: local('Все', 'All', 'ทั้งหมด') },
+    { key: 'booking', label: local('Бронирования', 'Bookings', 'การจอง') },
+    { key: 'order', label: local('Заказы', 'Orders', 'คำสั่งซื้อ') },
+    { key: 'promotion', label: local('Акции', 'Promotions', 'โปรโมชัน') },
+    { key: 'status', label: local('Статусы', 'Status', 'สถานะ') },
   ];
 
   return (
-    <div className="flex gap-2 flex-wrap">
+    <div className="flex flex-wrap gap-2" role="group" aria-label={local('Фильтры уведомлений', 'Filter notifications', 'ตัวกรองการแจ้งเตือน')}>
       {filters.map(({ key, label }) => (
         <button
           key={key}
+          type="button"
+          aria-pressed={activeFilter === key}
           onClick={() => onFilterChange(key)}
           className={cn(
-            'flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium transition-colors',
+            'flex min-h-11 items-center gap-1.5 rounded-[var(--bible-radius-control)] px-3 py-1.5 text-sm font-medium transition-colors',
             activeFilter === key
               ? 'bg-primary text-primary-foreground'
               : 'bg-muted text-muted-foreground hover:bg-muted/80'

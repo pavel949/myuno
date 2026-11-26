@@ -1,13 +1,20 @@
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { afterEach, expect, it, vi } from 'vitest';
-import { HomeHousingPreview, HomeNewbuildsPreview } from './HomeDiscoveryPreview';
-const state = vi.hoisted(() => ({ homes: { data: [], isLoading: false, isError: false, refetch: vi.fn() }, projects: { data: [], isLoading: false, isError: false, refetch: vi.fn() } }));
+import { HomeHousingPreview, HomeNewbuildsPreview, HomeSalePreview } from './HomeDiscoveryPreview';
+const state = vi.hoisted(() => ({ homes: { data: [], isLoading: false, isError: false, refetch: vi.fn() }, projects: { data: [], isLoading: false, isError: false, refetch: vi.fn() }, readHomes: vi.fn() }));
 vi.mock('@/contexts/LanguageContext', () => ({ useLanguage: () => ({ language: 'en' }) }));
-vi.mock('@/hooks/useProperties', () => ({ useProperties: () => state.homes }));
+vi.mock('@/hooks/useProperties', () => ({ useProperties: (...args: unknown[]) => { state.readHomes(...args); return state.homes; } }));
 vi.mock('@/hooks/useOffplanProjects', () => ({ useOffplanProjects: () => state.projects }));
+vi.mock('@/components/property/PropertyListingCard', () => ({ PropertyListingCard: () => null }));
 afterEach(() => { cleanup(); state.projects.data = []; state.homes.isLoading = state.projects.isLoading = state.homes.isError = state.projects.isError = false; vi.clearAllMocks(); });
 const show = () => render(<MemoryRouter><HomeHousingPreview /><HomeNewbuildsPreview /></MemoryRouter>);
+it('loads the same purchase price range advertised by the homepage sale section', () => {
+  render(<MemoryRouter><HomeSalePreview /></MemoryRouter>);
+  expect(state.readHomes).toHaveBeenCalledWith({ listingType: 'sale', minPrice: 0.01, maxPrice: 10_000_000 }, 48);
+  expect(screen.getByText('Up to ฿10,000,000')).toBeVisible();
+  expect(screen.getByRole('link', { name: 'See homes' })).toHaveAttribute('href', '/property/search?mode=buy&maxPrice=10000000');
+});
 it('keeps full catalogues reachable with honest empty previews', () => {
   show();
   expect(screen.getByRole('link', { name: 'All homes' })).toHaveAttribute('href', '/property/search?mode=rent');

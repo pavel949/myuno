@@ -29,6 +29,7 @@ import { PropertyOfferLinks } from './PropertyJourney';
 import { propertyArea } from '@/lib/real-estate/propertyJourney';
 
 import { ClearViewBadge } from '@/components/clearview/ClearViewBadge';
+import { ManagementMark } from '@/components/property/ManagementMark';
 
 interface PropertyListingCardProps {
   property: Property;
@@ -151,8 +152,8 @@ function PropertyListingCardBase({
       tabIndex={0}
       aria-label={title || districtDisplay}
       className={cn(
-        "property-premium-listing group min-w-0 cursor-pointer transition-shadow",
-        isSelected && "ring-2 ring-primary ring-offset-2 ring-offset-background rounded-sm",
+        "ds-focus property-premium-listing group min-w-0 cursor-pointer rounded-[var(--bible-radius-media)] border border-[color:var(--bible-hairline)] bg-card p-2 transition-shadow hover:shadow-[var(--bible-shadow-hover)]",
+        isSelected && "ring-2 ring-primary ring-offset-2 ring-offset-background",
         className,
       )}
       onClick={handleClick}
@@ -161,7 +162,7 @@ function PropertyListingCardBase({
       onMouseLeave={() => onHover?.(null)}
     >
       {/* Image Carousel — Airbnb style */}
-      <div className="relative">
+      <div className="relative overflow-hidden rounded-[var(--bible-radius-media)]">
         <PropertyImageCarousel
           key={property.id}
           images={images}
@@ -189,31 +190,23 @@ function PropertyListingCardBase({
           />
         </div>
 
-        {/* Badges — top left.
-            "Guest favorite" supersedes the legacy `is_featured` badge when
-            the property meets the rating + review threshold (Airbnb pattern). */}
-        <div className="absolute top-2 left-2 flex flex-col gap-1 z-10">
-          {primaryViewLabel && <Badge className="bg-background text-foreground border-0 rounded-none">{primaryViewLabel}</Badge>}
-        </div>
-
-        {/* ClearView grade overlay — bottom-left of image */}
-        {(() => {
-          const grade = (property as unknown as { clearview_badge?: string | null }).clearview_badge;
-          if (!grade) return null;
-          return (
-            <div className="absolute bottom-2 left-2 z-10">
-              <ClearViewBadge grade={grade as 'AAA' | 'AA' | 'A' | 'BBB' | 'BB'} size="xs" isRu={isRu} className="shadow-sm" />
-            </div>
-          );
-        })()}
+        {property.is_verified && (
+          <ManagementMark level="listed" className="absolute left-2 top-2 z-10" />
+        )}
       </div>
 
-      {/* Content — Airbnb compact style */}
-      <div className="mt-3 space-y-1.5">
+      <div className="mt-3 space-y-1.5 px-1 pb-1">
+        <div className="flex flex-wrap items-center gap-1">
+          {primaryViewLabel && <Badge variant="secondary">{primaryViewLabel}</Badge>}
+          {(() => {
+            const grade = (property as unknown as { clearview_badge?: string | null }).clearview_badge;
+            return grade ? <ClearViewBadge grade={grade as 'AAA' | 'AA' | 'A' | 'BBB' | 'BB'} size="xs" isRu={isRu} /> : null;
+          })()}
+        </div>
         {/* Listing name is the primary destination; district and rating are secondary. */}
         <div className="flex items-start justify-between gap-1">
           <h3 className="min-w-0 font-sans text-base font-semibold leading-snug text-foreground">
-            <Link state={publicJourneyState(location)} to={detailHref} onClick={(event) => event.stopPropagation()} className="line-clamp-2 break-words focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2">
+            <Link state={publicJourneyState(location)} to={detailHref} onClick={(event) => event.stopPropagation()} className="ds-focus line-clamp-2 break-words">
               {title || districtDisplay}
             </Link>
           </h3>

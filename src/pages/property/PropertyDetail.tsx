@@ -1,3 +1,5 @@
+import { StayOwnershipBridge } from '@/components/property/StayOwnershipBridge';
+import { ManagementMark } from '@/components/property/ManagementMark';
 import { PropertyRentalRateSummary } from '@/components/property/PropertyRentalRateSummary';
 import '@/styles/public-commerce.css';
 import '@/styles/premium-public.css';
@@ -434,6 +436,8 @@ export default function PropertyDetail() {
           </div>
         </div>
 
+        {property.is_verified && <ManagementMark level="listed" className="mb-2" />}
+
         {/* Image Gallery */}
         {mediaQuery.isError && (
           <div role="status" className="mb-4 flex flex-wrap items-center justify-between gap-3 border border-border p-3 text-sm">
@@ -454,7 +458,9 @@ export default function PropertyDetail() {
         <div>
           <div className="premium-detail-grid">
             <article className="premium-property-content min-w-0">
-              {propertyDesc && <section className="property-detail-intro"><h2>{isRu ? 'Дом для вашего ритма' : 'A home for your rhythm'}</h2><p>{propertyDesc}</p></section>}
+              {propertyDesc && <section className="property-detail-intro"><h2>{isRu ? 'Об объекте' : 'About this home'}</h2><p>{propertyDesc}</p></section>}
+
+              {!isSaleListing && pricing.hasOffer && <StayOwnershipBridge projectId={property.project?.id} district={property.district} />}
 
               {!isSaleListing && pricing.hasOffer && <PropertyRentalRateSummary property={property} rentalTerms={rentalTerms} />}
 

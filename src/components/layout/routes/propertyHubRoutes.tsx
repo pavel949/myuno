@@ -98,6 +98,7 @@ export const propertyHubRoutes = (
     <Route path="offplan" element={<PropertyOffplanEntry />} />
     <Route path="offplan/search" element={<LazyPage><Pages.OffplanIndex /></LazyPage>} />
     <Route path="offplan/:id" element={<LazyPage><Pages.OffplanDetail /></LazyPage>} />
+    <Route path="offplan/:id/units/:unitId" element={<LazyPage><Pages.OffplanUnitDetail /></LazyPage>} />
     <Route path="developers" element={<LazyPage><Pages.DevelopersIndex /></LazyPage>} />
     <Route path="developers/:id" element={<LazyPage><Pages.DeveloperDetail /></LazyPage>} />
     {/* Legacy /property/projects → canonical /property/offplan */}
@@ -105,6 +106,7 @@ export const propertyHubRoutes = (
 
     {/* Resale / Secondary Market */}
     <Route path="resale" element={<LazyPage><Pages.ResaleIndex /></LazyPage>} />
+    <Route path="resale/:id/offer" element={<LazyPage><Pages.ResaleOffer /></LazyPage>} />
     <Route path="resale/:id" element={<LazyPage><Pages.ResaleDetail /></LazyPage>} />
 
     {/* RE-first revenue engine — explainer + ClearView product landing */}

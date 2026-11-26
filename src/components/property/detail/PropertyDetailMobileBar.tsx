@@ -1,6 +1,6 @@
 /**
  * PropertyDetailMobileBar — Fixed bottom CTA for the property detail page on mobile.
- * Shows price + "Reserve / Select dates / Book now" or "Request consultation" for sale listings.
+ * Shows the public rate and opens review before a rental request or booking.
  */
 import { useLayoutEffect, useRef } from 'react';
 import { Calendar as CalendarIcon, MessageCircle } from 'lucide-react';
@@ -88,7 +88,7 @@ export function PropertyDetailMobileBar({
   const handleReserve = () => onOpenDatePicker();
 
   return (
-    <div ref={actionBarRef} data-property-detail-action-bar className="fixed bottom-[var(--bottom-nav-h)] left-0 right-0 z-40 p-4 bg-background/95 border-t border-border shadow-lg lg:hidden">
+    <div ref={actionBarRef} data-property-detail-action-bar className="fixed bottom-[var(--bottom-nav-h)] left-0 right-0 z-40 p-4 bg-background border-t border-border lg:hidden">
       <div className="flex flex-wrap items-center gap-3">
         {isSaleListing || isLongStayOnly ? (
           <>
@@ -119,6 +119,7 @@ export function PropertyDetailMobileBar({
         ) : (
           <>
             <div className="flex-1 min-w-0">
+              {rentalPriceLabel && <p className="text-body font-semibold">{rentalPriceLabel}</p>}
               {dateRange?.from && dateRange?.to ? (
                 <>
                   <p className="text-xs text-muted-foreground">
@@ -147,7 +148,7 @@ export function PropertyDetailMobileBar({
             <PropertyQuestionButton propertyId={propertyId} title={isRu ? titleRu || titleEn : titleEn || titleRu} context={{ dateRange, guests: guestCount }} className="h-auto min-h-11 py-2 text-xs whitespace-normal" />
             <Button
               size="lg"
-              className="h-auto min-h-11 px-3 py-2 text-xs whitespace-normal"
+              className="h-auto min-h-12 px-3 py-2 text-body-sm whitespace-normal"
               onClick={handleReserve}
             >
               <CalendarIcon className="w-4 h-4 shrink-0" />

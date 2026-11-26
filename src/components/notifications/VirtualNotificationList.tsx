@@ -10,7 +10,7 @@ interface VirtualNotificationListProps {
 
 export function VirtualNotificationList({ notifications, onMarkRead, onDelete }: VirtualNotificationListProps) {
   return (
-    <div className="space-y-2">
+    <ul className="space-y-2">
       <AnimatePresence mode="popLayout">
         {notifications.map((notification) => (
           <NotificationItem
@@ -21,6 +21,6 @@ export function VirtualNotificationList({ notifications, onMarkRead, onDelete }:
           />
         ))}
       </AnimatePresence>
-    </div>
+    </ul>
   );
 }

@@ -17,6 +17,9 @@ import { ru, th as thLocale } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import { useAuth } from '@/contexts/AuthContext';
+import { ContentSkeleton } from '@/components/ui/ContentSkeleton';
+import { QueryRecovery } from '@/components/shared/QueryRecovery';
+import { pickLang } from '@/lib/i18n/pickLang';
 
 interface ProfileWithRoles {
   id: string;
@@ -24,7 +27,7 @@ interface ProfileWithRoles {
   email: string | null;
   phone: string | null;
   created_at: string | null;
-  status: string;
+  status: string | null;
   roles: string[];
 }
 
@@ -49,6 +52,7 @@ const STATUS_MAP: Record<string, { status: 'active' | 'warning' | 'danger' | 'in
 
 export function ControlUsersTab() {
   const { language, t } = useLanguage();
+  const local = (ru: string, en: string, th: string) => pickLang(language, { ru, en, th });
   const { user: currentUser } = useAuth();
   const queryClient = useQueryClient();
   const dateLocale = language === 'ru' ? ru : language === 'th' ? thLocale : undefined;
@@ -106,8 +110,9 @@ export function ControlUsersTab() {
     }
   };
 
-  const { data: profiles, isLoading } = useQuery({
-    queryKey: ['admin-profiles-with-roles', searchQuery],
+  const { data: profiles, isLoading, isError, isFetching, refetch } = useQuery({
+    queryKey: ['admin-profiles-with-roles', currentUser?.id, searchQuery],
+    enabled: Boolean(currentUser?.id),
     queryFn: async (): Promise<ProfileWithRoles[]> => {
       let query = (supabase as any)
         .from('profiles')
@@ -125,22 +130,26 @@ export function ControlUsersTab() {
       if (!profilesData || profilesData.length === 0) return [];
 
       const ids = profilesData.map((p: any) => p.id);
-      const { data: rolesData } = await supabase
+      const { data: rolesData, error: rolesError, count: roleCount } = await supabase
         .from('user_roles')
-        .select('user_id, role')
+        .select('user_id, role', { count: 'exact' })
         .in('user_id', ids);
+      if (rolesError) throw rolesError;
+      if (roleCount != null && roleCount !== rolesData?.length) {
+        throw new Error('Incomplete account role assignments');
+      }
 
-      const rolesMap = new Map<string, string[]>();
+      const rolesMap = new Map<string, Set<string>>();
       rolesData?.forEach(r => {
-        const existing = rolesMap.get(r.user_id) || [];
-        existing.push(r.role);
+        const existing = rolesMap.get(r.user_id) ?? new Set<string>();
+        existing.add(r.role);
         rolesMap.set(r.user_id, existing);
       });
 
       return profilesData.map((p: any) => ({
         ...p,
-        status: p.status || 'active',
-        roles: rolesMap.get(p.id) || [],
+        status: p.status ?? null,
+        roles: Array.from(rolesMap.get(p.id) ?? []),
       }));
     }
   });
@@ -157,31 +166,40 @@ export function ControlUsersTab() {
               <Users className="h-4 w-4" />
               {t('admin.users.title')}
             </CardTitle>
-            <Badge variant="secondary" className="text-xs">
-              {profiles?.length || 0}
-            </Badge>
+            {profiles && !isError && (
+              <Badge variant="secondary" className="text-xs">
+                <span className="sr-only">{local('Аккаунтов показано', 'Accounts shown', 'บัญชีที่แสดง')} </span>
+                {profiles.length}
+              </Badge>
+            )}
           </div>
         </CardHeader>
         <CardContent className="px-4 pb-4">
           <div className="space-y-3">
             <div className="relative max-w-sm">
-              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+              <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" aria-hidden="true" />
               <Input
+                type="search"
+                aria-label={local('Поиск аккаунтов', 'Search accounts', 'ค้นหาบัญชี')}
                 placeholder={t('admin.users.searchPlaceholder')}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-8 h-8 text-sm"
+                className="min-h-11 pl-9 text-sm"
               />
             </div>
 
             {isLoading ? (
-              <div className="text-center py-6 text-muted-foreground text-sm">
-                {t('admin.users.loading')}
+              <div role="status">
+                <span className="sr-only">{t('admin.users.loading')}</span>
+                <div aria-hidden="true"><ContentSkeleton variant="list" count={3} /></div>
               </div>
+            ) : isError ? (
+              <QueryRecovery onRetry={refetch} isRetrying={isFetching} />
             ) : (
               <div className="space-y-1">
                 {profiles?.map((profile) => {
-                  const statusInfo = STATUS_MAP[profile.status] || STATUS_MAP.active;
+                  const statusInfo = profile.status ? STATUS_MAP[profile.status] : undefined;
+                  const effectiveStatus = profile.status || 'active';
                   return (
                     <Collapsible
                       key={profile.id}
@@ -189,14 +207,14 @@ export function ControlUsersTab() {
                       onOpenChange={() => setExpandedUser(prev => prev === profile.id ? null : profile.id)}
                     >
                       <CollapsibleTrigger asChild>
-                        <div className="flex items-center gap-3 p-2.5 rounded-none hover:bg-muted/50 cursor-pointer transition-colors border border-transparent hover:border-border">
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-2 flex-wrap">
-                              <span className="text-sm font-medium truncate">
+                        <button type="button" className="flex w-full items-start gap-3 rounded-[var(--bible-radius-card)] border border-transparent p-3 text-left transition-colors hover:border-border hover:bg-muted/50">
+                          <span className="min-w-0 flex-1">
+                            <span className="flex flex-wrap items-center gap-2">
+                              <span className="break-words text-sm font-medium">
                                 {profile.full_name || '—'}
                               </span>
-                              <StatusPill status={statusInfo.status} className="text-[10px]">
-                                {t(statusInfo.labelKey)}
+                              <StatusPill status={statusInfo?.status ?? 'inactive'} className="text-[10px]">
+                                {statusInfo ? t(statusInfo.labelKey) : local('Статус не указан', 'Status unavailable', 'ไม่ทราบสถานะ')}
                               </StatusPill>
                               {profile.roles.map(role => (
                                 <Badge
@@ -207,12 +225,12 @@ export function ControlUsersTab() {
                                   {role}
                                 </Badge>
                               ))}
-                            </div>
-                            <p className="text-xs text-muted-foreground truncate">
+                            </span>
+                            <span className="block break-all text-xs text-muted-foreground">
                               {profile.email || '—'}
-                            </p>
-                          </div>
-                          <span className="text-[11px] text-muted-foreground whitespace-nowrap">
+                            </span>
+                          </span>
+                          <span className="min-w-0 text-body-sm text-muted-foreground [overflow-wrap:anywhere]">
                             {profile.created_at
                               ? formatDistanceToNow(new Date(profile.created_at), {
                                   addSuffix: false,
@@ -220,11 +238,11 @@ export function ControlUsersTab() {
                                 })
                               : '—'}
                           </span>
-                          <ChevronDown className={cn(
-                            'h-3.5 w-3.5 text-muted-foreground transition-transform',
+                          <ChevronDown aria-hidden="true" className={cn(
+                            'size-4 shrink-0 text-muted-foreground transition-transform',
                             expandedUser === profile.id && 'rotate-180'
                           )} />
-                        </div>
+                        </button>
                       </CollapsibleTrigger>
                       <CollapsibleContent>
                         <div className="ml-3 pl-3 border-l-2 border-muted py-2 space-y-3">
@@ -247,7 +265,7 @@ export function ControlUsersTab() {
 
                           {/* Status Actions */}
                           <div className="flex flex-wrap gap-1.5">
-                            {profile.status !== 'active' && (
+                            {effectiveStatus !== 'active' && (
                               <Button
                                 variant="outline"
                                 size="sm"
@@ -259,7 +277,7 @@ export function ControlUsersTab() {
                                 {t('admin.users.actions.activate')}
                               </Button>
                             )}
-                            {profile.status !== 'suspended' && !isSelf(profile.id) && !profile.roles.includes('admin') && (
+                            {effectiveStatus !== 'suspended' && !isSelf(profile.id) && !profile.roles.includes('admin') && (
                               <Button
                                 variant="outline"
                                 size="sm"
@@ -271,7 +289,7 @@ export function ControlUsersTab() {
                                 {t('admin.users.actions.suspend')}
                               </Button>
                             )}
-                            {profile.status !== 'deactivated' && !isSelf(profile.id) && !profile.roles.includes('admin') && (
+                            {effectiveStatus !== 'deactivated' && !isSelf(profile.id) && !profile.roles.includes('admin') && (
                               <Button
                                 variant="outline"
                                 size="sm"

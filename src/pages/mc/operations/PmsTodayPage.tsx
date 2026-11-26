@@ -8,15 +8,17 @@ import { BookingDetailSheet } from '@/components/owner/BookingDetailSheet';
 import { PageShell } from '@/components/page/PageShell';
 import { PageHeader } from '@/components/page/PageHeader';
 import { Link, useLocation } from 'react-router-dom';
-import { LogIn, LogOut, BedDouble, MessageSquare, RefreshCw, Phone, CalendarDays, ListTodo, ArrowRight, AlertTriangle } from 'lucide-react';
+import { LogIn, LogOut, BedDouble, MessageSquare, RefreshCw, Phone, CalendarDays, ListTodo, ArrowRight, AlertTriangle, WifiOff } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { pickLang } from '@/lib/i18n/pickLang';
 import { APP_ROUTES } from '@/lib/config/routes';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
+import { StatusTag, recordedStatusTone } from '@/components/ui/status-tag';
 import { cn } from '@/lib/utils';
 import { usePmsToday, type TodayBooking, type TodayRequest, type TodayTask, type TodayUnit, type UnitState } from '@/hooks/usePmsToday';
+import { useIsOffline } from '@/hooks/useOfflineStatus';
 
 import { toBangkokDateKey } from '@/lib/hotelDates';
 
@@ -53,6 +55,7 @@ export default function PmsTodayPage() {
   const { language } = useLanguage();
   const t = (v: T) => pickLang(language, v);
   const d = usePmsToday();
+  const isOffline = useIsOffline();
   const location = useLocation();
   const [selectedBookingId, setSelectedBookingId] = useState<string | null>(null);
   const complete = !d.isLoading && !d.error && !d.truncatedSources.length && !d.countUnavailableSources.length;
@@ -96,7 +99,7 @@ export default function PmsTodayPage() {
           {t(kind === 'in' ? { en: 'Arrival', ru: 'Заезд', th: 'เช็คอิน' } : kind === 'out' ? { en: 'Departure', ru: 'Выезд', th: 'เช็คเอาท์' } : { en: 'Until', ru: 'До', th: 'ถึง' })}: {toBangkokDateKey(kind === 'in' ? b.check_in : b.check_out) ?? '—'}
         </p>
         <div className="mt-2 flex flex-wrap gap-1">
-          {b.status && <Badge variant="secondary" title={b.status} className="max-w-full whitespace-normal break-words [overflow-wrap:anywhere]">{label(b.status)}</Badge>}
+          {b.status && <StatusTag tone={recordedStatusTone(b.status)} title={b.status}>{label(b.status)}</StatusTag>}
           {b.source && <Badge variant="outline" title={b.source} className="max-w-full whitespace-normal break-words font-mono text-xs [overflow-wrap:anywhere]">{b.source}</Badge>}
         </div>
       </button>
@@ -120,7 +123,7 @@ export default function PmsTodayPage() {
         {r.description && <p title={r.description} className="mt-1 line-clamp-2 break-words text-sm text-muted-foreground [overflow-wrap:anywhere]">{r.description}</p>}
         <div className="mt-2 flex flex-wrap gap-1">
           {r.priority && <Badge variant="outline" className={cn('max-w-full whitespace-normal break-words', (r.priority === 'urgent' || r.priority === 'high') && 'border-destructive text-destructive')}>{label(r.priority)}</Badge>}
-          {r.status && <Badge variant="secondary" className="max-w-full whitespace-normal break-words [overflow-wrap:anywhere]">{label(r.status)}</Badge>}
+          {r.status && <StatusTag tone={recordedStatusTone(r.status)}>{label(r.status)}</StatusTag>}
         </div>
       </Link>
     </li>;
@@ -140,7 +143,7 @@ export default function PmsTodayPage() {
           <p className="mt-1 break-words text-sm text-muted-foreground [overflow-wrap:anywhere]">{d.titleOf(task.property_id)}</p>
           <div className="mt-2 flex flex-wrap gap-1">
             <Badge variant="outline">{task.source === 'ops' ? t({ en: 'Operations', ru: 'Операции', th: 'งานปฏิบัติการ' }) : 'CRM'}</Badge>
-            <Badge variant="secondary">{task.status ? label(task.status) : t({ en: 'Status not recorded', ru: 'Статус не указан', th: 'ไม่ได้บันทึกสถานะ' })}</Badge>
+            <StatusTag tone={recordedStatusTone(task.status)}>{task.status ? label(task.status) : t({ en: 'Status not recorded', ru: 'Статус не указан', th: 'ไม่ได้บันทึกสถานะ' })}</StatusTag>
             {task.priority && <Badge variant="outline">{label(task.priority)}</Badge>}
           </div>
           <p className="mt-2 text-sm text-muted-foreground">{due ? `${t(due < d.today ? { en: 'Overdue', ru: 'Просрочено', th: 'เกินกำหนด' } : { en: 'Due today', ru: 'На сегодня', th: 'ครบกำหนดวันนี้' })}: ${due}` : t({ en: 'Date not recorded', ru: 'Дата не указана', th: 'ไม่ได้บันทึกวันที่' })}</p>
@@ -161,7 +164,7 @@ export default function PmsTodayPage() {
     </Link>
   </li>;
 
-  const Flow = ({ id, icon: Icon, title, count, children }: { id?: string; icon: typeof LogIn; title: string; count: number; children: ReactNode }) => <section aria-labelledby={id} className="min-w-0 rounded-lg border border-border bg-card p-3 sm:p-4">
+  const Flow = ({ id, icon: Icon, title, count, children }: { id?: string; icon: typeof LogIn; title: string; count: number; children: ReactNode }) => <section aria-labelledby={id} className="min-w-0 rounded-[var(--bible-radius-card)] border border-[color:var(--bible-hairline)] bg-card p-3 sm:p-4">
     <header className="flex min-w-0 items-start gap-2 border-b border-border pb-3">
       <Icon aria-hidden className="mt-1 size-4 shrink-0 text-muted-foreground" />
       <h3 id={id} tabIndex={id ? -1 : undefined} className="min-w-0 flex-1 scroll-mt-28 break-words font-semibold [overflow-wrap:anywhere]">{title}</h3>
@@ -196,6 +199,18 @@ export default function PmsTodayPage() {
       }
     />
 
+    {isOffline && (
+      <div role="status" className="flex items-start gap-3 rounded-[var(--bible-radius-card)] border border-info/30 bg-info/10 p-4">
+        <WifiOff className="size-5 shrink-0" aria-hidden="true" />
+        <div>
+          <p className="font-semibold">{t({ en: 'You’re offline', ru: 'Нет подключения', th: 'คุณออฟไลน์อยู่' })}</p>
+          <p className="text-body-sm text-muted-foreground">
+            {t({ en: 'Reconnect to refresh today’s workspace.', ru: 'Подключитесь к сети, чтобы обновить сводку на сегодня.', th: 'เชื่อมต่ออินเทอร์เน็ตเพื่อรีเฟรชพื้นที่ทำงานวันนี้' })}
+          </p>
+        </div>
+      </div>
+    )}
+
     {complete && !!d.companyId && !!d.propertyIds?.length && <Suspense fallback={<Skeleton className="h-24" />}>
       <PropertyInquiriesWidget companyScope={{ id: d.companyId, propertyIds: d.propertyIds }} />
     </Suspense>}
@@ -208,7 +223,7 @@ export default function PmsTodayPage() {
     </div> : !d.hasProperties ? <section className="py-6">
       <h2 className="font-medium">{t({ en: 'No properties', ru: 'Нет объектов', th: 'ไม่มีที่พัก' })}</h2>
       <p className="mt-2 text-sm text-muted-foreground">{t({ en: 'Add a property to see arrivals and departures here.', ru: 'Добавьте объект, чтобы видеть здесь заезды и выезды.', th: 'เพิ่มที่พักเพื่อดูการเช็คอินและเช็คเอาท์' })}</p>
-      <Button asChild className="mt-4"><Link to={APP_ROUTES.MC_PROPERTIES}>{t({ en: 'Go to properties', ru: 'Перейти к объектам', th: 'ไปที่ที่พัก' })}</Link></Button>
+      <Button asChild className="mt-4 min-h-11"><Link to={APP_ROUTES.MC_PROPERTIES}>{t({ en: 'Go to properties', ru: 'Перейти к объектам', th: 'ไปที่ที่พัก' })}</Link></Button>
     </section> : (d.truncatedSources.length > 0 || d.countUnavailableSources.length > 0) ? <div role="alert" className="border border-accent bg-accent/10 p-4 text-sm">
       {t({ en: 'Today’s snapshot is incomplete: not all records are loaded, or completeness could not be verified. Counts and readiness signals are withheld. Open Tasks or Calendar to continue.', ru: 'Сводка на сегодня неполная: загружены не все записи или полноту данных не удалось проверить. Счётчики и признаки готовности скрыты. Продолжите в задачах или календаре.', th: 'สรุปวันนี้ไม่ครบถ้วน: โหลดข้อมูลไม่ครบหรือไม่สามารถตรวจสอบความครบถ้วนได้ จึงไม่แสดงจำนวนและสัญญาณความพร้อม โปรดเปิดงานหรือปฏิทินเพื่อดำเนินการต่อ' })}
     </div> : <>
@@ -216,7 +231,7 @@ export default function PmsTodayPage() {
         {jumpLinks.map(({ id, label: linkLabel, count }) => (
           <li key={id} className="min-w-0">
             <Link to={{ pathname: location.pathname, search: location.search, hash: `#${id}` }}
-              className={cn('flex min-h-11 min-w-0 items-center justify-between gap-2 rounded-lg border border-border bg-card px-3 py-2 text-sm hover:bg-muted/50', focusLink)}>
+              className={cn('flex min-h-11 min-w-0 items-center justify-between gap-2 rounded-[var(--bible-radius-card)] border border-[color:var(--bible-hairline)] bg-card px-3 py-2 text-sm hover:bg-muted/50', focusLink)}>
               <span className="min-w-0 font-medium [overflow-wrap:anywhere]">{linkLabel}</span>
               <span className="shrink-0 tabular-nums text-muted-foreground">{count}</span>
             </Link>
