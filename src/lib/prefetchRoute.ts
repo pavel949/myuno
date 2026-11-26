@@ -43,10 +43,22 @@ const ROUTE_CHUNKS: Record<string, () => Promise<unknown>> = {
 
   // Property hubs (heavy — biggest win from prefetch)
   '/property': () => import('@/pages/property/PropertyHub'),
+  '/property/rent': () => Promise.all([
+    import('@/pages/property/PropertyHub'),
+    import('@/pages/property/PropertyLanding'),
+  ]),
+  '/property/search': () => Promise.all([
+    import('@/pages/property/PropertyHub'),
+    import('@/pages/property/PropertySearchPage'),
+  ]),
   '/newbuilds': () => import('@/pages/newbuilds/NewbuildsLanding'),
 
   // Discovery & nav hubs
-  '/discover': () => import('@/components/navigation/v3/NavigatorPageV3'),
+  '/discover': () => import('@/pages/discover/DiscoveryHubPage'),
+  '/discover/buy': () => import('@/pages/discover/GoalEntryPage'),
+  '/discover/services': () => import('@/pages/discover/GoalEntryPage'),
+  '/experiences': () => import('@/pages/experiences/ExperiencesIndex'),
+  '/services': () => import('@/pages/services/ServicesIndex'),
   '/map': () => import('@/pages/MapView'),
   '/bookings': () => import('@/pages/Bookings'),
 
@@ -87,43 +99,6 @@ export function prefetchRoute(path: string | undefined | null): void {
       inflight.delete(key);
     });
     return;
-  }
-}
-
-/**
- * Schedule prefetching of all registered routes during browser idle time.
- * Call once when a high-intent surface opens (e.g. AllAppsDrawer).
- */
-export function prefetchAllPopularRoutes(): void {
-  const keys = Object.keys(ROUTE_CHUNKS);
-  let i = 0;
-  const CONCURRENCY = 2;
-
-  const pump = () => {
-    if (i >= keys.length) return;
-    const key = keys[i++];
-    const loader = ROUTE_CHUNKS[key];
-    if (!loader || inflight.has(key)) {
-      pump();
-      return;
-    }
-    inflight.add(key);
-    loader()
-      .catch(() => inflight.delete(key))
-      .finally(() => setTimeout(pump, 0));
-  };
-
-  type IdleWin = Window & {
-    requestIdleCallback?: (cb: () => void, opts?: { timeout: number }) => number;
-  };
-  const w = window as IdleWin;
-  const start = () => {
-    for (let n = 0; n < CONCURRENCY; n++) pump();
-  };
-  if (typeof w.requestIdleCallback === 'function') {
-    w.requestIdleCallback(start, { timeout: 2000 });
-  } else {
-    setTimeout(start, 200);
   }
 }
 

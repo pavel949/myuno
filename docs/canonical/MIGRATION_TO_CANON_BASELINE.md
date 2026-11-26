@@ -244,7 +244,7 @@ fontFamily: {
 **Цель:** заменить все legacy-классы (palette + radii) в `src/**` на канонические семантические токены, чтобы уменьшить `canon-overrides.css` до safety-net.
 
 ### 1 · Codemod
-**`scripts/canon-cleanup-codemod.mjs`** — детерминированный AST-free regex codemod, зеркалирующий маппинг из `canon-overrides.css`:
+**[`canon-cleanup-codemod.mjs` (исторический снимок)](https://github.com/pavel949/myuno/blob/c162008277b0f7bd73346c494fb1f3517f63ad81/scripts/canon-cleanup-codemod.mjs)** — детерминированный AST-free regex codemod, зеркалирующий маппинг из `canon-overrides.css`:
 
 | Family | → semantic token |
 |---|---|
@@ -262,7 +262,7 @@ fontFamily: {
 - `rounded-full` НЕ трогается (аватары/icon chips сохраняются).
 
 ### 2 · Применение
-Запуск: `node scripts/canon-cleanup-codemod.mjs --write`
+Исторически использовался режим записи. Скрипт выведен из активного репозитория: правила старого канона не следует повторно применять к текущему дереву.
 
 | Метрика | Значение |
 |---|---|
@@ -292,7 +292,7 @@ fontFamily: {
 ### 6 · Glassmorphism cleanup follow-up
 ESLint поймал 209 остаточных `backdrop-blur` — все были голым токеном без суффикса (codemod Phase 5 матчил `backdrop-blur-{sm,md,…}` с обязательным дефисом).
 
-**`scripts/canon-strip-glassmorphism.mjs`** — отдельный sweep, удалил 209 токенов из 144 файлов. После прохода:
+**[`canon-strip-glassmorphism.mjs` (исторический снимок)](https://github.com/pavel949/myuno/blob/c162008277b0f7bd73346c494fb1f3517f63ad81/scripts/canon-strip-glassmorphism.mjs)** — отдельный sweep, удалил 209 токенов из 144 файлов. После прохода:
 - Остаток `backdrop-blur*` в коде: **0**.
 - `canon-overrides.css §1` (глобальное подавление) остаётся как safety-net против внешнего HTML.
 

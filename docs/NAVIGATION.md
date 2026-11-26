@@ -14,7 +14,6 @@ One predictable navigation system across **mobile / tablet / desktop** for every
 | [`src/lib/nav/navigationModel.ts`](../src/lib/nav/navigationModel.ts) | Re-exports primary nav as `PRIMARY_NAV`, `SIDEBAR_NAV`, `FAB_ACTIONS`, bottom-bar helpers, `getWorkspaceDrawerGroups` |
 | [`src/lib/nav/roleIA.ts`](../src/lib/nav/roleIA.ts) | Role / URL / shell matrix (read before changing IA) |
 | [`src/lib/nav/floatingStack.ts`](../src/lib/nav/floatingStack.ts) | Z-index + `bottom-*` offsets for compare / chat / PWA / contextual FAB |
-| [`src/lib/nav/guestStayNavDraft.ts`](../src/lib/nav/guestStayNavDraft.ts) | Draft guest-stay sidebar — **not wired** until a product shell exists |
 | [`src/lib/config/routes.ts`](../src/lib/config/routes.ts) | `APP_ROUTES` — use for all path strings in nav data |
 | [`src/lib/nav/clusterCatalog.ts`](../src/lib/nav/clusterCatalog.ts) | Public **cluster → service** map (ARRIVE, LIVE, ENJOY, …). Used by `/discover`, left `AppDrawer`, and mobile `AllAppsDrawer` |
 | [`docs/ECOSYSTEM_NAMING.md`](ECOSYSTEM_NAMING.md) | RU/EN/TH **glossary** + rules — keep service names in sync with [`ecosystemGlossary.ts`](../src/lib/ecosystemGlossary.ts) |
