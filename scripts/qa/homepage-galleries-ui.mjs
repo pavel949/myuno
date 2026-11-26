@@ -165,7 +165,7 @@ if (
   throw Error('Production client included');
 // Compile the same stylesheet stack as the actual app entry and Landing.
 const styleSources = ['src/index.css', 'src/styles/cinematic-home.css', 'src/styles/premium-public.css',
-  'src/styles/homepage-refinement.css', 'src/styles/home-reference.css', 'src/styles/home-mobile-polish.css'];
+  'src/styles/homepage-refinement.css', 'src/styles/home-reference.css', 'src/styles/home-mobile-polish.css', 'src/styles/marketplace-unity.css'];
 const compiledIndex = process.env.HOME_GALLERY_INDEX_CSS;
 const css = await Promise.all(styleSources.map(async (file, index) => {
   if (compiledIndex) return readFile(index === 0 ? compiledIndex : path.join(root, file), 'utf8');

@@ -9,6 +9,9 @@ afterEach(cleanup);
 
 describe('myUNO managed marketplace entries', () => {
   it.each([
+    ['property', 'Недвижимость на Пхукете', 'Homes in Phuket', 'อสังหาริมทรัพย์ในภูเก็ต'],
+    ['discovery', 'Начните с вашей задачи', 'Start with your goal', 'เริ่มจากเป้าหมายของคุณ'],
+    ['live', 'Переезд и жизнь на Пхукете', 'Moving to and living in Phuket', 'ย้ายมาและใช้ชีวิตในภูเก็ต'],
     ['rent', 'Аренда на Пхукете', 'Rent in Phuket', 'เช่าที่พักในภูเก็ต'],
     ['buy', 'Купить недвижимость на Пхукете', 'Buy property in Phuket', 'ซื้ออสังหาริมทรัพย์ในภูเก็ต'],
     ['experiences', 'Впечатления на Пхукете', 'Experiences in Phuket', 'ประสบการณ์ในภูเก็ต'],

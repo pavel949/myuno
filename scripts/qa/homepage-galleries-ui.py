@@ -196,6 +196,19 @@ async def main():
                         else:
                             await expect(image).not_to_be_visible()
                         await expect(card.locator('.home-service-category-copy')).to_be_visible()
+                        geometry = await card.evaluate("""node => {
+                          const art=node.querySelector('.home-service-category-art');
+                          const action=node.querySelector('.home-service-category-copy > span');
+                          const style=getComputedStyle(node);
+                          return {artWidth:art.getBoundingClientRect().width,artHeight:art.getBoundingClientRect().height,
+                            actionHeight:action.getBoundingClientRect().height,radius:style.borderRadius,
+                            tokenRadius:getComputedStyle(document.documentElement).getPropertyValue('--radius-md').trim(),
+                            border:style.borderTopWidth};
+                        }""")
+                        assert abs(geometry['artWidth']-44)<=1 and abs(geometry['artHeight']-44)<=1, geometry
+                        assert geometry['actionHeight']>=44 and geometry['border']=='1px',geometry
+                        assert geometry['radius']==geometry['tokenRadius'],geometry
+
 
                     # Editorial guide/service grids and horizontal listing rails keep their distinct layouts.
                     grid_sections=0;tested_controls=0

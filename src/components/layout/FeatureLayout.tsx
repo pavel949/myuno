@@ -367,6 +367,7 @@ function MiniappMode({
       {marketplaceIntro && <div className={pageWidth === 'default' ? ECOSYSTEM_PAGE_CONTAINER : PUBLIC_CONTENT_LAYOUT[pageWidth]}>{marketplaceIntro}</div>}
       <div className="relative">
         <UnifiedHeader
+          className={pageWidth === 'catalogue' ? 'marketplace-catalogue-toolbar' : undefined}
           compactOverview={Boolean(marketplaceIntro)}
           hideHeading={Boolean(marketplaceIntro)}
           containerClassName={pageWidth === 'default' ? undefined : PUBLIC_CONTENT_LAYOUT[pageWidth]}

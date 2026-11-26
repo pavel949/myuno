@@ -6798,7 +6798,7 @@
     },
     {
       "file": "src/components/landing/MarketplaceEntry.tsx",
-      "sha256": "3eb7b288af704d9b3d189aaeed483d6167080df0bf65202ed7e8d04bcfe4c86a",
+      "sha256": "56c65a82951c019586e84ffeaf3519a68c932bfe9e32d8d531d87bdffc8e4005",
       "directRouteDeclarations": [],
       "runtime": "NOTTESTED",
       "visual": "NOTTESTED",
@@ -6808,7 +6808,7 @@
           "source": "@/components/ui/button",
           "instances": 1,
           "lines": [
-            46
+            54
           ]
         }
       ]
@@ -6928,7 +6928,7 @@
     },
     {
       "file": "src/components/layout/FeatureLayout.tsx",
-      "sha256": "e0160a9b6fb550d7e5bfd1704d75fd1b3fe03fe2e24f133c5c01e95998e89443",
+      "sha256": "c76e8d7fd3ec16dd59c4ada8eb21c99dcb12f89bf0d89bbdccfdc8883fc48fb0",
       "directRouteDeclarations": [],
       "runtime": "NOTTESTED",
       "visual": "NOTTESTED",
@@ -6944,10 +6944,10 @@
             284,
             299,
             325,
-            478,
-            524,
-            589,
-            604
+            479,
+            525,
+            590,
+            605
           ]
         },
         {
@@ -6955,8 +6955,8 @@
           "source": "@/components/page/EmptyState",
           "instances": 2,
           "lines": [
-            520,
-            530
+            521,
+            531
           ]
         },
         {
@@ -6964,7 +6964,7 @@
           "source": "@/components/uno/LoadingSpinner",
           "instances": 1,
           "lines": [
-            528
+            529
           ]
         }
       ]
@@ -17258,7 +17258,7 @@
     },
     {
       "file": "src/components/services/MarketplaceDiscoveryMenu.tsx",
-      "sha256": "153aae1db99ea9306b88b7db1c2a7ce50a49aa3872b42cca550abafe03e56505",
+      "sha256": "9920af4ec29436d03387bfe72657a346c651fd88c91bfe7e5ebd71e8c18fa41d",
       "directRouteDeclarations": [],
       "runtime": "NOTTESTED",
       "visual": "NOTTESTED",
@@ -17268,7 +17268,7 @@
           "source": "@/components/ui/button",
           "instances": 1,
           "lines": [
-            52
+            57
           ]
         },
         {
@@ -17276,7 +17276,7 @@
           "source": "@/components/ui/sheet",
           "instances": 1,
           "lines": [
-            51
+            56
           ]
         }
       ]
@@ -40506,7 +40506,7 @@
     },
     {
       "file": "src/pages/property/PropertySearchPage.tsx",
-      "sha256": "f620f45f038deaf055e76a6d787477287417a5de98190f01c6fa835f6d211e1f",
+      "sha256": "26187e0d2144f8ef5428f7979bb34c96e16a0e917049198cbb0874b57c7cfb21",
       "directRouteDeclarations": [
         {
           "id": "2394e6ffdd06a39f",
@@ -40523,13 +40523,13 @@
           "source": "@/components/ui/button",
           "instances": 7,
           "lines": [
-            358,
-            413,
-            425,
-            436,
-            506,
-            521,
-            534
+            359,
+            414,
+            426,
+            437,
+            507,
+            522,
+            535
           ]
         },
         {
@@ -40537,7 +40537,7 @@
           "source": "@/components/page/EmptyState",
           "instances": 1,
           "lines": [
-            525
+            526
           ]
         }
       ]

@@ -27,6 +27,13 @@ describe('shared marketplace discovery', () => {
     expect(screen.queryByRole('button', { name: 'All categories' })).toBeNull();
     expect(screen.queryByText(/available|confirmed|free/i)).toBeNull();
   });
+  it('keeps descriptive journey choices and their navigation context in the shared menu', () => {
+    render(<MemoryRouter><MarketplaceDiscoveryMenu title="Journey" allHref="/discover" allLabel="All paths"
+      items={[{ id: 'rent', label: 'Rent a home', description: 'Dates and guests', href: '/property/rent', navigationState: { returnTo: '/property?mode=all' } }]} /></MemoryRouter>);
+    expect(screen.getByRole('link', { name: 'Rent a home' })).toHaveAttribute('href', '/property/rent');
+    expect(screen.getByText('Dates and guests')).toBeVisible();
+    expect(screen.getByRole('link', { name: 'All paths' })).toHaveAttribute('href', '/discover');
+  });
   it('does not invent categories when the recorded category list is empty', () => {
     render(<MemoryRouter><MarketplaceDiscoveryMenu title="Categories" items={[]} onSelect={vi.fn()} /></MemoryRouter>);
     expect(screen.queryByRole('region')).toBeNull();
