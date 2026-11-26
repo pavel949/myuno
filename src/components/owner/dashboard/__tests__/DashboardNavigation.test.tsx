@@ -113,8 +113,8 @@ it('does not present stale rows as current after a reported source failure', () 
 it('preserves primary-button foreground and recognized small typography', () => {
   render(<MemoryRouter><DashboardDestinations businessRole="general" propertyCount={0} /></MemoryRouter>);
   const primary = screen.getByRole('link', { name: 'Объекты' });
-  expect(primary).toHaveClass('bg-primary', 'text-primary-foreground', 'text-sm');
+  expect(primary).toHaveClass('bg-primary', 'text-primary-foreground', 'text-body-sm');
   expect(primary).toHaveClass('flex-col', 'sm:flex-row');
-  expect(primary).not.toHaveClass('text-[15px]', 'text-body-sm');
+  expect(primary).not.toHaveClass('text-[15px]', 'text-sm');
   expect(screen.getByRole('link', { name: 'Календарь' }).querySelector('span')).toHaveClass('break-words', 'min-w-0');
 });

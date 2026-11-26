@@ -2,13 +2,14 @@
  * ResaleDetail — detail page for a secondary market property
  */
 import React, { useState } from 'react';
-import { useParams, useNavigate, useLocation } from 'react-router-dom';
+import { Link, useParams, useNavigate, useLocation } from 'react-router-dom';
 import {
-  MapPin, BedDouble, Bath, Maximize2, Calendar, ArrowRightLeft,
-  TrendingUp, Shield, ChevronLeft, Share2, Phone, ImageOff
+  MapPin, BedDouble, Bath, Maximize2, ArrowRightLeft,
+  Shield, ChevronLeft, ChevronRight, Phone, ImageOff
 } from 'lucide-react';
 import { BackButton } from '@/components/uno/BackButton';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ResponsiveModal } from '@/components/ui/responsive-modal';
@@ -17,8 +18,8 @@ import { APP_ROUTES } from '@/lib/config/routes';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useCurrency } from '@/contexts/CurrencyContext';
 
-import { useResaleProperty } from '@/hooks/useResaleProperties';
-import { ResaleViewingForm } from '@/components/property/ResaleViewingForm';
+import { resaleOfferCurrency, useResaleProperty } from '@/hooks/useResaleProperties';
+import { ResaleEnquiryForm } from '@/components/property/ResaleEnquiryForm';
 import { pickLang } from '@/lib/i18n/pickLang';
 import { cn } from '@/lib/utils';
 import { publicJourneyReturn } from '@/lib/real-estate/publicJourney';
@@ -31,6 +32,7 @@ export default function ResaleDetail() {
   const { language } = useLanguage();
   const { formatPrice } = useCurrency();
   const isRu = language === 'ru';
+  const t = (ru: string, en: string, th: string) => pickLang(language, { ru, en, th });
 
   const [showLeadForm, setShowLeadForm] = useState(false);
   const [currentImageIdx, setCurrentImageIdx] = useState(0);
@@ -75,15 +77,17 @@ export default function ResaleDetail() {
   const priceOnRequest = isRu ? 'Цена по запросу' : language === 'th' ? 'สอบถามราคา' : 'Price on request';
   const recordedPrice = (amount: number | null | undefined) => formatRecordedPrice(amount, property.currency, { unknownLabel: priceOnRequest, formatTHB: formatPrice });
   const askingPriceLabel = recordedPrice(property.asking_price);
+  const offerCurrency = resaleOfferCurrency(property);
   const description = (isRu && property.description_ru) ? property.description_ru : property.description;
   const images = property.media?.length
     ? property.media.map((m: any) => m.url || m)
     : property.cover_image
       ? [property.cover_image]
       : ['/placeholder.svg'];
-  const currentImage = typeof images[currentImageIdx] === 'string' ? images[currentImageIdx] as string : '/placeholder.svg';
+  const imageIndex = Math.min(currentImageIdx, images.length - 1);
+  const currentImage = typeof images[imageIndex] === 'string' ? images[imageIndex] as string : '/placeholder.svg';
 
-  const premiumPercent = property.original_purchase_price && property.original_purchase_price > 0
+  const premiumPercent = askingPriceLabel !== priceOnRequest && property.original_purchase_price && property.original_purchase_price > 0
     ? Math.round(((property.asking_price - property.original_purchase_price) / property.original_purchase_price) * 100)
     : null;
 
@@ -95,8 +99,8 @@ export default function ResaleDetail() {
 
   const seoTitle = `${title}${property.zone ? ` · ${property.zone}` : ''}${property.is_assignment ? ` · ${isRu ? 'Переуступка' : 'Assignment'}` : ''}`;
   const seoDescription = isRu
-    ? `${title} в ${property.zone || 'Пхукет'}. ${askingPriceLabel}. ${property.estimated_roi ? `ROI ${property.estimated_roi}%.` : ''} ${property.is_assignment ? 'Переуступка прав.' : 'Вторичный рынок.'}`.trim()
-    : `${title} in ${property.zone || 'Phuket'}. ${askingPriceLabel}. ${property.estimated_roi ? `${property.estimated_roi}% ROI.` : ''} ${property.is_assignment ? 'Assignment.' : 'Secondary market.'}`.trim();
+    ? `${title} в ${property.zone || 'Пхукет'}. ${askingPriceLabel}. ${property.is_assignment ? 'Переуступка прав.' : 'Вторичный рынок.'}`
+    : `${title} in ${property.zone || 'Phuket'}. ${askingPriceLabel}. ${property.is_assignment ? 'Assignment.' : 'Secondary market.'}`;
   const seoImage = (typeof images[0] === 'string' && images[0]) || 'https://www.myuno.app/og-image.png';
   const canonicalUrl = `https://www.myuno.app${APP_ROUTES.RESALE_DETAIL(property.id)}`;
   const jsonLd = createRealEstateListingSchema({
@@ -113,7 +117,7 @@ export default function ResaleDetail() {
   });
 
   return (
-    <div className="min-h-screen bg-background pb-24">
+    <div className="min-h-screen bg-background">
       <SEOHead
         title={seoTitle}
         description={seoDescription}
@@ -122,145 +126,142 @@ export default function ResaleDetail() {
         type="product"
         jsonLd={jsonLd}
       />
-      {/* Gallery */}
-      <div className="relative aspect-[16/10] bg-muted">
-        {failedImage === currentImage ? <div role="img" aria-label={isRu ? 'Фото недоступно' : language === 'th' ? 'ไม่มีรูปภาพ' : 'Photo unavailable'} className="absolute inset-0 flex items-center justify-center text-muted-foreground"><ImageOff className="size-10" aria-hidden="true" /></div> : <img
-          src={currentImage}
-          alt={title}
-          className="w-full h-full object-cover"
-          onErrorCapture={() => setFailedImage(currentImage)}
-        />}
-        <div className="absolute top-3 left-3">
-          <BackButton fallbackPath={APP_ROUTES.RESALE} onClick={returnToResults} />
-        </div>
-        {images.length > 1 && (
-          <div className="absolute bottom-3 right-3 bg-background/80 px-2 py-1 rounded-none text-xs">
-            {currentImageIdx + 1}/{images.length}
-          </div>
-        )}
-        {property.is_assignment && (
-          <Badge className="absolute top-3 right-3 bg-accent text-accent-foreground">
-            <ArrowRightLeft className="w-3 h-3 mr-1" />
-            {isRu ? 'Переуступка' : 'Assignment'}
-          </Badge>
-        )}
-      </div>
-
-      <div className="px-4 py-4 space-y-5">
-        {/* Title & Location */}
-        <div>
-          <h1 className="text-xl font-bold text-foreground">{title}</h1>
-          <div className="flex items-center gap-1 text-sm text-muted-foreground mt-1">
-            <MapPin className="w-4 h-4" />
-            <span>{property.zone}{property.address ? `, ${property.address}` : ''}</span>
-          </div>
-        </div>
-
-        {/* Key Metrics */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-          <MetricCard
-            label={isRu ? 'Цена' : 'Price'}
-            value={askingPriceLabel}
-            highlight
-          />
-          {property.area_sqm && (
-            <MetricCard
-              label={isRu ? 'Площадь' : 'Area'}
-              value={`${property.area_sqm} м²`}
-            />
-          )}
-          {property.estimated_roi && (
-            <MetricCard
-              label="ROI"
-              value={`${property.estimated_roi}%`}
-              icon={<TrendingUp className="w-4 h-4 text-primary" />}
-            />
-          )}
-          <MetricCard
-            label={isRu ? 'Владение' : 'Ownership'}
-            value={TITLE_TYPE_LABELS[property.title_type] || property.title_type}
-            icon={<Shield className="w-4 h-4 text-primary" />}
-          />
-        </div>
-
-        {/* Assignment Details */}
-        {property.is_assignment && property.original_purchase_price && (
-          <div className="bg-accent/10 border border-accent/30 rounded-none p-4 space-y-2">
-            <h3 className="font-semibold text-sm flex items-center gap-1.5">
-              <ArrowRightLeft className="w-4 h-4" />
-              {isRu ? 'Условия переуступки' : 'Assignment Details'}
-            </h3>
-            <div className="grid grid-cols-2 gap-2 text-sm">
-              <div>
-                <span className="text-muted-foreground">{isRu ? 'Покупка' : 'Original'}:</span>
-                <span className="ml-1 font-medium">{recordedPrice(property.original_purchase_price)}</span>
+      <div className="ds-frame ds-frame-detail ds-page ds-page-with-navigation purchase-detail-grid">
+        <div className="purchase-detail-intro min-w-0 space-y-4">
+          <div className="relative aspect-[16/10] overflow-hidden rounded-[var(--bible-radius-media)] bg-muted">
+            {failedImage === currentImage ? <div role="img" aria-label={isRu ? 'Фото недоступно' : language === 'th' ? 'ไม่มีรูปภาพ' : 'Photo unavailable'} className="absolute inset-0 flex items-center justify-center text-muted-foreground"><ImageOff className="size-10" aria-hidden="true" /></div> : <img
+              src={currentImage}
+              alt={title}
+              className="w-full h-full object-cover"
+              onErrorCapture={() => setFailedImage(currentImage)}
+            />}
+            <div className="absolute top-3 left-3">
+              <BackButton fallbackPath={APP_ROUTES.RESALE} onClick={returnToResults} />
+            </div>
+            {images.length > 1 && (
+              <div className="absolute bottom-3 right-3 flex items-center gap-2">
+                <Button type="button" variant="outline" size="icon" aria-label={t('Предыдущее фото', 'Previous photo', 'ภาพก่อนหน้า')} disabled={imageIndex === 0} onClick={() => setCurrentImageIdx(imageIndex - 1)}>
+                  <ChevronLeft className="size-4" aria-hidden="true" />
+                </Button>
+                <span className="rounded-[var(--bible-radius-control)] bg-background px-2 py-1 text-body-sm tabular-nums" aria-live="polite">
+                  {imageIndex + 1}/{images.length}
+                </span>
+                <Button type="button" variant="outline" size="icon" aria-label={t('Следующее фото', 'Next photo', 'ภาพถัดไป')} disabled={imageIndex >= images.length - 1} onClick={() => setCurrentImageIdx(imageIndex + 1)}>
+                  <ChevronRight className="size-4" aria-hidden="true" />
+                </Button>
               </div>
-              <div>
-                <span className="text-muted-foreground">{isRu ? 'Сейчас' : 'Asking'}:</span>
-                <span className="ml-1 font-medium">{askingPriceLabel}</span>
-              </div>
-              {premiumPercent !== null && (
-                <div>
-                  <span className="text-muted-foreground">{isRu ? 'Наценка' : 'Premium'}:</span>
-                  <span className={cn("ml-1 font-medium", premiumPercent > 0 ? 'text-destructive' : 'text-primary')}>
-                    {premiumPercent > 0 ? '+' : ''}{premiumPercent}%
-                  </span>
-                </div>
-              )}
-              {property.transfer_fee_paid_by && (
-                <div>
-                  <span className="text-muted-foreground">{isRu ? 'Комиссия' : 'Transfer fee'}:</span>
-                  <span className="ml-1 font-medium capitalize">{property.transfer_fee_paid_by}</span>
-                </div>
-              )}
+            )}
+            {property.is_assignment && (
+              <Badge className="absolute top-3 right-3 bg-accent text-accent-foreground">
+                <ArrowRightLeft className="w-3 h-3 mr-1" />
+                {isRu ? 'Переуступка' : 'Assignment'}
+              </Badge>
+            )}
+          </div>
+
+          <div>
+            <h1 className="text-h2 font-display text-foreground">{title}</h1>
+            <div className="flex items-center gap-1 text-sm text-muted-foreground mt-1">
+              <MapPin className="w-4 h-4" />
+              <span>{property.zone}{property.address ? `, ${property.address}` : ''}</span>
             </div>
           </div>
-        )}
-
-        {/* Specs */}
-        <div className="grid grid-cols-3 gap-3">
-          {property.bedrooms != null && (
-            <SpecItem icon={<BedDouble className="w-4 h-4" />} label={isRu ? 'Спальни' : 'Bedrooms'} value={String(property.bedrooms)} />
-          )}
-          {property.bathrooms != null && (
-            <SpecItem icon={<Bath className="w-4 h-4" />} label={isRu ? 'Ванные' : 'Bathrooms'} value={String(property.bathrooms)} />
-          )}
-          {property.floor && (
-            <SpecItem icon={<Maximize2 className="w-4 h-4" />} label={isRu ? 'Этаж' : 'Floor'} value={String(property.floor)} />
-          )}
         </div>
 
-        {/* Rental income */}
-        {property.current_rental_income && (
-          <div className="bg-primary/5 border border-primary/20 rounded-none p-4">
-            <h3 className="font-semibold text-sm mb-1">
-              {isRu ? 'Текущий доход от аренды' : 'Current Rental Income'}
-            </h3>
-            <p className="text-lg font-bold text-primary">
-              {recordedPrice(property.current_rental_income)}<span className="text-sm font-normal text-muted-foreground">/{isRu ? 'мес' : 'mo'}</span>
-            </p>
-          </div>
-        )}
+        <aside className="purchase-detail-actions" aria-labelledby="resale-asking-price">
+          <Card>
+            <CardHeader>
+              <h2 id="resale-asking-price" className="text-body-sm text-muted-foreground">{t('Цена продавца', 'Asking price', 'ราคาที่ผู้ขายตั้งไว้')}</h2>
+              <p className="text-h3 font-display tabular-nums">{askingPriceLabel}</p>
+            </CardHeader>
+            <CardContent className="grid gap-2">
+              <Button type="button" onClick={() => setShowLeadForm(true)}>
+                <Phone className="size-4" aria-hidden="true" />
+                {requestViewing}
+              </Button>
+              {offerCurrency && (
+                <Button variant="outline" asChild>
+                  <Link to={{ pathname: APP_ROUTES.RESALE_OFFER(property.id), search: location.search, hash: location.hash }} state={location.state}>
+                    {t('Предложить цену', 'Make an offer', 'ยื่นข้อเสนอ')}
+                  </Link>
+                </Button>
+              )}
+            </CardContent>
+          </Card>
+        </aside>
 
-        {/* Description */}
-        {description && (
-          <div>
-            <h3 className="font-semibold text-sm mb-2">{isRu ? 'Описание' : 'Description'}</h3>
-            <p className="text-sm text-muted-foreground whitespace-pre-line">{description}</p>
+        <div className="purchase-detail-facts min-w-0 space-y-5">
+          <div className="grid grid-cols-2 gap-3">
+            {property.area_sqm && (
+              <MetricCard
+                label={isRu ? 'Площадь' : 'Area'}
+                value={`${property.area_sqm} м²`}
+              />
+            )}
+            {property.title_type && (
+              <MetricCard
+                label={t('Форма владения', 'Ownership type', 'รูปแบบการถือครอง')}
+                value={TITLE_TYPE_LABELS[property.title_type] || property.title_type}
+                icon={<Shield className="size-4 text-primary" aria-hidden="true" />}
+              />
+            )}
           </div>
-        )}
-      </div>
 
-      {/* Fixed CTA */}
-      <div className="fixed bottom-0 left-0 right-0 bg-background/95 border-t border-border p-4 flex gap-2 z-30">
-        <div className="flex-1">
-          <p className="text-xs text-muted-foreground">{isRu ? 'Цена' : 'Price'}</p>
-          <p className="text-lg font-bold text-foreground">{askingPriceLabel}</p>
+          {/* Assignment Details */}
+          {property.is_assignment && property.original_purchase_price && (
+            <div className="bg-accent/10 border border-accent/30 rounded-none p-4 space-y-2">
+              <h3 className="font-semibold text-sm flex items-center gap-1.5">
+                <ArrowRightLeft className="w-4 h-4" />
+                {isRu ? 'Условия переуступки' : 'Assignment Details'}
+              </h3>
+              <div className="grid grid-cols-2 gap-2 text-sm">
+                <div>
+                  <span className="text-muted-foreground">{isRu ? 'Покупка' : 'Original'}:</span>
+                  <span className="ml-1 font-medium">{recordedPrice(property.original_purchase_price)}</span>
+                </div>
+                <div>
+                  <span className="text-muted-foreground">{isRu ? 'Сейчас' : 'Asking'}:</span>
+                  <span className="ml-1 font-medium">{askingPriceLabel}</span>
+                </div>
+                {premiumPercent !== null && (
+                  <div>
+                    <span className="text-muted-foreground">{isRu ? 'Наценка' : 'Premium'}:</span>
+                    <span className={cn("ml-1 font-medium", premiumPercent > 0 ? 'text-destructive' : 'text-primary')}>
+                      {premiumPercent > 0 ? '+' : ''}{premiumPercent}%
+                    </span>
+                  </div>
+                )}
+                {property.transfer_fee_paid_by && (
+                  <div>
+                    <span className="text-muted-foreground">{isRu ? 'Комиссия' : 'Transfer fee'}:</span>
+                    <span className="ml-1 font-medium capitalize">{property.transfer_fee_paid_by}</span>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Specs */}
+          <div className="grid grid-cols-3 gap-3">
+            {property.bedrooms != null && (
+              <SpecItem icon={<BedDouble className="w-4 h-4" />} label={isRu ? 'Спальни' : 'Bedrooms'} value={String(property.bedrooms)} />
+            )}
+            {property.bathrooms != null && (
+              <SpecItem icon={<Bath className="w-4 h-4" />} label={isRu ? 'Ванные' : 'Bathrooms'} value={String(property.bathrooms)} />
+            )}
+            {property.floor && (
+              <SpecItem icon={<Maximize2 className="w-4 h-4" />} label={isRu ? 'Этаж' : 'Floor'} value={String(property.floor)} />
+            )}
+          </div>
+
+          {/* Description */}
+          {description && (
+            <div>
+              <h3 className="font-semibold text-sm mb-2">{isRu ? 'Описание' : 'Description'}</h3>
+              <p className="text-sm text-muted-foreground whitespace-pre-line">{description}</p>
+            </div>
+          )}
         </div>
-        <Button type="button" onClick={() => setShowLeadForm(true)} className="h-auto min-h-11 whitespace-normal px-4 text-center sm:px-6">
-          <Phone className="w-4 h-4 mr-1" />
-          {requestViewing}
-        </Button>
       </div>
 
       {/* Lead Form — Sheet on mobile, Dialog on desktop */}
@@ -271,7 +272,7 @@ export default function ResaleDetail() {
         description={title}
         size="md"
       >
-        <ResaleViewingForm
+        <ResaleEnquiryForm
           key={property.id}
           listingId={property.id}
           onClose={() => setShowLeadForm(false)}
@@ -281,28 +282,25 @@ export default function ResaleDetail() {
   );
 }
 
-function MetricCard({ label, value, icon, highlight }: {
-  label: string; value: string; icon?: React.ReactNode; highlight?: boolean;
+function MetricCard({ label, value, icon }: {
+  label: string; value: string; icon?: React.ReactNode;
 }) {
   return (
-    <div className={cn(
-      "rounded-none p-3 text-center border",
-      highlight ? "bg-primary/5 border-primary/20" : "bg-muted/50 border-border/50"
-    )}>
+    <div className="rounded-[var(--bible-radius-card)] border border-border bg-card p-3 text-center">
       {icon && <div className="flex justify-center mb-1">{icon}</div>}
-      <p className={cn("text-sm font-bold", highlight && "text-primary")}>{value}</p>
-      <p className="text-[10px] text-muted-foreground">{label}</p>
+      <p className="text-body-sm font-semibold">{value}</p>
+      <p className="text-body-sm text-muted-foreground">{label}</p>
     </div>
   );
 }
 
 function SpecItem({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
   return (
-    <div className="flex items-center gap-2 bg-muted/50 rounded-none p-2">
+    <div className="flex items-center gap-2 rounded-[var(--bible-radius-card)] bg-muted/50 p-2">
       <div className="text-muted-foreground">{icon}</div>
       <div>
         <p className="text-sm font-medium">{value}</p>
-        <p className="text-[10px] text-muted-foreground">{label}</p>
+        <p className="text-body-sm text-muted-foreground">{label}</p>
       </div>
     </div>
   );

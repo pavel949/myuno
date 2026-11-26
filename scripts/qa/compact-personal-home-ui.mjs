@@ -138,6 +138,10 @@ const virtual = {
     }},{get(target,key){if(key in target)return target[key];return()=>deny('client '+String(key));}});
   `,
   '@/hooks/useTaxonomy': `import{deny}from'compact-fixture-state';export const useTaxonomy=()=>deny('unexpected taxonomy read');export const useTaxonomyHierarchy=useTaxonomy,useTaxonomyValue=useTaxonomy,useTaxonomyLabel=useTaxonomy,useTaxonomyLabels=useTaxonomy,formatForSelect=useTaxonomy,formatForChips=useTaxonomy;`,
+  '@/hooks/useUserCollections': `import{deny}from'compact-fixture-state';export const useUserCollections=()=>deny('unexpected saved-items read');`,
+  '@/hooks/useHapticFeedback': `export const triggerHaptic=()=>{};`,
+  '@/hooks/useSoundEffects': `export const playSound=()=>{};`,
+  '@/hooks/useFeedbackSettings': `export const getFeedbackSettings=()=>({hapticEnabled:false,soundEnabled:false});`,
   '@/hooks/useProperties': `export const useProperties=()=>({data:[],isLoading:false,isError:false,refetch:()=>{}});`,
   '@/hooks/useOffplanProjects': `export const useOffplanProjects=()=>({data:[],isLoading:false,isError:false,refetch:()=>{}});`,
   '@/hooks/useExperiences': `export const useExperiences=()=>({experiences:[],isLoading:false,error:null,refetch:()=>{}});`,

@@ -37,3 +37,17 @@
 [data-sidebar=sidebar][data-mobile=true] .mc-workspace-sidebar {
   background-color: hsl(var(--sidebar-background));
 }
+
+:root:not(.dark) .mc-workspace-sidebar {
+  --sidebar-background: var(--bible-ivory);
+  --sidebar-foreground: var(--brand-navy);
+  --sidebar-accent: var(--surface-white);
+  --sidebar-accent-foreground: var(--brand-navy);
+  --sidebar-ring: var(--brand-navy);
+}
+
+.mc-workspace-sidebar [data-sidebar=menu-button].mc-rail-destination[data-active=true] {
+  background: hsl(var(--sidebar-accent));
+  color: hsl(var(--sidebar-accent-foreground));
+  border-radius: var(--bible-radius-control);
+}

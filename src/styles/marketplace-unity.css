@@ -6,17 +6,17 @@
 .marketplace-eyebrow { margin:0; font-size:var(--type-body-sm-size); font-weight:500; color:hsl(var(--muted-foreground)); }
 .marketplace-title { margin:0; font-family:var(--font-display); font-size:var(--type-h1-size); font-weight:500; line-height:1.15; letter-spacing:-.025em; overflow-wrap:break-word; }
 .marketplace-lead { margin:0; max-width:60ch; font-size:var(--type-body-size); line-height:1.6; color:hsl(var(--muted-foreground)); }
-.marketplace-entry-art { display:none; overflow:hidden; background:hsl(var(--muted)); border-radius:var(--radius); }
+.marketplace-entry-art { display:none; overflow:hidden; background:hsl(var(--muted)); border-radius:var(--radius-lg); }
 .marketplace-entry-art img { display:block; width:100%; aspect-ratio:8/3; object-fit:cover; }
 .marketplace-menu { min-width:0; display:grid; gap:.75rem; }
 .marketplace-section-heading { display:flex; min-width:0; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:.5rem 1rem; }
 .marketplace-section-title { margin:0; font-family:var(--font-display); font-size:var(--type-h3-size); font-weight:500; line-height:1.3; }
 .marketplace-section-action { display:inline-flex; align-items:center; min-height:2.75rem; font-size:var(--type-body-sm-size); color:hsl(var(--foreground)); }
 .marketplace-choice-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:.75rem; }
-.marketplace-choice { display:grid; grid-template-columns:minmax(0,1fr) auto; align-content:start; align-items:start; gap:.75rem; min-width:0; min-height:8rem; height:100%; padding:1rem; text-align:start; color:hsl(var(--foreground)); border:1px solid hsl(var(--border)); border-radius:var(--radius); background:hsl(var(--card)); transition:border-color 150ms ease; }
+.marketplace-choice { display:grid; grid-template-columns:minmax(0,1fr) auto; align-content:start; align-items:start; gap:.75rem; min-width:0; min-height:8rem; height:100%; padding:1rem; text-align:start; color:hsl(var(--foreground)); border:1px solid hsl(var(--border)); border-radius:var(--radius-md); background:hsl(var(--card)); transition:border-color 150ms ease; }
 .marketplace-choice:hover { border-color:hsl(var(--primary)); }
 .marketplace-choice:focus-visible,.marketplace-section-action:focus-visible { outline:2px solid hsl(var(--ring)); outline-offset:3px; }
-.marketplace-choice-art { display:flex; align-items:center; justify-content:center; width:2.75rem; height:2.75rem; overflow:hidden; border-radius:var(--radius); background:hsl(var(--muted)); }
+.marketplace-choice-art { display:flex; align-items:center; justify-content:center; width:2.75rem; height:2.75rem; overflow:hidden; border-radius:var(--radius-lg); background:hsl(var(--muted)); }
 .marketplace-choice-art img { width:100%; height:100%; object-fit:cover; }
 .marketplace-choice-art svg { width:1.375rem; height:1.375rem; color:hsl(var(--primary)); }
 .marketplace-choice-copy { grid-column:1/-1; grid-row:2; display:grid; min-width:0; gap:.375rem; }
@@ -28,9 +28,9 @@
 @media(prefers-reduced-motion:reduce) { .marketplace-choice { transition:none; } }
 
 /* Home previews use the same compact navigation grammar as catalogue categories. */
-:is(.cinematic-home.home-refined,.premium-personal-discovery) .marketplace-home-categories.home-services .home-service-category-card { border:1px solid hsl(var(--border)); border-radius:var(--radius); background:hsl(var(--card)); overflow:hidden; }
+:is(.cinematic-home.home-refined,.premium-personal-discovery) .marketplace-home-categories.home-services .home-service-category-card { border:1px solid hsl(var(--border)); border-radius:var(--radius-md); background:hsl(var(--card)); overflow:hidden; }
 :is(.cinematic-home.home-refined,.premium-personal-discovery) .marketplace-home-categories.home-services .home-service-category-card > a:first-child { display:flex; flex-direction:column; height:auto; min-height:0; padding:1rem; }
-:is(.cinematic-home.home-refined,.premium-personal-discovery) .marketplace-home-categories.home-services .home-service-category-card .home-service-category-art { display:flex; width:2.75rem; height:2.75rem; min-height:0; aspect-ratio:1; margin:0 0 .75rem; border-radius:var(--radius); background:hsl(var(--muted)); }
+:is(.cinematic-home.home-refined,.premium-personal-discovery) .marketplace-home-categories.home-services .home-service-category-card .home-service-category-art { display:flex; width:2.75rem; height:2.75rem; min-height:0; aspect-ratio:1; margin:0 0 .75rem; border-radius:var(--radius-lg); background:hsl(var(--muted)); }
 :is(.cinematic-home.home-refined,.premium-personal-discovery) .marketplace-home-categories.home-services .home-service-category-art :is(img,.home-service-lucide-symbol) { width:100%; height:100%; min-height:0; }
 :is(.cinematic-home.home-refined,.premium-personal-discovery) .marketplace-home-categories.home-services .home-service-category-art .home-service-lucide-symbol { display:flex; align-items:center; justify-content:center; }
 :is(.cinematic-home.home-refined,.premium-personal-discovery) .marketplace-home-categories.home-services .home-service-lucide-symbol svg { width:1.375rem; height:1.375rem; }

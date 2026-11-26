@@ -105,6 +105,20 @@
 .public-project-card h3 > a { display: block; min-height: 2.75rem; }
 .public-commerce--project { width: min(100%, var(--public-width-detail)); margin-inline: auto; }
 .public-commerce--project .public-project-hero { height: clamp(20rem, 38vw, 34rem); max-height: none; }
+
+@media (min-width: 1024px) {
+  .public-project-tabs {
+    position: sticky;
+    inset-block-start: var(--bible-chrome-height);
+    z-index: 10;
+    border: 1px solid hsl(var(--border));
+    background: hsl(var(--background));
+  }
+
+  .public-project-sections :is(#project-overview, #project-units, #project-documents, #project-developer) {
+    scroll-margin-block-start: calc(var(--bible-chrome-height) + 3.5rem);
+  }
+}
 .public-project-content { padding: var(--public-detail-gap) var(--public-gutter); }
 .public-project-content > :is(div,section) { min-width: 0; }
 @media (max-width: 767px) {

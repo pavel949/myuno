@@ -10,7 +10,7 @@ import { ProjectTypePlans } from '@/components/newbuilds/ProjectTypePlans';
 import { isHostedProjectPlan } from '@/lib/real-estate/projectHostedPlans';
 import '@/styles/public-commerce.css';
 import { projectFeatureLabel } from '@/lib/offplan/presentation';
-import { OFFPLAN_BUYER_ENTRY } from '@/lib/consultationIntake';
+import { OffplanBuyerEnquiry } from '@/components/newbuilds/OffplanBuyerEnquiry';
 /**
  * OffplanDetail - Detailed view of an off-plan project
  * Shows public gallery, units, documents and developer information
@@ -37,7 +37,6 @@ import { useNewbuildProject } from '@/hooks/useNewbuildProjects';
 import { useDeveloper } from '@/hooks/useDevelopers';
 import { pickLang } from '@/lib/i18n/pickLang';
 import { DevelopmentUnitsSection } from '@/components/property/DevelopmentUnitsSection';
-import { LandingLeadForm } from '@/components/landings/LandingLeadForm';
 
 const TAB_HASHES = {
   overview: '#project-overview',
@@ -248,8 +247,8 @@ export default function OffplanDetail() {
         )}
 
         {/* Price & Units */}
-        <div className="rounded-none border bg-card p-4 space-y-3">
-          <div className="flex items-center justify-between">
+        <div className="space-y-3 rounded-[var(--bible-radius-card)] border border-border bg-card p-4">
+          <div className="flex flex-wrap items-baseline justify-between gap-2">
             <span className="text-muted-foreground">
               {pickLang(language, {"ru": "Цена", "en": "Price", "th": "ราคา"})}
             </span>
@@ -275,8 +274,11 @@ export default function OffplanDetail() {
         </div>
 
         {/* Tabs */}
-        <Tabs value={activeTab} onValueChange={changeTab} className="w-full">
-          <TabsList className="grid h-auto w-full grid-cols-2 gap-1 sm:grid-cols-4">
+        <Tabs value={activeTab} onValueChange={changeTab} className="public-project-sections w-full">
+          <TabsList
+            aria-label={pickLang(language, { ru: 'Разделы проекта', en: 'Project sections', th: 'ส่วนต่าง ๆ ของโครงการ' })}
+            className="public-project-tabs grid h-auto w-full grid-cols-2 gap-1 sm:grid-cols-4"
+          >
             <TabsTrigger className="min-h-11 whitespace-normal" value="overview">{pickLang(language, {"ru": "Обзор", "en": "Overview", "th": "ภาพรวม"})}</TabsTrigger>
             <TabsTrigger className="min-h-11 whitespace-normal" value="units">
               {pickLang(language, { ru: 'Объекты и планы', en: 'Units and plans', th: 'ยูนิตและแปลน' })}
@@ -316,11 +318,15 @@ export default function OffplanDetail() {
                 <h3 id="project-exact-units-title" className="text-lg font-semibold">
                   {pickLang(language, { en: 'Individual units', ru: 'Конкретные объекты', th: 'ยูนิตรายห้อง' })}
                 </h3>
-                <DevelopmentUnitsSection developmentId={project.id} onSelectUnit={(unit) => {
-                  setEnquiryIntent('consultation');
-                  setSelectedUnit(unit);
-                  setShowLeadForm(true);
-                }} />
+                <DevelopmentUnitsSection
+                  developmentId={project.id}
+                  unitListingContext={journeyLocation}
+                  onSelectUnit={(unit) => {
+                    setEnquiryIntent('consultation');
+                    setSelectedUnit(unit);
+                    setShowLeadForm(true);
+                  }}
+                />
               </section>
             </div>
           </TabsContent>
@@ -444,22 +450,7 @@ export default function OffplanDetail() {
         title={pickLang(language, { ru: selectedUnit ? 'Запросить информацию о юните' : 'Обсудить проект', en: selectedUnit ? 'Ask about this unit' : 'Discuss this project', th: 'สอบถามเกี่ยวกับโครงการนี้' })}
         size="md"
       >
-        <LandingLeadForm
-          key={`${project.id}:${selectedUnit?.id ?? "project"}:${enquiryIntent}`}
-          variant="universal"
-          verticalId="properties"
-          entryPoint={OFFPLAN_BUYER_ENTRY}
-          leadSource="cta"
-          universalRequestType="property_consultation"
-          contextMetadata={{
-            schema_version: 1,
-            project_id: project.id,
-            intent: enquiryIntent,
-            request_only: true,
-            offer_id: null,
-            ...(selectedUnit ? { unit_id: selectedUnit.id, property_id: selectedUnit.property_id } : {}),
-          }}
-        />
+        <OffplanBuyerEnquiry projectId={project.id} unit={selectedUnit} intent={enquiryIntent} />
       </ResponsiveModal>
     </div>
   );

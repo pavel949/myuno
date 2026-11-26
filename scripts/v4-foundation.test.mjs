@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { test } from 'node:test';
+import { fileURLToPath } from 'node:url';
 import postcss from 'postcss';
 import tailwindcss from 'tailwindcss';
 import loadConfig from 'tailwindcss/loadConfig.js';
@@ -49,7 +50,7 @@ for (const [theme, palette] of [['light', light], ['dark', dark]]) {
   });
 }
 test('v4 Tailwind radii compile from canonical tokens without a legacy global clamp', async () => {
-  const config = loadConfig(new URL('../tailwind.config.ts', import.meta.url).pathname);
+  const config = loadConfig(fileURLToPath(new URL('../tailwind.config.ts', import.meta.url)));
   const expected = [
     ['rounded-none', 'border-radius', '0px'], ['rounded-sm', 'border-radius', '4px'],
     ['rounded-md', 'border-radius', '8px'], ['rounded-lg', 'border-radius', '12px'],

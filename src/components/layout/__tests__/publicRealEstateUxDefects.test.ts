@@ -27,9 +27,11 @@ describe('public real-estate UX defects', () => {
   it('routes an empty property filter to property search without changing service fallback', () => {
     const favorites = source('src/pages/Favorites.tsx');
 
-    expect(favorites).toContain("filter === 'property' ? APP_ROUTES.PROPERTY_SEARCH : '/discover'");
-    expect(favorites).toContain("'No saved properties yet'");
+    expect(favorites).toMatch(/filter === 'property'\s*\? \{ to: APP_ROUTES\.PROPERTY_SEARCH/);
+    expect(favorites).toContain("to: APP_ROUTES.DISCOVER");
+    expect(favorites).toContain("'Nothing saved in this category'");
+    expect(favorites).toContain("onClick={() => setFilter('all')}");
     expect(favorites).toContain("'Search properties'");
-    expect(favorites).toContain("'Browse Services'");
+    expect(favorites).toContain("'Browse services'");
   });
 });

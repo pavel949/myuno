@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { CalendarDays, CheckCircle2, Clock3, ImageOff, MapPin, Star } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { StatusTag } from '@/components/ui/status-tag';
 import { useLanguage } from '@/contexts/LanguageContext';
 import type { MarketplaceService } from '@/hooks/useServiceMarketplace';
 import { pickLang } from '@/lib/i18n/pickLang';
@@ -114,7 +115,7 @@ export function MarketplaceServiceCard({
 
       <div className="flex min-w-0 flex-1 flex-col gap-3 p-4">
         <div className="min-w-0">
-          <h3 className="font-display text-base font-medium leading-snug">{name}</h3>
+          <h3 className="text-h3">{name}</h3>
           {description && <p className="mt-1 line-clamp-2 text-sm leading-relaxed text-muted-foreground">{description}</p>}
         </div>
 
@@ -137,16 +138,16 @@ export function MarketplaceServiceCard({
           <div className="marketplace-service-card__provider-meta">
             <Link
               to={providerHref}
-              className="marketplace-service-card__provider inline-flex min-h-11 items-center gap-1 text-sm text-muted-foreground hover:underline"
+              className="ds-focus marketplace-service-card__provider inline-flex min-h-11 items-center gap-1 text-sm text-muted-foreground hover:underline"
             >
-              {service.provider.is_verified === true && (
-                <CheckCircle2
-                  aria-label={L('Проверенный специалист', 'Verified provider', 'ผู้ให้บริการยืนยันแล้ว')}
-                  aria-hidden="false"
-                />
-              )}
               <span>{service.provider.name.trim() || L('Название специалиста не указано', 'Provider name not provided', 'ยังไม่ได้ระบุชื่อผู้ให้บริการ')}</span>
             </Link>
+            {service.provider.is_verified === true && (
+              <StatusTag tone="done" className="w-fit gap-1">
+                <CheckCircle2 aria-hidden="true" />
+                {L('Проверенный специалист', 'Verified provider', 'ผู้ให้บริการยืนยันแล้ว')}
+              </StatusTag>
+            )}
             <div
               className="marketplace-service-card__provider-rating"
               data-testid="marketplace-provider-rating"

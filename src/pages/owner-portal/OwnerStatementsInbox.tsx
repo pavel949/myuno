@@ -13,6 +13,7 @@ import {
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { StatusTag, recordedStatusTone } from '@/components/ui/status-tag';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { Textarea } from '@/components/ui/textarea';
 import { SignaturePad } from '@/components/signatures/SignaturePad';
@@ -235,11 +236,11 @@ function StatementCard({
   onReject?: () => void;
   readOnly?: boolean;
 }) {
-  const statusConfig: Record<string, { label: string; cls: string; Icon: typeof Clock }> = {
-    pending: { label: isRu ? 'Ожидает' : 'Pending', cls: 'bg-warning/15 text-warning', Icon: Clock },
-    approved: { label: isRu ? 'Одобрено' : 'Approved', cls: 'bg-success/15 text-success', Icon: CheckCircle2 },
-    rejected: { label: isRu ? 'Отклонено' : 'Rejected', cls: 'bg-destructive/15 text-destructive', Icon: XCircle },
-    expired: { label: isRu ? 'Истёк' : 'Expired', cls: 'bg-muted text-muted-foreground', Icon: Clock },
+  const statusConfig: Record<string, { label: string; Icon: typeof Clock }> = {
+    pending: { label: isRu ? 'Ожидает' : 'Pending', Icon: Clock },
+    approved: { label: isRu ? 'Одобрено' : 'Approved', Icon: CheckCircle2 },
+    rejected: { label: isRu ? 'Отклонено' : 'Rejected', Icon: XCircle },
+    expired: { label: isRu ? 'Истёк' : 'Expired', Icon: Clock },
   };
   const cfg = statusConfig[item.status];
   const Icon = cfg.Icon;
@@ -249,10 +250,10 @@ function StatementCard({
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-2 mb-1">
-              <Badge variant="outline" className={cn('text-xs gap-1', cfg.cls)}>
+              <StatusTag tone={recordedStatusTone(item.status)} className="gap-1">
                 <Icon className="w-3 h-3" />
                 {cfg.label}
-              </Badge>
+              </StatusTag>
             </div>
             <p className="text-sm font-semibold">
               {format(new Date(item.period_start), 'd MMM', { locale: isRu ? ru : undefined })} –{' '}

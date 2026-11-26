@@ -7,11 +7,22 @@ import { usePropertyQuickFilters } from '@/hooks/usePropertyQuickFilters';
 import { APP_ROUTES } from '@/lib/config/routes';
 import { pickLang, type LangValues } from '@/lib/i18n/pickLang';
 import { bangkokTodayISO, civilDateKey } from '@/lib/hotelDates';
-import { readPropertySearchQuery, normalizePropertySearchQuery } from '@/lib/propertySearchQuery';
+import { DEFAULT_HOME_SALE_MAX_PRICE, normalizePropertySearchQuery, propertySaleBudgetLabel, readPropertySearchQuery } from '@/lib/propertySearchQuery';
 import { HomeSearchDateRange } from './HomeSearchDateRange';
+import { buildExperienceSearchParams } from './HomeExperienceSearch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Input } from '@/components/ui/input';
 
-export function HomeDiscoverySearch({ rentalOnly = false, hideModeSwitch = false, showGuestsInline = false, initialParams, onSearch, progressive = false, catalogue = false }: { rentalOnly?: boolean; hideModeSwitch?: boolean; showGuestsInline?: boolean; initialParams?: URLSearchParams; onSearch?: (params: URLSearchParams) => void; progressive?: boolean; catalogue?: boolean }) {
+type SearchMode = 'all' | 'rent' | 'activities' | 'buy';
+const modeLabels: Record<SearchMode, LangValues> = {
+  all: { ru: 'Все объекты', en: 'All homes', th: 'ที่พักทั้งหมด' },
+  rent: { ru: 'Аренда', en: 'Rent', th: 'เช่า' },
+  activities: { ru: 'Впечатления и услуги', en: 'Experiences & services', th: 'ประสบการณ์และบริการ' },
+  buy: { ru: 'Покупка', en: 'Buy', th: 'ซื้อ' },
+};
+const saleBudgetOptions = [5_000_000, DEFAULT_HOME_SALE_MAX_PRICE, 15_000_000, 40_000_000];
+
+export function HomeDiscoverySearch({ rentalOnly = false, hideModeSwitch = false, showGuestsInline = false, initialParams, onSearch, progressive = false, catalogue = false, allowActivities = false }: { rentalOnly?: boolean; hideModeSwitch?: boolean; showGuestsInline?: boolean; initialParams?: URLSearchParams; onSearch?: (params: URLSearchParams) => void; progressive?: boolean; catalogue?: boolean; allowActivities?: boolean }) {
   const initial = readPropertySearchQuery(initialParams ?? new URLSearchParams());
   const { language } = useLanguage();
   const guestsId = useId();
@@ -21,25 +32,57 @@ export function HomeDiscoverySearch({ rentalOnly = false, hideModeSwitch = false
   const { districts, isLoading } = usePropertyQuickFilters();
   const { propertyTypes, isLoading: typesLoading } = usePropertyFilterOptions();
   const navigate = useNavigate();
-  const [mode, setMode] = useState<'all' | 'rent' | 'buy'>(rentalOnly ? 'rent' : catalogue && !initial.hasIntent ? 'all' : initial.mode);
+  const [mode, setMode] = useState<SearchMode>(rentalOnly ? 'rent' : catalogue && !initial.hasIntent ? 'all' : initial.mode);
+  const modes: SearchMode[] = catalogue ? ['all', 'rent', 'buy'] : allowActivities ? ['rent', 'activities', 'buy'] : ['rent', 'buy'];
+  const [activityMarket, setActivityMarket] = useState<'experiences' | 'services'>('experiences');
+  const [activityQuery, setActivityQuery] = useState('');
   const [district, setDistrict] = useState(initial.search.locations.join(','));
   const [propertyType, setPropertyType] = useState(initial.search.propertyTypes.join(','));
   const [checkIn, setCheckIn] = useState(initial.search.checkIn ? civilDateKey(initial.search.checkIn) : '');
   const [checkOut, setCheckOut] = useState(initial.search.checkOut ? civilDateKey(initial.search.checkOut) : '');
   const [guests, setGuests] = useState(initial.hasGuestFilter ? String(initial.search.guests) : '');
   const [bedrooms, setBedrooms] = useState(initial.search.bedrooms.join(','));
+  const [saleMaxPrice, setSaleMaxPrice] = useState<number | undefined>(initial.saleMaxPrice ?? (allowActivities ? DEFAULT_HOME_SALE_MAX_PRICE : undefined));
   const [tenancy, setTenancy] = useState<string>(initial.tenancy);
   const today = bangkokTodayISO();
   const [dateError, setDateError] = useState(false);
+  const [guestError, setGuestError] = useState(false);
   const [showRefinements, setShowRefinements] = useState(!progressive);
+  const showPropertyFields = allowActivities || showRefinements;
+  const guestsInCalendar = allowActivities && showGuestsInline;
+  const rentalDurations = allowActivities && !showRefinements && tenancy !== 'long'
+    ? ['short', 'medium'] as const
+    : ['short', 'medium', 'long'] as const;
+  const changeGuests = (value: string) => {
+    setGuests(value);
+    setGuestError(false);
+  };
+  const refinements = progressive && (
+    <button type="button" className="home-search-refine ds-focus" aria-expanded={showRefinements} onClick={() => setShowRefinements(value => !value)}>
+      {allowActivities
+        ? t({ ru: showRefinements ? 'Скрыть фильтры' : 'Фильтры', en: showRefinements ? 'Hide filters' : 'Filters', th: showRefinements ? 'ซ่อนตัวกรอง' : 'ตัวกรอง' })
+        : t({ ru: showRefinements ? 'Скрыть уточнения' : 'Уточнить поиск', en: showRefinements ? 'Hide refinements' : 'Refine search', th: showRefinements ? 'ซ่อนตัวกรอง' : 'ปรับการค้นหา' })}
+    </button>
+  );
 
   function search(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (mode === 'activities') {
+      const params = buildExperienceSearchParams({ q: activityQuery, type: 'all', maxPrice: '' });
+      const target = activityMarket === 'services' ? APP_ROUTES.GOAL_SERVICES : APP_ROUTES.EXPERIENCES;
+      navigate(params.size ? target + '?' + params : target);
+      return;
+    }
     if (mode === 'rent' && ((!!checkIn !== !!checkOut) || (checkIn && (checkIn < today || checkOut <= checkIn)))) {
       setDateError(true);
       return;
     }
     setDateError(false);
+    const count = Number(guests);
+    if (mode === 'rent' && guests && (!Number.isInteger(count) || count < 1 || count > 50)) {
+      setGuestError(true);
+      return;
+    }
     const params = new URLSearchParams(initialParams);
     for (const key of ['district', 'types', 'f.district', 'f.propertyType', 'f.listingType', 'bedrooms', 'f.bedrooms']) params.delete(key);
     params.set('mode', mode);
@@ -48,6 +91,8 @@ export function HomeDiscoverySearch({ rentalOnly = false, hideModeSwitch = false
     if (district) params.set('district', district);
     if (propertyType) params.set('types', propertyType);
     if (bedrooms) params.set('bedrooms', bedrooms);
+    params.delete('maxPrice');
+    if (mode === 'buy' && saleMaxPrice != null) params.set('maxPrice', String(saleMaxPrice));
     // Stay dates are civil dates, not instants. Shared/bookmarked URLs must keep
     // the selected calendar days when opened in a different time zone.
     if (mode === 'rent') {
@@ -64,21 +109,45 @@ export function HomeDiscoverySearch({ rentalOnly = false, hideModeSwitch = false
   }
 
   return (
-    <form className={`home-search${showGuestsInline ? ' home-search--homepage' : ''}${catalogue ? ' home-search--catalogue' : ''}`} onSubmit={search} aria-label={t({ ru: 'Поиск жилья', en: 'Find a home', th: 'ค้นหาที่พัก' })}>
+    <form className={`home-search${showGuestsInline ? ' home-search--homepage' : ''}${catalogue ? ' home-search--catalogue' : ''}`} data-home-discovery-mode={allowActivities ? mode : undefined} onSubmit={search} aria-label={allowActivities ? t({ ru: 'Поиск на myUNO', en: 'Search myUNO', th: 'ค้นหาใน myUNO' }) : t({ ru: 'Поиск жилья', en: 'Find a home', th: 'ค้นหาที่พัก' })}>
       {catalogue && <label className="home-search-query col-span-full" htmlFor={queryId}><span className="home-field-label">{t({ ru: 'Название объекта', en: 'Property name', th: 'ชื่อที่พัก' })}</span><input id={queryId} type="search" value={query} maxLength={120} onChange={event => setQuery(event.target.value)} placeholder={t({ ru: 'Необязательно', en: 'Optional', th: 'ไม่บังคับ' })} /></label>}
-      {!rentalOnly && !hideModeSwitch && <div className="home-search-modes" role="group" aria-label={t({ ru: 'Аренда или покупка', en: 'Rent or buy', th: 'เช่าหรือซื้อ' })}>
-        {(catalogue ? ['all', 'rent', 'buy'] as const : ['rent', 'buy'] as const).map(value => (
+      {!rentalOnly && !hideModeSwitch && <div className="home-search-modes" data-activities={allowActivities || undefined} role="group" aria-label={allowActivities ? t({ ru: 'Раздел поиска', en: 'What to search', th: 'ประเภทการค้นหา' }) : t({ ru: 'Аренда или покупка', en: 'Rent or buy', th: 'เช่าหรือซื้อ' })}>
+        {modes.map(value => (
           <button key={value} type="button" aria-pressed={mode === value} onClick={() => setMode(value)}>
-            {value === 'all' ? t({ ru: 'Все объекты', en: 'All homes', th: 'ที่พักทั้งหมด' }) : value === 'rent' ? t({ ru: 'Аренда', en: 'Rent', th: 'เช่า' }) : t({ ru: 'Покупка', en: 'Buy', th: 'ซื้อ' })}
+            {t(modeLabels[value])}
           </button>
         ))}
       </div>}
+      {mode === 'activities' ? (
+        <>
+          <div className="home-search-type">
+            <span className="home-field-label">{t({ ru: 'Каталог', en: 'Browse', th: 'เลือกดู' })}</span>
+            <Select value={activityMarket} onValueChange={value => setActivityMarket(value === 'services' ? 'services' : 'experiences')}>
+              <SelectTrigger className="home-search-select" aria-label={t({ ru: 'Выберите каталог', en: 'Choose a catalogue', th: 'เลือกแคตตาล็อก' })}><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="experiences">{t({ ru: 'Впечатления', en: 'Experiences', th: 'ประสบการณ์' })}</SelectItem>
+                <SelectItem value="services">{t({ ru: 'Услуги', en: 'Services', th: 'บริการ' })}</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <label className="home-search-query" htmlFor={queryId}>
+            <span className="home-field-label">{t({ ru: 'Что ищете?', en: 'What are you looking for?', th: 'คุณกำลังมองหาอะไร?' })}</span>
+            <input id={queryId} className="ds-input" type="search" value={activityQuery} maxLength={120} onChange={event => setActivityQuery(event.target.value)} placeholder={t({ ru: 'Необязательно', en: 'Optional', th: 'ไม่บังคับ' })} />
+          </label>
+          <button type="submit" data-chat-occlusion-target className="home-search-submit">
+            {activityMarket === 'services'
+              ? t({ ru: 'Найти услуги', en: 'Find services', th: 'ค้นหาบริการ' })
+              : t({ ru: 'Найти впечатления', en: 'Find experiences', th: 'ค้นหาประสบการณ์' })}
+            <ArrowRight size={18} aria-hidden="true" />
+          </button>
+        </>
+      ) : <>
       {mode === 'rent' && (
         <div className="home-search-duration col-span-full flex flex-nowrap gap-1" role="group" aria-label={t({ ru: 'Срок аренды', en: 'Rental duration', th: 'ระยะเวลาเช่า' })}>
-          {(['short', 'medium', 'long'] as const).map(value => <button className="min-h-11 border px-3 text-sm aria-pressed:bg-primary aria-pressed:text-primary-foreground" key={value} type="button" aria-pressed={tenancy === value} onClick={() => setTenancy(value)}>{value === 'short' ? t({ ru: 'Посуточно', en: 'Nightly', th: 'รายวัน' }) : value === 'medium' ? t({ ru: 'Помесячно', en: 'Monthly', th: 'รายเดือน' }) : t({ ru: 'На год', en: 'Yearly', th: 'รายปี' })}</button>)}
+          {rentalDurations.map(value => <button className="min-h-11 border px-3 text-sm aria-pressed:bg-primary aria-pressed:text-primary-foreground" key={value} type="button" aria-pressed={tenancy === value} onClick={() => setTenancy(value)}>{value === 'short' ? t({ ru: 'Посуточно', en: 'Nightly', th: 'รายวัน' }) : value === 'medium' ? t({ ru: 'Помесячно', en: 'Monthly', th: 'รายเดือน' }) : t({ ru: 'На год', en: 'Yearly', th: 'รายปี' })}</button>)}
         </div>
       )}
-      {showRefinements && <div className="home-search-location">
+      {showPropertyFields && <div className="home-search-location">
         <div className="min-w-0 flex-1"><span className="home-field-label">{t({ ru: 'Район', en: 'Area', th: 'ย่าน' })}</span>
           <Select value={district || '__all'} onValueChange={value => setDistrict(value === '__all' ? '' : value)} disabled={isLoading}>
             <SelectTrigger className="home-search-select" aria-label={t({ ru: 'Выберите район', en: 'Choose an area', th: 'เลือกย่าน' })}><SelectValue /></SelectTrigger>
@@ -91,16 +160,31 @@ export function HomeDiscoverySearch({ rentalOnly = false, hideModeSwitch = false
           </Select>
         </div>
       </div>}
-      {mode === 'rent' && <HomeSearchDateRange checkIn={checkIn} checkOut={checkOut} onChange={(start, end) => { setCheckIn(start); setCheckOut(end); setDateError(false); }} />}
-      {showGuestsInline && mode === 'rent' && (
+      {mode === 'rent' && (
+        <HomeSearchDateRange
+          checkIn={checkIn}
+          checkOut={checkOut}
+          onChange={(start, end) => { setCheckIn(start); setCheckOut(end); setDateError(false); }}
+          guests={guestsInCalendar ? {
+            count: guests,
+            field: (
+              <label className="grid gap-2" htmlFor={guestsId}>
+                <span>{t({ ru: 'Количество гостей', en: 'Number of guests', th: 'จำนวนผู้เข้าพัก' })}</span>
+                <Input id={guestsId} type="number" inputMode="numeric" min="1" max="50" step="1" value={guests} aria-invalid={guestError || undefined} onChange={event => changeGuests(event.target.value)} placeholder={t({ ru: 'Любое число', en: 'Any number', th: 'ไม่จำกัด' })} />
+              </label>
+            ),
+          } : undefined}
+        />
+      )}
+      {showGuestsInline && !guestsInCalendar && mode === 'rent' && (
         <label className="home-search-guests home-search-guests-inline" htmlFor={guestsId}>
           <Users size={18} aria-hidden="true" /><span>
             <span className="home-field-label">{t({ ru: 'Гости', en: 'Guests', th: 'ผู้เข้าพัก' })}</span>
-            <input id={guestsId} type="number" min="1" max="50" step="1" placeholder={t({ ru: 'Любое число', en: 'Any number', th: 'ไม่จำกัด' })} value={guests} onChange={e => setGuests(e.target.value)} aria-label={t({ ru: 'Количество гостей', en: 'Number of guests', th: 'จำนวนผู้เข้าพัก' })} />
+            <input id={guestsId} type="number" min="1" max="50" step="1" placeholder={t({ ru: 'Любое число', en: 'Any number', th: 'ไม่จำกัด' })} value={guests} onChange={e => changeGuests(e.target.value)} aria-label={t({ ru: 'Количество гостей', en: 'Number of guests', th: 'จำนวนผู้เข้าพัก' })} />
           </span>
         </label>
       )}
-      {showRefinements && <><div className="home-search-type">
+      {showPropertyFields && <><div className="home-search-type">
         <span className="home-field-label">{t({ ru: 'Тип жилья', en: 'Home type', th: 'ประเภทที่พัก' })}</span>
         <Select value={propertyType || '__all'} onValueChange={value => setPropertyType(value === '__all' ? '' : value)} disabled={typesLoading}>
           <SelectTrigger className="home-search-select" aria-label={t({ ru: 'Тип жилья', en: 'Home type', th: 'ประเภทที่พัก' })}><SelectValue /></SelectTrigger>
@@ -124,8 +208,33 @@ export function HomeDiscoverySearch({ rentalOnly = false, hideModeSwitch = false
         </Select>
       </div>
       </>}
-      <button type="submit" data-chat-occlusion-target className="home-search-submit">{t({ ru: 'Найти жильё', en: 'Find a home', th: 'ค้นหาที่พัก' })}<ArrowRight size={18} aria-hidden="true" /></button>
-      {progressive && <button type="button" className="home-search-refine" aria-expanded={showRefinements} onClick={() => setShowRefinements(value => !value)}>{t({ ru: showRefinements ? 'Скрыть уточнения' : 'Уточнить поиск', en: showRefinements ? 'Hide refinements' : 'Refine search', th: showRefinements ? 'ซ่อนตัวกรอง' : 'ปรับการค้นหา' })}</button>}
+      {mode === 'buy' && (allowActivities || catalogue || initial.saleMaxPrice != null) && (
+        <div className="home-search-budget">
+          <span className="home-field-label">{t({ ru: 'Бюджет', en: 'Budget', th: 'งบประมาณ' })}</span>
+          <Select value={saleMaxPrice?.toString() ?? '__all'} onValueChange={value => setSaleMaxPrice(value === '__all' ? undefined : Number(value))}>
+            <SelectTrigger className="home-search-select" aria-label={t({ ru: 'Бюджет покупки', en: 'Purchase budget', th: 'งบประมาณสำหรับซื้อ' })}><SelectValue /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="__all">{t({ ru: 'Без ограничения', en: 'No limit', th: 'ไม่จำกัด' })}</SelectItem>
+              {saleMaxPrice != null && !saleBudgetOptions.includes(saleMaxPrice) && (
+                <SelectItem value={String(saleMaxPrice)}>{propertySaleBudgetLabel(saleMaxPrice, language)}</SelectItem>
+              )}
+              {saleBudgetOptions.map(amount => (
+                <SelectItem key={amount} value={String(amount)}>{propertySaleBudgetLabel(amount, language)}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      )}
+      {allowActivities && refinements}
+      <button type="submit" data-chat-occlusion-target className="home-search-submit">
+        {allowActivities && mode === 'rent'
+          ? t({ ru: 'Найти жильё в аренду', en: 'Search stays', th: 'ค้นหาที่พักให้เช่า' })
+          : allowActivities && mode === 'buy'
+            ? t({ ru: 'Посмотреть жильё', en: 'See homes', th: 'ดูบ้านสำหรับขาย' })
+            : t({ ru: 'Найти жильё', en: 'Find a home', th: 'ค้นหาที่พัก' })}
+        <ArrowRight size={18} aria-hidden="true" />
+      </button>
+      {!allowActivities && refinements}
 
       {showRefinements && (!catalogue || (mode === 'rent' && !showGuestsInline)) && <details className="home-search-secondary">
         <summary>{catalogue ? t({ ru: 'Гости', en: 'Guests', th: 'ผู้เข้าพัก' }) : t({ ru: mode === 'rent' && !showGuestsInline ? 'Название и гости' : 'Название объекта', en: mode === 'rent' && !showGuestsInline ? 'Name and guests' : 'Property name', th: mode === 'rent' && !showGuestsInline ? 'ชื่อที่พักและผู้เข้าพัก' : 'ชื่อที่พัก' })}</summary>
@@ -137,13 +246,19 @@ export function HomeDiscoverySearch({ rentalOnly = false, hideModeSwitch = false
           {mode === 'rent' && !showGuestsInline && (
             <label className="home-search-guests" htmlFor={guestsId}><Users size={18} aria-hidden="true" /><span>
               <span className="home-field-label">{t({ ru: 'Гости', en: 'Guests', th: 'ผู้เข้าพัก' })}</span>
-              <input id={guestsId} aria-describedby={`${guestsId}-optional`} type="number" min="1" max="50" step="1" placeholder={t({ ru: 'Любое', en: 'Any', th: 'ไม่ระบุ' })} value={guests} onChange={e => setGuests(e.target.value)} aria-label={t({ ru: 'Количество гостей', en: 'Number of guests', th: 'จำนวนผู้เข้าพัก' })} />
+              <input id={guestsId} aria-describedby={`${guestsId}-optional`} type="number" min="1" max="50" step="1" placeholder={t({ ru: 'Любое', en: 'Any', th: 'ไม่ระบุ' })} value={guests} onChange={e => changeGuests(e.target.value)} aria-label={t({ ru: 'Количество гостей', en: 'Number of guests', th: 'จำนวนผู้เข้าพัก' })} />
               <span id={`${guestsId}-optional`} className="sr-only">{t({ ru: 'Необязательно. Оставьте пустым, чтобы не ограничивать число гостей.', en: 'Optional. Leave blank for no guest-count restriction.', th: 'ไม่บังคับ เว้นว่างเพื่อไม่จำกัดจำนวนผู้เข้าพัก' })}</span>
             </span></label>
           )}
         </div>
       </details>}
       {mode === 'rent' && dateError && <p role="alert" className="col-span-full text-sm text-destructive">{t({ ru: 'Выберите даты заезда и выезда. Выезд должен быть позже заезда.', en: 'Choose check-in and check-out dates. Check-out must be after check-in.', th: 'เลือกวันเช็กอินและเช็กเอาต์ โดยวันเช็กเอาต์ต้องอยู่หลังวันเช็กอิน' })}</p>}
+      {mode === 'rent' && guestError && (
+        <p role="alert" className="col-span-full text-body-sm text-destructive">
+          {t({ ru: 'Укажите от 1 до 50 гостей или оставьте поле пустым.', en: 'Enter 1 to 50 guests or leave the field blank.', th: 'ระบุผู้เข้าพัก 1 ถึง 50 คน หรือเว้นว่างไว้' })}
+        </p>
+      )}
+      </>}
     </form>
   );
 }

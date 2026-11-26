@@ -2,7 +2,7 @@
  * Unified user collections hook - replaces both useWishlist and useFavorites
  * Supports all item types: product, property, restaurant, tour, etc.
  */
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
@@ -50,22 +50,32 @@ export function useUserCollections(options: UseUserCollectionsOptions = {}) {
   const { itemType, autoFetch = true } = options;
   const { user } = useAuth();
   const { language } = useLanguage();
-  const [items, setItems] = useState<CollectionItem[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const actorId = user?.id;
+  const scope = [actorId, itemType].join(':');
+  const [storedItems, setItems] = useState<CollectionItem[]>([]);
+  const [read, setRead] = useState<{ scope: string; phase: 'loading' | 'ready' | 'error' }>({ scope, phase: 'loading' });
+  const latestRead = useRef(0);
+  const items = useMemo(
+    () => storedItems.filter(item => item.user_id === actorId && (!itemType || item.item_type === itemType)),
+    [storedItems, actorId, itemType],
+  );
+  const isLoading = read.scope === scope ? read.phase === 'loading' : autoFetch;
+  const loadFailed = read.scope === scope && read.phase === 'error';
 
   const fetchItems = useCallback(async () => {
-    if (!user) {
+    const request = ++latestRead.current;
+    if (!actorId) {
       setItems([]);
-      setIsLoading(false);
+      setRead({ scope, phase: 'ready' });
       return;
     }
 
-    setIsLoading(true);
+    setRead({ scope, phase: 'loading' });
     try {
       let query = supabase
         .from('favorites')
         .select('*')
-        .eq('user_id', user.id)
+        .eq('user_id', actorId)
         .order('created_at', { ascending: false });
 
       if (itemType) {
@@ -75,18 +85,19 @@ export function useUserCollections(options: UseUserCollectionsOptions = {}) {
       const { data, error } = await query;
 
       if (error) throw error;
+      if (request !== latestRead.current) return;
       
       setItems((data || []).map(item => ({
         ...item,
         item_type: item.item_type as CollectionItemType,
         item_data: item.item_data as FavoriteItemData | null
       })));
+      setRead({ scope, phase: 'ready' });
     } catch (error) {
       errorLog.silent(error, 'fetch_collections');
-    } finally {
-      setIsLoading(false);
+      if (request === latestRead.current) setRead({ scope, phase: 'error' });
     }
-  }, [user, itemType]);
+  }, [actorId, itemType, scope]);
 
   useEffect(() => {
     if (autoFetch) {
@@ -207,6 +218,7 @@ export function useUserCollections(options: UseUserCollectionsOptions = {}) {
     // Data
     items,
     isLoading,
+    loadFailed,
     counts,
     
     // Generic methods

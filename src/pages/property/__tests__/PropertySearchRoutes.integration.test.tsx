@@ -55,6 +55,20 @@ beforeEach(() => { state.withPriceLevel = false; state.language = 'en'; state.lo
 afterEach(cleanup);
 
 describe('one residential results surface', () => {
+  it('applies the visible THB budget to the sale query and clears just that constraint', () => {
+    state.withPriceLevel = true;
+    mount('/property/search?mode=buy&district=layan&f.priceLevel=2&maxPrice=10000000&source=homepage');
+    const budget = screen.getByRole('button', { name: 'Remove budget limit' });
+    expect(budget).toHaveTextContent('10,000,000');
+    expect(state.filters).toMatchObject({ listingType: 'sale', minPrice: 5_000_000, maxPrice: 10_000_000, district: 'layan' });
+
+    fireEvent.click(budget);
+    expect(screen.queryByRole('button', { name: 'Remove budget limit' })).toBeNull();
+    expect(state.filters).toMatchObject({ listingType: 'sale', minPrice: 5_000_000, maxPrice: 15_000_000, district: 'layan' });
+    expect(screen.getByTestId('location')).toHaveTextContent('source=homepage');
+    expect(screen.getByTestId('location')).not.toHaveTextContent('maxPrice');
+  });
+
   it('opens the undated holiday-search editor from the URL without inventing a guest filter', () => {
     render(<MemoryRouter initialEntries={['/property/search?mode=rent&tenancy=short']}><PropertySearchPage /></MemoryRouter>);
     const criteria = document.querySelector('.premium-search-criteria')!;

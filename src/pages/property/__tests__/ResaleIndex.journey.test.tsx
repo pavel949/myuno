@@ -4,6 +4,7 @@ import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { MemoryRouter, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 import ResaleIndex from '../ResaleIndex';
 import ResaleDetail from '../ResaleDetail';
+import ResaleOffer from '../ResaleOffer';
 
 const state = vi.hoisted(() => ({
   language: 'en', failed: false, detailFailed: false, loading: false,
@@ -20,7 +21,8 @@ vi.mock('@/components/ui/responsive-modal', () => ({
   ResponsiveModal: ({ open, title, children }: { open: boolean; title: string; children: React.ReactNode }) =>
     open ? <section role="dialog" aria-label={title}>{children}</section> : null,
 }));
-vi.mock('@/hooks/useResaleProperties', () => ({
+vi.mock('@/hooks/useResaleProperties', async importOriginal => ({
+  ...await importOriginal<typeof import('@/hooks/useResaleProperties')>(),
   useResaleProperties: (filters: Record<string, unknown>) => {
     state.filters = filters;
     return { data: state.properties, isError: state.failed, isLoading: state.loading, refetch: state.retry };
@@ -34,7 +36,7 @@ function Trace() {
   return <><output data-testid="location">{location.pathname + location.search + location.hash}</output><button onClick={() => navigate(-1)}>History back</button></>;
 }
 function mount(path = '/property/resale') {
-  return render(<MemoryRouter initialEntries={[path]}><Routes><Route path="/property/resale" element={<ResaleIndex />} /><Route path="/property/resale/:id" element={<ResaleDetail />} /></Routes><Trace /></MemoryRouter>);
+  return render(<MemoryRouter initialEntries={[path]}><Routes><Route path="/property/resale" element={<ResaleIndex />} /><Route path="/property/resale/:id" element={<ResaleDetail />} /><Route path="/property/resale/:id/offer" element={<ResaleOffer />} /></Routes><Trace /></MemoryRouter>);
 }
 function choose(label: string, value: string | RegExp) {
   fireEvent.keyDown(screen.getByRole('combobox', { name: label }), { key: 'Enter' });
@@ -46,7 +48,7 @@ beforeEach(() => {
   window.sessionStorage.clear();
   state.rpc.mockReset();
   state.language = 'en'; state.failed = false; state.detailFailed = false; state.loading = false; state.retry.mockClear();
-  state.properties = [{ id: 'unit', title: 'Garden resale', title_ru: 'Вторичная квартира', asking_price: 6000000, currency: 'THB', zone: 'Rawai', property_type: 'condo', media: [], title_type: 'freehold', condition: 'good' }];
+  state.properties = [{ id: 'unit', status: 'active', title: 'Garden resale', title_ru: 'Вторичная квартира', asking_price: 6000000, currency: 'THB', zone: 'Rawai', property_type: 'condo', media: [], title_type: 'freehold', condition: 'good' }];
   Element.prototype.hasPointerCapture = vi.fn(() => false); Element.prototype.setPointerCapture = vi.fn(); Element.prototype.releasePointerCapture = vi.fn(); Element.prototype.scrollIntoView = vi.fn();
 });
 afterEach(() => { cleanup(); vi.unstubAllGlobals(); });
@@ -136,6 +138,60 @@ it('keeps cards and detail usable with an explicit fallback when their photograp
   fireEvent.error(screen.getByAltText('Garden resale'));
   expect(screen.getByRole('img', { name: 'Photo unavailable' })).toBeVisible();
   expect(screen.getByRole('heading', { name: 'Garden resale' })).toBeVisible();
+});
+
+it('lets buyers browse the published listing photos', () => {
+  state.properties[0].media = ['/example-first.webp', '/example-second.webp'];
+  mount('/property/resale/unit');
+  expect(screen.getByRole('button', { name: 'Previous photo' })).toBeDisabled();
+  expect(screen.getByAltText('Garden resale')).toHaveAttribute('src', '/example-first.webp');
+  fireEvent.click(screen.getByRole('button', { name: 'Next photo' }));
+  expect(screen.getByAltText('Garden resale')).toHaveAttribute('src', '/example-second.webp');
+  expect(screen.getByRole('button', { name: 'Next photo' })).toBeDisabled();
+});
+
+it('shows the offer form only for an active listing open to negotiation', () => {
+  mount('/property/resale/unit/offer');
+  expect(screen.getByRole('heading', { name: 'Offer requests are unavailable' })).toBeVisible();
+  expect(screen.queryByRole('button', { name: 'Send offer for review' })).toBeNull();
+  expect(state.rpc).not.toHaveBeenCalled();
+});
+
+it('persists the proposed price and structured terms through the existing buyer intake', async () => {
+  vi.stubGlobal('crypto', webcrypto);
+  state.properties[0].price_negotiable = true;
+  state.rpc.mockResolvedValue({ data: '11111111-1111-4111-8111-111111111111', error: null });
+  mount('/property/resale/unit?source=bookmark#listing');
+  fireEvent.click(screen.getByRole('link', { name: 'Make an offer' }));
+  expect(location().pathname).toBe('/property/resale/unit/offer');
+  expect(location().searchParams.get('source')).toBe('bookmark');
+
+  fireEvent.change(screen.getByLabelText('Name'), { target: { value: 'Synthetic Buyer' } });
+  fireEvent.change(screen.getByLabelText('Phone or WhatsApp'), { target: { value: '+66000000000' } });
+  fireEvent.change(screen.getByLabelText('Offer amount (THB)'), { target: { value: '5750000' } });
+  fireEvent.change(screen.getByLabelText('Preferred transfer date'), { target: { value: '2099-10-20' } });
+  choose('Payment preference', 'Financing');
+  choose('Furniture', 'Include');
+  fireEvent.click(screen.getByLabelText('Keep existing rental bookings'));
+  fireEvent.click(screen.getByRole('button', { name: 'Send offer for review' }));
+
+  expect(await screen.findByText('Offer received for review')).toBeVisible();
+  expect(state.rpc).toHaveBeenCalledOnce();
+  expect(state.rpc).toHaveBeenCalledWith('submit_consultation_request', {
+    payload: expect.objectContaining({
+      request_type: 'property_consultation',
+      entry_point: '/property/resale/unit',
+      vertical_metadata: {
+        marketplace: 'resale',
+        resale_listing_id: 'unit',
+        intent: 'offer',
+        offer: {
+          amount: 5750000, currency: 'THB', payment_preference: 'financing', transfer_date: '2099-10-20',
+          furniture_preference: 'included', keep_existing_bookings: true,
+        },
+      },
+    }),
+  });
 });
 
 describe('resale viewing intake', () => {

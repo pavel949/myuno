@@ -93,6 +93,7 @@ export const APP_ROUTES = {
   PROPERTY: '/property',
   /** Rental discovery landing; filtered results retain PROPERTY_SEARCH. */
   PROPERTY_RENT: '/property/rent',
+  PROPERTY_BUY: '/property/buy',
   /** Catalog grid (Airbnb-style); landing lives at PROPERTY */
   PROPERTY_BROWSE: '/property/browse',
   /** Canonical short-term rent path (redirects to PROPERTY_BROWSE with tenancy=short) */
@@ -117,6 +118,7 @@ export const APP_ROUTES = {
   OFFPLAN: '/property/offplan',
   OFFPLAN_SEARCH: '/property/offplan/search',
   OFFPLAN_DETAIL: (id: string) => `/property/offplan/${id}`,
+  OFFPLAN_UNIT_DETAIL: (projectId: string, unitId: string) => `/property/offplan/${projectId}/units/${unitId}`,
   DEVELOPERS: '/property/developers',
   DEVELOPER_DETAIL: (id: string) => `/property/developers/${id}`,
 
@@ -191,6 +193,7 @@ export const APP_ROUTES = {
   // ── Resale / Secondary Market (under Property Hub) ──
   RESALE: '/property/resale',
   RESALE_DETAIL: (id: string) => `/property/resale/${id}`,
+  RESALE_OFFER: (id: string) => `/property/resale/${id}/offer`,
 
   // ── Commercial Real Estate (under Property Hub) — persona-gated (business / investor) ──
   COMMERCIAL: '/property/commercial',

@@ -1,12 +1,14 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Calendar, Tag, Info, Check, Trash2, ChevronRight, MessageSquare, Package, Wallet } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { formatDistanceToNow } from 'date-fns';
-import { ru, enUS } from 'date-fns/locale';
+import { enUS, ru, th } from 'date-fns/locale';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { APP_ROUTES } from '@/lib/config/routes';
+import { pickLang } from '@/lib/i18n/pickLang';
 
 export interface NotificationItemData {
   id: string;
@@ -56,123 +58,110 @@ const typeConfig: Record<string, { icon: React.ElementType; iconBg: string }> = 
   },
 };
 
+export function notificationActionPath(data: NotificationItemData['data']): string | undefined {
+  const path = data?.action_url;
+  if (
+    typeof path === 'string'
+    && path.startsWith('/')
+    && !path.startsWith('//')
+    && !path.includes('\\')
+    && !Array.from(path).some(char => char.charCodeAt(0) <= 32)
+  ) return path;
+  if (typeof data?.booking_id === 'string' && data.booking_id) {
+    return APP_ROUTES.BOOKING_DETAIL(encodeURIComponent(data.booking_id));
+  }
+  if (typeof data?.order_id === 'string' && data.order_id) {
+    return APP_ROUTES.ORDER_TRACKING(encodeURIComponent(data.order_id));
+  }
+}
+
 export function NotificationItem({ notification, onMarkRead, onDelete }: NotificationItemProps) {
   const { language } = useLanguage();
-  const navigate = useNavigate();
-  const isRu = language === 'ru';
-
+  const local = (ru: string, en: string, th: string) => pickLang(language, { ru, en, th });
   const config = typeConfig[notification.type] || typeConfig.status;
   const Icon = config.icon;
-
-  const formatTime = (dateStr: string) => {
-    return formatDistanceToNow(new Date(dateStr), {
-      addSuffix: true,
-      locale: isRu ? ru : enUS,
-    });
-  };
-
-  const handleClick = () => {
-    if (!notification.is_read) {
-      onMarkRead(notification.id);
-    }
-    
-    if (notification.data?.action_url) {
-      navigate(notification.data.action_url);
-    } else if (notification.data?.booking_id) {
-      navigate(`/bookings/${notification.data.booking_id}`);
-    } else if (notification.data?.order_id) {
-      navigate(`/orders/${notification.data.order_id}/tracking`);
-    }
-  };
-
-  const hasAction = notification.data?.action_url || notification.data?.booking_id || notification.data?.order_id;
+  const path = notificationActionPath(notification.data);
+  const createdAt = new Date(notification.created_at);
+  const hasTimestamp = Number.isFinite(createdAt.getTime());
+  const content = (
+    <div className="flex min-w-0 items-start gap-3">
+      <span className={cn("flex size-10 shrink-0 items-center justify-center rounded-[var(--bible-radius-control)]", config.iconBg)}>
+        <Icon className="size-5" aria-hidden="true" />
+      </span>
+      <div className="min-w-0 flex-1 space-y-1">
+        <div className="flex items-start justify-between gap-2">
+          <h3 className="break-words text-body-sm font-semibold">{notification.title}</h3>
+          {!notification.is_read && (
+            <span className="mt-1.5 size-2 shrink-0 rounded-full bg-primary">
+              <span className="sr-only">{local('Непрочитанное', 'Unread', 'ยังไม่ได้อ่าน')}</span>
+            </span>
+          )}
+        </div>
+        <p className="break-words text-body-sm text-muted-foreground">{notification.body}</p>
+        {typeof notification.data?.promo_code === 'string' && notification.data.promo_code && (
+          <code className="inline-block break-all rounded-[var(--bible-radius-control)] bg-primary/10 px-2 py-1 text-body-sm text-primary">
+            {notification.data.promo_code}
+          </code>
+        )}
+        {hasTimestamp && (
+          <time dateTime={createdAt.toISOString()} className="block text-body-sm text-muted-foreground">
+            {formatDistanceToNow(createdAt, { addSuffix: true, locale: language === 'ru' ? ru : language === 'th' ? th : enUS })}
+          </time>
+        )}
+      </div>
+      {path && <ChevronRight className="mt-1 size-4 shrink-0 text-muted-foreground" aria-hidden="true" />}
+    </div>
+  );
 
   return (
-    <motion.div
+    <motion.li
       layout
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, x: -100 }}
       className={cn(
-        "relative overflow-hidden rounded-none border p-3 transition-all",
-        !notification.is_read 
-          ? "border-primary/30 bg-primary/5" 
+        "rounded-[var(--bible-radius-card)] border p-3",
+        !notification.is_read
+          ? "border-primary/30 bg-primary/5"
           : "border-border bg-card",
-        hasAction && "cursor-pointer hover:border-primary/50"
+        path && "hover:border-primary/50"
       )}
-      onClick={hasAction ? handleClick : undefined}
     >
-      <div className="flex items-start gap-3">
-        {/* Icon */}
-        <div className={cn("w-10 h-10 rounded-none flex items-center justify-center flex-shrink-0", config.iconBg)}>
-          <Icon className="w-5 h-5" />
-        </div>
+      {path ? (
+        <Link
+          to={path}
+          aria-label={notification.title}
+          className="block rounded-[var(--bible-radius-control)]"
+          onClick={() => { if (!notification.is_read) onMarkRead(notification.id); }}
+        >
+          {content}
+        </Link>
+      ) : content}
 
-        {/* Content */}
-        <div className="flex-1 min-w-0">
-          <div className="flex items-start justify-between gap-2">
-            <h4 className={cn(
-              "font-medium text-sm line-clamp-1",
-              !notification.is_read && "text-foreground"
-            )}>
-              {notification.title}
-            </h4>
-            {!notification.is_read && (
-              <span className="w-2 h-2 bg-primary rounded-full flex-shrink-0 mt-1.5" />
-            )}
-          </div>
-          
-          <p className="text-xs text-muted-foreground line-clamp-2 mt-0.5">
-            {notification.body}
-          </p>
-
-          {notification.data?.promo_code && (
-            <code className="inline-block mt-1.5 text-[10px] font-mono bg-primary/10 text-primary px-2 py-0.5 rounded-none">
-              {notification.data.promo_code}
-            </code>
-          )}
-
-          <div className="flex items-center justify-between mt-2">
-            <span className="text-[10px] text-muted-foreground">
-              {formatTime(notification.created_at)}
-            </span>
-            
-            {hasAction && (
-              <ChevronRight className="w-4 h-4 text-muted-foreground" />
-            )}
-          </div>
-        </div>
-      </div>
-
-      {/* Quick Actions */}
-      <div className="flex items-center gap-1 mt-2 pt-2 border-t border-border/50">
+      <div className="mt-2 flex flex-wrap items-center justify-end gap-1 border-t border-border/50 pt-2">
         {!notification.is_read && (
           <Button
+            type="button"
             variant="ghost"
             size="sm"
-            className="h-7 text-xs flex-1"
-            onClick={(e) => {
-              e.stopPropagation();
-              onMarkRead(notification.id);
-            }}
+            className="min-h-11"
+            onClick={() => onMarkRead(notification.id)}
           >
-            <Check className="w-3.5 h-3.5 mr-1" />
-            {isRu ? 'Прочитано' : 'Mark read'}
+            <Check className="size-4" aria-hidden="true" />
+            {local('Прочитано', 'Mark read', 'ทำเครื่องหมายว่าอ่านแล้ว')}
           </Button>
         )}
         <Button
+          type="button"
           variant="ghost"
           size="sm"
-          className="h-7 text-xs text-destructive hover:text-destructive flex-1"
-          onClick={(e) => {
-            e.stopPropagation();
-            onDelete(notification.id);
-          }}
+          className="min-h-11 text-destructive hover:text-destructive"
+          onClick={() => onDelete(notification.id)}
         >
-          <Trash2 className="w-3.5 h-3.5 mr-1" />
-          {isRu ? 'Удалить' : 'Delete'}
+          <Trash2 className="size-4" aria-hidden="true" />
+          {local('Удалить', 'Delete', 'ลบ')}
         </Button>
       </div>
-    </motion.div>
+    </motion.li>
   );
 }

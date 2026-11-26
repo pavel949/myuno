@@ -9,17 +9,19 @@ import { pickLang } from '@/lib/i18n/pickLang';
 import React, { useState, useMemo, useCallback, useEffect, useRef, lazy, Suspense } from 'react';
 import { SearchLeadRequest } from '@/components/search/SearchLeadRequest';
 import { Link, useSearchParams, useLocation, useNavigate } from 'react-router-dom';
-import { Home, SlidersHorizontal, Loader2, Check, Map as MapIcon, List } from 'lucide-react';
+import { AlertTriangle, Home, SlidersHorizontal, Loader2, Check, Map as MapIcon, List, X } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
+import { EmptyState } from '@/components/page/EmptyState';
+import { PageState } from '@/components/page/PageState';
 import { UniversalFilter, FilterValues, type FilterConfig } from '@/components/filters/UniversalFilter';
 import { usePropertyFilterOptions } from '@/hooks/usePropertyFilterOptions';
 import { usePropertiesInfinite, Property } from '@/hooks/useProperties';
 import { Skeleton } from '@/components/ui/skeleton';
 import { BackButton } from '@/components/uno/BackButton';
 import { HomeDiscoverySearch } from '@/components/home/HomeDiscoverySearch';
-import { readPropertySearchQuery, updatePropertySearchSort, clearPropertySearchQuery, normalizePropertySearchQuery } from '@/lib/propertySearchQuery';
+import { readPropertySearchQuery, updatePropertySearchSort, clearPropertySearchQuery, normalizePropertySearchQuery, propertySaleBudgetLabel } from '@/lib/propertySearchQuery';
 import { propertySearchFeatureLabels, propertyPriceSortGroupLabel } from '@/lib/propertySearchPresentation';
 import { PROPERTY_FEATURE_MAP } from '@/lib/config/propertyFeatures';
 import { serializeFilters } from '@/lib/propertyBrowseFilters';
@@ -199,6 +201,10 @@ export default function PropertySearchPage() {
     return {
       ...base,
       ...(catalogueAll ? { listingType: undefined, rentTenancy: undefined, saleIntent: undefined, isQuickSale: undefined } : {}),
+      ...(state.saleMaxPrice != null ? {
+        minPrice: Math.max(base.minPrice ?? 0, 0.01),
+        maxPrice: Math.min(base.maxPrice ?? state.saleMaxPrice, state.saleMaxPrice),
+      } : {}),
       search: searchText || undefined,
       managementCompanyId: selectedCompanyId || undefined,
       projectId: selectedProjectId || undefined,
@@ -215,6 +221,7 @@ export default function PropertySearchPage() {
     rentTenancy,
     state.hasGuestFilter,
     state.saleIntent,
+    state.saleMaxPrice,
     state.isQuickSale,
   ]);
 
@@ -344,9 +351,27 @@ export default function PropertySearchPage() {
           <details open={criteriaOpen} className="premium-search-criteria">
             <summary className="property-discovery-search-summary" onClick={event => { event.preventDefault(); setCriteriaOpen(open => !open); }}><span><strong>{summaryTypes} · {summaryAreas}</strong><small>{searchText ? `«${searchText}» · ` : ''}{!catalogueAll && propertyMode === 'rent' ? `${summaryDuration} · ${summaryDates} · ${state.hasGuestFilter ? `${text('Гостей', 'Guests', 'ผู้เข้าพัก')}: ${searchParams.guests}` : text('Гости не указаны', 'Guests not specified', 'ไม่ระบุจำนวนผู้เข้าพัก')}` : text('Параметры и район можно изменить', 'Refine the area and preferences', 'ปรับย่านและความต้องการ')}{summaryExtraFilters ? ` · ${summaryExtraFilters} ${filterCountLabel}` : ''}</small></span><span>{criteriaOpen ? text('Свернуть', 'Collapse', 'ย่อ') : text('Изменить поиск', 'Change search', 'แก้ไขการค้นหา')}</span></summary>
             <div className="property-search-editor property-discovery-editor">
-              <HomeDiscoverySearch key={searchEditorKey} hideModeSwitch catalogue showGuestsInline initialParams={searchParamsUrl} onSearch={submitSearch} />
+              <HomeDiscoverySearch key={searchEditorKey + ':' + (state.saleMaxPrice ?? '')} hideModeSwitch catalogue showGuestsInline initialParams={searchParamsUrl} onSearch={submitSearch} />
             </div>
           </details>
+          {state.saleMaxPrice != null && (
+            <div>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                aria-label={text('Убрать лимит бюджета', 'Remove budget limit', 'นำขีดจำกัดงบประมาณออก')}
+                onClick={() => {
+                  const next = new URLSearchParams(searchParamsUrl);
+                  next.delete('maxPrice');
+                  submitSearch(next);
+                }}
+              >
+                {propertySaleBudgetLabel(state.saleMaxPrice, language)}
+                <X className="size-4" aria-hidden="true" />
+              </Button>
+            </div>
+          )}
           <div className="flex min-w-0 items-center gap-2">
             <UniversalFilter config={advancedFilterConfig} values={advancedValues} onChange={setAdvancedFilters} activeCount={advancedFilterCount}>
               <button type="button" className={cn('property-discovery-filter', advancedFilterCount > 0 && 'border-primary text-primary')}>
@@ -486,20 +511,32 @@ export default function PropertySearchPage() {
             )}
           </div>
 
-          {isError && <div role="alert" className="py-16 text-center">
-            <h2 className="mb-3">{text('Не удалось загрузить жильё', 'Homes could not be loaded', 'ไม่สามารถโหลดที่พักได้')}</h2>
-            <p className="mb-5 text-muted-foreground">{text('Параметры поиска сохранены. Попробуйте ещё раз.', 'Your search is kept. Please try again.', 'เก็บเงื่อนไขการค้นหาไว้แล้ว กรุณาลองอีกครั้ง')}</p>
-            <Button variant="outline" onClick={() => refetch()}>{text('Повторить', 'Try again', 'ลองอีกครั้ง')}</Button>
-          </div>}
+          {isError && (
+            <PageState
+              title={text('Не удалось загрузить жильё', 'Homes could not be loaded', 'ไม่สามารถโหลดที่พักได้')}
+              description={text('Параметры поиска сохранены. Попробуйте ещё раз.', 'Your search is kept. Please try again.', 'เก็บเงื่อนไขการค้นหาไว้แล้ว กรุณาลองอีกครั้ง')}
+              icon={AlertTriangle}
+              tone="warning"
+              announcement="alert"
+            >
+              <Button className="self-start" onClick={() => refetch()}>{text('Повторить', 'Try again', 'ลองอีกครั้ง')}</Button>
+            </PageState>
+          )}
           {!isLoading && !isError && !availability.pending && !availability.failed && !hasNextPage && properties.length === 0 && (
-            <div className="text-center py-8">
-              <Home className="w-16 h-16 mx-auto text-muted-foreground/50 mb-4" />
-              <h3 className="text-lg font-semibold mb-2">{!catalogueAll && propertyMode === 'buy' ? text('Прямых предложений по этим условиям нет', 'No direct sale listings match these criteria', 'ไม่มีประกาศขายโดยตรงที่ตรงเงื่อนไข') : text('Ничего не найдено', 'No properties found', 'ไม่พบที่พัก')}</h3>
-              <p className="text-muted-foreground mb-4">{!catalogueAll && propertyMode === 'buy' ? text('Измените фильтры или посмотрите отдельные каталоги вторичной недвижимости и новостроек выше.', 'Adjust your filters or explore the separate resale and new-development catalogues above.', 'ปรับตัวกรองหรือดูแคตตาล็อกบ้านมือสองและโครงการใหม่ด้านบน') : text('Попробуйте изменить фильтры', 'Try adjusting your filters', 'ลองเปลี่ยนตัวกรอง')}</p>
-              <Button variant="outline" onClick={clearAllFilters}>
-                {text('Сбросить фильтры', 'Reset filters', 'ล้างตัวกรอง')}
-              </Button>
-            </div>
+            <EmptyState
+              icon={Home}
+              title={!catalogueAll && propertyMode === 'buy'
+                ? text('Прямых предложений по этим условиям нет', 'No direct sale listings match these criteria', 'ไม่มีประกาศขายโดยตรงที่ตรงเงื่อนไข')
+                : text('Ничего не найдено', 'No properties found', 'ไม่พบที่พัก')}
+              description={!catalogueAll && propertyMode === 'buy'
+                ? text('Измените фильтры или посмотрите отдельные каталоги вторичной недвижимости и новостроек выше.', 'Adjust your filters or explore the separate resale and new-development catalogues above.', 'ปรับตัวกรองหรือดูแคตตาล็อกบ้านมือสองและโครงการใหม่ด้านบน')
+                : text('Попробуйте изменить фильтры', 'Try adjusting your filters', 'ลองเปลี่ยนตัวกรอง')}
+              action={(
+                <Button className="self-start" variant="outline" onClick={clearAllFilters}>
+                  {text('Сбросить фильтры', 'Reset filters', 'ล้างตัวกรอง')}
+                </Button>
+              )}
+            />
           )}
 
           {!catalogueAll && (propertyMode === 'rent' || propertyMode === 'buy') && !isError && <SearchLeadRequest kind={propertyMode} params={searchParamsUrl} className="mt-8" />}

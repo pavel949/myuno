@@ -8,6 +8,7 @@ import {
 import { useLanguage } from '@/contexts/LanguageContext';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
+import { APP_ROUTES } from '@/lib/config/routes';
 
 interface TripService {
   id: string;
@@ -25,7 +26,7 @@ const TRIP_SERVICES: TripService[] = [
   {
     id: 'transfer',
     icon: Plane,
-    path: '/transport',
+    path: APP_ROUTES.AIRPORT_TRANSFER,
     labelEn: 'Airport Transfer',
     labelRu: 'Трансфер',
     descEn: 'Meet & greet service',
@@ -150,7 +151,7 @@ export function TripServicesGrid({
     // Add booking context to URL if available
     const params = new URLSearchParams();
     if (bookingId) params.set('booking_id', bookingId);
-    if (propertyId) params.set('property_id', propertyId);
+    if (propertyId && service.id !== 'transfer') params.set('property_id', propertyId);
     
     const separator = service.path.includes('?') ? '&' : '?';
     const url = params.toString() 

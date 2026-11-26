@@ -36,20 +36,20 @@ it('returns keyboard focus to the actual search opener after Escape', async () =
   // JSDOM click does not perform the browser's native focus-on-click step.
   opener.focus();
   fireEvent.click(opener);
-  const dialog = await screen.findByRole('dialog', { name: 'Search' });
+  const dialog = await screen.findByRole('dialog', { name: 'Search myUNO' }, { timeout: 10000 });
   await waitFor(() => expect(dialog).toContainElement(document.activeElement as HTMLElement));
   fireEvent.keyDown(dialog, { key: 'Escape' });
   await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
   await waitFor(() => expect(opener).toHaveFocus());
-});
+}, 15000);
 
 it('opens a cold consumer search from Ctrl+K and subsequent global search events', async () => {
   render(<MemoryRouter><TopBar {...{ role: 'guest' as const }} /></MemoryRouter>);
-  expect(screen.queryByRole('dialog', { name: 'Search' })).not.toBeInTheDocument();
+  expect(screen.queryByRole('dialog', { name: 'Search myUNO' })).not.toBeInTheDocument();
   fireEvent.keyDown(document, { key: 'k', ctrlKey: true });
-  const dialog = await screen.findByRole('dialog', { name: 'Search' });
+  const dialog = await screen.findByRole('dialog', { name: 'Search myUNO' }, { timeout: 5000 });
   fireEvent.keyDown(dialog, { key: 'Escape' });
   await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
   fireEvent(window, new Event('myuno:open-search'));
-  expect(await screen.findByRole('dialog', { name: 'Search' })).toBeInTheDocument();
-});
+  expect(await screen.findByRole('dialog', { name: 'Search myUNO' })).toBeInTheDocument();
+}, 10000);

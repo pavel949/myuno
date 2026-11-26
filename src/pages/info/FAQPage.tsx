@@ -1,3 +1,4 @@
+import { useRef, useState } from 'react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { PageContainer } from '@/components/uno/PageContainer';
 import { PageHeader } from '@/components/uno/PageHeader';
@@ -9,14 +10,23 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from '@/components/ui/accordion';
-import { HelpCircle, MessageCircle, Shield, Building2, Users2, CreditCard, Scale, GraduationCap, Heart, Lock } from 'lucide-react';
+import { ArrowDown, HelpCircle, MessageCircle, Shield, Building2, Users2, CreditCard, Scale, GraduationCap, Heart, Lock, Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { Link } from 'react-router-dom';
+import { APP_ROUTES } from '@/lib/config/routes';
 
 export default function FAQPage() {
   const { language } = useLanguage();
   const isRu = language === 'ru';
   const isTh = language === 'th';
+  const label = (en: string, ru: string, th: string) => isRu ? ru : isTh ? th : en;
+  const [query, setQuery] = useState('');
+  const searchInput = useRef<HTMLInputElement>(null);
+  const pickQuery = (value: string) => {
+    setQuery(value);
+    searchInput.current?.focus();
+  };
 
   const faqCategories = [
     {
@@ -50,10 +60,10 @@ export default function FAQPage() {
         {
           q: isRu ? 'На каких языках доступен myUNO?' : isTh ? 'myUNO มีให้บริการในภาษาใดบ้าง?' : 'What languages is myUNO available in?',
           a: isRu 
-            ? 'myUNO доступен на русском, английском и тайском языках. Мультиязычная поддержка 24/7 понимает ваш контекст и культуру.'
+            ? 'В меню myUNO можно выбрать русский, английский или тайский язык.'
             : isTh 
-            ? 'myUNO มีให้บริการเป็นภาษารัสเซีย อังกฤษ และไทย การสนับสนุนหลายภาษา 24/7 เข้าใจบริบทและวัฒนธรรมของคุณ'
-            : 'myUNO is available in Russian, English and Thai. Multilingual 24/7 support understands your context and culture.',
+            ? 'คุณสามารถเลือกภาษารัสเซีย อังกฤษ หรือไทยได้จากเมนู myUNO'
+            : 'Choose Russian, English or Thai from the myUNO menu.',
         },
         {
           q: isRu ? 'Чем myUNO отличается от других платформ?' : isTh ? 'myUNO แตกต่างจากแพลตฟอร์มอื่นอย่างไร?' : 'How is myUNO different from other platforms?',
@@ -118,12 +128,12 @@ export default function FAQPage() {
             : 'Basic (🔵) — basic document check. Verified (🔷) — full verification + initial audit. Trusted (✅) — regular audit + rating 4.5+. Premium (⭐) — Mystery Shopping + rating 4.8+ + Repeat Rate > 40%.',
         },
         {
-          q: isRu ? 'Как получить 100% возврат средств?' : isTh ? 'จะได้รับเงินคืน 100% ได้อย่างไร?' : 'How do I get a 100% refund?',
+          q: isRu ? 'Как запросить возврат средств?' : isTh ? 'ฉันจะขอเงินคืนได้อย่างไร?' : 'How do I request a refund?',
           a: isRu 
-            ? 'Если услуга не была оказана, свяжитесь с поддержкой через SOS-кнопку или раздел «Помощь». Мы рассмотрим заявку в течение 24 часов. Деньги хранятся на escrow-счёте до подтверждения оказания услуги.'
+            ? 'Откройте бронирование и проверьте условия отмены. Если нужна помощь с возвратом, напишите в поддержку и укажите номер бронирования.'
             : isTh 
-            ? 'หากไม่ได้รับบริการ ติดต่อฝ่ายสนับสนุนผ่านปุ่ม SOS หรือส่วน "ช่วยเหลือ" เราจะตรวจสอบคำขอภายใน 24 ชั่วโมง เงินจะถูกเก็บไว้ในบัญชี escrow จนกว่าจะยืนยันการให้บริการ'
-            : 'If the service was not provided, contact support via SOS button or "Help" section. We will review your request within 24 hours. Money is held in escrow until service confirmation.',
+            ? 'เปิดการจองเพื่อตรวจสอบเงื่อนไขการยกเลิก หากต้องการความช่วยเหลือเรื่องเงินคืน โปรดแจ้งหมายเลขการจองแก่ฝ่ายสนับสนุน'
+            : 'Open your booking and check its cancellation policy. If you need help with a refund, contact support with your booking reference.',
         },
       ],
     },
@@ -158,10 +168,10 @@ export default function FAQPage() {
         {
           q: isRu ? 'Как защищена моя недвижимость?' : isTh ? 'ทรัพย์สินของฉันได้รับการคุ้มครองอย่างไร?' : 'How is my property protected?',
           a: isRu 
-            ? 'G-Trust обеспечивает: проверку всех гостей через паспорт и контактные данные, страхование от повреждений до $10,000, гарантированные выплаты в течение 24 часов после заезда, быстрое решение споров за 48 часов.'
+            ? 'Порядок работы с ущербом, условия выплат и доступная защита указаны в договоре управления вашим объектом. Эти условия можно уточнить у команды myUNO.'
             : isTh 
-            ? 'G-Trust ให้การ: ตรวจสอบแขกทุกคนผ่านพาสปอร์ตและข้อมูลติดต่อ, ประกันความเสียหายสูงสุด $10,000, รับประกันการจ่ายเงินภายใน 24 ชั่วโมงหลังเช็คอิน, การแก้ไขข้อพิพาทรวดเร็วภายใน 48 ชั่วโมง'
-            : 'G-Trust provides: verification of all guests via passport and contact details, damage insurance up to $10,000, guaranteed payouts within 24 hours after check-in, fast dispute resolution within 48 hours.',
+            ? 'ดูขั้นตอนกรณีเกิดความเสียหาย เงื่อนไขการจ่ายเงิน และความคุ้มครองที่มีในสัญญาบริหารทรัพย์สิน หรือติดต่อทีม myUNO เพื่อสอบถาม'
+            : 'Your property management agreement explains how damage is handled, when payouts are made, and what protection is available. Contact the myUNO team for details.',
         },
       ],
     },
@@ -180,10 +190,10 @@ export default function FAQPage() {
         {
           q: isRu ? 'Как работает SOS-кнопка?' : isTh ? 'ปุ่ม SOS ทำงานอย่างไร?' : 'How does the SOS button work?',
           a: isRu 
-            ? 'SOS-кнопка доступна 24/7 для экстренных ситуаций: спустило колесо, потерялись документы, нужна срочная медицинская помощь. Наша команда отреагирует в течение 15 минут и организует необходимую помощь.'
+            ? 'Используйте контакты в разделе «Помощь» для вопросов по поездке. Если нужна экстренная помощь в Таиланде, звоните напрямую в экстренные службы.'
             : isTh 
-            ? 'ปุ่ม SOS พร้อมใช้งาน 24/7 สำหรับสถานการณ์ฉุกเฉิน: ยางแบน, เอกสารหาย, ต้องการความช่วยเหลือทางการแพทย์เร่งด่วน ทีมของเราจะตอบกลับภายใน 15 นาทีและจัดการความช่วยเหลือที่จำเป็น'
-            : 'SOS button is available 24/7 for emergencies: flat tire, lost documents, urgent medical assistance needed. Our team will respond within 15 minutes and organize necessary help.',
+            ? 'สำหรับคำถามเกี่ยวกับการเดินทาง โปรดใช้ช่องทางติดต่อในหน้าความช่วยเหลือ หากเกิดเหตุฉุกเฉินในประเทศไทย ให้โทรหาหน่วยฉุกเฉินโดยตรง'
+            : 'Use the contact options in Help for trip assistance. For emergencies in Thailand, call emergency services directly.',
         },
         {
           q: isRu ? 'Можно ли получить персонального менеджера?' : isTh ? 'สามารถรับผู้จัดการส่วนตัวได้หรือไม่?' : 'Can I get a personal manager?',
@@ -218,18 +228,18 @@ export default function FAQPage() {
         {
           q: isRu ? 'Какие способы оплаты доступны?' : isTh ? 'มีวิธีการชำระเงินใดบ้าง?' : 'What payment methods are available?',
           a: isRu 
-            ? 'Мы принимаем банковские карты (Visa, Mastercard), наличные при получении услуги и оплату через myUNO Кошелёк (баланс с кэшбеком).'
+            ? 'Способы оплаты зависят от услуги. Доступные варианты появятся при оформлении заказа или в предложении.'
             : isTh 
-            ? 'เรารับบัตรธนาคาร (Visa, Mastercard), เงินสดเมื่อรับบริการ และการชำระเงินผ่าน myUNO Wallet (ยอดคงเหลือพร้อมเงินคืน)'
-            : 'We accept bank cards (Visa, Mastercard), cash upon service delivery and payment via myUNO Wallet (balance with cashback).',
+            ? 'วิธีชำระเงินขึ้นอยู่กับบริการ ระบบจะแสดงตัวเลือกที่ใช้ได้ในขั้นตอนชำระเงินหรือในใบเสนอราคา'
+            : 'Payment methods vary by service. The available options appear at checkout or in your quote.',
         },
         {
-          q: isRu ? 'Безопасна ли оплата?' : isTh ? 'การชำระเงินปลอดภัยหรือไม่?' : 'Is payment secure?',
+          q: isRu ? 'Где посмотреть условия оплаты?' : isTh ? 'ดูเงื่อนไขการชำระเงินได้ที่ไหน?' : 'Where can I check the payment terms?',
           a: isRu 
-            ? 'Да, все платежи защищены системой G-Trust. Деньги хранятся на escrow-счёте и переводятся партнёру только после подтверждения оказания услуги.'
+            ? 'Доступные способы оплаты и сумму к оплате можно проверить при оформлении заказа или в полученном предложении.'
             : isTh 
-            ? 'ใช่ การชำระเงินทั้งหมดได้รับการคุ้มครองโดยระบบ G-Trust เงินจะถูกเก็บไว้ในบัญชี escrow และจะถูกโอนให้พันธมิตรหลังจากยืนยันการให้บริการเท่านั้น'
-            : 'Yes, all payments are protected by the G-Trust system. Money is held in escrow and transferred to the partner only after service confirmation.',
+            ? 'ตรวจสอบวิธีชำระเงินที่ใช้ได้และยอดชำระในขั้นตอนชำระเงินหรือในใบเสนอราคาที่ได้รับ'
+            : 'Check the available payment methods and amount due at checkout or in the quote you received.',
         },
       ],
     },
@@ -240,45 +250,103 @@ export default function FAQPage() {
         {
           q: isRu ? 'Как защищены мои данные?' : isTh ? 'ข้อมูลของฉันได้รับการคุ้มครองอย่างไร?' : 'How is my data protected?',
           a: isRu 
-            ? 'myUNO соответствует требованиям PDPA (Thailand Personal Data Protection Act). Мы используем шифрование данных, безопасные серверы и не передаём ваши данные третьим лицам без вашего согласия.'
+            ? 'В Политике конфиденциальности описано, как myUNO обрабатывает персональные данные и куда обратиться с вопросом о них.'
             : isTh 
-            ? 'myUNO ปฏิบัติตามข้อกำหนด PDPA (พระราชบัญญัติคุ้มครองข้อมูลส่วนบุคคลของประเทศไทย) เราใช้การเข้ารหัสข้อมูล, เซิร์ฟเวอร์ที่ปลอดภัย และไม่ส่งต่อข้อมูลของคุณให้บุคคลที่สามโดยไม่ได้รับความยินยอมจากคุณ'
-            : 'myUNO complies with PDPA (Thailand Personal Data Protection Act). We use data encryption, secure servers and do not share your data with third parties without your consent.',
+            ? 'นโยบายความเป็นส่วนตัวอธิบายวิธีที่ myUNO จัดการข้อมูลส่วนบุคคลและช่องทางติดต่อเมื่อมีคำถามเกี่ยวกับข้อมูล'
+            : 'The Privacy Policy explains how myUNO handles personal data and where to send a question about your data.',
         },
         {
           q: isRu ? 'Что делать в экстренной ситуации?' : isTh ? 'จะทำอย่างไรในสถานการณ์ฉุกเฉิน?' : 'What to do in an emergency?',
           a: isRu 
-            ? 'Используйте SOS-кнопку в приложении — она работает 24/7. Наша команда отреагирует в течение 15 минут. Для критических ситуаций также звоните по номеру экстренных служб Таиланда: 1669 (медицина), 191 (полиция).'
+            ? 'В Таиланде звоните 1669 для экстренной медицинской помощи или 191 для вызова полиции.'
             : isTh 
-            ? 'ใช้ปุ่ม SOS ในแอป — ทำงาน 24/7 ทีมของเราจะตอบกลับภายใน 15 นาที สำหรับสถานการณ์วิกฤตยังสามารถโทรหาบริการฉุกเฉินของประเทศไทย: 1669 (การแพทย์), 191 (ตำรวจ)'
-            : 'Use the SOS button in the app — it works 24/7. Our team will respond within 15 minutes. For critical situations also call Thailand emergency services: 1669 (medical), 191 (police).',
+            ? 'ในประเทศไทย โทร 1669 สำหรับการแพทย์ฉุกเฉิน หรือ 191 สำหรับตำรวจ'
+            : 'In Thailand, call 1669 for emergency medical help or 191 for police.',
         },
       ],
     },
+  ];
+
+  const words = query.normalize('NFKC').toLocaleLowerCase().trim().split(/\s+/u).filter(Boolean);
+  const isSearching = words.length > 0;
+  const matchingCategories = faqCategories.map((category, categoryIndex) => ({
+    ...category,
+    categoryIndex,
+    items: category.items.map((item, itemIndex) => ({ ...item, itemIndex })).filter(item => {
+      if (!isSearching) return true;
+      const searchableText = `${category.title} ${item.q} ${item.a}`.normalize('NFKC').toLocaleLowerCase();
+      return words.every(word => searchableText.includes(word));
+    }),
+  })).filter(category => category.items.length > 0);
+  const resultCount = matchingCategories.reduce((sum, category) => sum + category.items.length, 0);
+  const commonSearches = [
+    { title: label('Refund', 'Возврат', 'เงินคืน'), query: label('refund', 'возврат', 'เงินคืน') },
+    { title: label('Cancellation', 'Отмена', 'การยกเลิก'), query: label('cancel', 'отмен', 'การยกเลิก') },
+    { title: label('Payment', 'Оплата', 'ชำระเงิน'), query: label('payment', 'оплат', 'ชำระเงิน') },
   ];
 
   return (
     <AppLayout usePageContainer={false}>
       <PageContainer className="max-w-4xl">
         <PageHeader 
-          title={isRu ? 'Частые вопросы' : isTh ? 'คำถามที่พบบ่อย' : 'FAQ'} 
+          title={label('Help centre', 'Центр помощи', 'ศูนย์ช่วยเหลือ')}
           showBack 
         />
 
-        {/* Search hint */}
-        <SectionCard className="flex items-center gap-3">
-          <HelpCircle className="w-10 h-10 text-primary flex-shrink-0" />
-          <div>
-            <h2 className="font-semibold">{isRu ? 'Нужна помощь?' : isTh ? 'ต้องการความช่วยเหลือหรือไม่?' : 'Need Help?'}</h2>
-            <p className="text-sm text-muted-foreground">
-              {isRu 
-                ? 'Найдите ответ ниже или свяжитесь с поддержкой 24/7'
-                : isTh 
-                ? 'ค้นหาคำตอบด้านล่างหรือติดต่อฝ่ายสนับสนุน 24/7'
-                : 'Find your answer below or contact support 24/7'}
-            </p>
+        <SectionCard className="space-y-2">
+          <label className="font-medium" htmlFor="help-search">
+            {label('Search help', 'Поиск по центру помощи', 'ค้นหาความช่วยเหลือ')}
+          </label>
+          <div className="relative">
+            <Search className="pointer-events-none absolute left-3 top-3 h-5 w-5 text-muted-foreground" aria-hidden="true" />
+            <Input
+              ref={searchInput}
+              id="help-search"
+              type="search"
+              className="min-h-11 pl-10"
+              placeholder={label('Try booking, payment or account', 'Например, бронирование или оплата', 'เช่น การจอง การชำระเงิน หรือบัญชี')}
+              value={query}
+              onChange={event => setQuery(event.currentTarget.value)}
+              aria-controls="help-results"
+            />
           </div>
+          {!isSearching && (
+            <div className="flex flex-wrap gap-2" role="group" aria-label={label('Common searches', 'Частые запросы', 'คำค้นหาที่ใช้บ่อย')}>
+              {commonSearches.map(topic => (
+                <Button key={topic.query} variant="outline" className="min-h-11" onClick={() => pickQuery(topic.query)}>
+                  {topic.title}
+                </Button>
+              ))}
+            </div>
+          )}
+          <p role="status" className="text-sm text-muted-foreground">
+            {isSearching && label(
+              `Answers found: ${resultCount}`,
+              `Найдено ответов: ${resultCount}`,
+              `พบคำตอบ ${resultCount} รายการ`,
+            )}
+          </p>
         </SectionCard>
+
+        {!isSearching && (
+          <nav aria-labelledby="help-topics" className="space-y-3">
+            <h2 id="help-topics" className="font-semibold">
+              {label('Browse by topic', 'Темы помощи', 'เรียกดูตามหัวข้อ')}
+            </h2>
+            <div className="grid gap-2 sm:grid-cols-2">
+              {faqCategories.map((category, index) => {
+                const Icon = category.icon;
+                return (
+                  <a key={category.title} href={`#help-topic-${index}`} className="ds-focus flex min-h-11 items-center gap-3 border border-border bg-card px-3 py-2 text-sm font-medium hover:bg-muted">
+                    <Icon className="h-4 w-4 shrink-0 text-primary" aria-hidden="true" />
+                    <span className="flex-1">{category.title}</span>
+                    <ArrowDown className="h-4 w-4 shrink-0" aria-hidden="true" />
+                  </a>
+                );
+              })}
+            </div>
+          </nav>
+        )}
 
         {/* Quick Links */}
         <div className="grid grid-cols-2 gap-3 my-4">
@@ -296,23 +364,31 @@ export default function FAQPage() {
           </Button>
         </div>
 
-        {/* FAQ Sections */}
-        {faqCategories.map((category, catIndex) => {
+        <div id="help-results" className="space-y-4">
+        {resultCount === 0 && (
+          <SectionCard className="space-y-2">
+            <p>{label('No answers match your search.', 'Ответы по вашему запросу не найдены.', 'ไม่พบคำตอบที่ตรงกับการค้นหา')}</p>
+            <Button variant="outline" onClick={() => pickQuery('')}>
+              {label('Clear search', 'Очистить поиск', 'ล้างการค้นหา')}
+            </Button>
+          </SectionCard>
+        )}
+        {matchingCategories.map(({ categoryIndex, ...category }) => {
           const CategoryIcon = category.icon;
           return (
-            <div key={catIndex}>
-              <div className="flex items-center gap-2 mb-2 mt-4">
-                <CategoryIcon className="w-4 h-4 text-primary" />
-                <h3 className="font-semibold text-sm text-muted-foreground">
+            <section key={categoryIndex} aria-labelledby={`help-topic-${categoryIndex}`}>
+              <div className="mb-2 flex items-center gap-2">
+                <CategoryIcon className="h-4 w-4 text-primary" aria-hidden="true" />
+                <h2 id={`help-topic-${categoryIndex}`} className="scroll-mt-24 font-semibold">
                   {category.title}
-                </h3>
+                </h2>
               </div>
               <SectionCard noPadding>
                 <Accordion type="single" collapsible className="w-full">
-                  {category.items.map((item, index) => (
+                  {category.items.map(item => (
                     <AccordionItem 
-                      key={index} 
-                      value={`${catIndex}-${index}`}
+                      key={item.itemIndex}
+                      value={String(item.itemIndex)}
                       className="border-b last:border-b-0"
                     >
                       <AccordionTrigger className="min-h-14 px-4 text-left font-sans text-sm leading-relaxed hover:no-underline">
@@ -325,23 +401,27 @@ export default function FAQPage() {
                   ))}
                 </Accordion>
               </SectionCard>
-            </div>
+            </section>
           );
         })}
+        </div>
 
         {/* Contact Support */}
         <SectionCard className="text-center mt-6">
-          <MessageCircle className="w-8 h-8 text-primary mx-auto mb-3" />
-          <h3 className="font-semibold mb-1">
-            {isRu ? 'Не нашли ответ?' : isTh ? 'ไม่พบคำตอบ?' : 'Didn\'t find an answer?'}
-          </h3>
+          <MessageCircle className="mx-auto mb-3 h-8 w-8 text-primary" aria-hidden="true" />
+          <h2 className="mb-1 font-semibold">
+            {label('Talk to the myUNO team', 'Свяжитесь с командой myUNO', 'ติดต่อทีม myUNO')}
+          </h2>
           <p className="text-sm text-muted-foreground mb-4">
-            {isRu ? 'Наша поддержка работает 24/7 на нескольких языках' : isTh ? 'ฝ่ายสนับสนุนของเราทำงาน 24/7 หลายภาษา' : 'Our support works 24/7 in multiple languages'}
+            {label('Send us a question about a booking, request or your account.', 'Напишите нам о бронировании, заявке или вашем аккаунте.', 'ส่งคำถามเกี่ยวกับการจอง คำขอ หรือบัญชีของคุณ')}
           </p>
           <Button className="w-full sm:w-auto" asChild>
-            <Link to="/support">
+            <Link to={APP_ROUTES.SUPPORT}>
               {isRu ? 'Написать в поддержку' : isTh ? 'ติดต่อฝ่ายสนับสนุน' : 'Contact Support'}
             </Link>
+          </Button>
+          <Button variant="link" className="w-full sm:w-auto" asChild>
+            <Link to={APP_ROUTES.PRIVACY}>{label('Privacy Policy', 'Политика конфиденциальности', 'นโยบายความเป็นส่วนตัว')}</Link>
           </Button>
         </SectionCard>
       </PageContainer>

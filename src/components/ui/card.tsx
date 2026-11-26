@@ -12,7 +12,7 @@ interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
 const cardVariants: Record<CardVariant, string> = {
   surface: "bg-muted/30 dark:bg-muted/10 rounded-md",
   content: "bg-card border border-border rounded-md",
-  interactive: "bg-card border border-border rounded-md hover:bg-muted/40 transition-colors duration-150 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ring-offset-background",
+  interactive: "bg-card border border-border rounded-md ds-focus hover:shadow-[var(--shadow-elevation-2)] transition-shadow duration-150 cursor-pointer",
   elevated: "bg-card border border-border rounded-md [box-shadow:var(--shadow-elevation-4)]",
 };
 
@@ -40,7 +40,7 @@ CardHeader.displayName = "CardHeader";
 
 const CardTitle = React.forwardRef<HTMLParagraphElement, React.HTMLAttributes<HTMLHeadingElement>>(
   ({ className, ...props }, ref) => (
-    <h3 ref={ref} className={cn("font-display text-base font-semibold leading-snug tracking-[-0.01em]", className)} {...props} />
+    <h3 ref={ref} className={cn("font-display text-base font-medium leading-snug tracking-[-0.01em]", className)} {...props} />
   ),
 );
 CardTitle.displayName = "CardTitle";

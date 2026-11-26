@@ -5,7 +5,7 @@ import { MemoryRouter, Route, Routes, useNavigate } from 'react-router-dom';
 import PropertyInquiry from '../PropertyInquiry';
 
 const mocks = vi.hoisted(() => ({ rpc: vi.fn(), createOrder: vi.fn(), reads: 0, language: 'en', seasonsPending: false, seasonsFailed: false, retrySeasons: vi.fn() }));
-const property = { id: 'unit', title_en: 'Synthetic home', listing_type: 'rent', listing_modes: ['rent'], tenancy_modes: ['short'], price_per_night: 1000, currency: 'THB', rentalTerms: { price_per_night: 1000, currency: 'THB', included_services: [], extra_services: [] } };
+const property = { id: 'unit', title_en: 'Synthetic home', listing_type: 'rent', listing_modes: ['rent'], tenancy_modes: ['short'], price_per_night: 1000, currency: 'THB', instant_booking: false, cleaning_fee: 0, rentalTerms: { price_per_night: 1000, currency: 'THB', included_services: [], extra_services: [] } };
 vi.mock('@/integrations/supabase/client', () => ({ supabase: { rpc: mocks.rpc } }));
 vi.mock('@/hooks/useProperties', () => ({ usePropertyWithRentalTerms: () => {
   // Fail boundedly on the original render loop rather than hanging the suite.
@@ -38,7 +38,7 @@ function deferred() {
   const promise = new Promise<Parameters<typeof resolve>[0]>(r => { resolve = r; });
   return { promise, resolve };
 }
-beforeEach(() => { vi.clearAllMocks(); mocks.reads = 0; mocks.language = 'en'; mocks.seasonsPending = false; mocks.seasonsFailed = false; mocks.rpc.mockResolvedValue({ data: [], error: null }); });
+beforeEach(() => { vi.clearAllMocks(); mocks.rpc.mockReset(); property.instant_booking = false; property.cleaning_fee = 0; mocks.reads = 0; mocks.language = 'en'; mocks.seasonsPending = false; mocks.seasonsFailed = false; mocks.rpc.mockResolvedValue({ data: [], error: null }); });
 afterEach(() => { cleanup(); localStorage.clear(); });
 const loading = 'Checking the price for your selected dates…';
 
@@ -98,6 +98,17 @@ describe('inquiry date-price lifecycle', () => {
     view.rerender(<Harness/>);
     await waitFor(() => expect(screen.getAllByText('THB 2000').length).toBeGreaterThan(0));
   });
+  it('shows the recorded cleaning fee and estimated total for an instant booking', async () => {
+    property.instant_booking = true;
+    property.cleaning_fee = 300;
+    render(<Harness />);
+    await screen.findByText('Cleaning fee');
+    expect(screen.getByText('Estimated booking total')).toBeVisible();
+    expect(screen.getByText('THB 300')).toBeVisible();
+    expect(screen.getByText('THB 2300')).toBeVisible();
+    expect(mocks.createOrder).not.toHaveBeenCalled();
+  });
+
   it('does not read prices without dates', () => {
     render(<Harness dates={false}/>);
     expect(screen.getByRole('heading', { name: 'Select your dates' })).toBeVisible();

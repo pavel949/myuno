@@ -37302,10 +37302,6 @@ export type Database = {
         Returns: Json
       }
       credit_cashback: { Args: { p_order_id: string }; Returns: Json }
-      delete_email: {
-        Args: { message_id: number; queue_name: string }
-        Returns: boolean
-      }
       detect_booking_conflicts: {
         Args: { p_property_id: string }
         Returns: {
@@ -37337,11 +37333,6 @@ export type Database = {
       discard_drive_import_review: {
         Args: { p_job_id: string }
         Returns: undefined
-      }
-      email_queue_dispatch: { Args: never; Returns: undefined }
-      enqueue_email: {
-        Args: { payload: Json; queue_name: string }
-        Returns: number
       }
       ensure_multi_role_qa_bundle: { Args: never; Returns: Json }
       find_or_create_identity: {
@@ -37650,15 +37641,6 @@ export type Database = {
         Args: { p_event_name: string; p_landing_id?: string; p_user_id: string }
         Returns: string
       }
-      move_to_dlq: {
-        Args: {
-          dlq_name: string
-          message_id: number
-          payload: Json
-          source_queue: string
-        }
-        Returns: number
-      }
       nearby_pois: {
         Args: {
           in_categories?: string[]
@@ -37716,14 +37698,6 @@ export type Database = {
       publish_property_to_marketplace: {
         Args: { p_owner_property_id: string }
         Returns: string
-      }
-      read_email_batch: {
-        Args: { batch_size: number; queue_name: string; vt: number }
-        Returns: {
-          message: Json
-          msg_id: number
-          read_ct: number
-        }[]
       }
       reassign_property_operating_space: {
         Args: { p_property_id: string; p_reason: string; p_to_space_id: string }

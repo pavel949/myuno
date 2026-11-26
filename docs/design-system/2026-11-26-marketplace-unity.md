@@ -22,7 +22,7 @@ Base: c702584d1 (visual foundation #367). Scope: public discovery presentation o
 
 ## Coordination
 
-PR368 changes shared chrome, tokens, property search and homepage QA. This branch uses main's accepted #367 foundation and does not import the unrelated PR368 changes. Reconcile source/generated registers and the PropertySearchPage masthead when integrating; do not restore old private previews or backend behaviour from either branch. No SQL, Edge deployment, grants, billing or production business writes are part of this change.
+Integrated accepted Design Bible #368 from main 720bf4840 (PR head 4c9aa07a6). The combined tree retains main's property search logic, actual header/navigation changes, compiled-index CSS fixture support and new page-state behaviour. The shared marketplace layer consumes the accepted Outfit/Manrope type tokens and card/media radius tokens. Homepage geometry assertions and the source register are regenerated for this combination. #369 keeps its own marketplace navigation, imagery/icon proportions and QA asset/style fixes. No PR merge, publication or backend activation is part of this integration.
 
 ## Verification
 
