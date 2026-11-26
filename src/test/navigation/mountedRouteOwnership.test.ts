@@ -6,6 +6,16 @@ describe('mounted route ownership', () => {
   it.each(['/invest', '/property/clearview', '/property/clearview/apply', '/mc/sequences'])('has exactly one declaration for %s', path => {
     expect(routes.filter(route => route.path === path && !route.index)).toHaveLength(1);
   });
+  it.each(['/sell', '/classifieds/sell'])('keeps %s on the same protected sell flow', path => {
+    const matches = routes.filter(route => route.path === path && !route.index);
+    expect(matches).toHaveLength(1);
+    // A distinct key preserves the original remount on navigation between the two URLs.
+    expect(matches[0].element.replace(/\s+/g, '')).toContain(
+      path === '/sell'
+        ? '<AuthGuard><LazyPage><Pages.SellItemPage/></LazyPage></AuthGuard>'
+        : '<AuthGuard><LazyPage><Pages.SellItemPagekey="classifieds-sell"/></LazyPage></AuthGuard>',
+    );
+  });
   it('retains the investment landing rather than a self redirect', () => {
     const route = routes.find(route => route.path === '/invest' && !route.index)!;
     expect(route.element).toContain('InvestmentHubLanding');
