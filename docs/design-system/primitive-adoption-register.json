@@ -8458,7 +8458,7 @@
     },
     {
       "file": "src/components/nav/TopBar.tsx",
-      "sha256": "6aab2cf489d15fc9ef703216a06dc050eadcc3376c3759a70ea7cd34b865b3f5",
+      "sha256": "367cbf66ae1406123d133fdadfc0dd3738c03937dcb3a554be9cf677ceccf5ae",
       "directRouteDeclarations": [],
       "runtime": "NOTTESTED",
       "visual": "NOTTESTED",
@@ -8468,8 +8468,8 @@
           "source": "@/components/ui/button",
           "instances": 2,
           "lines": [
-            238,
-            255
+            203,
+            220
           ]
         }
       ]

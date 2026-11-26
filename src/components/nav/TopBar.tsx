@@ -7,10 +7,10 @@
  *  - Tablet  (768–1023): logo + 5 nav pills + search-icon + utilities + avatar
  *  - Desktop (≥1024): logo + 5 nav pills + full search input + utilities + avatar
  *
- * Reads PRIMARY_NAV[role] from the SSOT navigation model.
+ * Consumer roles use ConsumerHeader; workspace roles use the shell sidebar.
  */
 import React, { lazy, memo, Suspense, useCallback, useEffect, useRef, useState } from 'react';
-import { Link, NavLink, useLocation } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { ConsumerHeader } from './ConsumerHeader';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { Search, SlidersHorizontal } from 'lucide-react';
@@ -31,7 +31,6 @@ import { SidebarTrigger } from '@/components/ui/sidebar';
 import { ECOSYSTEM_HEADER_INNER } from '@/design-system/ecosystemLayout';
 import { shouldShowBreadcrumbs } from '@/lib/config/routeMeta';
 import {
-  PRIMARY_NAV,
   hasSidebar,
   type NavRoleKey,
 } from '@/lib/nav/navigationModel';
@@ -68,8 +67,7 @@ export const TopBar = memo(function TopBar({
   const headerFrame = role === 'admin'
     ? 'mx-auto w-full max-w-none px-[var(--page-padding-x)]'
     : ECOSYSTEM_HEADER_INNER;
-  const cartEnabled = showCart ?? isConsumer;
-  const navItems = PRIMARY_NAV[role];
+  const cartEnabled = showCart === true;
   const showCrumbs = shouldShowBreadcrumbs(location.pathname);
 
   const openSearch = useCallback((event?: React.MouseEvent<HTMLElement>) => {
@@ -104,11 +102,6 @@ export const TopBar = memo(function TopBar({
       window.removeEventListener('myuno:open-search', openHandler);
     };
   }, [handleKeyDown, openSearch]);
-
-  const isActive = (path: string, exact?: boolean) => {
-    if (exact) return location.pathname === path;
-    return location.pathname === path || location.pathname.startsWith(`${path}/`);
-  };
 
   // Keep the dialog mounted once requested so reopening retains search state.
   // The rest of the header stays interactive while its first chunk loads.
@@ -162,34 +155,6 @@ export const TopBar = memo(function TopBar({
 
           {/* Logo */}
           <BrandWordmark className={role === 'owner' || role === 'admin' ? 'min-h-11 items-center' : undefined} />
-
-          {/* Nav pills (≥md). Consumer roles get them on tablet+; workspace roles
-              have a sidebar — pills are redundant, hidden. */}
-          {isConsumer && (
-            <nav className="hidden md:flex items-center gap-0.5 ml-2">
-              {navItems.map((item) => {
-                const Icon = item.icon;
-                const active = isActive(item.path, item.exact);
-                const label = pickLang(language, { ru: item.labelRu, en: item.labelEn, th: item.labelTh });
-                return (
-                  <NavLink
-                    key={item.path}
-                    to={item.path}
-                    aria-label={label}
-                    className={cn(
-                      'flex items-center gap-1.5 px-3 py-2 rounded-none text-[13px] font-medium transition-colors',
-                      active
-                        ? 'bg-primary/10 text-primary'
-                        : 'text-muted-foreground hover:text-foreground hover:bg-muted/40',
-                    )}
-                  >
-                    <Icon className="size-5" aria-hidden />
-                    <span className="hidden lg:inline">{label}</span>
-                  </NavLink>
-                );
-              })}
-            </nav>
-          )}
 
           {/* Desktop search input (lg+) */}
           <button
