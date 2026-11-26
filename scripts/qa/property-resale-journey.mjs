@@ -9,7 +9,18 @@ import postcss from 'postcss';
 import postcssImport from 'postcss-import';
 import tailwindcss from 'tailwindcss';
 import autoprefixer from 'autoprefixer';
+import ts from 'typescript';
 const root=process.cwd(),out=process.env.RESALE_JOURNEY_OUTPUT||path.join(root,'artifacts/ux-clarity/resale-journey');await mkdir(out,{recursive:true});
+const resaleHook = ts.createSourceFile(
+  'useResaleProperties.ts',
+  await readFile('src/hooks/useResaleProperties.ts', 'utf8'),
+  ts.ScriptTarget.Latest,
+  true,
+);
+const currencyPolicy = resaleHook.statements.find(
+  statement => ts.isFunctionDeclaration(statement) && statement.name?.text === 'resaleOfferCurrency',
+);
+if (!currencyPolicy) throw Error('The resale fixture requires the actual offer currency policy.');
 const row={id:'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',title:'Synthetic garden villa',title_ru:'Тестовая вилла с садом',property_type:'villa',zone:'Rawai',asking_price:6000000,currency:'THB',cover_image:'/synthetic-villa.svg',media:[],bedrooms:2,area_sqm:120,title_type:'freehold',condition:'good',furnished:'fully',status:'active',is_assignment:false};
 const virtual={
  '@/contexts/LanguageContext':`export const useLanguage=()=>({language:new URLSearchParams(location.search).get('lang')||'en'});`,
@@ -21,7 +32,8 @@ const virtual={
  '@/components/seo':`export const SEOHead=()=>null;export const createRealEstateListingSchema=()=>({});`,
  '@/components/seo/SEOHead':`export const SEOHead=()=>null;`,
  '@/pages/services/ServicesIndex':`export default function Services(){throw Error('Services outside resale fixture')}`,
- '@/hooks/useResaleProperties':`import{useState}from'react';const rows=[${JSON.stringify(row)},{...${JSON.stringify(row)},id:'foreign',title:'Synthetic USD villa',currency:'USD'}];export const useResaleProperties=filters=>{const[failed,setFailed]=useState(new URLSearchParams(location.search).has('failure'));window.fixtureFilters=filters;return{data:rows.filter(r=>(!filters.zone||r.zone===filters.zone)&&(!filters.property_type||r.property_type===filters.property_type)&&(!filters.min_price||r.asking_price>=filters.min_price)&&(!filters.max_price||r.asking_price<=filters.max_price)),isLoading:false,isError:failed,refetch:()=>{window.fixtureRetries=(window.fixtureRetries||0)+1;setFailed(false)}}};export const useResaleProperty=id=>({data:rows.find(r=>r.id===id),isLoading:false,isError:false});`,
+ '@/hooks/useResaleProperties':`import{useState}from'react';${currencyPolicy.getText(resaleHook)}
+   const rows=[${JSON.stringify(row)},{...${JSON.stringify(row)},id:'foreign',title:'Synthetic USD villa',currency:'USD'}];export const useResaleProperties=filters=>{const[failed,setFailed]=useState(new URLSearchParams(location.search).has('failure'));window.fixtureFilters=filters;return{data:rows.filter(r=>(!filters.zone||r.zone===filters.zone)&&(!filters.property_type||r.property_type===filters.property_type)&&(!filters.min_price||r.asking_price>=filters.min_price)&&(!filters.max_price||r.asking_price<=filters.max_price)),isLoading:false,isError:failed,refetch:()=>{window.fixtureRetries=(window.fixtureRetries||0)+1;setFailed(false)}}};export const useResaleProperty=id=>({data:rows.find(r=>r.id===id),isLoading:false,isError:false});`,
  '@/integrations/supabase/client':`export const supabase=new Proxy({},{get(){throw Error('Production backend forbidden in resale fixture')}});`,
 };
 const source=`import React from'react';import{createRoot}from'react-dom/client';import{MemoryRouter,Routes,Route,useLocation}from'react-router-dom';import Goal from'@/pages/discover/GoalEntryPage';import Index from'@/pages/property/ResaleIndex';import Detail from'@/pages/property/ResaleDetail';import{PropertyHubTabs}from'@/pages/property/PropertyHub';function Tabs(){const l=useLocation();return l.pathname.startsWith('/property')?<PropertyHubTabs/>:null}function Probe(){const l=useLocation();return <output hidden data-testid="location">{l.pathname+l.search+l.hash}</output>}createRoot(document.getElementById('root')).render(<MemoryRouter initialEntries={['/discover/buy']} future={{v7_startTransition:true,v7_relativeSplatPath:true}}><p className="border-b p-2 text-xs">SYNTHETIC PUBLIC JOURNEY — no live reads, requests or payments</p><Tabs/><Probe/><Routes><Route path="/discover/buy" element={<Goal goal="buy"/>}/><Route path="/property/resale" element={<Index/>}/><Route path="/property/resale/:id" element={<Detail/>}/></Routes></MemoryRouter>);`;

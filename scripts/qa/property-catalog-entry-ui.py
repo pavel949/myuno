@@ -88,34 +88,45 @@ async def main():
    results.append({'lang':'en','width':390,'variant':'manual-pagination','status':'PASS','published_count':47,'pageerrors':errors})
    await context.close()
   if not os.environ.get('CATALOG_BEFORE'):
-   # Actual header/bottom navigation and direct All bookmarks, never substitute nav links.
+   # Actual header and bottom navigation plus previously saved All URLs.
    for lang in ['en','ru','th']:
     for width in [320,390,1440]:
      context=await browser.new_context(viewport={'width':width,'height':900},service_workers='block')
      blocked=[];errors=[];await context.route('**/*',route)
      page=await context.new_page();page.on('pageerror',lambda e:errors.append(str(e)))
-     homes={'en':'Homes','ru':'Жильё','th':'ที่พัก'}[lang]
+     bottom_buy={'en':'Homes','ru':'Купить','th':'ซื้อบ้าน'}[lang]
      start=f'http://localhost:8080/fixture?lang={lang}&navEntry=1&entry=/fixture-start'
      await page.goto(start)
      if width<768:
-      bottom=page.get_by_test_id('actual-bottom').get_by_role('link',name=homes,exact=True)
-      await expect(bottom).to_have_attribute('href','/property');await bottom.click()
-      await expect(page.locator('[data-property-mode]')).to_have_attribute('data-property-mode','all')
+      bottom=page.get_by_test_id('actual-bottom').get_by_role('link',name=bottom_buy,exact=True)
+      await expect(bottom).to_have_attribute('href','/property/buy');await bottom.click()
+      await expect(page.locator('[data-property-mode]')).to_have_attribute('data-property-mode','buy')
       await expect(page.get_by_test_id('property-results-grid').locator(':scope > *')).to_have_count(20)
       assert await page.evaluate('document.documentElement.scrollWidth<=innerWidth')
       await page.screenshot(path=str(OUT/f'actual-bottom-tab-{lang}-{width}.png'))
       await page.goto(start)
-      await page.get_by_test_id('actual-header').get_by_role('button',name={'en':'Open menu','ru':'Открыть меню','th':'เปิดเมนู'}[lang]).click()
-      link=page.get_by_role('dialog').get_by_role('link',name=homes,exact=True)
-     else:link=page.get_by_test_id('actual-header').get_by_role('navigation').get_by_role('link',name=homes,exact=True)
-     await expect(link).to_have_attribute('href','/property');await link.click()
+     for destination in ['/property/buy','/property/rent']:
+      if width<768:
+       await page.get_by_test_id('actual-header').get_by_role('button',name={'en':'Open menu','ru':'Открыть меню','th':'เปิดเมนู'}[lang]).click()
+       nav=page.get_by_role('dialog')
+      else:
+       nav=page.get_by_test_id('actual-header').get_by_role('navigation')
+      await nav.locator(f'a[href="{destination}"]').click()
+      if destination.endswith('/buy'):
+       await expect(page.locator('[data-property-mode]')).to_have_attribute('data-property-mode','buy')
+       await expect(page.get_by_test_id('property-results-grid').locator(':scope > *')).to_have_count(20)
+      else:
+       await expect(page.get_by_test_id('rental-landing-boundary')).to_be_visible()
+       await expect(page.get_by_test_id('location')).to_have_text(destination)
+      if width<768: await expect(page.get_by_role('dialog')).to_have_count(0)
+      assert await page.evaluate('document.documentElement.scrollWidth<=innerWidth')
+      await page.screenshot(path=str(OUT/f'actual-{destination.rsplit("/",1)[-1]}-tab-{lang}-{width}.png'))
+      await page.goto(start)
+     await page.goto(f'http://localhost:8080/fixture?lang={lang}&entry=/property/browse')
      await expect(page.locator('[data-property-mode]')).to_have_attribute('data-property-mode','all')
      await expect(page.get_by_test_id('property-results-grid').locator(':scope > *')).to_have_count(20)
-     if width<768: await expect(page.get_by_role('dialog')).to_have_count(0)
-     assert await page.evaluate('document.documentElement.scrollWidth<=innerWidth')
-     await page.screenshot(path=str(OUT/f'actual-homes-tab-{lang}-{width}.png'))
      assert await page.evaluate("window.fixtureCatalog.calls.every(c=>!c.operations.some(op=>op[0]==='or'&&String(op[1]).includes('listing_type.eq.rent')))")
-     # Explicit goal remains rental-specific, unlike the general Homes tab.
+     # A stay goal with tenancy still redirects into the rental results.
      await page.goto(f'http://localhost:8080/fixture?lang={lang}&entry=/discover/stay&tenancy=short')
      await expect(page.locator('[data-property-mode]')).to_have_attribute('data-property-mode','rent')
      await expect(page.get_by_test_id('property-results-grid').locator(':scope > *')).to_have_count(15)
