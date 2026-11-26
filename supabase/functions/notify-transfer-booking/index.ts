@@ -19,7 +19,7 @@ async function sendEmail(
     const { error } = await sb().functions.invoke('send-transactional-email', {
       body: { templateName, recipientEmail, idempotencyKey, templateData },
     });
-    if (error) console.error('[email]', templateName, '->', recipientEmail, error);
+    if (error) console.error('[email]', templateName, 'send failed');
   } catch (e) {
     console.error('[email] invoke failed', templateName, e);
   }

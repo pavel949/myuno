@@ -1,6 +1,9 @@
 import { createCheckoutHandler } from "../_shared/checkout-handler.ts";
 import { validateSinglePrice } from "../_shared/price-guard.ts";
 
+// Platform cleaning service fee (THB), set server-side — never client-trusted.
+const CLEANING_SERVICE_FEE_THB = 50;
+
 interface CleaningCheckoutBody {
   provider_id: string;
   provider_name: string;
@@ -26,12 +29,16 @@ Deno.serve(
       const body = raw as CleaningCheckoutBody;
       const {
         provider_id, provider_name, service_id, service_name, service_price,
-        service_fee, total_amount, currency = "THB",
+        currency = "THB",
         scheduled_at, address, contact_name, contact_phone, contact_email, notes,
       } = body;
 
       if (!provider_id) throw new Error("Provider ID is required");
-      if (total_amount < 1) throw new Error("Total must be at least 1");
+      if (String(currency).toUpperCase() !== "THB") throw new Error("Unsupported currency");
+      const service_fee = CLEANING_SERVICE_FEE_THB;
+      if (body.service_fee !== undefined && Number(body.service_fee) !== service_fee) {
+        throw new Error("Service fee mismatch");
+      }
 
       // Anti-tampering: validate the service price against cleaning_services.
       // Fail closed — a checkout that can't be tied to a catalogue service is
@@ -46,6 +53,10 @@ Deno.serve(
       );
 
       const cur = currency.toLowerCase();
+      const total_amount = Number(service_price) + service_fee;
+      if (body.total_amount !== undefined && Number(body.total_amount) !== total_amount) {
+        throw new Error("Total mismatch");
+      }
 
       const lineItems = [
         {

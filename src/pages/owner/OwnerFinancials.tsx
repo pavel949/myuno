@@ -1,3 +1,4 @@
+import { csvCell } from '@/lib/export/csvSafe';
 import { useState, useMemo } from 'react';
 import { useNavigate, Navigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -119,7 +120,7 @@ export default function OwnerFinancials() {
       f.transaction_type === 'deposit' ? (isRu ? 'Залог' : 'Deposit') : f.transaction_type === 'income' ? (isRu ? 'Доход' : 'Income') : (isRu ? 'Расход' : 'Expense'),
       getCategoryLabel(f.category, f.transaction_type), f.amount, f.currency || '', f.property?.title || '', f.description || '', f.status || '',
     ]);
-    const csvContent = [headers.join(','), ...rows.map(row => row.map(cell => `"${cell}"`).join(','))].join('\n');
+    const csvContent = [headers.join(','), ...rows.map(row => row.map(cell => csvCell(cell)).join(','))].join('\n');
     const blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');

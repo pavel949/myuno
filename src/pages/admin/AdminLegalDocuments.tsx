@@ -1,3 +1,4 @@
+import { csvCell } from '@/lib/export/csvSafe';
 /**
  * @module AdminLegalDocuments
  * @description Admin page to manage versioned legal documents and view acceptance audit logs.
@@ -286,7 +287,7 @@ function AcceptancesTab({ isRu }: { isRu: boolean }) {
   const exportCsv = () => {
     if (!acceptances?.length) return;
     const headers = ['accepted_at', 'user_id', 'company_id', 'doc_key', 'version', 'ip_address', 'user_agent', 'acceptance_source'];
-    const rows = acceptances.map((a: any) => headers.map(h => a[h] ?? '').join(','));
+    const rows = acceptances.map((a: any) => headers.map(h => csvCell(a[h] ?? '')).join(','));
     const csv = [headers.join(','), ...rows].join('\n');
     const blob = new Blob([csv], { type: 'text/csv' });
     const url = URL.createObjectURL(blob);

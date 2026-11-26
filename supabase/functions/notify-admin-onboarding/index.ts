@@ -118,12 +118,12 @@ Deno.serve(async (req) => {
         });
         const body = await r.text();
         if (!r.ok) throw new Error(`send-transactional-email ${r.status}: ${body}`);
-        console.info(`[notify-admin-onboarding] queued for ${to}: ${body}`);
+        console.info(`[notify-admin-onboarding] admin notice queued`);
         return body;
       }),
     );
     results.forEach((r, i) => {
-      if (r.status === "rejected") console.error(`[notify-admin-onboarding] email failed for ${emails[i]}`, r.reason);
+      if (r.status === "rejected") console.error(`[notify-admin-onboarding] admin email #${i + 1} failed`);
     });
 
 

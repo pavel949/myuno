@@ -4,6 +4,7 @@
 // Triggered by pg_cron every 15 min.
 
 import { createServiceClient } from "../_shared/supabase.ts";
+import { requireServiceCaller } from "../_shared/internal-secret.ts";
 import { Resend } from "npm:resend@2.0.0";
 import {
   AlertRecipient,
@@ -23,6 +24,8 @@ const corsHeaders = {
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
+  const denied = await requireServiceCaller(req, corsHeaders);
+  if (denied) return denied;
 
   const supabase = createServiceClient();
   const resendKey = Deno.env.get("RESEND_API_KEY");

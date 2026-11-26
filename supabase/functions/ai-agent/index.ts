@@ -93,6 +93,22 @@ Deno.serve(async (req) => {
       );
     }
 
+    // Non-public agents are internal tools: only platform admins may use them.
+    if (agent.is_public !== true) {
+      let isAdmin = false;
+      if (userId) {
+        const { data: roleRows } = await supabase
+          .from("user_roles").select("role").eq("user_id", userId).eq("role", "admin").limit(1);
+        isAdmin = (roleRows ?? []).length > 0;
+      }
+      if (!isAdmin) {
+        return new Response(
+          JSON.stringify({ error: "Agent not found or inactive" }),
+          { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+    }
+
     // Get the knowledge from the first (latest) version
     const knowledge = agent.ai_agent_knowledge[0];
     if (!knowledge) {

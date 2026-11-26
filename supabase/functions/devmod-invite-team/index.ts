@@ -133,7 +133,7 @@ Deno.serve(async (req) => {
       from: `myUNO Developers <${fromEmail}>`,
     });
 
-    console.info(`[devmod-invite-team] Invited ${email} as ${role} to developer ${developer_id}`);
+    console.info(`[devmod-invite-team] Invitation sent (role=${role}) for developer ${developer_id}`);
 
     return new Response(JSON.stringify({ success: true }), {
       headers: { ...CORS, "Content-Type": "application/json" },

@@ -12,7 +12,7 @@
 import { createServiceClient } from "../_shared/supabase.ts";
 import { createStripeClient } from "../_shared/stripe.ts";
 import { requireAuth } from "../_shared/auth-guard.ts";
-import { getCorsHeaders } from "../_shared/cors.ts";
+import { getCorsHeaders, isTrustedAppUrl } from "../_shared/cors.ts";
 
 Deno.serve(async (req) => {
   // Restrict CORS to the allow-listed origins instead of a wildcard — this is a
@@ -32,6 +32,12 @@ Deno.serve(async (req) => {
     };
     const { developer_id, return_url, refresh_url } = body;
     const action = body.action ?? "create_link";
+
+    if ((return_url !== undefined && !isTrustedAppUrl(return_url)) || (refresh_url !== undefined && !isTrustedAppUrl(refresh_url))) {
+      return new Response(JSON.stringify({ error: "return_url and refresh_url must point to this app" }), {
+        status: 400, headers: { ...CORS, "Content-Type": "application/json" },
+      });
+    }
 
     if (!developer_id) {
       return new Response(JSON.stringify({ error: "developer_id required" }), {
