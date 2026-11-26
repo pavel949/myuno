@@ -102,7 +102,7 @@ export const TopBar = memo(function TopBar({
 
           {/* Desktop search input (lg+) */}
           <button
-            onClick={openSearch}
+            onClick={(event) => openSearch(event.currentTarget)}
             className={cn(
               'hidden lg:flex items-center gap-3 mx-4 flex-1 max-w-sm',
               'px-4 py-2 rounded-none',
@@ -131,7 +131,7 @@ export const TopBar = memo(function TopBar({
           {/* Right utilities */}
           <div className="flex items-center gap-0.5 lg:gap-1.5 ml-auto shrink-0">
             <button
-              onClick={openSearch}
+              onClick={(event) => openSearch(event.currentTarget)}
               className="lg:hidden flex items-center justify-center w-11 h-11 rounded-none hover:bg-muted/40 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
               aria-label={pickLang(language, { ru: 'Поиск', en: 'Search', th: 'ค้นหา' })}
             >

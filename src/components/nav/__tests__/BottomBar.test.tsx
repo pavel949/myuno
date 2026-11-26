@@ -12,32 +12,32 @@ afterEach(cleanup);
 beforeEach(() => { locale.language = 'en'; });
 
 it.each([
- ['ru', 'Бронирования', 'Брони'],
- ['en', 'Bookings', 'Bookings'],
- ['th', 'การจอง', 'การจอง'],
-])('keeps the %s booking destination and full accessible name with compact mobile text', (language, name, text) => {
+ ['ru', 'Поездки'],
+ ['en', 'Trips'],
+ ['th', 'ทริป'],
+])('labels the %s trips tab and preserves the booking destination', (language, name) => {
  locale.language = language;
  render(<MemoryRouter initialEntries={['/bookings']}><BottomBar {...{ role: 'guest' as const }} /></MemoryRouter>);
  const booking = screen.getByRole('link', { name });
  expect(booking).toHaveAttribute('href', '/bookings');
  expect(booking).toHaveAttribute('aria-current', 'page');
- expect(booking.querySelector('span')).toHaveTextContent(text);
- if (language === 'ru') expect(booking.querySelector('span')).toHaveClass('whitespace-nowrap');
- else expect(booking.querySelector('span')).not.toHaveClass('whitespace-nowrap');
+ expect(booking.querySelector('span')).toHaveTextContent(name);
  expect(screen.getAllByRole('link')).toHaveLength(5);
 });
 
 it.each([
- ['/property/search', 'Homes'],
- ['/property/example', 'Homes'],
+ ['/property/search', 'Explore'],
+ ['/property/example', 'Explore'],
+ ['/property/search?mode=buy', 'Homes'],
+ ['/property/offplan/example', 'Homes'],
  ['/transport/transfer', 'Services'],
  ['/discover/services', 'Services'],
  ['/trip-planner', 'Services'],
- ['/bookings', 'Bookings'],
- ['/me/requests', 'Bookings'],
- ['/my-stay', 'Bookings'],
- ['/profile', 'Profile'],
- ['/', 'Home'],
+ ['/bookings', 'Trips'],
+ ['/me/requests', 'Trips'],
+ ['/my-stay', 'Trips'],
+ ['/profile', 'Me'],
+ ['/', 'Explore'],
 ])('announces the same active tab it highlights on %s', (path, label) => {
  render(<MemoryRouter initialEntries={[path]}><BottomBar {...{ role: 'guest' as const }} /></MemoryRouter>);
  expect(screen.getByRole('link', { name: label })).toHaveAttribute('aria-current', 'page');

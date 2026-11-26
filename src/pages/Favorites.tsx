@@ -72,6 +72,11 @@ export default function Favorites() {
     ? favorites 
     : favorites.filter(f => f.item_type === filter);
   const hasSavedItems = favorites.length > 0;
+  const browseDestination = filter === 'property'
+    ? { to: APP_ROUTES.PROPERTY_SEARCH, label: t('Искать недвижимость', 'Search properties', 'ค้นหาอสังหาริมทรัพย์') }
+    : filter === 'all'
+      ? { to: APP_ROUTES.PROPERTY_RENT, label: t('Посмотреть жильё', 'Explore stays', 'ค้นหาที่พัก') }
+      : { to: APP_ROUTES.DISCOVER, label: t('Посмотреть услуги', 'Browse services', 'เรียกดูบริการ') };
 
   const handleNavigate = (item: { item_type: string; item_id: string }) => {
     if (item.item_type === 'property') {
@@ -229,16 +234,17 @@ export default function Favorites() {
                   description={hasSavedItems
                     ? t('Посмотрите все сохранённые позиции.', 'See all your saved items.', 'ดูรายการที่คุณบันทึกไว้ทั้งหมด')
                     : t('Нажмите на сердечко рядом с объявлением, чтобы вернуться к нему позже.', 'Tap the heart on a listing to keep it here.', 'แตะไอคอนหัวใจในประกาศเพื่อบันทึกไว้ที่นี่')}
-                  action={hasSavedItems ? (
-                    <Button className="self-start" variant="outline" onClick={() => setFilter('all')}>
-                      {t('Показать всё', 'Show all saved items', 'แสดงรายการที่บันทึกไว้ทั้งหมด')}
-                    </Button>
-                  ) : (
-                    <Button className="self-start" asChild>
-                      <Link to={APP_ROUTES.PROPERTY_RENT}>
-                        {t('Посмотреть жильё', 'Explore stays', 'ค้นหาที่พัก')}
-                      </Link>
-                    </Button>
+                  action={(
+                    <div className="flex flex-wrap gap-2">
+                      {hasSavedItems && (
+                        <Button variant="outline" onClick={() => setFilter('all')}>
+                          {t('Показать всё', 'Show all saved items', 'แสดงรายการที่บันทึกไว้ทั้งหมด')}
+                        </Button>
+                      )}
+                      <Button variant={hasSavedItems ? 'ghost' : 'default'} asChild>
+                        <Link to={browseDestination.to}>{browseDestination.label}</Link>
+                      </Button>
+                    </div>
                   )}
                 />
               )}

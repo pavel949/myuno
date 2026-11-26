@@ -27,9 +27,12 @@ for (const viewport of [{ width: 390, height: 844 }, { width: 1440, height: 900 
     }
     test('homepage opens the catalogue search from the header and keyboard', async ({ page }) => {
       await page.goto('/', { waitUntil: 'domcontentloaded' });
-      const trigger = page.locator('header button[aria-keyshortcuts="Control+K Meta+K"]');
-      const dialog = page.getByRole('dialog');
+      const searchButton = page.locator('header button[aria-keyshortcuts="Control+K Meta+K"]');
+      const direct = await searchButton.isVisible();
+      const trigger = direct ? searchButton : page.locator('header .consumer-menu');
+      const dialog = page.getByRole('dialog').filter({ has: page.getByRole('searchbox') });
       await trigger.click();
+      if (!direct) await page.locator('.consumer-task-search').click();
       await expect(dialog.getByRole('searchbox')).toBeFocused();
       await page.keyboard.press('Escape');
       await expect(dialog).toHaveCount(0);

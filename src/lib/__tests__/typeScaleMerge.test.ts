@@ -25,6 +25,6 @@ describe('canonical typography merge contract', () => {
     const result = cn(buttonVariants({ variant }));
     expect(result.split(' ')).toContain('text-body');
     expect(cn(buttonVariants({ variant, size: 'sm' })).split(' ')).not.toContain('text-body');
-    expect(cn(buttonVariants({ variant, size: 'sm' })).split(' ')).toContain('text-sm');
+    expect(cn(buttonVariants({ variant, size: 'sm' })).split(' ')).toContain('text-body-sm');
   });
 });

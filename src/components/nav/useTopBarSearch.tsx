@@ -1,4 +1,4 @@
-import { lazy, Suspense, useCallback, useEffect, useRef, useState, type MouseEvent } from 'react';
+import { lazy, Suspense, useCallback, useEffect, useRef, useState } from 'react';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { pickLang } from '@/lib/i18n/pickLang';
@@ -13,9 +13,9 @@ export function useTopBarSearch(shortcutEnabled: boolean) {
   const [searchRequested, setSearchRequested] = useState(false);
   const searchOrigin = useRef<HTMLElement | null>(null);
 
-  const openSearch = useCallback((event?: MouseEvent<HTMLElement>) => {
+  const openSearch = useCallback((origin?: HTMLElement) => {
     if (!searchOpen) {
-      searchOrigin.current = event?.currentTarget
+      searchOrigin.current = origin
         ?? (document.activeElement instanceof HTMLElement ? document.activeElement : null);
     }
     setSearchRequested(true);

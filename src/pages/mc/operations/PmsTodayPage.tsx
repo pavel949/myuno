@@ -223,7 +223,7 @@ export default function PmsTodayPage() {
     </div> : !d.hasProperties ? <section className="py-6">
       <h2 className="font-medium">{t({ en: 'No properties', ru: 'Нет объектов', th: 'ไม่มีที่พัก' })}</h2>
       <p className="mt-2 text-sm text-muted-foreground">{t({ en: 'Add a property to see arrivals and departures here.', ru: 'Добавьте объект, чтобы видеть здесь заезды и выезды.', th: 'เพิ่มที่พักเพื่อดูการเช็คอินและเช็คเอาท์' })}</p>
-      <Button asChild className="mt-4"><Link to={APP_ROUTES.MC_PROPERTIES}>{t({ en: 'Go to properties', ru: 'Перейти к объектам', th: 'ไปที่ที่พัก' })}</Link></Button>
+      <Button asChild className="mt-4 min-h-11"><Link to={APP_ROUTES.MC_PROPERTIES}>{t({ en: 'Go to properties', ru: 'Перейти к объектам', th: 'ไปที่ที่พัก' })}</Link></Button>
     </section> : (d.truncatedSources.length > 0 || d.countUnavailableSources.length > 0) ? <div role="alert" className="border border-accent bg-accent/10 p-4 text-sm">
       {t({ en: 'Today’s snapshot is incomplete: not all records are loaded, or completeness could not be verified. Counts and readiness signals are withheld. Open Tasks or Calendar to continue.', ru: 'Сводка на сегодня неполная: загружены не все записи или полноту данных не удалось проверить. Счётчики и признаки готовности скрыты. Продолжите в задачах или календаре.', th: 'สรุปวันนี้ไม่ครบถ้วน: โหลดข้อมูลไม่ครบหรือไม่สามารถตรวจสอบความครบถ้วนได้ จึงไม่แสดงจำนวนและสัญญาณความพร้อม โปรดเปิดงานหรือปฏิทินเพื่อดำเนินการต่อ' })}
     </div> : <>

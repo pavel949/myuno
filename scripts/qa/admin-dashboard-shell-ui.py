@@ -71,12 +71,13 @@ async def keyboard_flow(page, width):
     opener = visible[0]
     await tab_to(page, opener)
     await page.keyboard.press('Enter')
-    dialog = page.get_by_role('dialog', name='Search', exact=True)
+    lang = await page.locator('html').get_attribute('lang')
+    dialog_label = {'en': 'Search myUNO', 'ru': 'Поиск на myUNO', 'th': 'ค้นหาใน myUNO'}[lang]
+    dialog = page.get_by_role('dialog', name=dialog_label, exact=True)
     await expect(dialog).to_be_visible()
     await wait_for_dialog_ready(page, dialog, keyboard=True,
         failure_path=OUTPUT / f'keyboard-search-{width}-readiness')
     await expect(dialog.locator('input').first).to_be_focused()
-    lang = await page.locator('html').get_attribute('lang')
     await page.screenshot(path=str(OUTPUT / f'{lang}-{width}-global-search-open.png'), full_page=True)
     await page.keyboard.press('Escape')
     await expect(dialog).to_have_count(0)

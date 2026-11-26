@@ -28,7 +28,7 @@ export function LandingChrome({
 }: LandingChromeProps) {
   return (
     <header className="sticky top-0 z-30 border-b border-border/40 bg-background">
-      <div className={cn('flex h-14 items-center justify-between gap-2', variant === 'marketing' ? PUBLIC_CONTENT_LAYOUT.marketing : 'mx-auto max-w-6xl px-4 sm:px-5')}>
+      <div className={cn('flex h-14 items-center justify-between gap-1 sm:gap-2', variant === 'marketing' ? PUBLIC_CONTENT_LAYOUT.marketing : 'mx-auto max-w-6xl px-4 sm:px-5')}>
         <div className="min-w-0 shrink-0">
           <BrandWordmark />
         </div>
@@ -61,12 +61,12 @@ export function LandingChrome({
                 to={`${APP_ROUTES.AUTH}?mode=signup`}
                 aria-label={isRu ? 'Создать аккаунт' : 'Get started'}
                 className={cn(
-                  'inline-flex min-h-11 items-center justify-center gap-1 rounded-none px-3 text-xs font-semibold whitespace-nowrap shrink-0',
+                  'inline-flex min-h-11 min-w-11 items-center justify-center gap-1 rounded-none px-1 text-xs font-semibold whitespace-nowrap shrink-0 sm:px-3',
                   'bg-foreground text-background hover:bg-foreground/90 transition-colors',
                 )}
               >
                 {isRu ? 'Создать' : 'Get started'}
-                <ArrowRight className="h-3.5 w-3.5" strokeWidth={2.5} />
+                <ArrowRight className="hidden h-3.5 w-3.5 sm:block" strokeWidth={2.5} aria-hidden="true" />
               </Link>
             </>
           )}

@@ -55,9 +55,11 @@ it('puts tasks before preferences and groups partner paths without dropping them
 it('closes the sheet before invoking the existing search', () => {
  const search=vi.fn();
  render(<MemoryRouter><ConsumerHeader onSearch={search} /></MemoryRouter>);
- fireEvent.click(screen.getByRole('button', {name:'Open menu'}));
+ const menu = screen.getByRole('button', {name:'Open menu'});
+ fireEvent.click(menu);
  fireEvent.click(screen.getByRole('button', {name:'Search myUNO'}));
  expect(search).toHaveBeenCalledTimes(1);
+ expect(search).toHaveBeenCalledWith(menu);
  expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
 });
 
@@ -82,4 +84,5 @@ it('shows a labelled trigger for shared search with its keyboard shortcuts', () 
  expect(button).toHaveAttribute('aria-keyshortcuts', 'Control+K Meta+K');
  fireEvent.click(button);
  expect(search).toHaveBeenCalledOnce();
+ expect(search).toHaveBeenCalledWith(button);
 });

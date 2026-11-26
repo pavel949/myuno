@@ -114,7 +114,7 @@ export class ErrorBoundary extends Component<Props, State> {
           )}
           icon={AlertTriangle}
           tone="warning"
-          announcement="alert"
+          announcement={this.state.reloadFailed ? undefined : 'alert'}
           compact
         >
           {this.state.reloadFailed && <p role="alert" className="text-body-sm text-destructive">{ERROR_MESSAGES.reloadFailed[lang]}</p>}
