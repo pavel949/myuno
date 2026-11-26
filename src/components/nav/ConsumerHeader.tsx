@@ -5,6 +5,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { pickLang } from '@/lib/i18n/pickLang';
 import { APP_ROUTES as R } from '@/lib/config/routes';
+import { prefetchRoute } from '@/lib/prefetchRoute';
 import { GlobalPreferencesControls } from '@/components/uno/GlobalPreferencesControls';
 import { UserAvatarMenu } from '@/components/layout/UserAvatarMenu';
 import { GUEST_TOP_NAV, getActiveGuestTopNavItem } from '@/lib/nav/navigationModel';
@@ -93,7 +94,7 @@ export function ConsumerHeader({ overlay = false, onSearch, headerActions }: { o
       <div className="consumer-header-inner" data-public-frame={overlay ? 'overlay' : frame} style={!overlay && frame !== 'default' ? { maxWidth: PUBLIC_CONTENT_WIDTH[frame] } : undefined}>
         <Link to={R.HOME} className="consumer-wordmark" aria-label="myUNO">myUNO</Link>
           <nav className="consumer-nav" aria-label={t('Основные разделы', 'Main navigation', 'เมนูหลัก')}>
-            {links.map(l => <Link key={l.to} to={l.to} aria-current={l.active ? "page" : undefined}>{l.label}</Link>)}
+            {links.map(l => <Link key={l.to} to={l.to} onPointerEnter={() => prefetchRoute(l.to)} onFocus={() => prefetchRoute(l.to)} aria-current={l.active ? "page" : undefined}>{l.label}</Link>)}
           </nav>
           <details ref={partnerMenuRef} className="consumer-partner-menu">
             <summary ref={partnerTriggerRef} aria-current={partnerActive ? 'page' : undefined}>{t('Партнёрам', 'For partners', 'สำหรับพาร์ทเนอร์')}</summary>
@@ -119,7 +120,7 @@ export function ConsumerHeader({ overlay = false, onSearch, headerActions }: { o
                 <nav aria-label={t('Меню', 'Menu', 'เมนู')}>
                   <section className="consumer-task-section" aria-labelledby="consumer-homes-heading">
                     <h2 id="consumer-homes-heading">{t('Найти недвижимость', 'Find a home', 'ค้นหาที่พัก')}</h2>
-                    <Link to={R.PROPERTY} onClick={() => setOpen(false)} className="consumer-task-row" aria-current={activeDestination?.path === R.PROPERTY ? 'page' : undefined}><Building2 aria-hidden="true" /><span>{t('Жильё', 'Homes', 'ที่พัก')}</span><ChevronRight aria-hidden="true" /></Link>
+                    <Link to={R.PROPERTY} onPointerEnter={() => prefetchRoute(R.PROPERTY)} onFocus={() => prefetchRoute(R.PROPERTY)} onClick={() => setOpen(false)} className="consumer-task-row" aria-current={activeDestination?.path === R.PROPERTY ? 'page' : undefined}><Building2 aria-hidden="true" /><span>{t('Жильё', 'Homes', 'ที่พัก')}</span><ChevronRight aria-hidden="true" /></Link>
                     <div className="consumer-task-options">
                       <Link to={`${R.PROPERTY_SEARCH}?mode=rent&tenancy=short`} onClick={() => setOpen(false)}>{t('На время поездки', 'For a holiday', 'สำหรับวันหยุด')}</Link>
                       <Link to={`${R.PROPERTY_SEARCH}?mode=rent&tenancy=long`} onClick={() => setOpen(false)}>{t('Жить надолго', 'For a longer stay', 'พักระยะยาว')}</Link>
@@ -129,7 +130,7 @@ export function ConsumerHeader({ overlay = false, onSearch, headerActions }: { o
                   </section>
                   <section className="consumer-task-section" aria-labelledby="consumer-life-heading">
                     <h2 id="consumer-life-heading">{t('Отдыхать и решать дела', 'Enjoy your stay', 'พักผ่อนและใช้ชีวิต')}</h2>
-                    {links.filter(l => l.to === R.EXPERIENCES || l.to === R.GOAL_SERVICES).map(l => { const Icon = l.to === R.EXPERIENCES ? Compass : Wrench; return <Link key={l.to} to={l.to} onClick={() => setOpen(false)} className="consumer-task-row" aria-current={l.active ? 'page' : undefined}><Icon aria-hidden="true" /><span>{l.label}</span><ChevronRight aria-hidden="true" /></Link>; })}
+                    {links.filter(l => l.to === R.EXPERIENCES || l.to === R.GOAL_SERVICES).map(l => { const Icon = l.to === R.EXPERIENCES ? Compass : Wrench; return <Link key={l.to} to={l.to} onPointerEnter={() => prefetchRoute(l.to)} onFocus={() => prefetchRoute(l.to)} onClick={() => setOpen(false)} className="consumer-task-row" aria-current={l.active ? 'page' : undefined}><Icon aria-hidden="true" /><span>{l.label}</span><ChevronRight aria-hidden="true" /></Link>; })}
                   </section>
                   <section className="consumer-task-section" aria-labelledby="consumer-personal-heading">
                     <h2 id="consumer-personal-heading">{t('Мои дела', 'Your plans', 'แผนของคุณ')}</h2>

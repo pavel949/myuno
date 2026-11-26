@@ -20,6 +20,8 @@ const hookSource = await readFile('src/hooks/useExperiences.ts', 'utf8');
 const durationFormatter = hookSource.match(/export const formatDuration = [\s\S]*?\n};/)?.[0];
 if (!durationFormatter) throw Error('Actual pure duration formatter was not found');
 const virtual = {
+  // Keep real header navigation; do not bundle unrelated pages for speculative loads.
+  '@/lib/prefetchRoute': `export const prefetchRoute=()=>{};`,
   '@/hooks/useExperiences': `import {useSyncExternalStore} from 'react';
     const listeners=new Set();let retry=0;const subscribe=f=>{listeners.add(f);return()=>listeners.delete(f)};
     const base={currency:'THB',price_per:'person',cover_image:'/fixture-experience.svg',images:[],rating:4,review_count:2,duration_minutes:60,is_featured:false,location_name:'Synthetic Phuket',is_active:true};

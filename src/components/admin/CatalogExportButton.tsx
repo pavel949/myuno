@@ -1,3 +1,4 @@
+import { csvCell } from '@/lib/export/csvSafe';
 import React, { useState } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Button } from '@/components/ui/button';
@@ -69,7 +70,7 @@ export function CatalogExportButton({
 
       const csvContent = [
         headers.join(','),
-        ...rows.map(row => row.map(cell => `"${cell.replace(/"/g, '""')}"`).join(','))
+        ...rows.map(row => row.map(cell => csvCell(cell)).join(','))
       ].join('\n');
 
       const blob = new Blob(['\ufeff' + csvContent], { type: 'text/csv;charset=utf-8;' });

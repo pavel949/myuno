@@ -1,3 +1,4 @@
+import { csvCell } from '@/lib/export/csvSafe';
 import { pickLang } from '@/lib/i18n/pickLang';
 import '@/styles/premium-workspace.css';
 import { propertyBookingStatus } from '@/lib/propertyBookingPresentation';
@@ -256,7 +257,7 @@ export default function MCBookingsPage() {
       source: b.source || 'manual',
     }));
     const header = Object.keys(rows[0] || {}).join(',');
-    const csv = [header, ...rows.map(r => Object.values(r).map(v => `"${v}"`).join(','))].join('\n');
+    const csv = [header, ...rows.map(r => Object.values(r).map(v => csvCell(v)).join(','))].join('\n');
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');

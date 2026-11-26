@@ -74,6 +74,20 @@ export function getAllowedOrigin(origin: string | null | undefined): string {
   return Deno.env.get("SITE_URL") || CANONICAL_SITE_URL;
 }
 
+/**
+ * True only when `url` is an absolute URL whose origin is one of our trusted
+ * app origins. Use for caller-supplied redirect/return URLs (e.g. Stripe).
+ */
+export function isTrustedAppUrl(url: unknown): boolean {
+  if (typeof url !== "string" || url.length > 2048) return false;
+  try {
+    const o = new URL(url).origin;
+    return ALLOWED_ORIGINS.includes(o) || isLovablePreview(o);
+  } catch {
+    return false;
+  }
+}
+
 export function getCorsHeaders(req: Request): Record<string, string> {
   const origin = req.headers.get("Origin") ?? "";
   const allowed =

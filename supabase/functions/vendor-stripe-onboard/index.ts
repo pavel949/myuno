@@ -12,7 +12,7 @@
 import { createServiceClient } from "../_shared/supabase.ts";
 import { createStripeClient } from "../_shared/stripe.ts";
 import { requireAuth } from "../_shared/auth-guard.ts";
-import { getCorsHeaders } from "../_shared/cors.ts";
+import { getCorsHeaders, isTrustedAppUrl } from "../_shared/cors.ts";
 
 Deno.serve(async (req) => {
   // Restrict CORS to the allow-listed origins — this endpoint creates Stripe
@@ -111,6 +111,9 @@ Deno.serve(async (req) => {
     }
 
     const { return_url, refresh_url } = body;
+    if (return_url && refresh_url && (!isTrustedAppUrl(return_url) || !isTrustedAppUrl(refresh_url))) {
+      return json({ error: "return_url and refresh_url must point to this app" }, 400);
+    }
     if (!return_url || !refresh_url) {
       return json(
         { error: "return_url and refresh_url required" },

@@ -59,6 +59,24 @@
      }
      notified.add(leadId);
 
+     // Durable one-time guard (survives cold starts / multiple instances).
+     const { data: priorNotice } = await supabase
+       .from("booking_notifications_log")
+       .select("id")
+       .eq("notification_type", "lead_whatsapp_admin")
+       .contains("metadata", { lead_id: leadId })
+       .limit(1)
+       .maybeSingle();
+     if (priorNotice && !isService) {
+       return new Response(JSON.stringify({ error: "Forbidden" }), { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+     }
+     await supabase.from("booking_notifications_log").insert({
+       notification_type: "lead_whatsapp_admin",
+       channel: "whatsapp",
+       sent_at: new Date().toISOString(),
+       metadata: { lead_id: leadId },
+     });
+
      // Only process home_services leads for now
      if (lead.vertical_id !== "home_services") {
        return new Response(

@@ -22,6 +22,7 @@
 
 import { createServiceClient } from "../_shared/supabase.ts";
 import { requireAuth } from "../_shared/auth-guard.ts";
+import { createClient } from "npm:@supabase/supabase-js@2";
 
 const CORS = {
   "Access-Control-Allow-Origin": "*",
@@ -62,6 +63,25 @@ Deno.serve(async (req) => {
 
     if (!lead_id) return err("lead_id is required");
 
+    // Authorize against the caller's own row-level access: the caller must be
+    // able to read the lead (and any buyer / reservation they reference)
+    // under their normal permissions before the privileged client is used.
+    const actor = createClient(
+      Deno.env.get("SUPABASE_URL") ?? "",
+      Deno.env.get("SUPABASE_ANON_KEY") ?? "",
+      { global: { headers: { Authorization: req.headers.get("Authorization") ?? "" } } },
+    );
+    const { data: visibleLead } = await actor.from("nb_leads").select("id").eq("id", lead_id).maybeSingle();
+    if (!visibleLead) return err("Forbidden", 403);
+    if (buyer_id) {
+      const { data: b } = await actor.from("buyers").select("id").eq("id", buyer_id).maybeSingle();
+      if (!b) return err("Forbidden", 403);
+    }
+    if (reservation_id) {
+      const { data: rsv } = await actor.from("reservations").select("id").eq("id", reservation_id).maybeSingle();
+      if (!rsv) return err("Forbidden", 403);
+    }
+
     const sb = createServiceClient();
 
     // Check if channel already exists for this lead
@@ -100,7 +120,7 @@ Deno.serve(async (req) => {
       .single();
 
     if (insertErr || !channel) {
-      return err(insertErr?.message ?? "Failed to create channel", 500);
+      return err("Failed to create channel", 500);
     }
 
     // Log disclosure event
@@ -125,6 +145,6 @@ Deno.serve(async (req) => {
     });
   } catch (e) {
     console.error("[devmod-masked-channel-create]", e);
-    return err(e instanceof Error ? e.message : "Internal error", 500);
+    return err("Internal error", 500);
   }
 });

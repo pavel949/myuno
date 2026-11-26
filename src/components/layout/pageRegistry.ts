@@ -19,7 +19,6 @@ export const ForDevelopers = lazy(() => import('@/pages/ForDevelopers'));
 export const ForLocalServiceProviders = lazy(() => import('@/pages/ForLocalServices'));
 export const ForBusinessPage = lazy(() => import('@/pages/ForBusinessPage'));
 export const Discover = lazy(() => import('@/pages/discover/DiscoveryHubPage'));
-export const ServicesDiscover = lazy(() => import('@/pages/services/ServicesIndex'));
 export const SituationNavigator = lazy(() => import('@/components/navigation/v3/NavigatorPageV3'));
 export const SituationDetail = lazy(() => import('@/components/navigation/v3/SituationDetailPage'));
 // Wave 3 stabilize: PlatformCatalog removed (orphan — /catalog redirects to /discover).
@@ -326,7 +325,6 @@ export const SellItemPage = lazy(() => import('@/pages/market/SellItemPage'));
 // ── Classifieds (Барахолка) ──
 export const ClassifiedsIndex = lazy(() => import('@/pages/classifieds/ClassifiedsIndex'));
 export const ClassifiedDetailPage = lazy(() => import('@/pages/classifieds/ClassifiedDetailPage'));
-export const ClassifiedsSellPage = lazy(() => import('@/pages/classifieds/ClassifiedsSellPage'));
 
 // ── Other ──
 export const Favorites = lazy(() => import('@/pages/Favorites'));

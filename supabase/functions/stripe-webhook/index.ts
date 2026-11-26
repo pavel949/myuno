@@ -308,7 +308,7 @@ Deno.serve(async (req) => {
         // Frontend fires notify-transfer-booking as fire-and-forget before redirect;
         // if user closed the tab early, the operator never got pinged. Re-trigger here
         // (notify function is idempotent via booking_notifications_log + transfer-op-${id}
-        // idempotency keys in send-transactional-email).
+        // idempotency keys in the managed email send).
         try {
           if (order.order_type === 'vehicle') {
             const { data: fullOrder } = await supabaseAdmin

@@ -1,3 +1,4 @@
+import { neutralizeCsvRow } from '@/lib/export/csvSafe';
 import { AdminDraftPreview, ADMIN_EDITOR_HEADER, ADMIN_EDITOR_BODY, ADMIN_EDITOR_FOOTER } from '@/components/admin/AdminDraftPreview';
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
@@ -329,7 +330,7 @@ export default function AdminProviders() {
       languages: Array.isArray(p.languages) ? p.languages.join(';') : '',
       created_at: p.created_at || '',
     }));
-    const csv = Papa.unparse(rows);
+    const csv = Papa.unparse(rows.map(neutralizeCsvRow));
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');

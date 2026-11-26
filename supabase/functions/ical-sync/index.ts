@@ -250,7 +250,8 @@ Deno.serve(async (req) => {
       .from('property_external_calendars')
       .select('*, owner_properties!inner(id, owner_id)')
       .eq('is_active', true);
-    if (ownerScope) query = query.eq('owner_id', ownerScope);
+    // Bind BOTH the calendar owner and the target property's owner to the caller.
+    if (ownerScope) query = query.eq('owner_id', ownerScope).eq('owner_properties.owner_id', ownerScope);
     if (calendarIds.length > 0) query = query.in('id', calendarIds);
 
     const { data: calendars, error: calendarsError } = await query;
@@ -267,6 +268,10 @@ Deno.serve(async (req) => {
     const results: Array<Record<string, unknown>> = [];
 
     for (const calendar of calendars || []) {
+      if (ownerScope) {
+        const op = Array.isArray(calendar.owner_properties) ? calendar.owner_properties[0] : calendar.owner_properties;
+        if (calendar.owner_id !== ownerScope || op?.owner_id !== ownerScope) continue;
+      }
       try {
         console.info(`Fetching iCal: ${calendar.name}`);
         // SSRF guard: ical_url is user-supplied DB data — block loopback,

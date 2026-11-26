@@ -42,6 +42,27 @@ const ALLOWED_TABLES = new Set<string>([
   "providers",
 ]);
 
+// Fields an external token may never set: identity, authorship, ownership,
+// verification/moderation state, money, payouts and payment-provider links.
+const PROTECTED_FIELDS = new Set<string>([
+  "id", "created_at", "created_by", "owner_id", "user_id", "linked_user_id", "owner_user_id",
+  "company_id", "created_by_uno_team", "uno_team_creator_id", "is_verified", "verified_at",
+  "verified_by", "approved_at", "approved_by", "is_featured", "deleted_at", "deleted_by",
+]);
+const PROTECTED_PATTERN = /^(stripe_|payout|pending_payout|total_earnings|balance|commission|platform_fee|vendor_payout|rating|review_count|reviews_count|moderation_|approval_|is_approved|trust_|role|roles|lead_score|scoring)/i;
+
+function sanitizeRow(row: unknown, allowId: boolean): Record<string, unknown> | null {
+  if (!row || typeof row !== "object" || Array.isArray(row)) return null;
+  const out: Record<string, unknown> = {};
+  for (const [k, v] of Object.entries(row as Record<string, unknown>)) {
+    if (!/^[a-z][a-z0-9_]{0,62}$/.test(k)) return null;
+    if (k === "id" && allowId) { out[k] = v; continue; }
+    if (PROTECTED_FIELDS.has(k) || PROTECTED_PATTERN.test(k)) return null;
+    out[k] = v;
+  }
+  return out;
+}
+
 const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), {
     status,
@@ -120,10 +141,17 @@ Deno.serve(async (req) => {
 
     // POST — insert (single or array)
     if (method === "POST") {
-      const rows = body.rows as Record<string, unknown> | Record<string, unknown>[];
-      if (!rows) return json({ error: "Missing 'rows'" }, 400);
+      const rawRows = body.rows;
+      if (!rawRows) return json({ error: "Missing 'rows'" }, 400);
       const upsert = body.upsert === true;
-      const onConflict = body.on_conflict as string | undefined;
+      const list = Array.isArray(rawRows) ? rawRows : [rawRows];
+      if (list.length === 0 || list.length > 500) return json({ error: "rows must contain 1-500 items" }, 400);
+      const rows = list.map((r) => sanitizeRow(r, upsert));
+      if (rows.some((r) => r === null)) return json({ error: "rows contain protected or invalid fields" }, 400);
+      if (body.on_conflict !== undefined && body.on_conflict !== "id") {
+        return json({ error: "on_conflict may only be 'id'" }, 400);
+      }
+      const onConflict = upsert ? "id" : undefined;
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       let q: any = admin.from(table);
       q = upsert ? q.upsert(rows, onConflict ? { onConflict } : undefined) : q.insert(rows);
@@ -143,9 +171,13 @@ Deno.serve(async (req) => {
       if (matchKeys.length !== 1 || matchKeys[0] !== "id" || !match.id) {
         return json({ error: "PATCH 'match' must be exactly { id: <primary key> }" }, 400);
       }
-      const { data, error } = await admin.from(table).update(values).eq("id", match.id).select();
+      const cleanValues = sanitizeRow(values, false);
+      if (!cleanValues || Object.keys(cleanValues).length === 0) {
+        return json({ error: "values contain protected or invalid fields" }, 400);
+      }
+      const { data, error } = await admin.from(table).update(cleanValues).eq("id", match.id).select();
       if (error) return json({ error: error.message }, 400);
-      await audit("update", String(match.id), values);
+      await audit("update", String(match.id), cleanValues);
       return json({ data, updated: Array.isArray(data) ? data.length : 0 });
     }
 

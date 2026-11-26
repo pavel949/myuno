@@ -107,7 +107,7 @@ export function ContactExportButton({ contacts }: ContactExportButtonProps) {
       });
       return row;
     });
-    const csv = Papa.unparse(rows);
+    const csv = Papa.unparse(rows.map(neutralizeCsvRow));
     const exporterName = user?.email || 'Unknown';
     const watermark = `\n# Exported by: ${exporterName} on ${exportDate}\n# Confidential — Do not distribute`;
     const blob = new Blob(['\ufeff' + csv + watermark], { type: 'text/csv;charset=utf-8;' });
@@ -128,7 +128,7 @@ export function ContactExportButton({ contacts }: ContactExportButtonProps) {
     }
     await logExport();
     const rows = contacts.map(c => neutralizeCsvRow(contactToOdooRow(c)));
-    const csv = Papa.unparse(rows);
+    const csv = Papa.unparse(rows.map(neutralizeCsvRow));
     const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
