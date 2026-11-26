@@ -36,8 +36,6 @@ describe('configuration is distinct from delivery verification', () => {
     expect(verticalConfigurationStatus([{ value: '{"enabled":true}' }])).toBe('configured');
   });
   it('reports only the setting evidence supplied', () => {
-    expect(configurationStatus('live', 'stripe')).toBe('configured');
-    expect(configurationStatus('test', 'stripe')).toBe('not_configured');
     expect(configurationStatus('["admin@example.invalid"]', 'email')).toBe('configured');
     expect(configurationStatus('["not-an-email"]', 'email')).toBe('not_configured');
     expect(configurationStatus(null, 'whatsapp')).toBe('not_configured');

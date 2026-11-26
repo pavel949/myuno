@@ -3,7 +3,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useAdminCheck } from '@/hooks/useAdmin';
 import { supabase } from '@/integrations/supabase/client';
 import { CACHE_PROFILES } from '@/lib/queryConfig';
-import { configurationStatus, dashboardSnapshotPeriod, summarizeDashboardSnapshots, verticalConfigurationStatus, type PlatformStatusItem } from '@/lib/adminDashboardEvidence';
+import { configurationStatus, stripeStatusFromSecrets, dashboardSnapshotPeriod, summarizeDashboardSnapshots, verticalConfigurationStatus, type PlatformStatusItem } from '@/lib/adminDashboardEvidence';
 
 export function useAdminDashboardSnapshots(days: number) {
   const { user } = useAuth();
@@ -26,13 +26,18 @@ export function useAdminDashboardSnapshots(days: number) {
 }
 
 export async function readAdminPlatformStatus(now = new Date()): Promise<PlatformStatusItem[]> {
-  const settings = async (key: string, kind: 'stripe' | 'email' | 'whatsapp'): Promise<PlatformStatusItem> => {
+  const settings = async (key: string, kind: 'email' | 'whatsapp'): Promise<PlatformStatusItem> => {
     const { data, error } = await supabase.from('system_settings').select('value').eq('key', key).maybeSingle();
     return { key, status: error ? 'unknown' : configurationStatus(data?.value, kind) };
   };
   const cutoff = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000).toISOString();
   const results = await Promise.allSettled([
-    settings('stripe_mode', 'stripe'), settings('admin_emails', 'email'), settings('admin_whatsapp', 'whatsapp'),
+    (async (): Promise<PlatformStatusItem> => {
+      // Ask the edge runtime whether the Stripe secrets exist; only booleans and the key mode come back.
+      const { data, error } = await supabase.functions.invoke('admin-secrets-status');
+      return { key: 'stripe_mode', ...(error ? { status: 'unknown' as const } : stripeStatusFromSecrets(data)) };
+    })(),
+    settings('admin_emails', 'email'), settings('admin_whatsapp', 'whatsapp'),
     (async (): Promise<PlatformStatusItem> => {
       const { count, error } = await supabase.from('reconciliation_alerts').select('id', { count: 'exact', head: true })
         .is('resolved_at', null).gte('created_at', cutoff).lte('created_at', now.toISOString());

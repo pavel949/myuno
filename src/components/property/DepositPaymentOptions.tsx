@@ -18,6 +18,7 @@ import { format } from 'date-fns';
 import { ru } from 'date-fns/locale';
 import { logger } from '@/lib/logger';
 import { readPropertyOrderHold } from '@/lib/propertyOrderHold';
+import { readFunctionErrorCode } from '@/lib/functionError';
 
 interface DepositPaymentOptionsProps {
   propertyId: string;
@@ -152,7 +153,16 @@ export const DepositPaymentOptions = forwardRef<DepositPaymentOptionsHandle, Dep
           },
         });
 
-        if (error) throw error;
+        if (error) {
+          if (await readFunctionErrorCode(error) === 'stripe_not_configured') {
+            toast.error(
+              isRu ? 'Оплата картой сейчас недоступна' : 'Card payment is unavailable right now',
+              { description: isRu ? 'Бронь не создана и деньги не списаны. Напишите менеджеру, чтобы забронировать.' : 'No booking was created and nothing was charged. Message the manager to book.' },
+            );
+            return false;
+          }
+          throw error;
+        }
 
         if (data?.url) {
           window.location.href = data.url;
