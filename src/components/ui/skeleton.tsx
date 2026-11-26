@@ -16,7 +16,7 @@ const Skeleton = React.forwardRef<
         "rounded-none bg-muted relative overflow-hidden",
         "before:absolute before:inset-0",
         "before:bg-gradient-to-r before:from-transparent before:via-white/10 before:to-transparent",
-        "before:animate-shimmer",
+        "motion-safe:before:animate-shimmer",
         className
       )}
       style={{ backgroundSize: '200% 100%' }}

@@ -9,10 +9,10 @@
  *
  * Consumer roles use ConsumerHeader; workspace roles use the shell sidebar.
  */
-import React, { lazy, memo, Suspense, useCallback, useEffect, useRef, useState } from 'react';
+import { memo } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { ConsumerHeader } from './ConsumerHeader';
-import { ErrorBoundary } from '@/components/ErrorBoundary';
+import { useTopBarSearch } from './useTopBarSearch';
 import { Search, SlidersHorizontal } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { APP_ROUTES } from '@/lib/config/routes';
@@ -35,10 +35,6 @@ import {
   type NavRoleKey,
 } from '@/lib/nav/navigationModel';
 
-const GlobalSearchModal = lazy(async () => ({
-  default: (await import('@/components/search/GlobalSearchModal')).GlobalSearchModal,
-}));
-
 interface TopBarProps {
   role: NavRoleKey;
   title?: string;
@@ -57,9 +53,8 @@ export const TopBar = memo(function TopBar({
   const { t, language } = useLanguage();
   const location = useLocation();
   const isRu = language === 'ru';
-  const [searchOpen, setSearchOpen] = useState(false);
-  const [searchRequested, setSearchRequested] = useState(false);
-  const searchOrigin = useRef<HTMLElement | null>(null);
+  // AdminLayout's command palette owns the admin keyboard shortcut.
+  const { openSearch, searchDialog } = useTopBarSearch(role !== 'admin');
   const scrolled = useScrolled(60);
 
   const sidebarVisible = hasSidebar(role);
@@ -70,60 +65,9 @@ export const TopBar = memo(function TopBar({
   const cartEnabled = showCart === true;
   const showCrumbs = shouldShowBreadcrumbs(location.pathname);
 
-  const openSearch = useCallback((event?: React.MouseEvent<HTMLElement>) => {
-    if (role === 'admin') searchOrigin.current = event?.currentTarget
-      ?? (document.activeElement instanceof HTMLElement ? document.activeElement : null);
-    setSearchRequested(true);
-    setSearchOpen(true);
-  }, [role]);
-  const handleSearchOpenChange = useCallback((open: boolean) => {
-    setSearchOpen(open);
-    // This controlled search has no Radix DialogTrigger to restore focus to.
-    if (!open && role === 'admin') {
-      const origin = searchOrigin.current;
-      requestAnimationFrame(() => { if (origin?.isConnected) origin.focus({ preventScroll: true }); });
-    }
-  }, [role]);
-  const handleKeyDown = useCallback((e: KeyboardEvent) => {
-    // AdminLayout's command palette exclusively owns this shortcut.
-    if (role === 'admin') return;
-    if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
-      e.preventDefault();
-      openSearch();
-    }
-  }, [openSearch, role]);
-
-  useEffect(() => {
-    document.addEventListener('keydown', handleKeyDown);
-    const openHandler = () => openSearch();
-    window.addEventListener('myuno:open-search', openHandler);
-    return () => {
-      document.removeEventListener('keydown', handleKeyDown);
-      window.removeEventListener('myuno:open-search', openHandler);
-    };
-  }, [handleKeyDown, openSearch]);
-
-  // Keep the dialog mounted once requested so reopening retains search state.
-  // The rest of the header stays interactive while its first chunk loads.
-  const searchDialog = searchRequested && (
-    <ErrorBoundary fallback={(
-      <span role="alert">
-        {pickLang(language, { ru: 'Не удалось загрузить поиск', en: 'Search could not load', th: 'โหลดการค้นหาไม่สำเร็จ' })}
-      </span>
-    )}>
-      <Suspense fallback={(
-        <span className="sr-only" role="status">
-          {pickLang(language, { ru: 'Загрузка поиска', en: 'Loading search', th: 'กำลังโหลดการค้นหา' })}
-        </span>
-      )}>
-        <GlobalSearchModal open={searchOpen} onOpenChange={handleSearchOpenChange} />
-      </Suspense>
-    </ErrorBoundary>
-  );
-
   if (isConsumer) return (
     <>
-      <ConsumerHeader onSearch={() => openSearch()} />
+      <ConsumerHeader onSearch={openSearch} />
       {searchDialog}
     </>
   );

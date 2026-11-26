@@ -1,4 +1,4 @@
-import { cleanup, fireEvent, render, screen, within } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { afterEach, expect, it, vi } from 'vitest';
 import { ConsumerHeader } from '../ConsumerHeader';
@@ -44,7 +44,7 @@ it('puts tasks before preferences and groups partner paths without dropping them
  expect(within(menu).getByRole('link', {name:'For a holiday'})).toHaveAttribute('href','/property/search?mode=rent&tenancy=short');
  expect(within(menu).getByRole('link', {name:'For a longer stay'})).toHaveAttribute('href','/property/search?mode=rent&tenancy=long');
  expect(within(menu).getByRole('link', {name:'For a few months'})).toHaveAttribute('href','/property/search?mode=rent&tenancy=medium');
- expect(within(menu).getByRole('link', {name:'Buy a home'})).toHaveAttribute('href','/property/search?mode=buy');
+ expect(within(menu).getByRole('link', {name:'Buy a home'})).toHaveAttribute('href','/property/buy');
  const nav = within(menu).getByRole('navigation');
  expect(nav.compareDocumentPosition(within(menu).getByTestId('preferences')) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
  const partners = menu.querySelector('details')!;
@@ -61,30 +61,25 @@ it('closes the sheet before invoking the existing search', () => {
  expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
 });
 
-it('closes the desktop partner disclosure on Escape and returns focus to its trigger', () => {
- const { container } = render(<MemoryRouter><ConsumerHeader /></MemoryRouter>);
- const details = container.querySelector<HTMLDetailsElement>('.consumer-partner-menu')!;
- const trigger = details.querySelector('summary')!;
+it('closes the task menu on Escape even when focus is in the partner disclosure', async () => {
+ render(<MemoryRouter><ConsumerHeader /></MemoryRouter>);
+ const trigger = screen.getByRole('button', { name: 'Open menu' });
+ fireEvent.click(trigger);
+ const menu = screen.getByRole('dialog', { name: 'myUNO' });
+ const details = menu.querySelector<HTMLDetailsElement>('details')!;
  details.open = true;
  const owner = within(details).getByRole('link', {name:'For owners'});
  owner.focus();
  fireEvent.keyDown(owner, {key:'Escape'});
- expect(details.open).toBe(false);
- expect(trigger).toHaveFocus();
+ expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+ await waitFor(() => expect(trigger).toHaveFocus(), { timeout: 5000 });
 });
-it('allows focus within partners, and dismisses without stealing focus when focus or pointer goes outside', () => {
- const { container } = render(<MemoryRouter><ConsumerHeader /><button>Outside</button></MemoryRouter>);
- const details = container.querySelector<HTMLDetailsElement>('.consumer-partner-menu')!;
- details.open = true;
- const owner = within(details).getByRole('link', {name:'For owners'});
- owner.focus();
- expect(details.open).toBe(true);
- const outside = screen.getByRole('button', {name:'Outside'});
- outside.focus();
- expect(details.open).toBe(false);
- expect(outside).toHaveFocus();
- details.open = true;
- fireEvent.pointerDown(outside);
- expect(details.open).toBe(false);
- expect(outside).toHaveFocus();
+it('shows a labelled trigger for shared search with its keyboard shortcuts', () => {
+ const search = vi.fn();
+ render(<MemoryRouter><ConsumerHeader onSearch={search} /></MemoryRouter>);
+ const button = screen.getByRole('button', { name: /^Search$/ });
+ expect(button).toHaveAttribute('aria-haspopup', 'dialog');
+ expect(button).toHaveAttribute('aria-keyshortcuts', 'Control+K Meta+K');
+ fireEvent.click(button);
+ expect(search).toHaveBeenCalledOnce();
 });

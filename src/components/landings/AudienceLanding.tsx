@@ -1,13 +1,14 @@
 import { Link } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
+import { Button } from '@/components/ui/button';
 import { SEOHead } from '@/components/seo';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { pickLang, type LangValues } from '@/lib/i18n/pickLang';
 import { PUBLIC_CONTENT_ANCHOR } from '@/design-system/ecosystemLayout';
 import '@/styles/premium-audience.css';
 
-export interface AudienceLink { title: LangValues; description?: LangValues; href: string }
+export interface AudienceLink { title: LangValues; description?: LangValues; href: string; conversion?: boolean }
 interface AudienceLandingProps {
   path: string;
   eyebrow: LangValues;
@@ -42,7 +43,11 @@ export function AudienceLanding(props: AudienceLandingProps) {
       <section id="paths" tabIndex={-1} aria-labelledby="audience-paths-title" className={`audience-section ${PUBLIC_CONTENT_ANCHOR}`}>
         <h2 id="audience-paths-title">{label(props.choicesTitle)}</h2>
         <div className="audience-choices">{props.choices.map(item => <article key={item.href}>
-          <h3><Link to={item.href}>{label(item.title)}<ArrowRight className="h-4 w-4 shrink-0" aria-hidden="true" /></Link></h3>{item.description && <p>{label(item.description)}</p>}
+          <h3>
+            {item.conversion
+              ? <Button variant="conversion" asChild><Link to={item.href}>{label(item.title)}<ArrowRight aria-hidden="true" /></Link></Button>
+              : <Link to={item.href}>{label(item.title)}<ArrowRight className="h-4 w-4 shrink-0" aria-hidden="true" /></Link>}
+          </h3>{item.description && <p>{label(item.description)}</p>}
         </article>)}</div>
       </section>
       <section className="audience-section" aria-labelledby="audience-next-title">

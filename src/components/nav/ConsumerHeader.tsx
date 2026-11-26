@@ -1,12 +1,13 @@
 import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Menu, Search, Building2, Compass, Wrench, ChevronRight, CalendarDays, ShoppingBag, HelpCircle, LogIn } from 'lucide-react';
+import { Menu, Search, Building2, Compass, ChevronRight, CalendarDays, ShoppingBag, HelpCircle, LogIn } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { pickLang } from '@/lib/i18n/pickLang';
 import { APP_ROUTES as R } from '@/lib/config/routes';
 import { prefetchRoute } from '@/lib/prefetchRoute';
 import { GlobalPreferencesControls } from '@/components/uno/GlobalPreferencesControls';
+import { BrandWordmark } from '@/components/uno/BrandWordmark';
 import { UserAvatarMenu } from '@/components/layout/UserAvatarMenu';
 import { GUEST_TOP_NAV, getActiveGuestTopNavItem } from '@/lib/nav/navigationModel';
 import { Sheet, SheetContent, SheetTitle, SheetDescription, SheetTrigger } from '@/components/ui/sheet';
@@ -21,30 +22,6 @@ export function ConsumerHeader({ overlay = false, onSearch, headerActions }: { o
   const { user } = useAuth();
   const [open, setOpen] = useState(false);
   const headerRef = useRef<HTMLElement>(null);
-  const partnerMenuRef = useRef<HTMLDetailsElement>(null);
-  const partnerTriggerRef = useRef<HTMLElement>(null);
-  useEffect(() => {
-    const menu = partnerMenuRef.current;
-    if (!menu) return;
-    const dismissOutside = (event: Event) => {
-      if (menu.open && event.target instanceof Node && !menu.contains(event.target)) menu.open = false;
-    };
-    const dismissWithEscape = (event: KeyboardEvent) => {
-      if (event.key !== 'Escape' || event.defaultPrevented || !menu.open
-        || !(event.target instanceof Node) || !menu.contains(event.target)) return;
-      event.preventDefault();
-      menu.open = false;
-      partnerTriggerRef.current?.focus();
-    };
-    document.addEventListener('pointerdown', dismissOutside);
-    document.addEventListener('focusin', dismissOutside);
-    menu.addEventListener('keydown', dismissWithEscape);
-    return () => {
-      document.removeEventListener('pointerdown', dismissOutside);
-      document.removeEventListener('focusin', dismissOutside);
-      menu.removeEventListener('keydown', dismissWithEscape);
-    };
-  }, []);
   useLayoutEffect(() => {
     const header = headerRef.current;
     const canvas = header?.closest<HTMLElement>('[data-canvas]');
@@ -70,14 +47,14 @@ export function ConsumerHeader({ overlay = false, onSearch, headerActions }: { o
   const t = (ru: string, en: string, th: string) => pickLang(language, { ru, en, th });
   const { pathname, search, hash } = useLocation();
   useEffect(() => {
-    if (partnerMenuRef.current) partnerMenuRef.current.open = false;
     setOpen(false);
   }, [pathname, search, hash]);
   const frame = publicContentFrame(pathname);
   const signInPath = buildAuthPath({ from: `${pathname}${search}${hash}` });
-  const activeDestination = getActiveGuestTopNavItem(pathname);
+  const activeDestination = getActiveGuestTopNavItem(pathname, search);
   const links = GUEST_TOP_NAV.map(item => ({
     to: item.path,
+    Icon: item.icon,
     label: pickLang(language, { ru: item.labelRu, en: item.labelEn, th: item.labelTh }),
     active: activeDestination?.path === item.path,
   }));
@@ -88,22 +65,26 @@ export function ConsumerHeader({ overlay = false, onSearch, headerActions }: { o
     { to: R.FOR_REAL_ESTATE_DEVELOPERS, label: t('Застройщикам', 'For developers', 'สำหรับผู้พัฒนา') },
     { to: R.FOR_BUSINESS, label: t('Для бизнеса', 'For business', 'สำหรับธุรกิจ') },
   ];
-  const partnerActive = partnerLinks.some(link => pathname === link.to || pathname.startsWith(`${link.to}/`));
   return (
     <header ref={headerRef} className={`consumer-header${overlay ? ' consumer-header-overlay' : ''}`}>
       <div className="consumer-header-inner" data-public-frame={overlay ? 'overlay' : frame} style={!overlay && frame !== 'default' ? { maxWidth: PUBLIC_CONTENT_WIDTH[frame] } : undefined}>
-        <Link to={R.HOME} className="consumer-wordmark" aria-label="myUNO">myUNO</Link>
+        <BrandWordmark className="consumer-wordmark" tone={overlay ? 'onNavy' : 'default'} />
           <nav className="consumer-nav" aria-label={t('Основные разделы', 'Main navigation', 'เมนูหลัก')}>
-            {links.map(l => <Link key={l.to} to={l.to} onPointerEnter={() => prefetchRoute(l.to)} onFocus={() => prefetchRoute(l.to)} aria-current={l.active ? "page" : undefined}>{l.label}</Link>)}
+            {links.map(({ to, label, active }) => (
+              <Link
+                key={to}
+                to={to}
+                className="ds-focus"
+                onPointerEnter={() => prefetchRoute(to)}
+                onFocus={() => prefetchRoute(to)}
+                aria-current={active ? 'page' : undefined}
+              >
+                {label}
+              </Link>
+            ))}
           </nav>
-          <details ref={partnerMenuRef} className="consumer-partner-menu">
-            <summary ref={partnerTriggerRef} aria-current={partnerActive ? 'page' : undefined}>{t('Партнёрам', 'For partners', 'สำหรับพาร์ทเนอร์')}</summary>
-            <div className="consumer-partner-menu-panel">
-              {partnerLinks.map(link => <Link key={link.to} to={link.to} aria-current={pathname === link.to || pathname.startsWith(`${link.to}/`) ? 'page' : undefined} onClick={() => { if (partnerMenuRef.current) partnerMenuRef.current.open = false; }}>{link.label}</Link>)}
-            </div>
-          </details>
         <div className="consumer-utilities">
-          {onSearch && <button type="button" onClick={onSearch} className="consumer-icon" aria-label={t('Поиск', 'Search', 'ค้นหา')}><Search aria-hidden="true" /></button>}
+          {onSearch && <button type="button" onClick={onSearch} className="consumer-icon" aria-label={t('Поиск', 'Search', 'ค้นหา')} aria-haspopup="dialog" aria-keyshortcuts="Control+K Meta+K"><Search aria-hidden="true" /></button>}
           <div className="consumer-secondary-utilities"><GlobalPreferencesControls showCurrency={!overlay} className={overlay ? 'consumer-overlay-preferences' : undefined} /></div>
           {headerActions}
           {!overlay && <div className="consumer-secondary-utilities"><MiniCart /></div>}
@@ -120,21 +101,51 @@ export function ConsumerHeader({ overlay = false, onSearch, headerActions }: { o
                 <nav aria-label={t('Меню', 'Menu', 'เมนู')}>
                   <section className="consumer-task-section" aria-labelledby="consumer-homes-heading">
                     <h2 id="consumer-homes-heading">{t('Найти недвижимость', 'Find a home', 'ค้นหาที่พัก')}</h2>
-                    <Link to={R.PROPERTY} onPointerEnter={() => prefetchRoute(R.PROPERTY)} onFocus={() => prefetchRoute(R.PROPERTY)} onClick={() => setOpen(false)} className="consumer-task-row" aria-current={activeDestination?.path === R.PROPERTY ? 'page' : undefined}><Building2 aria-hidden="true" /><span>{t('Жильё', 'Homes', 'ที่พัก')}</span><ChevronRight aria-hidden="true" /></Link>
+                    <Link
+                      to={R.PROPERTY_RENT}
+                      onPointerEnter={() => prefetchRoute(R.PROPERTY_RENT)}
+                      onFocus={() => prefetchRoute(R.PROPERTY_RENT)}
+                      onClick={() => setOpen(false)}
+                      className="consumer-task-row"
+                      aria-current={activeDestination?.path === R.PROPERTY_RENT ? 'page' : undefined}
+                    >
+                      <Building2 aria-hidden="true" /><span>{t('Жильё', 'Stays', 'ที่พัก')}</span><ChevronRight aria-hidden="true" />
+                    </Link>
                     <div className="consumer-task-options">
                       <Link to={`${R.PROPERTY_SEARCH}?mode=rent&tenancy=short`} onClick={() => setOpen(false)}>{t('На время поездки', 'For a holiday', 'สำหรับวันหยุด')}</Link>
                       <Link to={`${R.PROPERTY_SEARCH}?mode=rent&tenancy=long`} onClick={() => setOpen(false)}>{t('Жить надолго', 'For a longer stay', 'พักระยะยาว')}</Link>
                       <Link to={`${R.PROPERTY_SEARCH}?mode=rent&tenancy=medium`} onClick={() => setOpen(false)}>{t('На несколько месяцев', 'For a few months', 'พักหลายเดือน')}</Link>
-                      <Link to={`${R.PROPERTY_SEARCH}?mode=buy`} onClick={() => setOpen(false)}>{t('Купить недвижимость', 'Buy a home', 'ซื้อที่อยู่อาศัย')}</Link>
+                      <Link to={R.PROPERTY_BUY} onClick={() => setOpen(false)}>{t('Купить недвижимость', 'Buy a home', 'ซื้อที่อยู่อาศัย')}</Link>
                     </div>
                   </section>
                   <section className="consumer-task-section" aria-labelledby="consumer-life-heading">
                     <h2 id="consumer-life-heading">{t('Отдыхать и решать дела', 'Enjoy your stay', 'พักผ่อนและใช้ชีวิต')}</h2>
-                    {links.filter(l => l.to === R.EXPERIENCES || l.to === R.GOAL_SERVICES).map(l => { const Icon = l.to === R.EXPERIENCES ? Compass : Wrench; return <Link key={l.to} to={l.to} onPointerEnter={() => prefetchRoute(l.to)} onFocus={() => prefetchRoute(l.to)} onClick={() => setOpen(false)} className="consumer-task-row" aria-current={l.active ? 'page' : undefined}><Icon aria-hidden="true" /><span>{l.label}</span><ChevronRight aria-hidden="true" /></Link>; })}
+                    {links.filter(l => l.to !== R.PROPERTY_RENT && l.to !== R.PROPERTY_BUY).map(({ to, label, active, Icon }) => (
+                      <Link
+                        key={to}
+                        to={to}
+                        onPointerEnter={() => prefetchRoute(to)}
+                        onFocus={() => prefetchRoute(to)}
+                        onClick={() => setOpen(false)}
+                        className="consumer-task-row"
+                        aria-current={active ? 'page' : undefined}
+                      >
+                        <Icon aria-hidden="true" /><span>{label}</span><ChevronRight aria-hidden="true" />
+                      </Link>
+                    ))}
+                    <Link
+                      to={R.EXPERIENCES}
+                      onPointerEnter={() => prefetchRoute(R.EXPERIENCES)}
+                      onFocus={() => prefetchRoute(R.EXPERIENCES)}
+                      onClick={() => setOpen(false)}
+                      className="consumer-task-row"
+                    >
+                      <Compass aria-hidden="true" /><span>{t('Впечатления', 'Experiences', 'ประสบการณ์')}</span><ChevronRight aria-hidden="true" />
+                    </Link>
                   </section>
                   <section className="consumer-task-section" aria-labelledby="consumer-personal-heading">
                     <h2 id="consumer-personal-heading">{t('Мои дела', 'Your plans', 'แผนของคุณ')}</h2>
-                    <Link to={R.BOOKINGS} onClick={() => setOpen(false)} className="consumer-task-row" aria-current={activeDestination?.path === R.BOOKINGS ? 'page' : undefined}><CalendarDays aria-hidden="true" /><span>{t('Заявки и бронирования', 'Requests and bookings', 'คำขอและการจอง')}</span><ChevronRight aria-hidden="true" /></Link>
+                    <Link to={R.BOOKINGS} onClick={() => setOpen(false)} className="consumer-task-row" aria-current={pathname === R.BOOKINGS || pathname.startsWith(`${R.BOOKINGS}/`) ? 'page' : undefined}><CalendarDays aria-hidden="true" /><span>{t('Заявки и бронирования', 'Requests and bookings', 'คำขอและการจอง')}</span><ChevronRight aria-hidden="true" /></Link>
                     <Link to="/cart" onClick={() => setOpen(false)} className="consumer-task-row" aria-current={pathname === '/cart' ? 'page' : undefined}><ShoppingBag aria-hidden="true" /><span>{t('Корзина', 'Cart', 'ตะกร้า')}</span><ChevronRight aria-hidden="true" /></Link>
                     {!user && <Link to={signInPath} onClick={() => setOpen(false)} className="consumer-task-row"><LogIn aria-hidden="true" /><span>{t('Войти', 'Sign in', 'เข้าสู่ระบบ')}</span><ChevronRight aria-hidden="true" /></Link>}
                   </section>

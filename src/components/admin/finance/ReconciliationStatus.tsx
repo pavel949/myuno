@@ -1,9 +1,14 @@
 import React from 'react';
-import { CheckCircle2, AlertTriangle, Loader2 } from 'lucide-react';
+import { AlertTriangle, CheckCircle2 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import { ContentSkeleton } from '@/components/ui/ContentSkeleton';
+import { Skeleton } from '@/components/ui/skeleton';
+import { QueryRecovery } from '@/components/shared/QueryRecovery';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useLedgerReconciliation } from '@/hooks/useLedgerReconciliation';
+import { pickLang } from '@/lib/i18n/pickLang';
+import { cn } from '@/lib/utils';
 
 interface ReconciliationStatusProps {
   days?: number;
@@ -11,16 +16,28 @@ interface ReconciliationStatusProps {
 }
 
 export function ReconciliationStatus({ days = 30, compact = false }: ReconciliationStatusProps) {
-  const { t } = useLanguage();
-  const { data, isLoading } = useLedgerReconciliation(days);
+  const { language, t } = useLanguage();
+  const local = (ru: string, en: string, th: string) => pickLang(language, { ru, en, th });
+  const { data, isLoading, isError, isFetching, refetch } = useLedgerReconciliation(days);
 
   if (isLoading) {
     return (
-      <Badge variant="outline" className="gap-1">
-        <Loader2 className="h-3 w-3 animate-spin" />
-        {t('admin.finance.recon.loading')}
-      </Badge>
+      <div role="status">
+        <span className="sr-only">{t('admin.finance.recon.loading')}</span>
+        <div aria-hidden="true">
+          {compact ? <Skeleton className="h-6 w-24" /> : <ContentSkeleton variant="card" count={1} />}
+        </div>
+      </div>
     );
+  }
+
+  if (isError) {
+    return compact ? (
+      <Badge variant="outline" className="gap-1 text-warning">
+        <AlertTriangle className="size-3" aria-hidden="true" />
+        {local('Сверка недоступна', 'Reconciliation unavailable', 'ไม่สามารถกระทบยอดได้')}
+      </Badge>
+    ) : <QueryRecovery onRetry={refetch} isRetrying={isFetching} />;
   }
 
   if (!data || data.totalOrders === 0) {
@@ -31,51 +48,46 @@ export function ReconciliationStatus({ days = 30, compact = false }: Reconciliat
     );
   }
 
-  if (data.isHealthy) {
-    return compact ? (
-      <Badge className="gap-1 bg-success/10 text-success border-success/20">
-        <CheckCircle2 className="h-3 w-3" />
-        {t('admin.finance.recon.ok')}
+  const Icon = data.isHealthy ? CheckCircle2 : AlertTriangle;
+  const statusTone = data.isHealthy ? 'text-success' : 'text-destructive';
+  if (compact) {
+    return (
+      <Badge
+        variant="outline"
+        className={cn('gap-1', statusTone, data.isHealthy ? 'border-success/20 bg-success/10' : 'border-destructive/20 bg-destructive/10')}
+      >
+        <Icon className="size-3" aria-hidden="true" />
+        {data.isHealthy
+          ? t('admin.finance.recon.ok')
+          : `${data.missingLedger + data.amountMismatch} ${t('admin.finance.recon.issues')}`}
       </Badge>
-    ) : (
-      <Card className="border-success/30 bg-success/5">
-        <CardContent className="p-3 flex items-center gap-3">
-          <CheckCircle2 className="h-5 w-5 text-success shrink-0" />
-          <div>
-            <p className="text-sm font-medium text-success">
-              {t('admin.finance.recon.passed')}
-            </p>
-            <p className="text-xs text-muted-foreground">
-              {data.matchedOrders} / {data.totalOrders} {t('admin.finance.recon.matchSuffix')}
-            </p>
-          </div>
-        </CardContent>
-      </Card>
     );
   }
 
-  return compact ? (
-    <Badge className="gap-1 bg-destructive/10 text-destructive border-destructive/20">
-      <AlertTriangle className="h-3 w-3" />
-      {data.missingLedger + data.amountMismatch} {t('admin.finance.recon.issues')}
-    </Badge>
-  ) : (
-    <Card className="border-destructive/30 bg-destructive/5">
-      <CardContent className="p-3 flex items-center gap-3">
-        <AlertTriangle className="h-5 w-5 text-destructive shrink-0" />
-        <div>
-          <p className="text-sm font-medium text-destructive">
-            {t('admin.finance.recon.issuesFound')}
-          </p>
-          <div className="text-xs text-muted-foreground space-y-0.5">
-            {data.missingLedger > 0 && (
-              <p>{data.missingLedger} {t('admin.finance.recon.missingLedger')}</p>
-            )}
-            {data.amountMismatch > 0 && (
-              <p>{data.amountMismatch} {t('admin.finance.recon.amountMismatch')}</p>
-            )}
-          </div>
-        </div>
+  const metrics = [
+    { label: local('Проверено заказов', 'Orders checked', 'คำสั่งซื้อที่ตรวจสอบ'), value: data.totalOrders },
+    { label: local('Совпадения', 'Matched orders', 'คำสั่งซื้อที่ตรงกัน'), value: data.matchedOrders },
+    { label: local('Нет записи в реестре', 'Missing ledger entries', 'รายการบัญชีที่ขาดหาย'), value: data.missingLedger },
+    { label: local('Расхождения в суммах', 'Amount differences', 'ส่วนต่างของยอดเงิน'), value: data.amountMismatch },
+  ];
+  const number = new Intl.NumberFormat(language);
+  return (
+    <Card>
+      <CardHeader>
+        <h3 className={cn('flex items-start gap-2 text-body font-semibold', statusTone)}>
+          <Icon className="size-5 shrink-0" aria-hidden="true" />
+          {t(data.isHealthy ? 'admin.finance.recon.passed' : 'admin.finance.recon.issuesFound')}
+        </h3>
+      </CardHeader>
+      <CardContent>
+        <dl className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+          {metrics.map(({ label, value }) => (
+            <div key={label} className="min-w-0 rounded-[var(--bible-radius-control)] border border-border p-3">
+              <dt className="text-body-sm text-muted-foreground">{label}</dt>
+              <dd className="font-display text-h4 tabular-nums">{number.format(value)}</dd>
+            </div>
+          ))}
+        </dl>
       </CardContent>
     </Card>
   );

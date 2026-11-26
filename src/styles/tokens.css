@@ -12,11 +12,11 @@
 
 :root {
   /* Approved public-home editorial palette and type scale. Consolidated CSS. */
-  --home-ui-canvas: 36 33.3333% 97.0588%;
-  --home-ui-white: 0 0% 100%;
+  --home-ui-canvas: var(--brand-cream);
+  --home-ui-white: var(--surface-white);
   --home-ui-hero-navy: 210 73.1707% 16.0784%;
   --home-ui-overlay-ink: 212 84.9057% 10.3922%;
-  --home-ui-control-navy: 211 71.4286% 16.4706%;
+  --home-ui-control-navy: var(--brand-navy);
   --home-ui-shadow-ink: 0 0% 0%;
   --home-ui-direction-navy: 206.6667 65.4545% 21.5686%;
   --home-ui-card-overlay: 210 80% 11.7647%;
@@ -53,6 +53,37 @@
   --home-ui-display-mobile: clamp(31px,8.2vw,39px);
   --home-ui-title-medium: 19px;
   --home-ui-title-large: 21px;
+
+  /* Design Bible v4 shared component geometry. */
+  --bible-radius-control: var(--radius-sm);
+  --bible-state-figure-height: 4.5rem;
+  --bible-home-hero-height: 28.75rem;
+  --bible-home-hero-overlap: 6.75rem;
+  --bible-home-hero-caption-bottom: 8.25rem;
+  --bible-home-hero-mobile-height: 13rem;
+  --bible-home-hero-heading-size: 4rem;
+  --bible-radius-card: var(--radius-md);
+  --bible-radius-media: var(--radius-lg);
+  --bible-button-height: 3rem;
+  --bible-chrome-height: 4rem;
+  --bible-ivory: var(--brand-ivory);
+  --bible-navy-hover: var(--brand-navy-700);
+  --bible-navy-tint: var(--brand-navy-100);
+  --bible-gold: var(--brand-gold-500);
+  --bible-gold-hover: var(--brand-gold-600);
+  --bible-gold-ink: var(--brand-gold-ink);
+  --bible-focus-contrast: var(--ring);
+  --bible-status-done-bg: 128.5714 21.2121% 93.5294%;
+  --bible-status-done-fg: 135 31.8182% 17.2549%;
+  --bible-status-waiting-bg: 40 78.9474% 96.2745%;
+  --bible-status-waiting-fg: 34.6552 68.2353% 33.3333%;
+  --bible-status-blocked-bg: 0 60% 96.0784%;
+  --bible-status-blocked-fg: 15.283 74.6479% 27.8431%;
+  --bible-status-blocked-line: 17.4725 88.3495% 40.3922%;
+  --bible-status-neutral-fg: 215.2941 19.3182% 34.5098%;
+  --bible-hairline: hsl(var(--brand-navy) / 0.08);
+  --bible-shadow-hover: var(--shadow-elevation-2);
+  --bible-shadow-overlay: var(--shadow-elevation-4);
 
   color-scheme: light;
 
@@ -140,8 +171,8 @@
   --foreground: var(--ink);       /* ink */
 
   --primary: var(--brand-navy);      /* navy */
-  --primary-hover: var(--brand-navy-900);      /* navy-900 */
-  --primary-foreground: var(--surface-white);      /* white text on navy */
+  --primary-hover: var(--bible-navy-hover);
+  --primary-foreground: var(--brand-cream);      /* paper text on navy */
 
   --secondary: var(--surface-raised);       /* surface-raised */
   --secondary-foreground: var(--ink);
@@ -233,26 +264,26 @@
      fallbacks for any callers that still reference --font-heading-ru etc.
      ═══════════════════════════════════════════════════════════ */
   /* Existing named utility sizes and leading; numeric defaults unchanged. */
-  --type-display-size: 3rem;
-  --type-display-leading: 1.1;
-  --type-h1-size: 2.25rem;
-  --type-h1-leading: 1.2;
+  --type-display-size: clamp(2.25rem, 5.5vw, 4rem);
+  --type-display-leading: 1.0625;
+  --type-h1-size: clamp(1.75rem, 4vw, 2.5rem);
+  --type-h1-leading: 1.15;
   --type-h2-size: 1.75rem;
-  --type-h2-leading: 1.25;
-  --type-h3-size: 1.375rem;
-  --type-h3-leading: 1.3;
+  --type-h2-leading: 1.2857;
+  --type-h3-size: 1.25rem;
+  --type-h3-leading: 1.4;
   --type-h4-size: 1.125rem;
   --type-h4-leading: 1.4;
-  --type-body-lg-size: 1.0625rem;
-  --type-body-lg-leading: 1.6;
+  --type-body-lg-size: 1.125rem;
+  --type-body-lg-leading: 1.5556;
   --type-body-size: 0.9375rem;
-  --type-body-leading: 1.7;
+  --type-body-leading: 1.6;
   --type-body-sm-size: 0.8125rem;
-  --type-body-sm-leading: 1.6;
+  --type-body-sm-leading: 1.5385;
   --type-caption-size: 0.6875rem;
   --type-caption-leading: 1.5;
-  --type-label-size: 0.625rem;
-  --type-label-leading: 1.4;
+  --type-label-size: 0.6875rem;
+  --type-label-leading: 1.2727;
   --type-mono-size: 0.75rem;
   --type-mono-leading: 1.5;
   /* Existing global element roles intentionally differ from utility roles. */
@@ -569,6 +600,8 @@ html:not([lang]) {
    ═══════════════════════════════════════════════════════════ */
 .dark {
   color-scheme: dark;
+  --bible-focus-contrast: var(--bible-gold);
+  --bible-hairline: hsl(var(--foreground) / 0.16);
   --background:           calc(var(--brand-hue) + 3) 28% 10%;     /* navy-900 */
   --foreground: var(--brand-cream);      /* cream */
 

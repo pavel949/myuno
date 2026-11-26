@@ -364,28 +364,6 @@ export function PropertyBookingCard({
           </div>
         )}
         
-        {/* Reserve Button — gradient CTA */}
-        <Button 
-          size="lg" 
-          className="w-full min-h-12 h-auto py-3 whitespace-normal text-sm font-semibold"
-          onClick={() => { if (!dateRange?.from || !dateRange?.to) setCalendarOpen(true); else handleReserve(); }}
-          disabled={!availabilityReady || validationErrors.length > 0 || (!!dateRange?.from && !!dateRange?.to && !quoteReady)}
-        >
-          {!dateRange?.from || !dateRange?.to ? (
-            <><CalendarIcon className="w-4 h-4 mr-2" />{isRu ? 'Рассчитать стоимость' : 'Calculate stay cost'}</>
-          ) : (
-            instantBooking
-              ? pickLang(language, { ru: 'Продолжить к бронированию', en: 'Continue to booking', th: 'ดำเนินการจองต่อ' })
-              : pickLang(language, { ru: 'Запросить бронирование', en: 'Request to book', th: 'ส่งคำขอจอง' })
-          )}
-        </Button>
-        
-        <p className="text-xs text-muted-foreground">
-          {instantBooking
-            ? pickLang(language, { ru: 'Проверьте стоимость и условия перед подтверждением.', en: 'Review the price and terms before confirming.', th: 'ตรวจสอบราคาและเงื่อนไขก่อนยืนยัน' })
-            : pickLang(language, { ru: 'myUNO проверит заявку. Сейчас оплаты нет.', en: 'myUNO will review your request. No payment is due now.', th: 'myUNO จะตรวจสอบคำขอ ยังไม่ต้องชำระเงินตอนนี้' })}
-        </p>
-
         {!quoteReady ? null : (
           <>
             <Separator />
@@ -490,6 +468,28 @@ export function PropertyBookingCard({
             {isRu ? `Мин. срок проживания: ${rentalTerms.min_stay_nights} ночей` : `Minimum stay: ${rentalTerms.min_stay_nights} nights`}
           </p>
         )}
+        {/* Review the displayed price before continuing to checkout. */}
+        <Button
+          size="lg"
+          className="w-full min-h-12 h-auto py-3 whitespace-normal text-sm font-semibold"
+          onClick={() => { if (!dateRange?.from || !dateRange?.to) setCalendarOpen(true); else handleReserve(); }}
+          disabled={!availabilityReady || validationErrors.length > 0 || (!!dateRange?.from && !!dateRange?.to && !quoteReady)}
+        >
+          {!dateRange?.from || !dateRange?.to ? (
+            <><CalendarIcon className="w-4 h-4 mr-2" />{isRu ? 'Рассчитать стоимость' : 'Calculate stay cost'}</>
+          ) : (
+            instantBooking
+              ? pickLang(language, { ru: 'Продолжить к бронированию', en: 'Continue to booking', th: 'ดำเนินการจองต่อ' })
+              : pickLang(language, { ru: 'Запросить бронирование', en: 'Request to book', th: 'ส่งคำขอจอง' })
+          )}
+        </Button>
+
+        <p className="text-xs text-muted-foreground">
+          {instantBooking
+            ? pickLang(language, { ru: 'Проверьте стоимость и условия перед подтверждением.', en: 'Review the price and terms before confirming.', th: 'ตรวจสอบราคาและเงื่อนไขก่อนยืนยัน' })
+            : pickLang(language, { ru: 'myUNO проверит заявку. Сейчас оплаты нет.', en: 'myUNO will review your request. No payment is due now.', th: 'myUNO จะตรวจสอบคำขอ ยังไม่ต้องชำระเงินตอนนี้' })}
+        </p>
+
       </CardContent>
     </Card>
   );

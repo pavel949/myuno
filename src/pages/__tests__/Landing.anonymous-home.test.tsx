@@ -15,7 +15,11 @@ vi.mock('@/components/seo/SEOHead', () => ({ SEOHead: () => null }));
 vi.mock('@/components/legal/LegalEntityInfo', () => ({ LegalCopyright: () => <small>Existing legal footer</small> }));
 vi.mock('@/components/concierge/ConciergeHelpSheet', () => ({ ConciergeHelpSheet: () => null }));
 vi.mock('@/components/home/HomeSearchEntry', () => ({ HomeSearchEntry: () => <button>Unified home search</button>, HomePlanLinks: () => <nav>Search shortcuts</nav> }));
-vi.mock('@/components/home/HomeDiscoveryPreview', () => ({ HomeHousingPreview: () => <section>Published housing</section>, HomeNewbuildsPreview: () => <section>Published new developments</section> }));
+vi.mock('@/components/home/HomeDiscoveryPreview', () => ({
+  HomeHousingPreview: () => <section>Published housing</section>,
+  HomeNewbuildsPreview: () => <section>Published new developments</section>,
+  HomeSalePreview: () => <section>Published sale homes</section>,
+}));
 vi.mock('@/components/home/HomePopulatedProjects', () => ({ HomePopulatedProjects: () => <section aria-label="Project gallery">Populated public projects</section> }));
 vi.mock('@/components/home/HomeCatalogGalleries', () => ({ HomeLocationGallery: () => null, HomeExperienceGallery: () => <section>Published experiences</section>, HomeServiceGallery: () => <section>Service categories</section> }));
 vi.mock('@/hooks/useProperties', () => ({ useProperties: () => ({ data: [], isLoading: false, isError: false }) }));
@@ -52,9 +56,9 @@ const show = () => render(<MemoryRouter initialEntries={[APP_ROUTES.HOME]}><Rout
 beforeEach(() => { state.language = 'en'; state.user = null; state.isLoading = false; state.social = {}; authenticatedIndex.mockClear(); });
 afterEach(cleanup);
 it.each([
- ['en', 'Main navigation', ['Home', 'Homes', 'Bookings', 'Services', 'Profile']],
- ['ru', 'Основная навигация', ['Главная', 'Жильё', 'Бронирования', 'Услуги', 'Профиль']],
- ['th', 'เมนูหลัก', ['หน้าแรก', 'ที่พัก', 'การจอง', 'บริการ', 'โปรไฟล์']],
+ ['en', 'Main navigation', ['Explore', 'Trips', 'Services', 'Homes', 'Me']],
+ ['ru', 'Основная навигация', ['Поиск', 'Поездки', 'Услуги', 'Купить', 'Профиль']],
+ ['th', 'เมนูหลัก', ['สำรวจ', 'ทริป', 'บริการ', 'ซื้อบ้าน', 'ฉัน']],
 ] as const)('mounts the real anonymous landing and all five public tabs in %s', (language, name, labels) => {
  expect(mountedAtHome).toBe(true);
  state.language = language;
@@ -70,7 +74,7 @@ it.each([
  const bar = screen.getByRole('navigation', { name });
  const links = within(bar).getAllByRole('link');
  expect(links.map(link => link.getAttribute('aria-label'))).toEqual(labels);
- expect(links.map(link => link.getAttribute('href'))).toEqual(['/', '/property', '/bookings', '/discover/services', '/account']);
+ expect(links.map(link => link.getAttribute('href'))).toEqual(['/', '/bookings', '/discover/services', '/property/buy', '/account']);
  expect(links[0]).toHaveAttribute('aria-current', 'page');
  expect(bar).toHaveClass('md:hidden', 'fixed', 'bottom-0');
  expect(bar).toHaveStyle({ paddingBottom: 'env(safe-area-inset-bottom, 0px)' });
@@ -93,6 +97,8 @@ it('reserves the shared mobile bar height and safe area below the footer, with n
 it('uses one choice layer, groups property before island services and keeps consumer out of partner block', () => {
  show();
  const main = screen.getByRole('main');
+ expect(within(main).getByRole('link', { name: /Homes for sale.*10,000,000/ })).toHaveAttribute('href', '/property/search?mode=buy&maxPrice=10000000');
+ expect(main.textContent!.indexOf('Published housing')).toBeLessThan(main.textContent!.indexOf('Published sale homes'));
  expect(main.textContent!.indexOf('Published new developments')).toBeLessThan(main.textContent!.indexOf('Service categories'));
  expect(main.textContent!.indexOf('Published new developments')).toBeLessThan(main.textContent!.indexOf('Published experiences'));
  const partners = screen.getByRole('region', { name: 'Grow your property and services with myUNO' });

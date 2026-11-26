@@ -1,10 +1,13 @@
 import React, { useState } from 'react';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { format, differenceInDays, isPast, isFuture, isToday } from 'date-fns';
+import { bangkokTodayDate, parseCivilDate } from '@/lib/hotelDates';
+import { StayOwnershipBridge } from '@/components/property/StayOwnershipBridge';
+import { StatusTag, type StatusTone } from '@/components/ui/status-tag';
+import { format, differenceInDays } from 'date-fns';
 import { ru } from 'date-fns/locale';
 import {
-  MapPin, Calendar, Users, Clock, Phone, MessageCircle,
+  MapPin, Calendar, Users, Clock, Phone,
   Wifi, Key, Car, AlertTriangle, CheckCircle2, Home,
   ChevronRight, ExternalLink, Copy, Loader2, Star,
   ShieldCheck
@@ -17,7 +20,6 @@ import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { TripServicesGrid } from '@/components/property/TripServicesGrid';
 import { MessageHostButton } from '@/components/property/MessageHostButton';
@@ -147,26 +149,34 @@ export default function GuestTripDetail() {
   }
 
   const property = booking.properties;
-  const checkIn = new Date(booking.check_in);
-  const checkOut = new Date(booking.check_out);
+  const checkIn = parseCivilDate(booking.check_in);
+  const checkOut = parseCivilDate(booking.check_out);
   const nights = differenceInDays(checkOut, checkIn);
-  
-  // Trip timeline status
-  const now = new Date();
-  const tripStatus = isPast(checkOut) ? 'completed' : isToday(checkIn) || (isPast(checkIn) && isFuture(checkOut)) ? 'active' : 'upcoming';
-  const daysUntilCheckIn = differenceInDays(checkIn, now);
-  const showCheckInDetails = daysUntilCheckIn <= 1 || tripStatus === 'active';
+  const today = bangkokTodayDate();
+  const daysUntilCheckIn = differenceInDays(checkIn, today);
+  const showCheckInDetails = booking.status === 'checked_in'
+    || (booking.status === 'confirmed' && daysUntilCheckIn <= 1 && differenceInDays(checkOut, today) > 0);
 
   const copyToClipboard = (text: string, label: string) => {
     navigator.clipboard.writeText(text);
     toast.success(isRu ? `${label} скопировано` : `${label} copied`);
   };
 
-  const statusBadge = {
-    upcoming: { label: isRu ? 'Предстоящая' : 'Upcoming', variant: 'default' as const },
-    active: { label: isRu ? 'Сейчас' : 'Active', variant: 'default' as const, className: 'bg-success' },
-    completed: { label: isRu ? 'Завершена' : 'Completed', variant: 'secondary' as const },
-  }[tripStatus];
+  const statuses: Record<string, { label: string; tone: StatusTone }> = {
+    confirmed: { label: isRu ? 'Подтверждена' : 'Confirmed', tone: 'neutral' },
+    checked_in: { label: isRu ? 'Идёт проживание' : 'In stay', tone: 'active' },
+    checked_out: { label: isRu ? 'Выезд выполнен' : 'Checked out', tone: 'done' },
+    completed: { label: isRu ? 'Завершена' : 'Completed', tone: 'done' },
+    pending: { label: isRu ? 'Ожидает подтверждения' : 'Pending confirmation', tone: 'waiting' },
+    pending_payment: { label: isRu ? 'Ожидает оплаты' : 'Awaiting payment', tone: 'waiting' },
+    pending_deposit: { label: isRu ? 'Ожидает предоплаты' : 'Awaiting deposit', tone: 'waiting' },
+    deposit_paid: { label: isRu ? 'Предоплата получена' : 'Deposit paid', tone: 'waiting' },
+    cancelled: { label: isRu ? 'Отменена' : 'Cancelled', tone: 'neutral' },
+    expired: { label: isRu ? 'Истекла' : 'Expired', tone: 'blocked' },
+  };
+  const status = statuses[booking.status] ?? { label: isRu ? 'Статус неизвестен' : 'Status unknown', tone: 'neutral' as const };
+  const isCompleted = ['completed', 'checked_out'].includes(booking.status);
+  const isUpcoming = daysUntilCheckIn > 0 && ['confirmed', 'pending', 'pending_deposit', 'deposit_paid'].includes(booking.status);
 
   return (
     <AppLayout showBottomNav={false}>
@@ -180,21 +190,18 @@ export default function GuestTripDetail() {
         {/* Property Hero */}
         <Card className="overflow-hidden">
           {property?.images?.[0] && (
-            <div className="aspect-video relative">
+            <div className="aspect-[4/3] max-h-80 overflow-hidden rounded-[var(--bible-radius-media)]">
               <img
                 src={property.images[0]}
                 alt={isRu ? property.title_ru : property.title}
                 className="w-full h-full object-cover"
               />
-              <div className="absolute top-3 right-3">
-                <Badge {...statusBadge} className={statusBadge.className}>
-                  {statusBadge.label}
-                </Badge>
-              </div>
+
             </div>
           )}
-          <CardContent className="p-4">
-            <h2 className="font-bold text-lg mb-1">
+          <CardContent className="space-y-2 p-4">
+            <StatusTag tone={status.tone}>{status.label}</StatusTag>
+            <h2 className="text-h3">
               {isRu ? property?.title_ru : property?.title}
             </h2>
             {property?.address && (
@@ -222,7 +229,7 @@ export default function GuestTripDetail() {
                 </p>
                 <p className="text-sm text-muted-foreground flex items-center gap-1">
                   <Clock className="w-3 h-3" />
-                  {isRu ? 'с' : 'from'} {property?.check_in_time || '14:00'}
+                  {property?.check_in_time ? `${isRu ? 'с' : 'from'} ${property.check_in_time}` : (isRu ? 'Время уточняется' : 'Time to be confirmed')}
                 </p>
               </div>
               <div>
@@ -234,7 +241,7 @@ export default function GuestTripDetail() {
                 </p>
                 <p className="text-sm text-muted-foreground flex items-center gap-1">
                   <Clock className="w-3 h-3" />
-                  {isRu ? 'до' : 'by'} {property?.check_out_time || '12:00'}
+                  {property?.check_out_time ? `${isRu ? 'до' : 'by'} ${property.check_out_time}` : (isRu ? 'Время уточняется' : 'Time to be confirmed')}
                 </p>
               </div>
             </div>
@@ -257,7 +264,9 @@ export default function GuestTripDetail() {
           </CardContent>
         </Card>
 
-        {/* Check-in Details - shown 24h before or during stay */}
+        <StayOwnershipBridge district={property?.district} />
+
+        {/* Check-in details for upcoming and active confirmed stays. */}
         {showCheckInDetails && (
           <Card className="border-primary">
             <CardHeader className="pb-2">
@@ -399,7 +408,7 @@ export default function GuestTripDetail() {
         )}
 
         {/* Cross-sell Services */}
-        {tripStatus === 'upcoming' && (
+        {isUpcoming && (
           <TripServicesGrid
             variant="full"
             maxItems={6}
@@ -409,7 +418,7 @@ export default function GuestTripDetail() {
         )}
 
         {/* Leave Review CTA — shown after checkout */}
-        {tripStatus === 'completed' && (
+        {isCompleted && (
           <Card className="border-primary/50 bg-primary/5">
             <CardContent className="p-4">
               <div className="flex items-start gap-3">
@@ -435,7 +444,7 @@ export default function GuestTripDetail() {
           </Card>
         )}
 
-        {tripStatus === 'upcoming' && ['confirmed', 'pending', 'pending_deposit', 'deposit_paid'].includes(booking.status) && (
+        {isUpcoming && (
           <Card>
             <CardContent className="space-y-3 p-4">
               <div className="flex items-start gap-2">

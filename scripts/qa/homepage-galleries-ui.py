@@ -3,7 +3,7 @@ import asyncio, json, os, sys, time
 from datetime import datetime, timezone
 from pathlib import Path
 from urllib.parse import parse_qsl, urlparse
-from playwright.async_api import async_playwright, expect
+from playwright.async_api import async_playwright, expect, TimeoutError as PlaywrightTimeoutError
 OUTPUT = Path(sys.argv[1])
 WIDTHS = [320,360,375,390,430,768,1440,1920]
 if not os.environ.get('CI') and os.environ.get('HOME_GALLERY_WIDTHS'):
@@ -16,126 +16,128 @@ if SHARD not in [None,'en','ru','th']: raise ValueError('Unknown gallery languag
 LANGUAGES=[SHARD] if SHARD else ['en','ru','th']
 
 HOME_COPY = {
-    'en': ('Find a home', 'Find a home', 'Rent', 'Number of guests', 'Refine search', 'Choose an area', 'Stay dates',
-           'Explore myUNO', ('Rent a home', 'Buy property', 'Experiences', 'Services'), 'Rawai'),
-    'ru': ('Поиск жилья', 'Найти жильё', 'Аренда', 'Количество гостей', 'Уточнить поиск', 'Выберите район', 'Даты проживания',
-           'Основные направления', ('Снять жильё', 'Купить недвижимость', 'Впечатления', 'Услуги'), 'Равай'),
-    'th': ('ค้นหาที่พัก', 'ค้นหาที่พัก', 'เช่า', 'จำนวนผู้เข้าพัก', 'ปรับการค้นหา', 'เลือกย่าน', 'วันที่เข้าพัก',
-           'สำรวจ myUNO', ('เช่าที่พัก', 'ซื้ออสังหาริมทรัพย์', 'ประสบการณ์', 'บริการ'), 'Rawai'),
+    'en': {
+        'form': 'Search myUNO', 'rent': 'Rent', 'activity': 'Experiences & services', 'buy': 'Buy',
+        'guests': 'Number of guests', 'filters': 'Filters', 'area_label': 'Choose an area', 'area': 'Rawai',
+        'done': 'Done', 'market': 'Choose a catalogue', 'services': 'Services', 'activity_query': 'What are you looking for?',
+    },
+    'ru': {
+        'form': 'Поиск на myUNO', 'rent': 'Аренда', 'activity': 'Впечатления и услуги', 'buy': 'Покупка',
+        'guests': 'Количество гостей', 'filters': 'Фильтры', 'area_label': 'Выберите район', 'area': 'Равай',
+        'done': 'Готово', 'market': 'Выберите каталог', 'services': 'Услуги', 'activity_query': 'Что ищете?',
+    },
+    'th': {
+        'form': 'ค้นหาใน myUNO', 'rent': 'เช่า', 'activity': 'ประสบการณ์และบริการ', 'buy': 'ซื้อ',
+        'guests': 'จำนวนผู้เข้าพัก', 'filters': 'ตัวกรอง', 'area_label': 'เลือกย่าน', 'area': 'Rawai',
+        'done': 'เสร็จสิ้น', 'market': 'เลือกแคตตาล็อก', 'services': 'บริการ', 'activity_query': 'คุณกำลังมองหาอะไร?',
+    },
 }
-DESTINATIONS = ('/property/rent', '/discover/buy', '/experiences', '/services')
+
 
 async def check_home_entry(page, lang, width):
-    form_name, search_name, rent_name, guests_name, refine_name, area_name, dates_name, nav_name, titles, area = HOME_COPY[lang]
-    hero = page.locator('.home-hero')
-    search = page.get_by_role('form', name=form_name, exact=True)
+    copy = HOME_COPY[lang]
+    panel = page.locator('.home-hero-search')
+    search = page.get_by_role('form', name=copy['form'], exact=True)
+    await expect(panel.get_by_role('form', name=copy['form'], exact=True)).to_have_count(1)
     await expect(page.locator('form.home-search')).to_have_count(1)
-    await expect(hero.get_by_role('form', name=form_name, exact=True)).to_have_count(1)
-    await expect(page.locator('.home-search-entry-button,.premium-plan-links,.home-hero-choice')).to_have_count(0)
-    await expect(search.get_by_role('button', name=rent_name, exact=True)).to_have_attribute('aria-pressed','true')
-    submit = search.get_by_role('button', name=search_name, exact=True)
-    await expect(submit).to_be_visible()
-    await expect(submit).to_have_attribute('type','submit')
-    refine = search.get_by_role('button', name=refine_name, exact=True)
-    await expect(refine).to_have_attribute('aria-expanded','false')
-    await expect(search.get_by_role('combobox')).to_have_count(0)
-    guests = search.get_by_role('spinbutton', name=guests_name, exact=True)
-    await expect(guests).to_be_visible()
-    dates = search.get_by_role('button', name=dates_name, exact=True)
+    modes = search.locator('.home-search-modes')
+    await expect(modes.get_by_role('button')).to_have_count(3)
+    rent = modes.get_by_role('button', name=copy['rent'], exact=True)
+    activity = modes.get_by_role('button', name=copy['activity'], exact=True)
+    buy = modes.get_by_role('button', name=copy['buy'], exact=True)
+    await expect(rent).to_have_attribute('aria-pressed', 'true')
+    await expect(activity).to_be_visible()
+    await expect(buy).to_be_visible()
+    await expect(search.get_by_role('spinbutton')).to_have_count(0)
+    submit = search.locator('.home-search-submit')
+    await expect(submit).to_have_attribute('type', 'submit')
+    filters = search.get_by_role('button', name=copy['filters'], exact=True)
+    await expect(filters).to_have_attribute('aria-expanded', 'false')
 
-    nav = page.get_by_role('navigation', name=nav_name, exact=True)
-    await expect(nav).to_have_count(1)
-    await expect(page.locator('.home-reference-direction')).to_have_count(4)
-    cards = nav.get_by_role('link')
-    await expect(cards).to_have_count(4)
+    photo = page.locator('.home-hero-banner-photo')
+    await expect(photo).to_have_attribute('alt', '')
+    await page.wait_for_function('(el) => el.complete && el.naturalWidth > 0', arg=await photo.element_handle())
     await page.evaluate("window.scrollTo({top: 0, behavior: 'instant'})")
-    layout = await page.evaluate("""
-      () => {
+    geometry = await search.evaluate("""
+      (form) => {
         const rect = el => el.getBoundingClientRect().toJSON();
+        const controls = ['location', 'dates', 'type', 'bedrooms', 'refine', 'submit'];
         return {
-          hero: rect(document.querySelector('.home-hero')),
-          heroLayout: rect(document.querySelector('.home-hero-layout')),
-          photo: rect(document.querySelector('.home-hero-media')),
-          panel: rect(document.querySelector('.home-reference-search')),
-          nav: rect(document.querySelector('.home-reference-directions')),
-          controls: ['.home-search-dates','.home-search-guests-inline','.home-search-submit'].map(
-            selector => rect(document.querySelector(selector))
-          ),
-          cards: [...document.querySelectorAll('.home-reference-direction')].map(rect),
+          form: rect(form),
+          photo: rect(document.querySelector('.home-hero-banner-photo')),
+          banner: rect(document.querySelector('.home-hero-banner')),
+          controls: controls.map(name => rect(form.querySelector('.home-search-' + name))),
         };
       }
     """)
-    hero_box, photo, panel, nav_box, boxes = (layout[k] for k in ('hero','photo','panel','nav','cards'))
-    assert panel['top'] >= hero_box['top'] and panel['bottom'] <= hero_box['bottom']+1, layout
-    frame = layout['heroLayout']
-    assert photo['height'] > 200 and abs(photo['width']-frame['width']) <= 1 and abs(photo['left']-frame['left']) <= 1, layout
-    date_box, guests_box, submit_box = layout['controls']
-    assert submit_box['height'] >= 44 and all(control['width'] >= 44 for control in layout['controls']), layout
+    assert geometry['form']['left'] >= -1 and geometry['form']['right'] <= width + 1, geometry
+    assert geometry['photo']['height'] > 160, geometry
+    assert abs(geometry['photo']['width'] - geometry['banner']['width']) <= 1, geometry
+    assert geometry['controls'][-1]['height'] >= 44, geometry
     if width >= 1024:
-        centers = [(control['top']+control['bottom'])/2 for control in layout['controls']]
-        assert max(centers)-min(centers) < 3, layout
-        assert date_box['right'] < guests_box['left'] and guests_box['right'] < submit_box['left'], layout
-    if width < 768:
-        assert date_box['bottom'] < guests_box['top'] and guests_box['bottom'] < submit_box['top'], layout
-    assert nav_box['top'] >= hero_box['bottom']-1 and boxes[0]['top'] < 820, layout
-    columns = 2 if width < 1200 else 4
-    for index, box in enumerate(boxes):
-        assert box['width'] >= 44 and box['height'] >= (44 if width < 768 else 215)-1, layout
-        assert box['left'] >= nav_box['left']-1 and box['right'] <= nav_box['right']+1, layout
-        row, column = divmod(index, columns)
-        assert abs(box['top'] - boxes[row*columns]['top']) < 2, layout
-        assert abs(box['left'] - boxes[column]['left']) < 2, layout
-        if column: assert boxes[index-1]['right'] < box['left'], layout
-        if row: assert boxes[index-columns]['bottom'] < box['top'], layout
-    photo_paths = []
-    for index, destination in enumerate(DESTINATIONS):
-        card = cards.nth(index)
-        await expect(card).to_have_attribute('href', destination)
-        await expect(card.locator('strong')).to_have_text(titles[index])
-        await expect(card.locator('.home-reference-direction-icon svg')).to_have_count(1)
-        image = card.locator('img')
-        await card.scroll_into_view_if_needed()
-        await expect(image).to_have_attribute('alt','')
-        await page.wait_for_function('(el)=>el.complete && el.naturalWidth>0', arg=await image.element_handle(), timeout=5000)
-        photo_paths.append(await image.get_attribute('src'))
-    assert len(set(photo_paths)) == 4, photo_paths
-    await cards.first.focus()
-    for index in range(4):
-        card = cards.nth(index)
-        await expect(card).to_be_focused()
-        if index < 3: await card.press('Tab')
-    for index, destination in enumerate(DESTINATIONS):
-        await cards.nth(index).press('Enter')
-        await expect(page.get_by_test_id('location')).to_have_text(destination)
-        await expect(page.get_by_role('dialog')).to_have_count(0)
+        bottoms = [control['bottom'] for control in geometry['controls']]
+        assert max(bottoms) - min(bottoms) <= 2, geometry
+        await panel.evaluate("(el) => window.scrollTo({top: scrollY + el.getBoundingClientRect().top + 200, behavior: 'instant'})")
+        sticky = await page.evaluate("""
+          () => {
+            const header = document.querySelector('.consumer-header').getBoundingClientRect();
+            const panel = document.querySelector('.home-hero-search').getBoundingClientRect();
+            return {headerBottom: header.bottom, panelTop: panel.top, scroll: scrollY};
+          }
+        """)
+        assert sticky['scroll'] > 0 and abs(sticky['headerBottom'] - sticky['panelTop']) <= 2, sticky
+        await page.evaluate("window.scrollTo({top: 0, behavior: 'instant'})")
 
-    await refine.press('Enter')
-    area_select = search.get_by_role('combobox', name=area_name, exact=True)
-    await expect(area_select).to_be_visible()
-    await area_select.press('Enter')
-    await page.get_by_role('option', name=area, exact=True).click()
-    await guests.fill('3')
-    await dates.press('Enter')
+    await filters.press('Enter')
+    await expect(search.locator('.home-search-refine')).to_have_attribute('aria-expanded', 'true')
+    area = search.get_by_role('combobox', name=copy['area_label'], exact=True)
+    await area.press('Enter')
+    await page.get_by_role('option', name=copy['area'], exact=True).click()
+    await search.locator('.home-search-date-trigger').press('Enter')
     calendar = page.get_by_role('dialog')
     await expect(calendar).to_be_visible()
+    await calendar.get_by_role('spinbutton', name=copy['guests'], exact=True).fill('3')
     await calendar.locator('[data-day="2027-05-12"] button').press('Enter')
     await calendar.locator('[data-day="2027-05-15"] button').press('Space')
+    await expect(calendar).to_be_visible()
+    await calendar.get_by_role('button', name=copy['done'], exact=True).press('Enter')
     await expect(calendar).to_have_count(0)
+
+    destination = page.get_by_test_id('location')
     await submit.press('Enter')
-    await expect(page.get_by_test_id('location')).to_contain_text('/property/search?')
-    parsed = urlparse(await page.get_by_test_id('location').text_content())
-    assert parsed.path == '/property/search'
-    assert sorted(parse_qsl(parsed.query, keep_blank_values=True)) == sorted([
-        ('mode','rent'), ('tenancy','short'), ('district','rawai'),
-        ('checkIn','2027-05-12'), ('checkOut','2027-05-15'), ('guests','3'),
-    ]), parsed
+    await expect(destination).to_contain_text('/property/search?')
+    rental = urlparse(await destination.text_content())
+    assert rental.path == '/property/search'
+    assert dict(parse_qsl(rental.query, keep_blank_values=True)) == {
+        'mode': 'rent', 'tenancy': 'short', 'district': 'rawai',
+        'checkIn': '2027-05-12', 'checkOut': '2027-05-15', 'guests': '3',
+    }, rental
+
+    await activity.press('Enter')
+    await expect(search).to_have_attribute('data-home-discovery-mode', 'activities')
+    await search.get_by_role('combobox', name=copy['market'], exact=True).press('Enter')
+    await page.get_by_role('option', name=copy['services'], exact=True).click()
+    await search.get_by_role('searchbox', name=copy['activity_query'], exact=True).fill('airport transfer')
+    await submit.press('Enter')
+    await expect(destination).to_have_text('/discover/services?q=airport+transfer')
+
+    await buy.press('Enter')
+    await expect(search).to_have_attribute('data-home-discovery-mode', 'buy')
+    await expect(search.locator('.home-search-date-trigger')).to_have_count(0)
+    await submit.press('Enter')
+    await expect(destination).to_contain_text('mode=buy')
+    sale = urlparse(await destination.text_content())
+    sale_query = dict(parse_qsl(sale.query, keep_blank_values=True))
+    assert sale.path == '/property/search' and sale_query.get('maxPrice') == '10000000', sale
+    assert not {'checkIn', 'checkOut', 'guests'} & sale_query.keys(), sale
+    await rent.press('Enter')
     await expect(page.get_by_role('dialog')).to_have_count(0)
     assert await page.evaluate('document.documentElement.scrollWidth <= innerWidth'), f'Search overflow {lang} {width}'
 
 async def main():
     results = []
     async with async_playwright() as p:
-        system = '/usr/bin/chromium'
+        system = os.environ.get('CHROMIUM_PATH', '/usr/bin/chromium')
         browser = await p.chromium.launch(executable_path=None if os.environ.get('CI') else system if Path(system).exists() else None, args=['--no-sandbox'])
         blocked = []
         async def route(r):
@@ -169,14 +171,15 @@ async def main():
             for width in WIDTHS:
                 case_started=time.monotonic()
                 context = await browser.new_context(viewport={'width': width, 'height': 900}, has_touch=width < 768, reduced_motion='reduce', service_workers='block')
-                blocked, errors = [], []
+                blocked, errors, console_errors = [], [], []
                 await context.route('**/*', route)
                 page = await context.new_page()
                 page.on('pageerror', lambda error: errors.append(str(error)))
+                page.on('console', lambda message: console_errors.append(message.text) if message.type == 'error' else None)
                 await page.clock.set_fixed_time(datetime(2027, 5, 11, 12, tzinfo=timezone.utc))
                 try:
                     await page.goto(f'http://localhost:8080/fixture?lang={lang}', wait_until='domcontentloaded')
-                    await expect(page.locator('.home-rail-viewport')).to_have_count(5)
+                    await expect(page.locator('.home-rail-viewport')).to_have_count(6)
                     assert await page.evaluate('document.documentElement.scrollWidth <= innerWidth'), f'Page overflow {lang} {width}'
                     rental_heading = await page.locator('#home-stays-title').bounding_box()
                     purchase_heading = await page.locator('#home-newbuilds-title').bounding_box()
@@ -245,19 +248,26 @@ async def main():
                             await rail.press('Home')
                     # Native touch swipe tested through Chromium's input protocol.
                     if width < 768:
-                        for rail in [page.locator('.home-properties .home-rail-viewport'), page.locator('.premium-newbuilds .home-rail-viewport'), page.locator('.home-experiences .home-rail-viewport')]:
-                            await rail.scroll_into_view_if_needed()
-                            await rail.evaluate('(el)=>el.scrollLeft=0')
+                        session = await context.new_cdp_session(page)
+                        for area in ['home-properties', 'premium-newbuilds', 'home-experiences']:
+                            rail = page.locator(f'.{area} .home-rail-viewport')
+                            await rail.evaluate("""el => {
+                                el.scrollIntoView({block:'center', inline:'nearest', behavior:'instant'});
+                                el.scrollTo({left:0, behavior:'instant'});
+                            }""")
                             box = await rail.bounding_box()
-                            session = await context.new_cdp_session(page)
-                            y = box['y'] + box['height']/2
-                            x = box['x']+box['width']*.8
+                            y = box['y'] + box['height'] / 2
+                            x = box['x'] + box['width'] * .88
+                            assert await rail.evaluate('(el, pos)=>el.contains(document.elementFromPoint(...pos))', [x, y]), f'{area}: touch starts outside the rail'
                             await session.send('Input.dispatchTouchEvent',{'type':'touchStart','touchPoints':[{'x':x,'y':y}]})
-                            for step in range(1,8):
-                                await session.send('Input.dispatchTouchEvent',{'type':'touchMove','touchPoints':[{'x':x-step*22,'y':y}]})
+                            for step in range(1,9):
+                                await session.send('Input.dispatchTouchEvent',{'type':'touchMove','touchPoints':[{'x':x - step * box['width'] * .09,'y':y}]})
                             await session.send('Input.dispatchTouchEvent',{'type':'touchEnd','touchPoints':[]})
-                            await page.wait_for_function('(el)=>el.scrollLeft>0',arg=await rail.element_handle(),timeout=5000)
-                            assert await rail.evaluate('(el)=>el.scrollLeft>0'), 'Swipe did not scroll'
+                            try:
+                                await page.wait_for_function('(el)=>el.scrollLeft>0',arg=await rail.element_handle(),timeout=5000)
+                            except PlaywrightTimeoutError as error:
+                                raise AssertionError(f'{area}: horizontal swipe did not scroll the rail at {width}px') from error
+                        await session.detach()
                     await check_home_entry(page, lang, width)
                     await expect(page.locator('.premium-newbuilds .home-rail article')).to_have_count(6)
                     # The rail controls must never intercept the catalogue header action.
@@ -267,6 +277,13 @@ async def main():
                     assert hit, 'Rental catalogue link is covered by rail controls'
                     await catalogue.click()
                     await expect(page.get_by_test_id('location')).to_have_text('/property/search?mode=rent')
+                    sale_catalogue = page.locator('.home-sale-band .home-gallery-heading a')
+                    sale_href = await sale_catalogue.get_attribute('href')
+                    sale_destination = urlparse(sale_href)
+                    assert sale_destination.path == '/property/search'
+                    assert dict(parse_qsl(sale_destination.query)) == {'mode': 'buy', 'maxPrice': '10000000'}, sale_href
+                    await sale_catalogue.click()
+                    await expect(page.get_by_test_id('location')).to_have_text(sale_href)
                     await expect(page.locator('.home-listing .home-listing-facts,.home-listing .home-listing-pricing')).to_have_count(0)
                     # Exercise actual card CTAs and verify the committed public destination.
                     for selector, prefix in [('.home-area-guide-link', '/area/'),
@@ -291,14 +308,15 @@ async def main():
                         await expect(page.get_by_test_id('location')).to_have_text(href)
                     await page.locator('.home-rail-viewport').evaluate_all('(rows)=>rows.forEach(row=>row.scrollLeft=0)')
                     await page.evaluate('window.scrollTo({top:0,behavior:"instant"})')
-                    await page.locator('.home-hero').scroll_into_view_if_needed()
+                    await page.locator('.home-hero-banner').scroll_into_view_if_needed()
                     await page.screenshot(path=str(OUTPUT/f'{lang}-{width}-homepage.png'), full_page=True)
                     assert not errors, errors
-                    results.append({'language':lang,'width':width,'state':'data','pageOverflow':False,'sections':5,'gridSections':grid_sections,'keyboardControlledRails':tested_controls,'swipe':width<768,'nativeMobileTap':width<768,'directIntentRoutes':4,'errors':errors})
+                    results.append({'language':lang,'width':width,'state':'data','pageOverflow':False,'sections':6,'gridSections':grid_sections,'keyboardControlledRails':tested_controls,'swipe':width<768,'nativeMobileTap':width<768,'verifiedSearchModes':3,'errors':errors})
                     print(json.dumps({'completed':len(results),'language':lang,'width':width,'seconds':round(time.monotonic()-case_started,2)}),flush=True)
                 except Exception:
                     await page.screenshot(path=str(OUTPUT/f"failure-{lang}-{width}.png"),full_page=True)
-                    print(json.dumps({"language":lang,"width":width,"activeElement":await page.evaluate("document.activeElement?.outerHTML"),"dialogs":await page.get_by_role("dialog").count()}),flush=True)
+                    active = await page.evaluate("document.activeElement?.outerHTML?.slice(0, 400)")
+                    print(json.dumps({"language":lang,"width":width,"activeElement":active,"dialogs":await page.get_by_role("dialog").count(),"pageErrors":errors[:4],"consoleErrors":console_errors[:4]}),flush=True)
                     raise
                 finally:
                     await context.close()
@@ -312,7 +330,7 @@ async def main():
             if state=='loading': await expect(page.locator('.home-properties [role=status]')).to_be_visible()
             assert await page.evaluate('document.documentElement.scrollWidth<=innerWidth')
             if state=='error':
-                await expect(page.get_by_role('alert')).to_have_count(4)
+                await expect(page.get_by_role('alert')).to_have_count(5)
                 await page.get_by_role('button',name='Try again').first.click()
                 assert await page.evaluate('window.fixtureRetries') == 1
                 assert 'No published' not in await page.locator('body').inner_text()

@@ -25,6 +25,20 @@ for (const viewport of [{ width: 390, height: 844 }, { width: 1440, height: 900 
         expect(dimensions.scrollWidth).toBeLessThanOrEqual(dimensions.viewport + 1);
       });
     }
+    test('homepage opens the catalogue search from the header and keyboard', async ({ page }) => {
+      await page.goto('/', { waitUntil: 'domcontentloaded' });
+      const trigger = page.locator('header button[aria-keyshortcuts="Control+K Meta+K"]');
+      const dialog = page.getByRole('dialog');
+      await trigger.click();
+      await expect(dialog.getByRole('searchbox')).toBeFocused();
+      await page.keyboard.press('Escape');
+      await expect(dialog).toHaveCount(0);
+      await expect(trigger).toBeFocused();
+
+      await page.keyboard.press('Control+k');
+      await expect(dialog.getByRole('searchbox')).toBeFocused();
+      expect(new URL(page.url()).pathname).toBe('/');
+    });
   });
 }
 
@@ -118,40 +132,49 @@ test.describe('mobile homepage visual contract', () => {
 });
 
 
-test.describe('homepage premium category gateway', () => {
+test.describe('homepage discovery search', () => {
   for (const width of [320, 390, 768, 1440, 1915]) {
-    test(`all four categories use real photos and readable Lucide icons at ${width}px`, async ({ page }) => {
+    test(`the hero photo and three search modes fit at ${width}px`, async ({ page }) => {
       await page.setViewportSize({ width, height: 900 });
       await page.goto('/', { waitUntil: 'domcontentloaded' });
 
-      const cards = page.locator('.home-reference-directions .home-reference-direction');
-      await expect(cards).toHaveCount(4);
-      await page.waitForFunction(() => [...document.querySelectorAll<HTMLImageElement>('.home-reference-direction > img')]
-        .every((img) => img.complete));
+      const search = page.locator('.home-reference-search form[data-home-discovery-mode]');
+      await expect(search).toHaveAttribute('data-home-discovery-mode', 'rent');
+      await expect(search.locator('.home-search-modes button')).toHaveCount(3);
+      await expect(search.locator('.home-search-submit')).toBeVisible();
+      const photo = page.locator('.home-hero-banner-photo');
+      await expect(photo).toBeVisible();
+      await expect(photo).toHaveAttribute('alt', '');
+      await expect.poll(() => photo.evaluate((img: HTMLImageElement) => img.complete && img.naturalWidth > 0)).toBe(true);
+      expect(await photo.evaluate((img: HTMLImageElement) => !/\.svg(?:$|[?#])|^data:image\/svg/i.test(img.src))).toBe(true);
 
-      const appearance = await cards.evaluateAll((elements) => elements.map((card) => {
-        const picture = card.querySelector<HTMLImageElement>(':scope > img')!;
-        const heading = card.querySelector<HTMLElement>('strong')!;
-        const note = card.querySelector<HTMLElement>('small')!;
-        return {
-          photoLoaded: picture.naturalWidth > 0,
-          vectorArt: picture.src.toLowerCase().includes('.svg') || picture.src.startsWith('data:image/svg'),
-          hasIconBadge: Boolean(card.querySelector('.home-reference-direction-icon svg')),
-          clipped: heading.scrollHeight > heading.clientHeight + 2 ||
-            note.scrollHeight > note.clientHeight + 2,
-          height: card.getBoundingClientRect().height,
-        };
+      const geometry = await search.evaluate((form) => ({
+        fits: document.documentElement.scrollWidth <= window.innerWidth + 1,
+        shape: form.getBoundingClientRect().width,
+        controls: Array.from(form.querySelectorAll('.home-search-modes button'), (button) => ({
+          width: button.getBoundingClientRect().width,
+          clipped: button.scrollWidth > button.clientWidth + 2 || button.scrollHeight > button.clientHeight + 2,
+        })),
+        desktopRow: ['location', 'dates', 'type', 'bedrooms', 'refine', 'submit'].map(
+          (field) => form.querySelector(`.home-search-${field}`)?.getBoundingClientRect().bottom,
+        ),
       }));
 
-      for (const card of appearance) {
-        expect(card.photoLoaded).toBe(true);
-        expect(card.vectorArt).toBe(false);
-        expect(card.hasIconBadge).toBe(true);
-        expect(card.clipped).toBe(false);
-        if (width >= 768) expect(card.height).toBeLessThanOrEqual(341);
+      const modes = search.locator('.home-search-modes button');
+      await modes.nth(1).click();
+      await expect(search).toHaveAttribute('data-home-discovery-mode', 'activities');
+      await modes.nth(2).click();
+      await expect(search).toHaveAttribute('data-home-discovery-mode', 'buy');
+      await modes.first().click();
+      await expect(search).toHaveAttribute('data-home-discovery-mode', 'rent');
+      expect(geometry.fits).toBe(true);
+      expect(geometry.shape).toBeLessThanOrEqual(width);
+      expect(geometry.controls.every((control) => control.width >= 44 && !control.clipped)).toBe(true);
+      if (width >= 1024) {
+        const bottoms = geometry.desktopRow.filter((bottom): bottom is number => bottom !== undefined);
+        expect(bottoms).toHaveLength(6);
+        expect(Math.max(...bottoms) - Math.min(...bottoms)).toBeLessThanOrEqual(2);
       }
-      expect(Math.max(...appearance.map((card) => card.height)) -
-        Math.min(...appearance.map((card) => card.height))).toBeLessThanOrEqual(2);
     });
   }
 });

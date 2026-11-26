@@ -4,7 +4,7 @@ import { Bell, Settings } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { Button } from '@/components/ui/button';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { useNotifications } from '@/hooks/useNotifications';
+import { useNotificationActions } from '@/hooks/useNotificationActions';
 import { useAuth } from '@/contexts/AuthContext';
 import { PageContainer } from '@/components/uno/PageContainer';
 import { PageHeader } from '@/components/uno/PageHeader';
@@ -12,22 +12,27 @@ import { EmptyState } from '@/components/uno/EmptyState';
 import { NotificationInbox } from '@/components/notifications/NotificationInbox';
 import { NotificationItemData } from '@/components/notifications/NotificationItem';
 import { redirectToAuth } from '@/lib/auth/redirectToAuth';
+import { QueryRecovery } from '@/components/shared/QueryRecovery';
+import { APP_ROUTES } from '@/lib/config/routes';
+import { pickLang } from '@/lib/i18n/pickLang';
 
 export default function Notifications() {
   const navigate = useNavigate();
   const { language, t } = useLanguage();
   const { user } = useAuth();
-  const isRu = language === 'ru';
+  const local = (ru: string, en: string, th: string) => pickLang(language, { ru, en, th });
+  const title = local('Уведомления', 'Notifications', 'การแจ้งเตือน');
   
   const {
     notifications,
     isLoading,
+    isError,
     unreadCount,
     markAsRead,
     markAllAsRead,
     deleteNotification,
     refresh,
-  } = useNotifications();
+  } = useNotificationActions();
 
   // Transform notifications to match NotificationItemData interface
   const transformedNotifications: NotificationItemData[] = notifications.map(n => ({
@@ -45,15 +50,13 @@ export default function Notifications() {
       <AppLayout>
         <PageContainer>
           <PageHeader 
-            title={isRu ? 'Уведомления' : 'Notifications'} 
+            title={title}
             showBack 
           />
           <EmptyState
             icon={Bell}
-            title={isRu ? 'Войдите в аккаунт' : 'Sign in required'}
-            description={isRu 
-              ? 'Войдите, чтобы управлять уведомлениями' 
-              : 'Sign in to manage notifications'}
+            title={local('Войдите в аккаунт', 'Sign in required', 'กรุณาเข้าสู่ระบบ')}
+            description={local('Войдите, чтобы управлять уведомлениями', 'Sign in to manage notifications', 'เข้าสู่ระบบเพื่อจัดการการแจ้งเตือน')}
             action={
               <Button onClick={() => redirectToAuth(navigate)}>
                 {t('auth.login')}
@@ -69,29 +72,33 @@ export default function Notifications() {
     <AppLayout>
       <PageContainer>
         <PageHeader
-          title={isRu ? 'Уведомления' : 'Notifications'}
+          title={title}
           showBack
           badge={unreadCount}
           actions={
             <Button
               variant="ghost"
               size="icon"
-              onClick={() => navigate('/profile/notifications')}
-              aria-label={isRu ? 'Настройки уведомлений' : 'Notification settings'}
+              onClick={() => navigate(APP_ROUTES.NOTIFICATION_SETTINGS)}
+              aria-label={local('Настройки уведомлений', 'Notification settings', 'ตั้งค่าการแจ้งเตือน')}
             >
               <Settings className="w-5 h-5" />
             </Button>
           }
         />
 
-        <NotificationInbox
-          notifications={transformedNotifications}
-          isLoading={isLoading}
-          unreadCount={unreadCount}
-          onMarkRead={(id) => markAsRead(id)}
-          onMarkAllRead={markAllAsRead}
-          onDelete={deleteNotification}
-        />
+        {isError && <QueryRecovery onRetry={refresh} stale={transformedNotifications.length > 0} />}
+        {(!isError || transformedNotifications.length > 0) && (
+          <NotificationInbox
+            key={user.id}
+            notifications={transformedNotifications}
+            isLoading={isLoading}
+            unreadCount={unreadCount}
+            onMarkRead={markAsRead}
+            onMarkAllRead={markAllAsRead}
+            onDelete={deleteNotification}
+          />
+        )}
       </PageContainer>
     </AppLayout>
   );

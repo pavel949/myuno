@@ -153,6 +153,7 @@ body {
   body {
     @apply bg-background text-foreground font-sans antialiased;
     font-size: var(--type-page-body-size);
+    font-variant-numeric: tabular-nums;
     line-height: var(--type-page-body-leading);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
@@ -168,37 +169,39 @@ body {
 
   /* Typography — Outfit (display), Manrope (body) — Design Bible v4 */
   h1 {
-    @apply font-display font-bold tracking-tight;
+    @apply font-display font-normal;
+    letter-spacing: -0.015em;
     font-size: var(--type-page-h1-size);
     line-height: var(--type-page-h1-leading);
     overflow-wrap: break-word;
   }
   
   h2 {
-    @apply font-display font-bold tracking-tight;
+    @apply font-display font-medium;
+    letter-spacing: -0.01em;
     font-size: var(--type-page-h2-size);
     line-height: var(--type-page-h2-leading);
     overflow-wrap: break-word;
   }
   
   h3 {
-    @apply font-display font-semibold tracking-tight;
+    @apply font-display font-medium;
     font-size: var(--type-page-h3-size);
     line-height: var(--type-page-h3-leading);
     overflow-wrap: break-word;
   }
   
   h4, h5, h6 {
-    @apply font-display font-semibold leading-[1.3];
+    @apply font-display font-medium;
     overflow-wrap: break-word;
   }
 
   p {
-    @apply text-sm lg:text-base leading-[1.65] tracking-[0.005em];
+    @apply text-body;
   }
 
   small {
-    @apply text-xs lg:text-sm leading-normal tracking-[0.01em];
+    @apply text-body-sm;
   }
 
   /* Mobile normalization */

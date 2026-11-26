@@ -8,11 +8,13 @@
  */
 import { ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Check, Loader2 } from 'lucide-react';
+import { Check } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { Button } from '@/components/ui/button';
+import { ContentSkeleton } from '@/components/ui/ContentSkeleton';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { WhatsAppOrderContact } from '@/components/contact/WhatsAppOrderContact';
+import { pickLang } from '@/lib/i18n/pickLang';
 
 interface UnifiedSuccessLayoutProps {
   isLoading?: boolean;
@@ -63,8 +65,13 @@ export function UnifiedSuccessLayout({
   if (isLoading) {
     return (
       <AppLayout showHeader={false}>
-        <div className="min-h-[60vh] flex items-center justify-center">
-          <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
+        <div role="status" className="ds-frame ds-frame-form ds-page">
+          <span className="sr-only">
+            {pickLang(language, { ru: 'Загружаем заказ', en: 'Loading order details', th: 'กำลังโหลดรายละเอียดคำสั่งซื้อ' })}
+          </span>
+          <div aria-hidden="true">
+            <ContentSkeleton variant="card" count={2} />
+          </div>
         </div>
       </AppLayout>
     );

@@ -21,8 +21,10 @@ it('shows real record references and statuses without linking order IDs to legac
  state.services.orders = [{ id: 'svc-a', order_number: 'SVC-2', service_name: 'Synthetic cleaning', status: 'assigned' }];
  const { container } = show();
  expect(screen.getByText('Synthetic home')).toBeVisible();
- expect(screen.getByText('order-a · Pending confirmation')).toBeVisible();
- expect(screen.getByText('SVC-2 · Assigned')).toBeVisible();
+ expect(screen.getByText('order-a')).toBeVisible();
+  expect(screen.getByText('Pending confirmation')).toHaveAttribute('data-tone', 'waiting');
+ expect(screen.getByText('SVC-2')).toBeVisible();
+  expect(screen.getByText('Assigned')).toHaveAttribute('data-tone', 'neutral');
  expect(container.querySelector('a[href="/trip/order-a"]')).toBeNull();
  expect(screen.getByRole('link', { name: 'Order details' })).toHaveAttribute('href', '/orders/order-a/tracking');
  expect(container.querySelector('img')).toBeNull();

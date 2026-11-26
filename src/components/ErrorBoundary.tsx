@@ -1,6 +1,7 @@
 import '@/styles/premium-account.css';
 import React, { Component, ErrorInfo, ReactNode, useEffect } from 'react';
 import { AlertTriangle, RefreshCw } from 'lucide-react';
+import { PageState } from '@/components/page/PageState';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { createErrorHandler } from '@/lib/errorHandler';
@@ -103,32 +104,31 @@ export class ErrorBoundary extends Component<Props, State> {
       const messages = isChunkError ? ERROR_MESSAGES.chunk : ERROR_MESSAGES.generic;
 
       return (
-        <div className="premium-system flex flex-col items-center justify-center min-h-[200px] p-6 text-center">
-          <div className="w-16 h-16 rounded-none bg-destructive/8 flex items-center justify-center mb-4">
-            <AlertTriangle className="h-8 w-8 text-destructive" />
-          </div>
-          <h2 className="text-lg font-semibold text-foreground mb-2">
-            {messages.title[lang]}
-          </h2>
-          <p className="text-sm text-muted-foreground mb-4 max-w-md">
-            {messages.desc[lang]}
-          </p>
-          {isChunkError && <p className="text-sm text-muted-foreground mb-4">{ERROR_MESSAGES.saveWarning[lang]}</p>}
-          {this.state.reloadFailed && <p role="alert" className="text-sm text-destructive mb-4">{ERROR_MESSAGES.reloadFailed[lang]}</p>}
-          <div className="flex gap-2">
-            {!isChunkError && (
-              <Button onClick={this.handleReset} variant="outline" size="sm">
-                <RefreshCw className="h-4 w-4 mr-2" />
-                {ERROR_MESSAGES.tryAgain[lang]}
-              </Button>
-            )}
-            {isChunkError ? (
-              <Button onClick={this.handleReload} variant="default" size="sm" disabled={this.state.reloading}>
-                {ERROR_MESSAGES.reload[lang]}
-              </Button>
-            ) : null}
-          </div>
-        </div>
+        <PageState
+          title={messages.title[lang]}
+          description={(
+            <>
+              <p>{messages.desc[lang]}</p>
+              {isChunkError && <p>{ERROR_MESSAGES.saveWarning[lang]}</p>}
+            </>
+          )}
+          icon={AlertTriangle}
+          tone="warning"
+          announcement="alert"
+          compact
+        >
+          {this.state.reloadFailed && <p role="alert" className="text-body-sm text-destructive">{ERROR_MESSAGES.reloadFailed[lang]}</p>}
+          {isChunkError ? (
+            <Button onClick={this.handleReload} disabled={this.state.reloading}>
+              {ERROR_MESSAGES.reload[lang]}
+            </Button>
+          ) : (
+            <Button onClick={this.handleReset}>
+              <RefreshCw className="size-4" aria-hidden="true" />
+              {ERROR_MESSAGES.tryAgain[lang]}
+            </Button>
+          )}
+        </PageState>
       );
     }
 

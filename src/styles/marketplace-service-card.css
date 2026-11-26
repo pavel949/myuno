@@ -1,7 +1,7 @@
 .marketplace-service-card {
   border: 1px solid hsl(var(--border));
   background: hsl(var(--card));
-  transition: border-color var(--public-motion), background var(--public-motion);
+  transition: border-color var(--public-motion), background var(--public-motion), box-shadow var(--public-motion);
 }
 
 .marketplace-service-card:focus-within {
@@ -96,4 +96,22 @@
     transition: none;
     animation: none;
   }
+}
+
+.marketplace-service-card {
+  border-color: var(--bible-hairline);
+  border-radius: var(--bible-radius-media);
+}
+
+.marketplace-service-card:hover {
+  box-shadow: var(--bible-shadow-hover);
+}
+
+.marketplace-service-card__media {
+  aspect-ratio: 4 / 3;
+  border-radius: var(--bible-radius-media);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .marketplace-service-card { transition: none; }
 }
