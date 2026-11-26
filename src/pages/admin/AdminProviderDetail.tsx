@@ -51,8 +51,9 @@ export default function AdminProviderDetail() {
           <CardContent className="p-8 text-center">
             <AlertTriangle className="h-12 w-12 mx-auto mb-4 text-destructive" />
             <h3 className="font-medium mb-2">
-              {isRussian ? 'Провайдер не найден' : 'Provider not found'}
+              {error ? (isRussian ? 'Не удалось загрузить данные поставщика' : 'Could not load provider details') : (isRussian ? 'Провайдер не найден' : 'Provider not found')}
             </h3>
+            {error && <Button className="mr-2" variant="outline" onClick={() => void refetch()}>{isRussian ? 'Повторить' : 'Retry'}</Button>}
             <BackButton fallbackPath={`${APP_ROUTES.ADMIN}/providers`} variant="default" size="md" />
           </CardContent>
         </Card>

@@ -1,10 +1,11 @@
 import {describe,it,expect,vi,beforeEach} from 'vitest';
 import {renderHook,waitFor} from '@testing-library/react';
 const tables:string[]=[];
+vi.mock('@/contexts/AuthContext',()=>({useAuth:()=>({user:null})}));
 vi.mock('@/integrations/supabase/client',()=>({supabase:{from:(table:string)=>{
  tables.push(table);
  if(!['public_provider_catalog','public_service_catalog'].includes(table))throw new Error('Private relation forbidden');
- const q={select:(columns:string)=>{q.columns=columns;return q},columns:'',eq:()=>q,order:()=>q,maybeSingle:async()=>({data:{id:'provider',name:'Public provider',is_active:true,is_verified:true},error:null}),then:(fn:(r:unknown)=>unknown)=>Promise.resolve(fn({data:[{id:'service',name_en:'Repair',name_ru:'Ремонт',price:100,currency:'THB',is_active:true,created_at:'2026-10-17',...(q.columns.includes('duration_minutes')?{duration_minutes:95}:{}),...(q.columns.includes('lead_time_hours')?{lead_time_hours:36}:{})}],error:null}))};return q;
+ const q={select:(columns:string)=>{q.columns=columns;return q},columns:'',eq:()=>q,order:()=>q,abortSignal:()=>q,maybeSingle:async()=>({data:{id:'provider',name:'Public provider',is_active:true,is_verified:true},error:null}),then:(fn:(r:unknown)=>unknown)=>Promise.resolve(fn({data:[{id:'service',name_en:'Repair',name_ru:'Ремонт',price:100,currency:'THB',is_active:true,created_at:'2026-10-17',...(q.columns.includes('duration_minutes')?{duration_minutes:95}:{}),...(q.columns.includes('lead_time_hours')?{lead_time_hours:36}:{})}],error:null}))};return q;
 }}}));
 import {useProviderDetails} from './useProviderDetails';
 beforeEach(()=>{tables.length=0;});
