@@ -1,13 +1,14 @@
 import { transferCustomerReceiptCopy, transferReceiptLanguage } from './customer-receipt.ts';
 // Trilingual transfer booking notifier (RU/EN/TH)
 // Recipients: Klod operator (WA+email), admin (WA+email), customer (email confirmation in their language)
-// Email delivery via Lovable Emails (send-transactional-email) with built-in retry queue + suppression.
+// Email delivery via Lovable Emails (managed send helper).
 import { createClient } from 'npm:@supabase/supabase-js@2';
 import { getAdminEmails, getAdminWhatsApp } from '../_shared/admin-config.ts';
 import { NOTIFY_CORS as corsHeaders } from '../_shared/notify-utils.ts';
 import { getTransferMarkupMultiplier } from '../_shared/transfer-commission.ts';
 import { requireServiceCaller } from '../_shared/internal-secret.ts';
 import { requireAuth } from '../_shared/auth-guard.ts';
+import { sendLoggedTemplateEmail } from '../_shared/transactional-email-templates/send-logged.ts';
 
 async function sendEmail(
   templateName: string,
@@ -16,12 +17,9 @@ async function sendEmail(
   templateData: Record<string, unknown>,
 ): Promise<void> {
   try {
-    const { error } = await sb().functions.invoke('send-transactional-email', {
-      body: { templateName, recipientEmail, idempotencyKey, templateData },
-    });
-    if (error) console.error('[email]', templateName, 'send failed');
+    await sendLoggedTemplateEmail(templateName, recipientEmail, { idempotencyKey, templateData });
   } catch (e) {
-    console.error('[email] invoke failed', templateName, e);
+    console.error('[email] send failed', templateName, e instanceof Error ? e.message : e);
   }
 }
 

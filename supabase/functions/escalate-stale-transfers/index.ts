@@ -8,6 +8,7 @@ import { createClient } from "npm:@supabase/supabase-js@2";
 import { NOTIFY_CORS as corsHeaders } from "../_shared/notify-utils.ts";
 import { getAdminEmails, getAdminWhatsApp } from "../_shared/admin-config.ts";
 import { requireServiceCaller } from "../_shared/internal-secret.ts";
+import { sendLoggedTemplateEmail } from "../_shared/transactional-email-templates/send-logged.ts";
 
 const sb = () => createClient(
   Deno.env.get("SUPABASE_URL")!,
@@ -71,10 +72,7 @@ Deno.serve(async (req) => {
       await sendWA(adminWA, msg);
 
       for (const email of adminEmails) {
-        await sb().functions.invoke("send-transactional-email", {
-          body: {
-            templateName: "transfer-operator-new",
-            recipientEmail: email,
+        await sendLoggedTemplateEmail("transfer-operator-new", email, {
             idempotencyKey: `transfer-escalate-${o.id}-${email}`,
             templateData: {
               orderNumber: o.order_number,
@@ -90,8 +88,7 @@ Deno.serve(async (req) => {
               totalLabel: `${o.currency} ${o.total_amount}`,
               paymentMethod: "—", attachments: [], confirmUrl: "", operatorMissing: true,
             },
-          },
-        }).catch((e) => console.error("[escalate email]", e));
+        }).catch((e) => console.error("[escalate email]", e instanceof Error ? e.message : e));
       }
 
       const meta = (o.metadata || {}) as Record<string, unknown>;
