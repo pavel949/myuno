@@ -42,3 +42,14 @@ it('returns keyboard focus to the actual search opener after Escape', async () =
   await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
   await waitFor(() => expect(opener).toHaveFocus());
 });
+
+it('opens a cold consumer search from Ctrl+K and subsequent global search events', async () => {
+  render(<MemoryRouter><TopBar {...{ role: 'guest' as const }} /></MemoryRouter>);
+  expect(screen.queryByRole('dialog', { name: 'Search' })).not.toBeInTheDocument();
+  fireEvent.keyDown(document, { key: 'k', ctrlKey: true });
+  const dialog = await screen.findByRole('dialog', { name: 'Search' });
+  fireEvent.keyDown(dialog, { key: 'Escape' });
+  await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
+  fireEvent(window, new Event('myuno:open-search'));
+  expect(await screen.findByRole('dialog', { name: 'Search' })).toBeInTheDocument();
+});
