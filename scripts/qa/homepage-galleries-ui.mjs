@@ -13,7 +13,7 @@ await writeFile(path.join(output, 'fixture-home.svg'), '<svg xmlns="http://www.w
 // Static public assets referenced by absolute path from homepage components
 // (e.g. homeServiceCategories yacht art). The QA browser only serves files in
 // the output folder and aborts everything else, so mirror them here.
-for (const asset of ['yachts/catamaran-53-1.webp']) {
+for (const asset of ['yachts/catamaran-53-1.webp', 'catalog/flowers/pink-garden-roses.webp']) {
   await mkdir(path.join(output, path.dirname(asset)), { recursive: true });
   await copyFile(path.join(root, 'public', asset), path.join(output, asset));
 }
