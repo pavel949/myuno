@@ -163,7 +163,7 @@ export const ExitIntentModal = memo(function ExitIntentModal({
             transition={{ type: 'spring', damping: 25, stiffness: 300 }}
             className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[90vw] max-w-md z-[101]"
           >
-            <div className="bg-card rounded-none border border-border/50 shadow-2xl overflow-hidden">
+            <div className="bg-card rounded-md border border-border/50 shadow-2xl overflow-hidden">
               {/* Header with gradient */}
               <div className={cn(
                 "p-6 text-center relative",

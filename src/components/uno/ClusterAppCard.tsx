@@ -72,7 +72,7 @@ export function ClusterAppCard({
       <div className="flex items-start gap-3">
         <div
           className={cn(
-            'grid h-10 w-10 shrink-0 place-items-center rounded-none border',
+            'grid h-10 w-10 shrink-0 place-items-center rounded-sm border',
             ACCENT_BG[clusterId],
             ACCENT_BORDER[clusterId],
           )}

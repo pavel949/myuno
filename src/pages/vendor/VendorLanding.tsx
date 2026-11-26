@@ -194,7 +194,7 @@ export default function VendorLanding() {
         </h2>
         <div className="space-y-3">
           {howItWorks.map((item, i) => (
-            <div key={i} className="flex items-center gap-4 p-3 rounded-none border bg-card">
+            <div key={i} className="flex items-center gap-4 p-3 rounded-md border bg-card">
               <div className="shrink-0 w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center font-bold text-primary">
                 {item.step}
               </div>

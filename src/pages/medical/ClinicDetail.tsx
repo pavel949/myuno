@@ -173,7 +173,7 @@ const ClinicDetail = () => {
 
           <TabsContent value="doctors" className="mt-4 space-y-3">
             {doctors.length > 0 ? doctors.map((doctor) => (
-              <div key={doctor.id} className="flex items-center gap-4 p-3 bg-card rounded-none border border-border"
+              <div key={doctor.id} className="flex items-center gap-4 p-3 bg-card rounded-md border border-border"
                 onClick={() => navigate(`/medical/appointment/${id}?doctor=${doctor.id}`)}>
                 {doctor.photo && (
                   <img src={doctor.photo} alt={doctor.name_en} className="w-14 h-14 rounded-full object-cover" />
@@ -195,7 +195,7 @@ const ClinicDetail = () => {
 
           <TabsContent value="services" className="mt-4 space-y-2">
             {services.length > 0 ? services.map((service) => (
-              <div key={service.id} className="flex items-center justify-between p-3 bg-card rounded-none border border-border">
+              <div key={service.id} className="flex items-center justify-between p-3 bg-card rounded-md border border-border">
                 <span>{language === 'ru' ? service.name_ru : service.name_en}</span>
                 {service.price && <span className="font-semibold text-primary">฿{service.price.toLocaleString()}</span>}
               </div>

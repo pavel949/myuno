@@ -46,7 +46,7 @@ export function ListCard({
     <div
       onClick={handleClick}
       className={cn(
-        "cursor-pointer bg-card rounded-none overflow-hidden shadow-sm border",
+        "cursor-pointer bg-card rounded-md overflow-hidden shadow-sm border",
         "hover:shadow-md hover:border-primary/30 transition-all ",
         className
       )}

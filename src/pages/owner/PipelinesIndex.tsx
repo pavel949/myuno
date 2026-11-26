@@ -29,7 +29,7 @@ function PipelineCard({ pipeline, dealCount, totalValue, isRu, onClick }: {
   return (
     <button
       onClick={onClick}
-      className="text-left border rounded-none p-5 bg-card hover:border-primary/50 hover:shadow-md transition-all group"
+      className="text-left border rounded-md p-5 bg-card hover:border-primary/50 hover:shadow-md transition-all group"
     >
       <div className="flex items-start justify-between mb-3">
         <div>

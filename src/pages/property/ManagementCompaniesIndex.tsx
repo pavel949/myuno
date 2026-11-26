@@ -40,7 +40,7 @@ export default function ManagementCompaniesIndex() {
             ))}
           </div>
         ) : isError ? <QueryRecovery onRetry={refetch} /> : data.length === 0 ? (
-          <div className="rounded-none border border-dashed border-border bg-card px-4 py-10 text-center text-sm text-muted-foreground">
+          <div className="rounded-md border border-dashed border-border bg-card px-4 py-10 text-center text-sm text-muted-foreground">
             {t('mcDirectory.empty')}
           </div>
         ) : (

@@ -287,7 +287,7 @@ export default function CommercialDetail() {
 
 function Metric({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-none border border-border bg-card p-3">
+    <div className="rounded-md border border-border bg-card p-3">
       <p className="text-[11px] uppercase tracking-wide text-muted-foreground">{label}</p>
       <p className="text-base font-bold text-foreground mt-0.5">{value}</p>
     </div>

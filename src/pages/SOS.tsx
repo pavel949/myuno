@@ -291,7 +291,7 @@ export default function SOS() {
           {EMERGENCY_TIP_CATEGORIES.map((category) => {
             const isExpanded = expandedCategories.includes(category.id);
             return (
-              <div key={category.id} className="rounded-none border border-border/50 bg-card overflow-hidden">
+              <div key={category.id} className="rounded-md border border-border/50 bg-card overflow-hidden">
                 <button
                   onClick={() => toggleCategory(category.id)}
                   className="w-full flex items-center justify-between p-3 hover:bg-muted/30 transition-colors"

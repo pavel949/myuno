@@ -345,7 +345,7 @@ export default function TransportBooking() {
         )}
 
         {/* Pickup Location */}
-        <div className="bg-card rounded-none border p-5 mb-4">
+        <div className="bg-card rounded-md border p-5 mb-4">
           <AddressPickerInput
             value={pickupLocation}
             onChange={(addr) => setPickupLocation(addr)}
@@ -357,7 +357,7 @@ export default function TransportBooking() {
         </div>
 
         {/* Contact Info */}
-        <div className="bg-card rounded-none border p-5 mb-4">
+        <div className="bg-card rounded-md border p-5 mb-4">
           <h3 className="font-semibold mb-4">
             {language === 'ru' ? 'Контактные данные' : 'Contact Information'}
           </h3>
@@ -369,7 +369,7 @@ export default function TransportBooking() {
         </div>
 
         {/* Payment Method */}
-        <div className="bg-card rounded-none border p-5 mb-4">
+        <div className="bg-card rounded-md border p-5 mb-4">
           <h3 className="font-semibold mb-4">
             {language === 'ru' ? 'Способ оплаты' : 'Payment Method'}
           </h3>

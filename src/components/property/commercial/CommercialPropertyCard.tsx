@@ -44,7 +44,7 @@ export function CommercialPropertyCard({ property, className }: Props) {
       state={journey}
       to={APP_ROUTES.COMMERCIAL_DETAIL(property.id)}
       className={cn(
-        'group block rounded-none border border-border bg-card overflow-hidden hover:shadow-lg transition-shadow',
+        'group block rounded-md border border-border bg-card overflow-hidden hover:shadow-lg transition-shadow',
         className,
       )}
     >

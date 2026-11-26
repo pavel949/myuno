@@ -5,6 +5,26 @@
 
 ---
 
+## [1.26.0] — 2026-11-25
+
+### Changed (Design Bible v4 adopted app-wide · Round 4A HQ)
+
+**Visual system → Design Bible v4** (решение Павла, supersedes DS 2.1)
+- `src/styles/tokens.css`: примитивы перемаплены на v4 — navy `#0D2230`, gold `#C59A45` (gold-ink `#8A6524` для текста/поверхностей), paper `#FDFBF7`, ivory `#F4F1EA`, slate-текст, статусы done/active/waiting/blocked/neutral, тени e1/e2, gold focus ring. Legacy-имена `--brand-orange*` указывают на gold.
+- Шрифты: Outfit (display) + Manrope (UI, кириллица) + IBM Plex Mono; `scripts/validate-fonts.mjs` обновлён.
+- Радиусы: control 4 · card 8 · media 12 · pill (`tailwind.config.ts`, shadcn-примитивы, `scripts/v4-radius-codemod.mjs`).
+- Доки: `CLAUDE.md` §6, `DESIGN.md`, `05-visual-design-system.md` (шапка).
+
+### Added (Round 4A — HQ admin, states, notifications)
+- H1 `/admin/clearview`, `/admin/clearview/:reportId` — очередь и редактор ClearView (item-level P·S·D, evidence, публичный вывод vs детали, live rating, чек-лист, журнал поправок, двухэтапная проверка).
+- H2 `/admin/finance` → вкладка «Выплаты и сверка» (KPI, owners/providers/exceptions, сверка, двойное одобрение > ฿1M).
+- H3 `/admin/content` — единый контент-менеджер с проверкой языков/SEO/текста.
+- H4 `/admin/users` → «Матрица доступа» (view/edit/approve; `src/lib/access/hqAccessPolicy.ts`).
+- S1 `src/components/page/SystemState.tsx`; N1 группировка уведомлений по поездке/покупке.
+- Миграция `20261125120000_hq_dual_approvals.sql`: `hq_dual_approvals`, `hq_record_approval`, `hq_publish_clearview_report`, флаг `feature_flag:hq_round4a`.
+
+---
+
 ## [1.25.0] — 2026-06-24
 
 ### Added (No-Budget Growth Playbook + referral-aware sharing)

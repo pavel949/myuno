@@ -19,6 +19,6 @@ interface PageSectionProps {
 export function PageSection({ title, subtitle, icon, iconClassName, action, children, className, size = 'md', density = 'workspace', surface = false }: PageSectionProps) {
   return <section className={cn('ds-section', `ds-section--${density}`, className)}>
     {(title || action) && <SectionHeader title={title ?? ''} subtitle={subtitle} icon={icon} iconClassName={iconClassName} action={action} size={size} density={density} className="ds-section-header-with-content" />}
-    {surface ? <div className="rounded-none bg-card border border-border/40 p-[var(--card-padding)]">{children}</div> : children}
+    {surface ? <div className="rounded-md bg-card border border-border/40 p-[var(--card-padding)]">{children}</div> : children}
   </section>;
 }

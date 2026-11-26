@@ -181,7 +181,7 @@ export function AddressPickerInput({
           type="button"
           onClick={() => setIsOpen(true)}
           className={cn(
-            'w-full flex items-center gap-3 p-3 rounded-none border bg-card text-left transition-all',
+            'w-full flex items-center gap-3 p-3 rounded-md border bg-card text-left transition-all',
             'hover:border-primary/50 focus:border-primary focus:ring-2 focus:ring-primary/20',
             value ? 'border-border' : 'border-dashed border-muted-foreground/30'
           )}

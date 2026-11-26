@@ -44,7 +44,7 @@ export function InvestmentCard({
         onClick={handleClick}
         className={cn(
           'group flex-shrink-0 w-[280px] cursor-pointer',
-          'bg-card rounded-none border border-border/50',
+          'bg-card rounded-md border border-border/50',
           'hover:shadow-lg hover:border-primary/30 transition-all',
           'overflow-hidden',
           className
@@ -151,7 +151,7 @@ export function InvestmentCard({
       onClick={handleClick}
       className={cn(
         'group cursor-pointer',
-        'bg-card rounded-none border border-border/50',
+        'bg-card rounded-md border border-border/50',
         'hover:shadow-xl hover:border-primary/30 transition-all duration-300',
         'overflow-hidden',
         className

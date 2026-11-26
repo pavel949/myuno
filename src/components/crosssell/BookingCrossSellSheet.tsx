@@ -180,7 +180,7 @@ export function BookingCrossSellSheet({ bookingId, open, onOpenChange }: Booking
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, x: -100 }}
                   transition={{ delay: idx * 0.1 }}
-                  className="flex gap-3 p-3 rounded-none border bg-card hover:bg-accent/50 transition-colors"
+                  className="flex gap-3 p-3 rounded-md border bg-card hover:bg-accent/50 transition-colors"
                 >
                   <div className={`w-12 h-12 rounded-none bg-gradient-to-br ${gradient} flex items-center justify-center flex-shrink-0`}>
                     <Icon className="w-6 h-6 text-white" />

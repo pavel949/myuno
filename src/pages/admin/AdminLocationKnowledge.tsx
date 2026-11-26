@@ -431,7 +431,7 @@ export default function AdminLocationKnowledge() {
                         {sectionItems.map(item => (
                           <div 
                             key={item.id}
-                            className="flex items-center gap-3 p-3 rounded-none border bg-card hover:bg-muted/30 transition-colors"
+                            className="flex items-center gap-3 p-3 rounded-md border bg-card hover:bg-muted/30 transition-colors"
                           >
                             <div className="flex-1 min-w-0">
                               <div className="flex items-center gap-2">

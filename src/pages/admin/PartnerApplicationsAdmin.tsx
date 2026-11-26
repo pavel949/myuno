@@ -378,7 +378,7 @@ export default function PartnerApplicationsAdmin() {
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, scale: 0.95 }}
                   transition={{ delay: index * 0.03 }}
-                  className="bg-card border border-border rounded-none p-4 hover:border-primary/30 transition-colors cursor-pointer"
+                  className="bg-card border border-border rounded-md p-4 hover:border-primary/30 transition-colors cursor-pointer"
                   onClick={() => {
                     setSelectedApp(app);
                     setIsDetailOpen(true);

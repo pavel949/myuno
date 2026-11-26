@@ -60,7 +60,7 @@ export default function RelocationDashboard() {
         {isLoading && <p className="text-sm text-muted-foreground mt-6">{isRu ? 'Загрузка…' : 'Loading…'}</p>}
 
         {!isLoading && !plan && (
-          <div className="mt-8 rounded-none border border-border bg-card p-5">
+          <div className="mt-8 rounded-md border border-border bg-card p-5">
             <p className="text-sm text-foreground">
               {isRu ? 'Пока нет сохранённого плана. Пройдите квиз на странице переезда.' : 'No saved plan yet. Complete the quiz on the relocation page.'}
             </p>
@@ -87,7 +87,7 @@ export default function RelocationDashboard() {
 
             <ul className="mt-6 space-y-3">
               {plan.steps.map((step) => (
-                <li key={step.id} className="rounded-none border border-border bg-card p-4">
+                <li key={step.id} className="rounded-md border border-border bg-card p-4">
                   <div className="flex items-start justify-between gap-2">
                     <div>
                       <h2 className="text-sm font-semibold text-foreground">{isRu ? step.title_ru : step.title_en}</h2>

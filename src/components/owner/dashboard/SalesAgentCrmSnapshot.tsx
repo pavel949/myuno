@@ -85,7 +85,7 @@ export function SalesAgentCrmSnapshot() {
   const signals = sellSignals.length;
 
   return (
-    <Card className="rounded-none border bg-card p-4 space-y-4">
+    <Card className="rounded-md border bg-card p-4 space-y-4">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">

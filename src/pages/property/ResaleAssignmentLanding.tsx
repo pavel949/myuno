@@ -105,7 +105,7 @@ export default function ResaleAssignmentLanding() {
         en: 'Below-market ready units and assignments from private sellers in Phuket. Legal due diligence and full transaction support.',
       }}
     >
-      <div className="rounded-none border border-border bg-card p-6">
+      <div className="rounded-md border border-border bg-card p-6">
         <h2 className="text-xl font-semibold mb-4">
           {t({ ru: 'Как это работает', en: 'How it works' })}
         </h2>

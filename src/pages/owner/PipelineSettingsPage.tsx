@@ -106,7 +106,7 @@ const [showAdd, setShowAdd] = useState(false);
   return (
     <div className="space-y-3">
       {options.filter(o => o.is_active).map(opt => (
-        <div key={opt.id} className="flex items-center gap-3 p-3 rounded-none border bg-card group">
+        <div key={opt.id} className="flex items-center gap-3 p-3 rounded-md border bg-card group">
           <GripVertical className="h-4 w-4 text-muted-foreground shrink-0 opacity-30" />
           <div
             className="h-4 w-4 rounded-full shrink-0 border"
@@ -147,7 +147,7 @@ const [showAdd, setShowAdd] = useState(false);
       ))}
 
       {showAdd ? (
-        <div className="border rounded-none p-4 bg-card space-y-3">
+        <div className="border rounded-md p-4 bg-card space-y-3">
           <p className="text-sm font-medium break-words">{pickLang(language, {"en": "New Item", "ru": "Новый элемент", "th": "รายการใหม่"})}</p>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div>
@@ -285,7 +285,7 @@ const [selectedType, setSelectedType] = useState<DealType>('sale');
       ) : (
         <div className="space-y-2">
           {typeStages.map(stage => (
-            <div key={stage.id} className="flex items-center gap-3 p-3 rounded-none border bg-card group">
+            <div key={stage.id} className="flex items-center gap-3 p-3 rounded-md border bg-card group">
               <GripVertical className="h-4 w-4 text-muted-foreground shrink-0 opacity-30" />
               <div className="h-4 w-4 rounded-full shrink-0" style={{ backgroundColor: stage.color }} />
               <div className="flex-1 min-w-0">
@@ -306,7 +306,7 @@ const [selectedType, setSelectedType] = useState<DealType>('sale');
       )}
 
       {showAdd ? (
-        <div className="border rounded-none p-4 bg-card space-y-3">
+        <div className="border rounded-md p-4 bg-card space-y-3">
           <p className="text-sm font-medium break-words">{pickLang(language, {"en": "New Stage", "ru": "Новый этап", "th": "ขั้นตอนใหม่"})}</p>
           <div className="grid grid-cols-2 gap-3">
             <div><Label>{pickLang(language, { en: 'Key', ru: 'Ключ', th: 'รหัส' })}</Label><Input value={newStage.stage_key} onChange={e => setNewStage(s => ({ ...s, stage_key: e.target.value }))} placeholder="proposal" className="h-8 text-xs" /></div>

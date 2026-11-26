@@ -321,7 +321,7 @@ export function AirbnbSearchBar({ onSearch, className, initialParams }: AirbnbSe
       {/* ═══ Mobile Search Bar — Airbnb-style minimal pill ═══ */}
       <div className="md:hidden">
         <motion.div
-          className="flex items-center gap-3 px-4 py-3 bg-card rounded-none border shadow-sm cursor-pointer"
+          className="flex items-center gap-3 px-4 py-3 bg-card rounded-md border shadow-sm cursor-pointer"
           onClick={() => setIsOpen(true)}
           whileTap={{ scale: 0.98 }}
           role="button"
@@ -371,7 +371,7 @@ export function AirbnbSearchBar({ onSearch, className, initialParams }: AirbnbSe
         </AnimatePresence>
 
         <motion.div
-          className={cn("relative z-50 flex items-center bg-card rounded-none border [box-shadow:var(--shadow-elevation-2)] transition-shadow", activeField && "[box-shadow:var(--shadow-elevation-4)]")}
+          className={cn("relative z-50 flex items-center bg-card rounded-md border [box-shadow:var(--shadow-elevation-2)] transition-shadow", activeField && "[box-shadow:var(--shadow-elevation-4)]")}
           animate={{ scale: activeField ? 1.02 : 1 }}
           transition={{ duration: 0.2 }}
         >
@@ -507,7 +507,7 @@ export function AirbnbSearchBar({ onSearch, className, initialParams }: AirbnbSe
 
           {/* Search Button */}
           <div className="px-2 py-2">
-            <Button size="lg" className="rounded-none h-12 px-6 gap-2" onClick={handleSearch}>
+            <Button size="lg" className="rounded-sm h-12 px-6 gap-2" onClick={handleSearch}>
               <Search className="w-5 h-5" />
               <span className="hidden lg:inline">{isRu ? 'Найти' : 'Search'}</span>
             </Button>

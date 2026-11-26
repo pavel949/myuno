@@ -117,7 +117,7 @@ export const LoyaltyWidget: React.FC<LoyaltyWidgetProps> = ({
       <button
         onClick={() => navigate('/wallet')}
         className={cn(
-          'flex items-center gap-3 p-3 bg-card border border-border rounded-none hover:shadow-sm transition-all w-full text-left',
+          'flex items-center gap-3 p-3 bg-card border border-border rounded-md hover:shadow-sm transition-all w-full text-left',
           className
         )}
       >
@@ -140,7 +140,7 @@ export const LoyaltyWidget: React.FC<LoyaltyWidgetProps> = ({
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       className={cn(
-        'bg-card border border-border rounded-none overflow-hidden',
+        'bg-card border border-border rounded-md overflow-hidden',
         className
       )}
     >

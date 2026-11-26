@@ -1,7 +1,7 @@
 /**
  * Unified Chart Theme — DS 2.1 civic infrastructure
  * Uses CSS variables from tokens.css; stays in sync with design-system.
- * Fonts resolve via --font-body (Geist) so locale-switching JustWorks.
+ * Fonts resolve via --font-body (Manrope) so locale-switching JustWorks.
  */
 
 export const CHART_THEME = {

@@ -112,7 +112,7 @@ export function StartPageLayout({
           {metaEntries.map(({ key, label, value, Icon }) => (
             <div
               key={key}
-              className="rounded-none border border-border bg-card/40 px-3 py-2.5"
+              className="rounded-md border border-border bg-card/40 px-3 py-2.5"
             >
               <dt className="flex items-center gap-1.5 text-[11px] text-muted-foreground font-medium">
                 <Icon className="w-3.5 h-3.5" aria-hidden="true" />

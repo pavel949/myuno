@@ -216,7 +216,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
       <Sheet open={open} onOpenChange={onOpenChange}>
         <SheetContent
           side="bottom"
-          className="p-0 max-h-[85vh] rounded-none border-t border-border bg-card"
+          className="p-0 max-h-[85vh] rounded-md border-t border-border bg-card"
         >
           <PaletteBody onClose={() => onOpenChange(false)} onSwitchRole={onSwitchRole} />
         </SheetContent>

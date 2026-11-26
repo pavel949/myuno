@@ -9,3 +9,4 @@ export { PageTabs, type PageTab } from './PageTabs';
 export { PageSection } from './PageSection';
 export { EmptyState } from './EmptyState';
 export { LoadingState } from './LoadingState';
+export { SystemState, SYSTEM_STATE_SPECS, type SystemStateVariant, type SystemStateProps } from './SystemState';

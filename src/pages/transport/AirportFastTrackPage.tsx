@@ -625,7 +625,7 @@ export default function AirportFastTrackPage() {
         {step === 'passenger' && (
           <div className="space-y-5">
             {passengers.map((pax, i) => (
-              <div key={i} className="p-4 rounded-none border bg-card space-y-3">
+              <div key={i} className="p-4 rounded-md border bg-card space-y-3">
                 <div className="flex items-center justify-between">
                   <h3 className="font-semibold text-sm">
                     {isRu ? `Пассажир ${i + 1}` : `Passenger ${i + 1}`}
@@ -702,7 +702,7 @@ export default function AirportFastTrackPage() {
         {/* ═══ Step 3: Review — white-label, no supplier name shown ═══ */}
         {step === 'review' && selectedService && (
           <div className="space-y-4">
-            <div className="p-4 rounded-none border bg-card space-y-3">
+            <div className="p-4 rounded-md border bg-card space-y-3">
               <div className="flex items-center gap-2 mb-1">
                 <Shield className="w-4 h-4 text-primary" />
                 <span className="text-xs text-muted-foreground font-medium">myUNO Airport VIP</span>

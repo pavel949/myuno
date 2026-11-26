@@ -107,7 +107,7 @@ export default function ClearViewForDevelopersLanding() {
         en: 'Order an independent ClearView™ AAA–CCC rating for your project. 8 categories, 15-day report, public badge on myUNO.',
       }}
     >
-      <div className="rounded-none border border-border bg-card p-6">
+      <div className="rounded-md border border-border bg-card p-6">
         <h2 className="text-xl font-semibold mb-4">
           {t({ ru: 'Что входит в рейтинг', en: 'What the rating covers' })}
         </h2>

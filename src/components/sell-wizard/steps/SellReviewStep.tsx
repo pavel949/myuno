@@ -135,7 +135,7 @@ export function SellReviewStep({ draft, categories, onEdit, onSubmit, onBack, is
         {sections.map((section) => (
           <div
             key={section.step}
-            className="p-4 rounded-none border bg-card"
+            className="p-4 rounded-md border bg-card"
           >
             <div className="flex items-start justify-between gap-4">
               <div className="flex items-start gap-3 flex-1">

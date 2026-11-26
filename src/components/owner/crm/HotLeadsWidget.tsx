@@ -32,7 +32,7 @@ export function HotLeadsWidget() {
         {hotLeads.slice(0, 5).map(lead => (
           <div
             key={lead.id}
-            className="flex items-center justify-between p-3 rounded-none bg-card border"
+            className="flex items-center justify-between p-3 rounded-md bg-card border"
           >
             <div className="min-w-0 flex-1">
               <p className="font-medium text-sm truncate">

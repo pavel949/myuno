@@ -309,7 +309,7 @@ export default function OwnerRevenueDashboard() {
           ) : (
             <div className="space-y-3">
               {propertyRevenue.map(p => (
-                <div key={p.id} className="p-3 rounded-none border bg-card">
+                <div key={p.id} className="p-3 rounded-md border bg-card">
                   <div className="flex items-center gap-3 mb-2">
                     {p.coverImage ? (
                       <img src={p.coverImage} alt="" className="w-10 h-10 rounded-none object-cover" />

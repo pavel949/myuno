@@ -57,7 +57,7 @@ function PayoutMethodCard({ method, onSetDefault, onDelete }: PayoutMethodCardPr
 
   return (
     <div className={cn(
-      'relative p-4 rounded-none border bg-card',
+      'relative p-4 rounded-md border bg-card',
       method.is_default && 'ring-2 ring-primary/50 border-primary'
     )}>
       <div className="flex items-start justify-between">

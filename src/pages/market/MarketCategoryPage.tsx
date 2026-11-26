@@ -289,7 +289,7 @@ const MarketCategoryPage = () => {
             viewMode === 'grid' ? "grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6" : "flex flex-col"
           )}>
             {[1, 2, 3, 4].map(i => (
-              <div key={i} className="bg-card rounded-none border border-border overflow-hidden">
+              <div key={i} className="bg-card rounded-md border border-border overflow-hidden">
                 <Skeleton className={viewMode === 'grid' ? "aspect-square" : "h-28 w-28"} />
                 <div className="p-3">
                   <Skeleton className="h-10 mb-2" />

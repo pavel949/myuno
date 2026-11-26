@@ -68,7 +68,7 @@ export function PropertyMatching({ deal }: Props) {
         <button
           key={p.id}
           onClick={() => navigate(APP_ROUTES.PROPERTY_DETAIL(p.id))}
-          className="w-full text-left flex gap-3 p-3 rounded-none border bg-card hover:bg-accent/50 transition-colors"
+          className="w-full text-left flex gap-3 p-3 rounded-md border bg-card hover:bg-accent/50 transition-colors"
         >
           {p.images?.[0] && (
             <img src={p.images[0]} alt="" className="h-14 w-14 rounded-none object-cover shrink-0" />

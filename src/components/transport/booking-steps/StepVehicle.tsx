@@ -66,7 +66,7 @@ export function StepVehicle({ formData, setFormData, language, vehicleTypes, rou
             >
               {vehicle.cover_image ? (
                 <div className={cn(
-                  'w-16 h-12 rounded-none overflow-hidden shrink-0 border',
+                  'w-16 h-12 rounded-sm overflow-hidden shrink-0 border',
                   isSelected ? 'border-primary' : 'border-border/50',
                 )}>
                   <img

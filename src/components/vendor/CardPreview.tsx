@@ -143,7 +143,7 @@ export function CardPreview(props: CardPreviewProps) {
   }
 
   return (
-    <div className="border border-border rounded-none overflow-hidden bg-card shadow-sm">
+    <div className="border border-border rounded-md overflow-hidden bg-card shadow-sm">
       {/* Image */}
       <div className="aspect-[16/10] relative bg-muted">
         {props.image ? (

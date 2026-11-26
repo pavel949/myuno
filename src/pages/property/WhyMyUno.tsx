@@ -58,7 +58,7 @@ export default function WhyMyUno() {
 
       <section className="px-4 pb-5 space-y-2">
         {COMPARISONS.map((c, i) => (
-          <div key={i} className="rounded-none border border-border bg-card px-3.5 py-3">
+          <div key={i} className="rounded-md border border-border bg-card px-3.5 py-3">
             <h2 className="text-[13.5px] font-semibold text-foreground">
               {isRu ? c.against.ru : c.against.en}
             </h2>

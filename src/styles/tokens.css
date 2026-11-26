@@ -1,5 +1,6 @@
 /**
- * myUNO Design System — Canonical Tokens v2.0
+ * myUNO Design System — Canonical Tokens v4 (Design Bible v4, adopted 2026-11-25)
+ * Previous: DS 2.1 (Source Serif 4 + Geist, orange, 0px radii) — superseded.
  *
  * Source of truth: docs/canonical/05-visual-design-system.md
  * Philosophy: «Цифровая инфраструктура государственного класса»
@@ -59,49 +60,57 @@
      1 · BRAND COLOURS — three signature colours, used sparingly
      ═══════════════════════════════════════════════════════════ */
   /* navy: #0A2240 · ≤10% of screen · authority, primary CTA, headers */
-  --brand-hue:         213;
-  --brand-navy:        var(--brand-hue) 73% 15%;
-  --brand-navy-900:    calc(var(--brand-hue) + 1) 78% 9%;   /* #051428 — pressed/hover */
+  /* v4 navy: #0D2230 · authority, primary CTA, HQ rail */
+  /* One-source brand hue: every navy step derives from --brand-hue. */
+  --brand-hue:         204;
+  --brand-navy:        var(--brand-hue) 57% 12%;               /* #0D2230 navy-800 */
+  --brand-navy-900:    calc(var(--brand-hue) - 1) 57% 9%;      /* #0A1A24 — pressed/hover */
   --brand-navy-800:    var(--brand-navy);   /* = brand-navy */
-  --brand-navy-700:    calc(var(--brand-hue) - 2) 67% 32%;   /* #1B4F8A — links, outline */
-  --brand-navy-500:    calc(var(--brand-hue) - 2) 60% 43%;   /* #2B6CB0 — info plates */
-  --brand-navy-100:    calc(var(--brand-hue) + 1) 88% 95%;   /* #EBF4FF — info backgrounds */
-  --brand-navy-50:     calc(var(--brand-hue) + 1) 71% 97%;   /* #F4F8FD */
+  --brand-navy-700:    calc(var(--brand-hue) + 1) 56% 16%;     /* #122D40 — raised navy surfaces */
+  --brand-navy-500:    calc(var(--brand-hue) + 4) 47% 35%;     /* #2F5B83 — links on light */
+  --brand-navy-100:    calc(var(--brand-hue) + 5) 74% 89%;     /* #D0E5F8 — navy-50 · active/info backgrounds */
+  --brand-navy-50:     calc(var(--brand-hue) + 5) 74% 95%;     /* #EAF3FC */
 
-  /* orange: #D96B1A · ≤3% of screen · humanity, single accents */
-  --brand-orange:      22 79% 47%;
-  --brand-orange-700:  22 80% 38%;    /* #AE5013 — hover */
-  --brand-orange-600:  var(--brand-orange);    /* = brand-orange */
-  --brand-orange-400:  25 89% 65%;    /* #F59E5A */
-  --brand-orange-100:  29 84% 95%;    /* #FEF3EA */
+  /* v4 gold: #C59A45 · singular accent (marks, eyebrows on navy, focus ring) */
+  --brand-gold-500:    40 53% 52%;    /* #C59A45 */
+  --brand-gold-600:    40 54% 46%;    /* #B48A36 — hover */
+  --brand-gold-ink:    38 59% 34%;    /* #8A6524 — gold text/surfaces on light (AA with white) */
+  --brand-gold-50:     42 77% 97%;    /* #FDF9F0 */
+  /* Legacy orange names now resolve to the v4 gold family (callers unchanged). */
+  --brand-orange:      var(--brand-gold-500);
+  --brand-orange-700:  var(--brand-gold-ink);
+  --brand-orange-600:  var(--brand-gold-600);
+  --brand-orange-400:  var(--brand-gold-500);
+  --brand-orange-100:  var(--brand-gold-50);
 
-  /* cream: #F7F5F1 · page background — NEVER pure white */
-  --brand-cream:       36 27% 96%;
+  /* paper: #FDFBF7 · page background; ivory #F4F1EA · quiet surfaces */
+  --brand-cream:       40 60% 98%;
+  --brand-ivory:       42 31% 94%;
 
   /* ═══════════════════════════════════════════════════════════
      2 · STONE NEUTRAL SCALE — all greys/blacks come from here
      ═══════════════════════════════════════════════════════════ */
-  --ink:               24  10% 10%;   /* #1C1917 — primary text, icons */
-  --text-primary:      24  10% 14%;   /* #292524 */
-  --text-body:         24  10% 25%;   /* #44403C — body, long reading */
-  --text-muted:        24   5% 46%;   /* #78716C — secondary, metadata */
-  --text-subtle:       24   6% 64%;   /* #A8A29E — placeholders, decorative icons */
-  --border-strong:     30   6% 90%;   /* #E7E5E4 — card/table borders */
-  --border-subtle:     30   8% 96%;   /* #F5F5F4 — inner table borders */
-  --surface-raised:    30  10% 98%;   /* #FAFAF9 — hover/selected blocks */
-  --surface-white:     0    0% 100%;  /* #FFFFFF — cards above cream */
+  --ink:               221 39% 11%;   /* #111827 — v4 text */
+  --text-primary:      221 39% 11%;   /* #111827 */
+  --text-body:         215 25% 27%;   /* #334155 — v4 text-2 */
+  --text-muted:        215 16% 47%;   /* #64748B — v4 text-3 */
+  --text-subtle:       215 20% 65%;   /* #94A3B8 — v4 text-4 */
+  --border-strong:     210 7% 93%;    /* line: rgba(13,34,48,.08) on paper */
+  --border-subtle:     42 31% 94%;    /* ivory — inner table rows, quiet fills */
+  --surface-raised:    42 31% 96%;    /* hover/selected blocks */
+  --surface-white:     0    0% 100%;  /* #FFFFFF — cards above paper */
 
   /* ═══════════════════════════════════════════════════════════
      3 · SEMANTIC COLOURS — status, never decoration
      ═══════════════════════════════════════════════════════════ */
-  --success:           143 64% 24%;   /* #166534 green-800 */
-  --success-bg:        141 84% 93%;   /* #DCFCE7 green-100 */
-  --warning:           28  93% 30%;   /* #92400E amber-800 */
-  --warning-bg:        49  98% 89%;   /* #FEF3C7 amber-100 */
-  --danger:            0   72% 35%;   /* #991B1B red-800 */
-  --danger-bg:         0   93% 94%;   /* #FEE2E2 red-100 */
-  --info:              211 67% 32%;   /* = navy-700 */
-  --info-bg:           214 88% 95%;   /* = navy-100 */
+  --success:           135 32% 17%;   /* #1E3A25 v4 done-fg */
+  --success-bg:        129 21% 94%;   /* #EBF2EC v4 done-bg */
+  --warning:           35 68% 33%;    /* #8F5E1B v4 waiting-fg */
+  --warning-bg:        40 79% 96%;    /* #FDF8EE v4 waiting-bg */
+  --danger:            15 75% 28%;    /* #7C2D12 v4 blocked-fg */
+  --danger-bg:         0 60% 96%;     /* #FBEFEF v4 blocked-bg */
+  --info:              204 57% 12%;   /* v4 active-fg #0D2230 — literal: statuses never follow brand hue */
+  --info-bg:           209 74% 89%;   /* v4 active-bg #D0E5F8 — literal */
 
   /* ═══════════════════════════════════════════════════════════
      4 · CATEGORY COLOURS — 16 fixed catalogue colours
@@ -138,14 +147,14 @@
   --secondary: var(--surface-raised);       /* surface-raised */
   --secondary-foreground: var(--ink);
 
-  --accent: var(--brand-orange-700);       /* accessible orange action surface with white text */
+  --accent: var(--brand-gold-ink);       /* v4 gold-ink: eyebrows, marks; AA with white text */
   --accent-foreground: var(--surface-white);
 
   --destructive: var(--danger);       /* danger */
   --destructive-foreground: var(--surface-white);
 
-  --muted: var(--border-subtle);       /* border-subtle as surface */
-  --muted-foreground:     24  8% 38%;       /* text-muted — WCAG AA on cream (≥4.5:1), tightened from 46% (2026-06-18 Lighthouse) */
+  --muted: var(--brand-ivory);       /* v4 ivory surface */
+  --muted-foreground:     215 19% 35%;      /* #475569 v4 neutral-fg — AA on paper and ivory */
 
   --card: var(--surface-white);      /* white card on cream page */
   --card-foreground: var(--ink);
@@ -156,8 +165,8 @@
   --popover-foreground: var(--ink);
 
   --border: var(--border-strong);       /* border-strong */
-  --input:                30  6% 52%;       /* control boundary: 3.37:1 against cream */
-  --ring: var(--brand-navy);      /* navy */
+  --input:                215 14% 55%;      /* control boundary ≥3:1 against paper */
+  --ring: var(--brand-gold-500);      /* v4 focus: gold ring */
 
   --success-foreground: var(--surface-white);
   --warning-foreground: var(--surface-white);
@@ -176,19 +185,24 @@
   /* ═══════════════════════════════════════════════════════════
      6 · RADII — canon §5: 0px is the default. 8-16px is forbidden.
      ═══════════════════════════════════════════════════════════ */
-  --radius:                0px;
+  /* v4 radii: control 4 · card 8 · media 12 · pill */
+  --radius:                4px;        /* r-control — buttons, inputs, chips */
   --radius-none:           0px;
-  --radius-sm:             2px;        /* mini-badges, category chips */
-  --radius-full:           9999px;     /* avatars, status dots, pill toggles */
+  --radius-sm:             4px;        /* r-control */
+  --radius-full:           9999px;     /* r-pill — avatars, status dots, pill toggles */
 
   /* Legacy aliases — kept while Phase 4 globally rewrites callers.
      These CURRENTLY return 0 to enforce canon; before Phase 4 they
      defaulted to 16px. If a screen looks wrong, that's expected — Phase 3/4
      will rewrite radius classes (rounded-xl etc.) directly. */
-  --radius-md:             0px;
-  --radius-lg:             0px;
-  --card-radius:           0px;
-  --card-radius-compact:   0px;
+  --radius-md:             8px;        /* r-card — cards, panels, modals */
+  --radius-lg:             12px;       /* r-media — media, large surfaces */
+  --card-radius:           8px;
+  --card-radius-compact:   8px;
+
+  /* Shared measures (no local geometry in components). */
+  --measure-state:         24rem;      /* SystemState copy width */
+  --dialog-max-width:      32rem;      /* = former max-w-lg */
 
   /* ═══════════════════════════════════════════════════════════
      7 · SHADOWS — canon §6: borders separate blocks, not shadows.
@@ -196,9 +210,9 @@
   --shadow-none:        none;
   /* Retired neumorphic name: explicit no-shadow compatibility, not a new style. */
   --shadow-neu-inset:   var(--shadow-none);
-  --shadow-xs:          0 1px 2px rgba(28, 25, 23, 0.04);
-  --shadow-sm:          0 2px 6px rgba(28, 25, 23, 0.06);
-  --shadow-md:          0 8px 20px rgba(28, 25, 23, 0.08);
+  --shadow-xs:          0 4px 12px -4px rgba(13, 34, 48, 0.08);   /* v4 e1 */
+  --shadow-sm:          0 4px 12px -4px rgba(13, 34, 48, 0.08);   /* v4 e1 */
+  --shadow-md:          0 20px 40px -15px rgba(13, 34, 48, 0.12), 0 0 0 1px rgba(17, 24, 39, 0.05);   /* v4 e2 */
 
   /* Legacy aliases mapped onto the canonical scale */
   --shadow-elevation-0: none;
@@ -217,7 +231,7 @@
   --shadow-glow-accent: none;
 
   /* ═══════════════════════════════════════════════════════════
-     8 · TYPOGRAPHY — primary triad: Geist + Source Serif 4 + IBM Plex Mono
+     8 · TYPOGRAPHY — v4: Outfit (display) + Manrope (UI) + IBM Plex Mono (data)
      Source Serif 4 (variable, italic-rich) carries the editorial display voice;
      Geist (Vercel, variable gothic) is the neutral infra-govt body sans;
      IBM Plex Mono carries data, captions, and numerics.
@@ -257,22 +271,23 @@
   --type-page-h3-size: 1rem;
   --type-page-h3-leading: 1.25;
   /* Deliberate operator chrome: preserve current MC sidebar appearance. */
-  --operator-sidebar-background: calc(var(--brand-hue) - 2) 60% 17%;
-  --operator-sidebar-foreground: 40 25% 96%;
-  --operator-sidebar-accent: calc(var(--brand-hue) - 2) 35% 29%;
+  /* v4 HQ rail: navy-800, paper text, active item = paper at 10% */
+  --operator-sidebar-background: var(--brand-navy);
+  --operator-sidebar-foreground: 40 60% 98%;
+  --operator-sidebar-accent: var(--brand-navy-700);
   --operator-sidebar-accent-foreground: 0 0% 100%;
   --operator-sidebar-border: calc(var(--brand-hue) - 2) 28% 32%;
   --operator-sidebar-ring: 40 25% 85%;
 
-  --font-stylesheet-url: "https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700;800;900&family=Source+Serif+4:ital,opsz,wght@0,8..60,300..900;1,8..60,300..900&family=IBM+Plex+Mono:wght@400;500;600;700&family=Unbounded:wght@400;500;600&family=Golos+Text:wght@400;500;600&family=Noto+Serif:ital,wght@0,400;0,600;0,700;1,400&family=Noto+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Noto+Sans+Thai:wght@300;400;500;600;700&display=swap";
-  --font-family-display: 'Source Serif 4';
-  --font-family-body: 'Geist';
+  --font-stylesheet-url: "https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;700&family=Manrope:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600;700&family=Unbounded:wght@400;500;600&family=Golos+Text:wght@400;500;600&family=Noto+Serif:ital,wght@0,400;0,600;0,700;1,400&family=Noto+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Noto+Sans+Thai:wght@300;400;500;600;700&family=Noto+Sans+SC:wght@400;500;700&display=swap";
+  --font-family-display: 'Outfit';
+  --font-family-body: 'Manrope';
   --font-family-mono: 'IBM Plex Mono';
   --font-family-th: 'Noto Sans Thai';
-  --font-heading-ru: var(--font-family-display), 'Unbounded', 'Noto Serif', Georgia, var(--font-family-th), serif;
+  --font-heading-ru: var(--font-family-display), var(--font-family-body), 'Golos Text', 'Unbounded', 'Noto Serif', Georgia, var(--font-family-th), sans-serif;
   --font-body-ru:    var(--font-family-body), 'Golos Text', 'Noto Sans', var(--font-family-th), system-ui, sans-serif;
-  --font-heading-en: var(--font-family-display), 'Noto Serif', Georgia, var(--font-family-th), serif;
-  --font-body-en:    var(--font-family-body), 'Noto Sans', var(--font-family-th), system-ui, -apple-system, sans-serif;
+  --font-heading-en: var(--font-family-display), var(--font-family-body), 'Noto Serif', Georgia, var(--font-family-th), sans-serif;
+  --font-body-en:    var(--font-family-body), 'Noto Sans SC', 'Noto Sans', var(--font-family-th), system-ui, -apple-system, sans-serif;
   --font-heading-th: var(--font-family-display), var(--font-family-th), serif;
   --font-body-th: var(--font-family-body), var(--font-family-th), system-ui, sans-serif;
   --font-mono:       var(--font-family-mono), 'JetBrains Mono', 'SF Mono', Consolas, monospace;

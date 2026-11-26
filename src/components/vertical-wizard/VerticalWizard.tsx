@@ -91,7 +91,7 @@ export const VerticalWizard = ({ spec, initial, onSubmit, onSaveDraft, submittin
         </div>
 
         {current.groups.map((g) => (
-          <section key={g.id} className="space-y-4 rounded-none border border-border bg-card p-5">
+          <section key={g.id} className="space-y-4 rounded-md border border-border bg-card p-5">
             <header className="space-y-1">
               <h3 className="text-base font-medium">{t(g.title, lang)}</h3>
               {g.description && <p className="text-sm text-muted-foreground">{t(g.description, lang)}</p>}

@@ -35,7 +35,7 @@ export const VehicleCard = memo(function VehicleCard({ vehicle, onClick, classNa
     <article
       onClick={onClick}
       className={cn(
-        "group cursor-pointer bg-card rounded-none border border-border/50 overflow-hidden transition-all duration-200",
+        "group cursor-pointer bg-card rounded-md border border-border/50 overflow-hidden transition-all duration-200",
         "hover:shadow-lg hover:shadow-black/5 hover:border-border",
         className
       )}

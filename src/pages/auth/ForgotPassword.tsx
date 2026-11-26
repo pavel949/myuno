@@ -127,7 +127,7 @@ export default function ForgotPassword() {
                       onChange={(e) => setEmail(e.target.value)}
                       placeholder="your@email.com"
                       className={cn(
-                        "w-full h-12 pl-10 pr-4 rounded-none bg-secondary border transition-colors",
+                        "w-full h-12 pl-10 pr-4 rounded-sm bg-secondary border transition-colors",
                         "focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary",
                         error ? "border-destructive" : "border-border"
                       )}

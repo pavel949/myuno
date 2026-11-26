@@ -54,7 +54,7 @@ export default function InvestmentBusinessZone() {
           <button
             type="button"
             onClick={() => navigate(`${APP_ROUTES.COMMERCIAL}?intent=rent`)}
-            className="w-full text-left rounded-none border border-border bg-card hover:bg-muted/40 transition-colors p-4 flex items-center gap-3"
+            className="w-full text-left rounded-md border border-border bg-card hover:bg-muted/40 transition-colors p-4 flex items-center gap-3"
           >
             <div className="p-2 rounded-none bg-accent/15 text-accent dark:text-accent">
               <Building2 className="h-5 w-5" />

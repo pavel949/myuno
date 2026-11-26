@@ -64,7 +64,7 @@ export function HotelHeroBanner({ onOpenHmaForm }: Props) {
         const inner = (
           <div
             className={cn(
-              'h-full flex flex-col gap-2 p-3.5 rounded-none border-2 transition-all bg-card hover:shadow-md',
+              'h-full flex flex-col gap-2 p-3.5 rounded-md border-2 transition-all bg-card hover:shadow-md',
               toneClasses[c.tone],
             )}
           >

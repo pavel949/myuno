@@ -207,7 +207,7 @@ const Cart = () => {
                 {typeItems.map((item) => (
                   <div 
                     key={item.id}
-                    className="bg-card border border-border rounded-none p-3 flex gap-3"
+                    className="bg-card border border-border rounded-md p-3 flex gap-3"
                   >
                     {/* Image */}
                     {item.image && (

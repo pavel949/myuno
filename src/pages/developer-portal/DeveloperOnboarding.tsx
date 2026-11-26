@@ -321,7 +321,7 @@ export default function DeveloperOnboarding() {
         <div className="w-full max-w-2xl mx-auto">
           {/* Header */}
           <div className="flex items-center gap-3 mb-6 md:mb-8">
-            <div className="w-11 h-11 rounded-none bg-[hsl(var(--nb-gold)/0.15)] border border-[hsl(var(--nb-gold)/0.25)] flex items-center justify-center shrink-0">
+            <div className="w-11 h-11 rounded-sm bg-[hsl(var(--nb-gold)/0.15)] border border-[hsl(var(--nb-gold)/0.25)] flex items-center justify-center shrink-0">
               <Building2 className="w-5 h-5 text-[hsl(var(--nb-gold))]" />
             </div>
             <div className="min-w-0">

@@ -105,7 +105,7 @@ export default function SalonDetail() {
 
       {/* Content */}
       <div className="px-4 -mt-8 relative z-10 space-y-6 pb-32">
-        <div className="bg-card rounded-none p-5 border border-border/50 shadow-lg">
+        <div className="bg-card rounded-md p-5 border border-border/50 shadow-lg">
           <div className="flex items-start justify-between mb-3">
             <div>
               <h1 className="text-xl font-display font-bold flex items-center gap-2">

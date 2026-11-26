@@ -61,7 +61,7 @@ const RecipeBadge = forwardRef<HTMLDivElement, { recipe: ProductRecipe; language
         
         {showTooltip && (
           <div 
-            className="absolute z-50 top-full left-0 mt-2 w-64 bg-card border border-border rounded-none shadow-xl p-3 animate-in fade-in slide-in-from-top-2 duration-200"
+            className="absolute z-50 top-full left-0 mt-2 w-64 bg-card border border-border rounded-md shadow-xl p-3 animate-in fade-in slide-in-from-top-2 duration-200"
             onClick={(e) => e.stopPropagation()}
           >
             <button
@@ -137,7 +137,7 @@ export const ProfessionalProductCard = forwardRef<HTMLDivElement, ProfessionalPr
   if (variant === 'featured') {
     return (
       <div 
-        className="relative rounded-none overflow-hidden bg-card border border-border shadow-lg cursor-pointer group"
+        className="relative rounded-md overflow-hidden bg-card border border-border shadow-lg cursor-pointer group"
         onClick={onClick}
       >
       {/* Image Section */}
@@ -235,7 +235,7 @@ export const ProfessionalProductCard = forwardRef<HTMLDivElement, ProfessionalPr
   if (variant === 'horizontal') {
     return (
       <div 
-        className="flex gap-4 p-3 bg-card rounded-none border border-border shadow-sm hover:shadow-md transition-shadow cursor-pointer group"
+        className="flex gap-4 p-3 bg-card rounded-md border border-border shadow-sm hover:shadow-md transition-shadow cursor-pointer group"
         onClick={onClick}
       >
         {/* Image */}
@@ -335,7 +335,7 @@ export const ProfessionalProductCard = forwardRef<HTMLDivElement, ProfessionalPr
   return (
     <div 
       className={cn(
-        "bg-card rounded-none border border-border overflow-hidden shadow-sm hover:shadow-md transition-all duration-200 group cursor-pointer",
+        "bg-card rounded-md border border-border overflow-hidden shadow-sm hover:shadow-md transition-all duration-200 group cursor-pointer",
         compact && "rounded-none"
       )}
       onClick={onClick}

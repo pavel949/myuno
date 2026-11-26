@@ -122,7 +122,7 @@ export default function WhatIfFAQ() {
         {/* Emergency strip */}
         <section
           aria-label={meta.emergency}
-          className="mb-6 rounded-none border border-border bg-card p-4"
+          className="mb-6 rounded-md border border-border bg-card p-4"
         >
           <div className="mb-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
             {meta.emergency}

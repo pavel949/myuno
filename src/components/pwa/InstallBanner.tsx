@@ -80,7 +80,7 @@ export const InstallBanner = forwardRef<HTMLDivElement>(function InstallBanner(_
           transition={{ duration: 0.2 }}
           className="overflow-hidden w-full max-w-[1536px] mx-auto px-4 md:px-6 lg:px-8 xl:px-10 pt-2"
         >
-          <div className="rounded-none border border-border/60 bg-card p-3">
+          <div className="rounded-md border border-border/60 bg-card p-3">
             {!showInstructions ? (
               <div className="flex items-center gap-3">
                 <div className="w-9 h-9 shrink-0 rounded-none bg-primary/10 flex items-center justify-center">

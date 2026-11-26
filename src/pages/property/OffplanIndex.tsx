@@ -262,7 +262,7 @@ export default function OffplanIndex() {
             {[1, 2, 3, 4].map((i) => (
               <div key={i}>
                 <Skeleton className="aspect-[4/3] rounded-none" />
-                <div className="p-4 space-y-3 bg-card rounded-none border border-t-0">
+                <div className="p-4 space-y-3 bg-card rounded-md border border-t-0">
                   <Skeleton className="h-5 w-3/4" />
                   <Skeleton className="h-4 w-1/2" />
                   <Skeleton className="h-8 w-full" />

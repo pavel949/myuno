@@ -21,9 +21,9 @@ const premiumButtonVariants = cva(
         "glass-gold": "glass-gold text-primary hover:bg-primary/20",
       },
       size: {
-        default: "h-11 px-6 py-2 rounded-none text-sm",
-        sm: "h-9 px-4 rounded-none text-sm",
-        lg: "h-12 px-8 rounded-none text-base",
+        default: "h-11 px-6 py-2 rounded-sm text-sm",
+        sm: "h-9 px-4 rounded-sm text-sm",
+        lg: "h-12 px-8 rounded-sm text-base",
         xl: "h-14 px-10 rounded-none text-lg",
         icon: "h-10 w-10 rounded-none",
         "icon-sm": "h-8 w-8 rounded-none",

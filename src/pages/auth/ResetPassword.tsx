@@ -240,7 +240,7 @@ export default function ResetPassword() {
                       onChange={(e) => setPassword(e.target.value)}
                       placeholder="••••••••"
                       className={cn(
-                        "w-full h-12 pl-10 pr-12 rounded-none bg-secondary border transition-colors",
+                        "w-full h-12 pl-10 pr-12 rounded-sm bg-secondary border transition-colors",
                         "focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary",
                         errors.password ? "border-destructive" : "border-border"
                       )}
@@ -278,7 +278,7 @@ export default function ResetPassword() {
                       onChange={(e) => setConfirmPassword(e.target.value)}
                       placeholder="••••••••"
                       className={cn(
-                        "w-full h-12 pl-10 pr-4 rounded-none bg-secondary border transition-colors",
+                        "w-full h-12 pl-10 pr-4 rounded-sm bg-secondary border transition-colors",
                         "focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary",
                         errors.confirm ? "border-destructive" : "border-border"
                       )}

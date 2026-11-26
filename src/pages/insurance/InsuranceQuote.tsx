@@ -239,7 +239,7 @@ export default function InsuranceQuote() {
 
           {/* Selected Plan Summary */}
           {selectedPlan && (
-            <div className="bg-card border border-border rounded-none p-4">
+            <div className="bg-card border border-border rounded-md p-4">
               <h3 className="font-semibold mb-2">{language === 'ru' ? 'Выбранный план' : 'Selected Plan'}</h3>
               <div className="flex items-center justify-between">
                 <span>{language === 'ru' ? selectedPlan.name_ru : selectedPlan.name_en}</span>

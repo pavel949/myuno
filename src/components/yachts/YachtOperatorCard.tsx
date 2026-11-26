@@ -57,7 +57,7 @@ export function YachtOperatorCard({ providerId }: YachtOperatorCardProps) {
   if (!provider) return null;
 
   return (
-    <div className="p-5 border border-border/60 rounded-none bg-card">
+    <div className="p-5 border border-border/60 rounded-md bg-card">
       <div className="flex items-start gap-4">
         {/* Avatar / Logo */}
         <div className="w-14 h-14 rounded-none bg-primary/10 flex items-center justify-center flex-shrink-0 overflow-hidden">

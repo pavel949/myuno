@@ -101,7 +101,7 @@ export default function InsuranceIndex() {
                   <div
                     key={plan.id}
                     onClick={() => navigate(`/insurance/plan/${plan.id}`)}
-                    className="bg-card border border-border rounded-none p-4 cursor-pointer hover:border-primary/50 transition-colors [box-shadow:var(--shadow-elevation-1)]"
+                    className="bg-card border border-border rounded-md p-4 cursor-pointer hover:border-primary/50 transition-colors [box-shadow:var(--shadow-elevation-1)]"
                   >
                     <div className="flex items-start justify-between mb-2">
                       <div>

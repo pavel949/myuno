@@ -105,7 +105,7 @@ export default function PharmacyDetail() {
         </div>
 
         {/* Info Card */}
-        <div className="relative -mt-12 bg-card rounded-none p-4 shadow-lg border mb-6">
+        <div className="relative -mt-12 bg-card rounded-md p-4 shadow-lg border mb-6">
           <div className="flex items-start justify-between">
             <div>
               <h1 className="text-xl font-bold">
@@ -185,7 +185,7 @@ export default function PharmacyDetail() {
           ) : (
             <div className="grid grid-cols-2 gap-3">
               {products.map(product => (
-                <div key={product.id} className="bg-card rounded-none border overflow-hidden">
+                <div key={product.id} className="bg-card rounded-md border overflow-hidden">
                   <div className="relative">
                     <img
                       src={product.image || PLACEHOLDER_IMAGES.pharmacyProduct}

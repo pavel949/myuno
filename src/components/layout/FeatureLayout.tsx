@@ -257,7 +257,7 @@ function MiniappMode({
             type="button"
             variant={view === 'list' ? 'default' : 'ghost'}
             size="sm"
-            className="h-11 min-w-11 px-2 rounded-none"
+            className="h-11 min-w-11 px-2 rounded-sm"
             onClick={() => setView('list')}
             aria-label={language === 'ru' ? 'Список' : 'List'}
             aria-pressed={view === 'list'}
@@ -268,7 +268,7 @@ function MiniappMode({
             type="button"
             variant={view === 'map' ? 'default' : 'ghost'}
             size="sm"
-            className="h-11 min-w-11 px-2 rounded-none"
+            className="h-11 min-w-11 px-2 rounded-sm"
             onClick={() => setView('map')}
             aria-label={language === 'ru' ? 'Карта' : 'Map'}
             aria-pressed={view === 'map'}
@@ -469,7 +469,7 @@ function MiniappMode({
         {quickActions}
 
         {showEcosystemHint && (
-          <div className="rounded-none border border-border/60 bg-card/70 px-4 py-3 flex items-center justify-between gap-3">
+          <div className="rounded-md border border-border/60 bg-card/70 px-4 py-3 flex items-center justify-between gap-3">
             <p className="text-xs md:text-sm text-muted-foreground">
               {language === 'ru'
                 ? 'myUNO: экосистема сервисов и решений — изучайте рынок и бронируйте в одном контуре.'

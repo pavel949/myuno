@@ -343,7 +343,7 @@ export default function DepositVaultPage() {
                     </div>
 
                     <div className="grid grid-cols-2 gap-2">
-                      <label className="flex items-center justify-center gap-1.5 h-9 text-xs border border-dashed border-border rounded-none cursor-pointer hover:border-primary/40">
+                      <label className="flex items-center justify-center gap-1.5 h-9 text-xs border border-dashed border-border rounded-sm cursor-pointer hover:border-primary/40">
                         <input
                           type="file"
                           accept="image/*"
@@ -358,7 +358,7 @@ export default function DepositVaultPage() {
                         )}
                         {t ? "Фото въезда" : "Check-in photo"}
                       </label>
-                      <label className="flex items-center justify-center gap-1.5 h-9 text-xs border border-dashed border-border rounded-none cursor-pointer hover:border-primary/40">
+                      <label className="flex items-center justify-center gap-1.5 h-9 text-xs border border-dashed border-border rounded-sm cursor-pointer hover:border-primary/40">
                         <input
                           type="file"
                           accept="image/*"

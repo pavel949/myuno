@@ -236,7 +236,7 @@ export default function NewbuildsCompare() {
               <Link
                 key={item.id}
                 to={`${APP_ROUTES.CLEARVIEW_APPLY}?project=${item.id}`}
-                className="flex items-center justify-between gap-2 px-3 py-2.5 rounded-none border border-border bg-card hover:border-foreground/40 transition-colors"
+                className="flex items-center justify-between gap-2 px-3 py-2.5 rounded-md border border-border bg-card hover:border-foreground/40 transition-colors"
               >
                 <div className="flex items-center gap-2 min-w-0">
                   <FileText className="w-4 h-4 text-muted-foreground shrink-0" />

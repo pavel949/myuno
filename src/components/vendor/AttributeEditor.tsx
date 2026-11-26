@@ -116,7 +116,7 @@ export function AttributeEditor({
           {attributes.map((attr, index) => (
             <div 
               key={index} 
-              className="flex items-start gap-2 p-2 border rounded-none bg-card"
+              className="flex items-start gap-2 p-2 border rounded-md bg-card"
             >
               <GripVertical className="w-4 h-4 text-muted-foreground mt-2.5 shrink-0 cursor-grab" />
               

@@ -42,7 +42,7 @@ export function InstallmentTimeline({
 
   return (
     <section
-      className={cn('border border-border/60 bg-card p-4 rounded-none', className)}
+      className={cn('border border-border/60 bg-card p-4 rounded-md', className)}
       aria-label={isRu ? 'Платёжный график' : 'Payment schedule'}
     >
       <header className="flex items-start justify-between gap-3 mb-3">

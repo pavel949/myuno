@@ -78,7 +78,7 @@ const SeedCard = ({ surface, isRu }: SeedCardProps) => {
     <Link
       to={href}
       state={publicJourneyState(location)}
-      className="group block overflow-hidden rounded-none border border-border bg-card transition-colors hover:border-primary/60"
+      className="group block overflow-hidden rounded-md border border-border bg-card transition-colors hover:border-primary/60"
     >
       {surface.coverImageUrl ? (
         <div className="aspect-[4/3] w-full overflow-hidden bg-muted">
@@ -320,7 +320,7 @@ const AreaLandingPage = () => {
             {highlights.map((h) => (
               <li
                 key={h}
-                className="flex items-center gap-2 rounded-none border border-border bg-card p-3 text-sm text-foreground"
+                className="flex items-center gap-2 rounded-md border border-border bg-card p-3 text-sm text-foreground"
               >
                 <MapPin className="h-4 w-4 shrink-0 text-primary" aria-hidden />
                 <span>{h}</span>
@@ -333,7 +333,7 @@ const AreaLandingPage = () => {
         <HomeServiceGallery />
         {/* Cross-links: personas + clusters */}
         {(personaLinks.length > 0 || clusterLinks.length > 0) && (
-          <section className="mb-10 rounded-none border border-border bg-card p-5">
+          <section className="mb-10 rounded-md border border-border bg-card p-5">
             {personaLinks.length > 0 && (
               <div className="mb-5">
                 <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
@@ -386,7 +386,7 @@ const AreaLandingPage = () => {
                 <li key={na.slug}>
                   <Link
                     to={`/area/${na.slug}`}
-                    className="flex items-center gap-3 rounded-none border border-border bg-card p-4 transition-colors hover:border-primary/60"
+                    className="flex items-center gap-3 rounded-md border border-border bg-card p-4 transition-colors hover:border-primary/60"
                   >
                     <span className="flex h-10 w-10 items-center justify-center rounded-none bg-primary/10">
                       <MapPin className="h-5 w-5 text-primary" aria-hidden />

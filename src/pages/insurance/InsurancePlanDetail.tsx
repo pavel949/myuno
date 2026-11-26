@@ -136,7 +136,7 @@ export default function InsurancePlanDetail() {
           </TabsList>
 
           <TabsContent value="features" className="space-y-4 mt-4">
-            <div className="bg-card border border-border rounded-none p-4">
+            <div className="bg-card border border-border rounded-md p-4">
               <ul className="space-y-3">
                 {(language === 'ru' ? features.ru : features.en)?.map((feature, idx) => (
                   <li key={idx} className="flex items-start gap-3 text-sm">
@@ -149,7 +149,7 @@ export default function InsurancePlanDetail() {
 
             {/* Age requirements */}
             {(plan.min_age || plan.max_age) && (
-              <div className="bg-card border border-border rounded-none p-4">
+              <div className="bg-card border border-border rounded-md p-4">
                 <h3 className="font-semibold mb-2">
                   {language === 'ru' ? 'Возрастные ограничения' : 'Age Requirements'}
                 </h3>
@@ -165,7 +165,7 @@ export default function InsurancePlanDetail() {
 
             {/* Deductible */}
             {plan.deductible && (
-              <div className="bg-card border border-border rounded-none p-4">
+              <div className="bg-card border border-border rounded-md p-4">
                 <h3 className="font-semibold mb-2">
                   {language === 'ru' ? 'Франшиза' : 'Deductible'}
                 </h3>
@@ -175,7 +175,7 @@ export default function InsurancePlanDetail() {
 
             {/* Medical exam */}
             {plan.requires_medical_exam !== null && (
-              <div className="bg-card border border-border rounded-none p-4 flex items-center justify-between">
+              <div className="bg-card border border-border rounded-md p-4 flex items-center justify-between">
                 <span className="text-sm">
                   {language === 'ru' ? 'Мед. осмотр' : 'Medical exam required'}
                 </span>
@@ -193,7 +193,7 @@ export default function InsurancePlanDetail() {
           </TabsContent>
 
           <TabsContent value="exclusions" className="space-y-4 mt-4">
-            <div className="bg-card border border-border rounded-none p-4">
+            <div className="bg-card border border-border rounded-md p-4">
               <ul className="space-y-3">
                 {(language === 'ru' ? exclusions.ru : exclusions.en)?.map((exclusion, idx) => (
                   <li key={idx} className="flex items-start gap-3 text-sm">

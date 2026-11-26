@@ -144,7 +144,7 @@ export default function VehicleDetail() {
                   key={i}
                   onClick={() => setActiveImage(i)}
                   className={cn(
-                    "w-16 h-12 rounded-none overflow-hidden flex-shrink-0 border-2 transition-all lg:w-24 lg:h-16",
+                    "w-16 h-12 rounded-sm overflow-hidden flex-shrink-0 border-2 transition-all lg:w-24 lg:h-16",
                     activeImage === i ? "border-primary shadow-sm" : "border-transparent opacity-50 hover:opacity-80"
                   )}
                 >
@@ -295,7 +295,7 @@ export default function VehicleDetail() {
                 <h2 className="text-base font-semibold mb-3">{isRu ? 'Включено' : 'Included'}</h2>
                 <div className="grid grid-cols-2 gap-2">
                   {localizedFeatures.map((feature, i) => (
-                    <div key={i} className="flex items-center gap-2.5 p-3 rounded-none bg-card border border-border/50">
+                    <div key={i} className="flex items-center gap-2.5 p-3 rounded-md bg-card border border-border/50">
                       <Check className="w-4 h-4 text-success shrink-0" />
                       <span className="text-sm">{feature}</span>
                     </div>
@@ -391,7 +391,7 @@ export default function VehicleDetail() {
 
 function SpecCard({ icon: Icon, label, value }: { icon: typeof Users; label: string; value: string }) {
   return (
-    <div className="flex flex-col items-center p-3 rounded-none bg-card border border-border/50 text-center">
+    <div className="flex flex-col items-center p-3 rounded-md bg-card border border-border/50 text-center">
       <Icon className="w-5 h-5 text-primary mb-1.5" />
       <span className="text-sm font-bold text-foreground lg:break-words lg:max-w-full">{value}</span>
       <span className="text-xs text-muted-foreground mt-0.5">{label}</span>

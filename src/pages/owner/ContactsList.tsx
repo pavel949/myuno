@@ -87,7 +87,7 @@ function ContactCard({
   return (
     <button
       onClick={onClick}
-      className="w-full text-left rounded-none border bg-card hover:bg-accent/30 transition-all hover:shadow-md group"
+      className="w-full text-left rounded-md border bg-card hover:bg-accent/30 transition-all hover:shadow-md group"
     >
       <div className="p-4">
         <div className="flex items-start gap-3">
@@ -227,7 +227,7 @@ function ContactListRow({
     <button
       type="button"
       onClick={onClick}
-      className="w-full flex items-center gap-3 md:gap-4 p-3 md:p-4 rounded-none border bg-card hover:bg-accent/30 transition-colors text-left"
+      className="w-full flex items-center gap-3 md:gap-4 p-3 md:p-4 rounded-md border bg-card hover:bg-accent/30 transition-colors text-left"
     >
       <div className={cn('h-10 w-10 rounded-full flex items-center justify-center shrink-0 text-sm font-semibold', avatarColor)}>
         {firstName.charAt(0) || '?'}{lastName.charAt(0) || '?'}
@@ -501,7 +501,7 @@ export default function ContactsList() {
       </div>
 
       {showFilters && (
-        <div className="space-y-3 p-3 rounded-none border bg-card">
+        <div className="space-y-3 p-3 rounded-md border bg-card">
           {/* Type filter */}
           <div>
             <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide mb-1.5">{isRu ? 'Тип' : 'Type'}</p>

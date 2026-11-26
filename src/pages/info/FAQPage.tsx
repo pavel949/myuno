@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { PageContainer } from '@/components/uno/PageContainer';
 import { PageHeader } from '@/components/uno/PageHeader';
@@ -9,7 +10,9 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from '@/components/ui/accordion';
-import { HelpCircle, MessageCircle, Shield, Building2, Users2, CreditCard, Scale, GraduationCap, Heart, Lock } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { filterFaqCategories } from '@/lib/help/filterFaq';
+import { Search, HelpCircle, MessageCircle, Shield, Building2, Users2, CreditCard, Scale, GraduationCap, Heart, Lock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
 
@@ -17,6 +20,7 @@ export default function FAQPage() {
   const { language } = useLanguage();
   const isRu = language === 'ru';
   const isTh = language === 'th';
+  const [query, setQuery] = useState('');
 
   const faqCategories = [
     {
@@ -257,62 +261,104 @@ export default function FAQPage() {
     },
   ];
 
+  const visibleCategories = filterFaqCategories(faqCategories, query);
+  const matchCount = visibleCategories.reduce((sum, category) => sum + category.items.length, 0);
+
   return (
     <AppLayout usePageContainer={false}>
       <PageContainer className="max-w-4xl">
         <PageHeader 
-          title={isRu ? 'Частые вопросы' : isTh ? 'คำถามที่พบบ่อย' : 'FAQ'} 
+          title={isRu ? 'Помощь и частые вопросы' : isTh ? 'ศูนย์ช่วยเหลือ' : 'Help centre'} 
           showBack 
         />
 
-        {/* Search hint */}
-        <SectionCard className="flex items-center gap-3">
-          <HelpCircle className="w-10 h-10 text-primary flex-shrink-0" />
-          <div>
-            <h2 className="font-semibold">{isRu ? 'Нужна помощь?' : isTh ? 'ต้องการความช่วยเหลือหรือไม่?' : 'Need Help?'}</h2>
-            <p className="text-sm text-muted-foreground">
-              {isRu 
-                ? 'Найдите ответ ниже или свяжитесь с поддержкой 24/7'
-                : isTh 
-                ? 'ค้นหาคำตอบด้านล่างหรือติดต่อฝ่ายสนับสนุน 24/7'
-                : 'Find your answer below or contact support 24/7'}
-            </p>
+        {/* Search first (design K8) */}
+        <div role="search" className="mb-4">
+          <label htmlFor="faq-search" className="mb-2 block text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+            {isRu ? 'Поиск по ответам' : isTh ? 'ค้นหาคำตอบ' : 'Search answers'}
+          </label>
+          <div className="relative">
+            <Search className="pointer-events-none absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" aria-hidden="true" />
+            <Input
+              id="faq-search"
+              type="search"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder={isRu ? 'Например: возврат, виза, оплата' : isTh ? 'เช่น การคืนเงิน วีซ่า การชำระเงิน' : 'For example: refund, visa, payment'}
+              className="h-12 pl-10"
+            />
           </div>
-        </SectionCard>
-
-        {/* Quick Links */}
-        <div className="grid grid-cols-2 gap-3 my-4">
-          <Button variant="outline" asChild className="h-auto py-3 flex-col gap-1">
-            <Link to="/g-trust">
-              <Shield className="w-5 h-5 text-accent" />
-              <span className="text-xs">G-Trust</span>
-            </Link>
-          </Button>
-          <Button variant="outline" asChild className="h-auto py-3 flex-col gap-1">
-            <Link to="/partners">
-              <Building2 className="w-5 h-5 text-primary" />
-              <span className="text-xs">{isRu ? 'Партнёрам' : isTh ? 'สำหรับพันธมิตร' : 'For Partners'}</span>
-            </Link>
-          </Button>
         </div>
 
+        {/* Categories */}
+        {!query.trim() && (
+          <nav aria-label={isRu ? 'Разделы' : isTh ? 'หมวดหมู่' : 'Categories'} className="mb-2">
+            <ul className="grid grid-cols-1 gap-2 min-[420px]:grid-cols-2 sm:grid-cols-3">
+              {faqCategories.map((category, catIndex) => {
+                const CategoryIcon = category.icon;
+                return (
+                  <li key={category.title}>
+                    <a
+                      href={`#faq-${catIndex}`}
+                      className="flex min-h-12 items-center gap-3 rounded-md border border-border bg-card px-3 py-2 text-sm transition-colors hover:border-primary/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                    >
+                      <CategoryIcon className="h-4 w-4 shrink-0 text-primary" aria-hidden="true" />
+                      <span className="min-w-0 flex-1 font-medium">{category.title}</span>
+                      <span className="font-mono text-xs tabular-nums text-muted-foreground">{category.items.length}</span>
+                    </a>
+                  </li>
+                );
+              })}
+            </ul>
+          </nav>
+        )}
+
+        {query.trim() && (
+          <p className="text-sm text-muted-foreground" aria-live="polite">
+            {isRu
+              ? `Найдено ответов: ${matchCount}`
+              : isTh
+              ? `พบคำตอบ: ${matchCount}`
+              : `${matchCount} ${matchCount === 1 ? 'answer' : 'answers'} found`}
+          </p>
+        )}
+
+        {query.trim() && visibleCategories.length === 0 && (
+          <SectionCard className="mt-4">
+            <h2 className="font-semibold">
+              {isRu ? 'Ответа на этот вопрос пока нет' : isTh ? 'ยังไม่มีคำตอบสำหรับคำถามนี้' : 'No answer for this yet'}
+            </h2>
+            <p className="mt-1 text-sm text-muted-foreground">
+              {isRu
+                ? 'Измените запрос или напишите в поддержку — ответим по существу.'
+                : isTh
+                ? 'ลองเปลี่ยนคำค้นหา หรือเขียนถึงฝ่ายสนับสนุน'
+                : 'Try other words, or write to support with your question.'}
+            </p>
+            <Button variant="outline" className="mt-3 min-h-11" onClick={() => setQuery('')}>
+              {isRu ? 'Сбросить поиск' : isTh ? 'ล้างการค้นหา' : 'Clear search'}
+            </Button>
+          </SectionCard>
+        )}
+
         {/* FAQ Sections */}
-        {faqCategories.map((category, catIndex) => {
+        {visibleCategories.map((category) => {
           const CategoryIcon = category.icon;
+          const catIndex = faqCategories.findIndex((c) => c.title === category.title);
           return (
-            <div key={catIndex}>
-              <div className="flex items-center gap-2 mb-2 mt-4">
-                <CategoryIcon className="w-4 h-4 text-primary" />
-                <h3 className="font-semibold text-sm text-muted-foreground">
+            <section key={category.title} id={`faq-${catIndex}`} className="scroll-mt-24">
+              <div className="flex items-center gap-2 mb-2 mt-6">
+                <CategoryIcon className="w-4 h-4 text-primary" aria-hidden="true" />
+                <h2 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                   {category.title}
-                </h3>
+                </h2>
               </div>
               <SectionCard noPadding>
                 <Accordion type="single" collapsible className="w-full">
-                  {category.items.map((item, index) => (
-                    <AccordionItem 
-                      key={index} 
-                      value={`${catIndex}-${index}`}
+                  {category.items.map((item) => (
+                    <AccordionItem
+                      key={item.q}
+                      value={`${catIndex}-${item.q}`}
                       className="border-b last:border-b-0"
                     >
                       <AccordionTrigger className="min-h-14 px-4 text-left font-sans text-sm leading-relaxed hover:no-underline">
@@ -325,9 +371,25 @@ export default function FAQPage() {
                   ))}
                 </Accordion>
               </SectionCard>
-            </div>
+            </section>
           );
         })}
+
+        {/* Related pages */}
+        <div className="grid grid-cols-2 gap-3 my-6">
+          <Button variant="outline" asChild className="h-auto min-h-11 py-3 flex-col gap-1">
+            <Link to="/g-trust">
+              <Shield className="w-5 h-5 text-accent" aria-hidden="true" />
+              <span className="text-xs">G-Trust</span>
+            </Link>
+          </Button>
+          <Button variant="outline" asChild className="h-auto min-h-11 py-3 flex-col gap-1">
+            <Link to="/partners">
+              <Building2 className="w-5 h-5 text-primary" aria-hidden="true" />
+              <span className="text-xs">{isRu ? 'Партнёрам' : isTh ? 'สำหรับพันธมิตร' : 'For Partners'}</span>
+            </Link>
+          </Button>
+        </div>
 
         {/* Contact Support */}
         <SectionCard className="text-center mt-6">

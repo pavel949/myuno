@@ -27,7 +27,7 @@ export function ClearViewCallout({
   return (
     <section
       aria-labelledby="hub-clearview-heading"
-      className="rounded-none border border-accent/40 bg-card p-5 shadow-sm"
+      className="rounded-md border border-accent/40 bg-card p-5 shadow-sm"
     >
       <div className="flex items-start gap-4">
         <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-none bg-accent/15 text-accent">

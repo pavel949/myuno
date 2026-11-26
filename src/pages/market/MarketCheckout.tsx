@@ -499,7 +499,7 @@ const MarketCheckout = () => {
         )}
 
         {/* Order Items */}
-        <div className="bg-card rounded-none border p-4 mb-4">
+        <div className="bg-card rounded-md border p-4 mb-4">
           <div className="flex items-center justify-between mb-3">
             <h3 className="font-semibold flex items-center gap-2">
               <Package className="w-5 h-5 text-primary" />
@@ -548,7 +548,7 @@ const MarketCheckout = () => {
         )}
 
         {/* Delivery Type Selector */}
-        <div className="bg-card rounded-none border p-5 mb-4">
+        <div className="bg-card rounded-md border p-5 mb-4">
           <DeliveryTypeSelector
             selectedType={deliveryType}
             onTypeChange={setDeliveryType}
@@ -562,7 +562,7 @@ const MarketCheckout = () => {
         </div>
 
         {/* Address Form */}
-        <div className="bg-card rounded-none border p-5 mb-4">
+        <div className="bg-card rounded-md border p-5 mb-4">
           {deliveryType === 'local' ? (
             <>
               <div className="flex items-center gap-2 mb-4">
@@ -665,7 +665,7 @@ const MarketCheckout = () => {
         </div>
 
         {/* Payment Method */}
-        <div className="bg-card rounded-none border p-5 mb-4">
+        <div className="bg-card rounded-md border p-5 mb-4">
           <h3 className="font-semibold mb-4">
             {language === 'ru' ? 'Способ оплаты' : 'Payment Method'}
           </h3>
@@ -696,7 +696,7 @@ const MarketCheckout = () => {
         </div>
 
         {/* Order Summary */}
-        <div className="bg-card rounded-none border p-5 mb-4">
+        <div className="bg-card rounded-md border p-5 mb-4">
           <h3 className="font-semibold mb-4">{language === 'ru' ? 'Итого' : 'Order Summary'}</h3>
           <div className="space-y-2 text-sm">
             <div className="flex justify-between">

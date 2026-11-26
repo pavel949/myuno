@@ -74,7 +74,7 @@ export const GuidedFallback = memo(function GuidedFallback({
         {/* Secondary: Call */}
         <button
           onClick={() => window.location.href = getTelLink()}
-          className="w-full flex items-center gap-3 p-4 rounded-none bg-card border border-border/60 text-left hover:shadow-sm transition-all touch-manipulation"
+          className="w-full flex items-center gap-3 p-4 rounded-md bg-card border border-border/60 text-left hover:shadow-sm transition-all touch-manipulation"
         >
           <div className="w-10 h-10 rounded-none bg-muted flex items-center justify-center shrink-0">
             <Phone className="w-5 h-5 text-muted-foreground" />
@@ -92,7 +92,7 @@ export const GuidedFallback = memo(function GuidedFallback({
         {/* Tertiary: VIP Concierge */}
         <button
           onClick={() => navigate('/vip-concierge')}
-          className="w-full flex items-center gap-3 p-4 rounded-none bg-card border border-border/60 text-left hover:shadow-sm transition-all touch-manipulation"
+          className="w-full flex items-center gap-3 p-4 rounded-md bg-card border border-border/60 text-left hover:shadow-sm transition-all touch-manipulation"
         >
           <div className="w-10 h-10 rounded-none bg-muted flex items-center justify-center shrink-0">
             <HeartHandshake className="w-5 h-5 text-muted-foreground" />

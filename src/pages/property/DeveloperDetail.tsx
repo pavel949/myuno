@@ -116,7 +116,7 @@ export default function DeveloperDetail() {
 
       {/* Profile card */}
       <div className="px-4 -mt-12 relative z-10">
-        <div className="rounded-none border bg-card p-4 shadow-lg">
+        <div className="rounded-md border bg-card p-4 shadow-lg">
           <div className="flex items-start gap-4">
             {developer.logoUrl ? (
               <img

@@ -106,7 +106,7 @@ export default function StorefrontDemoLanding() {
         en: 'Public branded site synced with myUNO PMS. Direct commission-free bookings, RU+EN, custom domain.',
       }}
     >
-      <div className="rounded-none border border-border bg-card p-6">
+      <div className="rounded-md border border-border bg-card p-6">
         <h2 className="text-xl font-semibold mb-4">
           {t({ ru: 'Что вы получаете', en: 'What you get' })}
         </h2>

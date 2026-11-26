@@ -108,7 +108,7 @@ export function ContactEmailsSection({ contactId, companyId, contactEmail }: Con
       <div
         key={email.id}
         className={cn(
-          'flex gap-3 p-3 rounded-none border bg-card',
+          'flex gap-3 p-3 rounded-md border bg-card',
           isThreadChild && 'ml-6 border-l-2 border-l-muted',
         )}
       >
@@ -246,7 +246,7 @@ export function ContactEmailsSection({ contactId, companyId, contactEmail }: Con
           <Skeleton className="h-16 w-full" />
         </div>
       ) : emails.length === 0 ? (
-        <div className="text-center py-12 rounded-none border bg-card">
+        <div className="text-center py-12 rounded-md border bg-card">
           <Mail className="h-10 w-10 mx-auto text-muted-foreground/30 mb-2" />
           <p className="text-sm text-muted-foreground">
             {isRu ? 'Нет писем по этому контакту' : 'No emails for this contact'}

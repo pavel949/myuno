@@ -387,7 +387,7 @@ export default function RestaurantDetail() {
                       </h2>
                       <div className="space-y-2">
                         {items.map(item => (
-                          <div key={item.id} className="flex gap-3 p-3 rounded-none bg-card border border-border/50">
+                          <div key={item.id} className="flex gap-3 p-3 rounded-md bg-card border border-border/50">
                             {item.image && (
                               <img src={item.image} alt="" className="w-16 h-16 rounded-none object-cover shrink-0" />
                             )}

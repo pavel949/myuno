@@ -51,7 +51,7 @@ export function BookingSummary({
     : 0;
 
   return (
-    <div className="bg-card rounded-none border overflow-hidden">
+    <div className="bg-card rounded-md border overflow-hidden">
       {/* Header with image */}
       <div className="flex gap-4 p-4 border-b">
         {image && (

@@ -43,7 +43,11 @@ const CANONICAL_FAMILIES = new Set([
   // RU
   'Unbounded',
   'Golos Text',
-  // EN + universal fallbacks
+  // Design Bible v4 primary pair (adopted 2026-11-25)
+  'Outfit',
+  'Manrope',
+  'Noto Sans SC',
+  // EN + universal fallbacks (DS 2.1 families kept for legacy callers)
   'Source Serif 4',
   'Geist',
   'IBM Plex Mono',

@@ -103,7 +103,7 @@ export function AftercareBanner({
   return (
     <div className={cn('space-y-4', className)}>
       {/* Timeline */}
-      <div className="rounded-none border bg-card p-4 space-y-3">
+      <div className="rounded-md border bg-card p-4 space-y-3">
         <div className="flex items-center gap-2">
           <CheckCircle2 className="w-4 h-4 text-success" />
           <h4 className="text-sm font-semibold">

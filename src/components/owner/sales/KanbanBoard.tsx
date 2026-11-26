@@ -65,7 +65,7 @@ function KanbanCard({ deal, agentName }: { deal: AgentDeal; agentName?: string }
       {...attributes}
       {...listeners}
       className={cn(
-        'p-3 rounded-none border bg-card cursor-grab active:cursor-grabbing touch-none transition-shadow hover:shadow-md group border-l-4',
+        'p-3 rounded-md border bg-card cursor-grab active:cursor-grabbing touch-none transition-shadow hover:shadow-md group border-l-4',
         isDragging && 'opacity-50 shadow-lg z-50',
         isOverdue && 'border-l-2 border-l-destructive',
         !isOverdue && age > 30 && 'border-l-2 border-l-destructive',
@@ -374,7 +374,7 @@ export function KanbanBoard({ deals, members = [], pipelineData, onQuickCreate }
       </div>
       <DragOverlay>
         {activeDeal && (
-          <div className="p-3 rounded-none border bg-card shadow-xl w-[240px]">
+          <div className="p-3 rounded-md border bg-card shadow-xl w-[240px]">
             <p className="font-medium text-sm">{activeDeal.client_name}</p>
             {activeDeal.deal_value && (
               <p className="text-xs text-muted-foreground mt-1">{formatValue(activeDeal.deal_value, activeDeal.currency)}</p>

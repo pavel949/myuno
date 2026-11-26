@@ -106,7 +106,7 @@ export function BookingListSkeleton({ className, count = 5 }: SkeletonProps & { 
         {Array.from({ length: count }).map((_, i) => (
           <div
             key={i}
-            className="flex gap-3 p-4 bg-card border border-border rounded-none"
+            className="flex gap-3 p-4 bg-card border border-border rounded-md"
           >
             {/* Icon placeholder */}
             <Skeleton className="w-16 h-16 rounded-none flex-shrink-0" />
@@ -140,7 +140,7 @@ export function ProfileSkeleton({ className }: SkeletonProps) {
   return (
     <div className={cn('p-4 space-y-4', className)}>
       {/* Avatar & Name Card */}
-      <div className="p-4 bg-card border border-border rounded-none space-y-3">
+      <div className="p-4 bg-card border border-border rounded-md space-y-3">
         <div className="flex items-center gap-3">
           <Skeleton className="w-16 h-16 rounded-full flex-shrink-0" />
           <div className="flex-1 space-y-2">
@@ -153,7 +153,7 @@ export function ProfileSkeleton({ className }: SkeletonProps) {
       </div>
 
       {/* Menu items */}
-      <div className="bg-card border border-border rounded-none overflow-hidden divide-y divide-border">
+      <div className="bg-card border border-border rounded-md overflow-hidden divide-y divide-border">
         {Array.from({ length: 6 }).map((_, i) => (
           <div key={i} className="flex items-center gap-3 p-4">
             <Skeleton className="w-5 h-5 rounded-none flex-shrink-0" />
@@ -165,7 +165,7 @@ export function ProfileSkeleton({ className }: SkeletonProps) {
 
       {/* Info section */}
       <Skeleton className="h-4 w-24" />
-      <div className="bg-card border border-border rounded-none overflow-hidden divide-y divide-border">
+      <div className="bg-card border border-border rounded-md overflow-hidden divide-y divide-border">
         {Array.from({ length: 4 }).map((_, i) => (
           <div key={i} className="flex items-center gap-3 p-4">
             <Skeleton className="w-5 h-5 rounded-none flex-shrink-0" />

@@ -64,7 +64,7 @@ export default function BuildSurfaceLandingPage() {
               else navigate(s.path);
             };
             return (
-              <button key={i} onClick={onClick} className="w-full flex items-center gap-4 p-4 rounded-none border border-border bg-card text-left transition-all hover:[box-shadow:var(--shadow-elevation-2)]">
+              <button key={i} onClick={onClick} className="w-full flex items-center gap-4 p-4 rounded-md border border-border bg-card text-left transition-all hover:[box-shadow:var(--shadow-elevation-2)]">
                 <div className="w-11 h-11 rounded-none flex items-center justify-center shrink-0 relative" style={{ background: tokenColor(s.color, 0.15) }}>
                   <Icon className="w-5 h-5" style={{ color: tokenColor(s.color) }} />
                   <span className="absolute -top-2 -left-2 w-5 h-5 rounded-full bg-foreground text-background text-[10px] font-bold flex items-center justify-center tabular-nums">{i + 1}</span>

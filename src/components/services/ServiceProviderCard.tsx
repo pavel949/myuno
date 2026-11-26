@@ -45,7 +45,7 @@ export const ServiceProviderCard = memo(function ServiceProviderCard({
         onClick={onClick}
       className={cn(
         "w-full flex items-center gap-4 p-4",
-        "bg-card border border-border/50 rounded-none",
+        "bg-card border border-border/50 rounded-md",
         "hover:shadow-md hover:border-primary/30",
         "",
         "transition-all duration-200",

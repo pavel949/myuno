@@ -1,4 +1,5 @@
 import { AppLayout } from '@/components/layout/AppLayout';
+import { LegalDocumentNav } from '@/components/legal/LegalDocumentNav';
 import { PageContainer } from '@/components/uno/PageContainer';
 import { PageHeader } from '@/components/uno/PageHeader';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -24,6 +25,7 @@ export default function PartnerAgreementPage() {
           title={isRu ? 'Условия партнёрства' : 'Partnership Terms'} 
           showBack 
         />
+        <LegalDocumentNav current="/partner-agreement" />
 
         {/* Hero Card */}
         <Card className="mb-6 bg-gradient-to-br from-primary/5 to-accent/5 border-primary/20">
@@ -51,7 +53,7 @@ export default function PartnerAgreementPage() {
             { emoji: '3️⃣', text: isRu ? 'Вы оказываете услугу, мы переводим оплату каждую пятницу' : 'You deliver the service, we transfer payment every Friday' },
             { emoji: '4️⃣', text: isRu ? 'Платформа удерживает комиссию по правилам ниже' : 'Platform deducts commission according to the rules below' },
           ].map((item, i) => (
-            <div key={i} className="flex items-start gap-3 p-3 rounded-none border bg-card">
+            <div key={i} className="flex items-start gap-3 p-3 rounded-md border bg-card">
               <span className="text-lg">{item.emoji}</span>
               <p className="text-sm">{item.text}</p>
             </div>

@@ -62,7 +62,7 @@ export function DealScheduledActivities({ dealId, companyId }: Props) {
   };
 
   return (
-    <div className="border rounded-none p-4 bg-card space-y-3">
+    <div className="border rounded-md p-4 bg-card space-y-3">
       <div className="flex items-center justify-between">
         <p className="text-sm font-medium flex items-center gap-1.5">
           <CalendarClock className="h-4 w-4 text-primary" />

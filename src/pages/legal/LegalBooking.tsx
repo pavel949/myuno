@@ -208,7 +208,7 @@ export default function LegalBooking() {
         {step === 1 && (
           <div className="space-y-6">
             {/* Consultation Type */}
-            <div className="bg-card rounded-none border p-5">
+            <div className="bg-card rounded-md border p-5">
               <Label className="font-semibold mb-4 block">
                 {language === 'ru' ? 'Формат консультации' : 'Consultation Format'}
               </Label>
@@ -239,7 +239,7 @@ export default function LegalBooking() {
             </div>
 
             {/* Date & Time */}
-            <div className="bg-card rounded-none border p-5">
+            <div className="bg-card rounded-md border p-5">
               <h3 className="font-semibold mb-4">
                 {language === 'ru' ? 'Дата и время' : 'Date & Time'}
               </h3>
@@ -279,7 +279,7 @@ export default function LegalBooking() {
             />
 
             {/* Service Selection */}
-            <div className="bg-card rounded-none border p-5">
+            <div className="bg-card rounded-md border p-5">
               <Label className="font-semibold mb-4 block">
                 {language === 'ru' ? 'Тип услуги' : 'Service Type'}
               </Label>
@@ -298,7 +298,7 @@ export default function LegalBooking() {
             </div>
 
             {/* Description */}
-            <div className="bg-card rounded-none border p-5">
+            <div className="bg-card rounded-md border p-5">
               <Label className="font-semibold mb-4 block">
                 {language === 'ru' ? 'Опишите ваш вопрос' : 'Describe Your Question'}
               </Label>
@@ -347,7 +347,7 @@ export default function LegalBooking() {
             />
 
             {/* Contact Info */}
-            <div className="bg-card rounded-none border p-5">
+            <div className="bg-card rounded-md border p-5">
               <h3 className="font-semibold mb-4">
                 {language === 'ru' ? 'Контактные данные' : 'Contact Information'}
               </h3>
@@ -368,7 +368,7 @@ export default function LegalBooking() {
             </div>
 
             {/* Payment Method */}
-            <div className="bg-card rounded-none border p-5">
+            <div className="bg-card rounded-md border p-5">
               <h3 className="font-semibold mb-4">
                 {language === 'ru' ? 'Способ оплаты' : 'Payment Method'}
               </h3>

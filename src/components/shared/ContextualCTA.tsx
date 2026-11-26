@@ -115,7 +115,7 @@ export function ContextualCTA({
   return (
     <section
       className={
-        'rounded-none border border-border bg-card p-4 ' + (className ?? '')
+        'rounded-md border border-border bg-card p-4 ' + (className ?? '')
       }
       aria-label={title}
     >

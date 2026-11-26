@@ -479,6 +479,9 @@ export const LifecycleMessaging = lazy(() => import('@/pages/admin/LifecycleMess
 export const ExperienceCategoriesPage = lazy(() => import('@/pages/admin/ExperienceCategoriesPage'));
 export const AdminUsersAccess = lazy(() => import('@/pages/admin/AdminUsersAccess'));
 export const AdminFinance = lazy(() => import('@/pages/admin/AdminFinance'));
+export const AdminClearViewQueue = lazy(() => import('@/pages/admin/AdminClearViewQueue'));
+export const AdminClearViewReview = lazy(() => import('@/pages/admin/AdminClearViewReview'));
+export const AdminContent = lazy(() => import('@/pages/admin/AdminContent'));
 export const AdminSystemSettings = lazy(() => import('@/pages/admin/AdminSystemSettings'));
 export const AdminApiKeys = lazy(() => import('@/pages/admin/AdminApiKeys'));
 export const AdminGoogleMapsDiagnostics = lazy(() => import('@/pages/admin/AdminGoogleMapsDiagnostics'));

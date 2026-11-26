@@ -52,11 +52,11 @@ export function TransportHeroSearch({ onSearch }: TransportHeroSearchProps) {
         </div>
 
         {/* Search Card */}
-        <div className="bg-card border border-border rounded-none p-4 md:p-6">
+        <div className="bg-card border border-border rounded-md p-4 md:p-6">
           {/* Main search row */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
             {/* Location */}
-            <div className="flex items-center gap-3 min-h-11 p-3.5 rounded-none bg-muted/50 border border-border/50">
+            <div className="flex items-center gap-3 min-h-11 p-3.5 rounded-sm bg-muted/50 border border-border/50">
               <MapPin className="w-6 h-6 text-primary shrink-0" aria-hidden />
               <div className="flex-1 min-w-0">
                 <p className="text-xs uppercase tracking-wide text-muted-foreground font-semibold">
@@ -73,7 +73,7 @@ export function TransportHeroSearch({ onSearch }: TransportHeroSearchProps) {
               <PopoverTrigger asChild>
                 <button
                   type="button"
-                  className="flex items-center gap-3 min-h-11 p-3.5 rounded-none bg-muted/50 border border-border/50 text-left hover:border-primary/50 transition-colors w-full"
+                  className="flex items-center gap-3 min-h-11 p-3.5 rounded-sm bg-muted/50 border border-border/50 text-left hover:border-primary/50 transition-colors w-full"
                 >
                   <CalendarIcon className="w-6 h-6 text-primary shrink-0" aria-hidden />
                   <div className="flex-1 min-w-0">
@@ -110,7 +110,7 @@ export function TransportHeroSearch({ onSearch }: TransportHeroSearchProps) {
               <PopoverTrigger asChild>
                 <button
                   type="button"
-                  className="flex items-center gap-3 min-h-11 p-3.5 rounded-none bg-muted/50 border border-border/50 text-left hover:border-primary/50 transition-colors w-full"
+                  className="flex items-center gap-3 min-h-11 p-3.5 rounded-sm bg-muted/50 border border-border/50 text-left hover:border-primary/50 transition-colors w-full"
                 >
                   <CalendarIcon className="w-6 h-6 text-primary shrink-0" aria-hidden />
                   <div className="flex-1 min-w-0">

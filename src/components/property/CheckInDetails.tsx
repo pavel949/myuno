@@ -172,7 +172,7 @@ export function CheckInDetails({
 
           <div className="min-w-0 flex flex-col gap-2">
             {keyHandover ? (
-              <div className="flex gap-2 p-3 rounded-none bg-card border border-border/50 min-h-[4.5rem]">
+              <div className="flex gap-2 p-3 rounded-md bg-card border border-border/50 min-h-[4.5rem]">
                 <Key className="w-5 h-5 text-muted-foreground shrink-0 mt-0.5" />
                 <div className="min-w-0">
                   <p className="text-xs text-muted-foreground mb-0.5">{isRu ? 'Доступ / ключи' : 'Access'}</p>
@@ -266,7 +266,7 @@ export function CheckInDetails({
         )}
 
         {manager && (manager.name || manager.phone) && (
-          <div className="p-3 rounded-none bg-card border border-border/50">
+          <div className="p-3 rounded-md bg-card border border-border/50">
             <p className="text-sm font-medium mb-2">{isRu ? 'Менеджер' : 'Property manager'}</p>
             {manager.name && <p className="text-sm">{manager.name}</p>}
             <div className="flex flex-wrap items-center gap-3 mt-2">

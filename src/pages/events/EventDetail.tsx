@@ -195,18 +195,18 @@ const EventDetail = () => {
 
         {/* Info Cards */}
         <div className="grid grid-cols-3 gap-3 mb-6">
-          <div className="bg-card rounded-none p-3 border border-border text-center">
+          <div className="bg-card rounded-md p-3 border border-border text-center">
             <Calendar className="w-5 h-5 mx-auto mb-1 text-primary" />
             <p className="text-xs font-medium">{formatDate(event.event_date).split(',')[0]}</p>
             <p className="text-xs text-muted-foreground">{event.event_time}</p>
           </div>
-          <div className="bg-card rounded-none p-3 border border-border text-center">
+          <div className="bg-card rounded-md p-3 border border-border text-center">
             <Clock className="w-5 h-5 mx-auto mb-1 text-primary" />
             <p className="text-xs font-medium">
               {event.duration_hours ? `${event.duration_hours}${language === 'ru' ? 'ч' : 'h'}` : '—'}
             </p>
           </div>
-          <div className="bg-card rounded-none p-3 border border-border text-center">
+          <div className="bg-card rounded-md p-3 border border-border text-center">
             <Tag className="w-5 h-5 mx-auto mb-1 text-primary" />
             <p className="text-xs font-medium">
               {isFree ? (language === 'ru' ? 'Бесплатно' : 'Free') : `${currencyInfo.symbol}${event.price?.toLocaleString()}`}

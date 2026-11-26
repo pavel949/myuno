@@ -69,7 +69,7 @@ export function ResalePropertyCard({ property, onClick, className }: ResalePrope
         }
       } : undefined}
       className={cn(
-        "block bg-card rounded-none border border-border/50 overflow-hidden cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+        "block bg-card rounded-md border border-border/50 overflow-hidden cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
         "hover:shadow-md transition-shadow",
         className
       )}

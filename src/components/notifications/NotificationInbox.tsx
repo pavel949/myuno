@@ -9,6 +9,7 @@ import { ContentSkeleton } from '@/components/ui/ContentSkeleton';
 import { NotificationFilters, NotificationFilterType } from './NotificationFilters';
 import { NotificationItemData } from './NotificationItem';
 import { VirtualNotificationList } from './VirtualNotificationList';
+import { groupNotifications, shortRef } from '@/lib/notifications/groupNotifications';
 
 interface NotificationInboxProps {
   notifications: NotificationItemData[];
@@ -51,6 +52,13 @@ export function NotificationInbox({
     if (activeFilter === 'all') return notifications;
     return notifications.filter(n => n.type === activeFilter);
   }, [notifications, activeFilter]);
+
+  const groups = useMemo(() => groupNotifications(filteredNotifications), [filteredNotifications]);
+  const isGrouped = groups.some((g) => g.kind !== 'other');
+  const groupTitle = (kind: string, ref: string | null) =>
+    kind === 'trip' ? `${isRu ? 'Поездка' : 'Trip'} · ${shortRef(ref ?? '')}`
+      : kind === 'purchase' ? `${isRu ? 'Покупка' : 'Purchase'} · ${shortRef(ref ?? '')}`
+        : (isRu ? 'Другие уведомления' : 'Other updates');
 
   if (isLoading) {
     return (
@@ -120,11 +128,24 @@ export function NotificationInbox({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
           >
-            <VirtualNotificationList
-              notifications={filteredNotifications}
-              onMarkRead={onMarkRead}
-              onDelete={onDelete}
-            />
+            {isGrouped ? (
+              <div className="space-y-6">
+                {groups.map((g) => (
+                  <section key={g.key} aria-label={groupTitle(g.kind, g.ref)}>
+                    <h2 className="mb-2 text-caption font-semibold uppercase tracking-wide text-muted-foreground">
+                      {groupTitle(g.kind, g.ref)}
+                    </h2>
+                    <VirtualNotificationList notifications={g.items} onMarkRead={onMarkRead} onDelete={onDelete} />
+                  </section>
+                ))}
+              </div>
+            ) : (
+              <VirtualNotificationList
+                notifications={filteredNotifications}
+                onMarkRead={onMarkRead}
+                onDelete={onDelete}
+              />
+            )}
           </motion.div>
         )}
       </AnimatePresence>

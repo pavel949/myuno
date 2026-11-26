@@ -111,7 +111,7 @@ export default function CapitalAdvisoryLanding() {
         en: 'Private Phuket real-estate deal channel for capital from $2M. Shortlist, due diligence, tax and legal — turnkey.',
       }}
     >
-      <div className="rounded-none border border-border bg-card p-6">
+      <div className="rounded-md border border-border bg-card p-6">
         <h2 className="text-xl font-semibold mb-4">
           {t({ ru: 'Что входит в работу', en: 'What is included' })}
         </h2>

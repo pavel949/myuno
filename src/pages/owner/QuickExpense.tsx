@@ -167,7 +167,7 @@ export default function QuickExpense() {
         </div>
 
         {/* Amount */}
-        <div className="bg-card rounded-none p-4 border">
+        <div className="bg-card rounded-md p-4 border">
           <Label className="text-xs text-muted-foreground mb-2 block">{isRu ? 'Сумма' : 'Amount'}</Label>
           <div className="flex gap-1.5 mb-3 overflow-x-auto scrollbar-hide -mx-1 px-1 touch-pan-y">
             {QUICK_AMOUNTS.map(amt => (

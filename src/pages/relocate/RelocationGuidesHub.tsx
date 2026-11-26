@@ -143,7 +143,7 @@ export default function RelocationGuidesHub() {
                 <Link
                   key={a.slug}
                   to={APP_ROUTES.RELOCATION_GUIDE(a.slug)}
-                  className="flex items-start gap-3 rounded-none border border-border bg-card p-4 hover:border-primary/50 transition-colors"
+                  className="flex items-start gap-3 rounded-md border border-border bg-card p-4 hover:border-primary/50 transition-colors"
                 >
                   <div className="flex-1 min-w-0">
                     <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">

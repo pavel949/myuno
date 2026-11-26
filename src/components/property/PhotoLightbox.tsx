@@ -135,7 +135,7 @@ export function PhotoLightbox({
               aria-label={isRu ? `Фото ${i + 1} из ${images.length}` : `Photo ${i + 1} of ${images.length}`}
               aria-current={currentIndex === i ? 'true' : undefined}
               className={cn(
-                "w-16 h-12 rounded-none overflow-hidden flex-shrink-0 border-2 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-media-foreground focus-visible:ring-offset-2 focus-visible:ring-offset-media-canvas",
+                "w-16 h-12 rounded-sm overflow-hidden flex-shrink-0 border-2 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-media-foreground focus-visible:ring-offset-2 focus-visible:ring-offset-media-canvas",
                 currentIndex === i
                   ? "border-media-foreground opacity-100 ring-2 ring-media-foreground/30"
                   : "border-transparent opacity-50 hover:opacity-80"

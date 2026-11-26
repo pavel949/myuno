@@ -301,7 +301,7 @@ export function PipelinePivotTable({ deals, pipelineData }: Props) {
       </div>
 
       {/* Table */}
-      <div className="border rounded-none overflow-x-auto bg-card">
+      <div className="border rounded-md overflow-x-auto bg-card">
         <table className="w-full text-xs">
           <thead>
             <tr className="border-b bg-muted/50">

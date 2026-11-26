@@ -429,6 +429,7 @@ const ADMIN_SIDEBAR_SOURCE: SidebarNavGroup[] = [
     items: [
       { path: '/admin/properties', labelEn: 'Properties', labelRu: 'Объекты', icon: Building2 },
       { path: '/admin/newbuilds', labelEn: 'New developments', labelRu: 'Новостройки', icon: Crown },
+      { path: '/admin/clearview', labelEn: 'ClearView reviews', labelRu: 'Проверки ClearView', icon: ShieldCheck },
       { path: '/admin/nb-leads', labelEn: 'New-development leads', labelRu: 'Заявки по новостройкам', icon: ListChecks },
       { path: '/admin/pm-companies', labelEn: 'Management companies', labelRu: 'Управляющие компании', icon: ContactRound },
       { path: '/admin/mc-dashboard', labelEn: 'Management dashboard', labelRu: 'Показатели УК', icon: BarChart3 },
@@ -478,6 +479,7 @@ const ADMIN_SIDEBAR_SOURCE: SidebarNavGroup[] = [
     labelEn: 'Content & data', labelRu: 'Контент и данные',
     items: [
       { path: '/admin/add', labelEn: 'Data entry', labelRu: 'Добавление данных', icon: Plus },
+      { path: '/admin/content', labelEn: 'Content manager', labelRu: 'Контент-менеджер', icon: FileText },
       { path: '/admin/experience-categories', labelEn: 'Experience categories', labelRu: 'Категории впечатлений', icon: Tag },
       { path: '/admin/life-situations', labelEn: 'Life situations', labelRu: 'Жизненные ситуации', icon: Heart },
       { path: '/admin/relocation-articles', labelEn: 'Relocation guides', labelRu: 'Гайды по переезду', icon: BookOpen },

@@ -364,13 +364,13 @@ const ServiceProviderDetail = () => {
               )}
 
               <div className="grid grid-cols-2 gap-4">
-                <div className="p-4 bg-card rounded-none border border-border">
+                <div className="p-4 bg-card rounded-md border border-border">
                   <p className="text-2xl font-bold text-primary">{reviewCount}</p>
                   <p className="text-sm text-muted-foreground">
                     {pickLang(language, {"ru": "Отзывов", "en": "Reviews", "th": "รีวิว"})}
                   </p>
                 </div>
-                <div className="p-4 bg-card rounded-none border border-border">
+                <div className="p-4 bg-card rounded-md border border-border">
                   <p className="text-2xl font-bold text-primary">{rating !== null && reviewCount > 0 ? rating.toFixed(1) : text("Пока нет оценки", "Not rated yet", "ยังไม่มีคะแนน")}</p>
                   <p className="text-sm text-muted-foreground">
                     {pickLang(language, {"ru": "Средний рейтинг", "en": "Average rating", "th": "คะแนนเฉลี่ย"})}
@@ -396,7 +396,7 @@ const ServiceProviderDetail = () => {
             ) : (
               <div className="space-y-4">
                 {reviews.map((review) => (
-                  <div key={review.id} className="p-4 bg-card rounded-none border border-border">
+                  <div key={review.id} className="p-4 bg-card rounded-md border border-border">
                     <div className="flex items-center justify-between mb-2">
                       <span className="font-medium">
                         {review.profile?.full_name || (pickLang(language, {"ru": "Гость", "en": "Guest", "th": "ผู้ใช้"}))}

@@ -248,7 +248,7 @@ export default function OffplanDetail() {
         )}
 
         {/* Price & Units */}
-        <div className="rounded-none border bg-card p-4 space-y-3">
+        <div className="rounded-md border bg-card p-4 space-y-3">
           <div className="flex items-center justify-between">
             <span className="text-muted-foreground">
               {pickLang(language, {"ru": "Цена", "en": "Price", "th": "ราคา"})}
@@ -342,7 +342,7 @@ export default function OffplanDetail() {
                         href={doc.file_url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="flex items-center gap-3 rounded-none border bg-card p-3 hover:bg-accent/40 transition-colors"
+                        className="flex items-center gap-3 rounded-md border bg-card p-3 hover:bg-accent/40 transition-colors"
                       >
                         <div className="w-10 h-10 rounded-none bg-primary/10 flex items-center justify-center flex-shrink-0">
                           <FileText className="w-5 h-5 text-primary" />

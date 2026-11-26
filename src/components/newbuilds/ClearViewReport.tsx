@@ -18,6 +18,8 @@
  *  └───────────────────────────────────────────────┘
  */
 import React from 'react';
+import { Link } from 'react-router-dom';
+import { APP_ROUTES } from '@/lib/config/routes';
 import { pickLang } from '@/lib/i18n/pickLang';
 import {
   Shield,
@@ -105,7 +107,7 @@ export function ClearViewReport({ projectId, isBrokered, publicView = false }: P
   const ownerView = !publicView && !isAdmin && isProjectDeveloper;
 
   return (
-    <section className="border border-border bg-card p-5 sm:p-6 space-y-5 rounded-none">
+    <section className="border border-border bg-card p-5 sm:p-6 space-y-5 rounded-md">
       {/* Header */}
       <header className="flex items-start justify-between gap-3">
         <div className="flex items-center gap-2.5">
@@ -131,30 +133,24 @@ export function ClearViewReport({ projectId, isBrokered, publicView = false }: P
         </div>
         {isAdmin && !publicView && (
           <div className="flex gap-2">
-            {report && (
+            {report && report.is_published && (
               <Button
                 size="sm"
                 variant="outline"
                 className="rounded-none"
-                onClick={() =>
-                  togglePublish.mutate({
-                    id: report.id,
-                    projectId,
-                    publish: !report.is_published,
-                  })
-                }
+                onClick={() => togglePublish.mutate({ id: report.id, projectId, publish: false })}
               >
-                {report.is_published ? (
-                  <>
-                    <EyeOff className="w-3.5 h-3.5 mr-1" />
-                    {isRu ? 'Скрыть' : 'Unpublish'}
-                  </>
-                ) : (
-                  <>
-                    <Eye className="w-3.5 h-3.5 mr-1" />
-                    {isRu ? 'Опубликовать' : 'Publish'}
-                  </>
-                )}
+                <EyeOff className="w-3.5 h-3.5 mr-1" />
+                {isRu ? 'Скрыть' : 'Unpublish'}
+              </Button>
+            )}
+            {report && !report.is_published && (
+              /* Publishing needs two reviewers (hq_publish_clearview_report). */
+              <Button asChild size="sm" variant="outline" className="rounded-none">
+                <Link to={APP_ROUTES.ADMIN_CLEARVIEW_REVIEW(report.id)}>
+                  <Eye className="w-3.5 h-3.5 mr-1" />
+                  {isRu ? 'На проверку' : 'Review to publish'}
+                </Link>
               </Button>
             )}
             <Button

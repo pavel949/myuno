@@ -51,7 +51,7 @@ export function CalmClusterHero({
   return (
     <div className={cn('relative px-4 pt-4 pb-5', className)}>
       <BackButton fallbackPath={fallbackPath} className="mb-3" />
-      <div className="rounded-none border border-border bg-card p-5">
+      <div className="rounded-md border border-border bg-card p-5">
         <div className="flex items-center gap-3">
           <div
             className={cn(

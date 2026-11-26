@@ -118,7 +118,7 @@ export function NbCompareProvider({ children }: { children: React.ReactNode }) {
                   </div>
                 ))}
                 {items.length < MAX_COMPARE && (
-                  <div className="w-10 h-10 rounded-none border-2 border-dashed flex items-center justify-center" style={{ borderColor: 'hsl(var(--nb-gold) / 0.3)' }}>
+                  <div className="w-10 h-10 rounded-sm border-2 border-dashed flex items-center justify-center" style={{ borderColor: 'hsl(var(--nb-gold) / 0.3)' }}>
                     <span className="text-xs" style={{ color: 'hsl(var(--nb-gold) / 0.5)' }}>+</span>
                   </div>
                 )}
