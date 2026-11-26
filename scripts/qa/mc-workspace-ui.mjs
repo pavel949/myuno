@@ -9,6 +9,8 @@ const output = '/tmp/browser/mc-workspace-isolated';
 await mkdir(output, { recursive: true });
 const queryState = `const state=new URLSearchParams(location.search).get('state')||'empty';const base={isLoading:state==='loading',isError:state==='error',error:state==='error'?Error('Synthetic failure'):null,refetch:()=>{window.fixtureRetries=(window.fixtureRetries||0)+1}};`;
 const virtual = {
+  // This fixture exercises rendered links, not speculative loads of unrelated pages.
+  '@/lib/prefetchRoute': `export const prefetchRoute=()=>{};`,
   '@/contexts/LanguageContext': `export const useLanguage=()=>({language:new URLSearchParams(location.search).get('lang')||'ru',t:key=>key,setLanguage:value=>{window.fixtureLanguage=value}});`,
   '@/contexts/ThemeContext': `export const useTheme=()=>({theme:'light',setTheme:value=>{window.fixtureTheme=value}});`,
   '@/contexts/CurrencyContext': `export const currencies={THB:{code:'THB',symbol:'฿',name:'Thai baht',nameRu:'Тайский бат'}};export const useCurrency=()=>({currency:'THB',currencyInfo:currencies.THB,setCurrency:value=>{window.fixtureCurrency=value}});`,
