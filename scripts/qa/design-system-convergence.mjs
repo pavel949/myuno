@@ -20,6 +20,7 @@ const homeStyles = [
   'src/styles/homepage-refinement.css',
   'src/styles/home-reference.css',
   'src/styles/home-mobile-polish.css',
+  'src/styles/marketplace-unity.css',
 ];
 const baseline = process.argv.includes('--baseline');
 const tokensPath = path.join(root, 'src/styles/tokens.css');
