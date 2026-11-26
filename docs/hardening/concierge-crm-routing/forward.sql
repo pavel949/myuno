@@ -16,6 +16,7 @@ REVOKE ALL ON private.concierge_notification_outbox FROM PUBLIC,anon,authenticat
 CREATE FUNCTION private.enqueue_concierge_request() RETURNS trigger
 LANGUAGE plpgsql SECURITY DEFINER SET search_path='' AS $$
 BEGIN
+ IF NEW.source_data->>'concierge_notification_transport' IS DISTINCT FROM 'outbox_v1' THEN RETURN NEW; END IF;
  INSERT INTO private.concierge_notification_outbox(request_id,recipient)
  VALUES(NEW.id,'66630827085'),(NEW.id,'66954243332');
  RETURN NEW;

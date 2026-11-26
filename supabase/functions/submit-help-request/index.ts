@@ -9,7 +9,9 @@
 import { z } from "https://deno.land/x/zod@v3.23.8/mod.ts";
 import { createServiceClient } from "../_shared/supabase.ts";
 import { getCorsHeaders } from "../_shared/cors.ts";
-import { getAdminEmails, getMailFrom } from "../_shared/admin-config.ts";
+import { getAdminEmails, getAdminWhatsApp, getMailFrom } from "../_shared/admin-config.ts";
+import { sendWhatsApp } from "../_shared/whatsapp.ts";
+import { stampConciergeTransport, conciergeOutboxEnabled } from "../_shared/concierge-notifications.mjs";
 
 const BodySchema = z.object({
   topic: z.enum(["visa", "invest", "business", "relocation", "property", "legal", "finance", "general"]),
@@ -37,6 +39,13 @@ const TOPIC_LABEL_RU: Record<string, string> = {
   legal: "Юридические вопросы",
   finance: "Финансы",
   general: "Общий вопрос",
+};
+
+const URGENCY_EMOJI: Record<string, string> = {
+  low: "🟢",
+  normal: "🔵",
+  high: "🟠",
+  urgent: "🔴",
 };
 
 Deno.serve(async (req) => {
@@ -72,6 +81,8 @@ Deno.serve(async (req) => {
   }
 
   const input = parsed.data;
+  // Server-only switch. Source synchronization alone must not change live transport.
+  const useOutbox = conciergeOutboxEnabled(Deno.env.get("CONCIERGE_OUTBOX_ENABLED"));
   const sb = createServiceClient();
 
   // Resolve current user (if any) from JWT
@@ -118,7 +129,7 @@ Deno.serve(async (req) => {
       referral_code: input.referral_code,
       vendor_id: input.vendor_id,
       listing_id: input.listing_id,
-      source_data: input.source_data ?? {},
+      source_data: stampConciergeTransport(input.source_data, useOutbox),
       status: "new",
     })
     .select("id, created_at")
@@ -132,9 +143,31 @@ Deno.serve(async (req) => {
     });
   }
 
-  // CRM + both WhatsApp copies are persisted by the reviewed DB trigger/outbox.
-  // Deploy this handler only with the coordinated queue activation; no direct
-  // send here, so scheduler retries cannot duplicate a legacy notification.
+  // Only the server switch stamps rows for the new trigger. Legacy requests
+  // retain their sender during rolling deployment; they never enter the queue.
+  if (!useOutbox) {
+    try {
+      const adminWa = await getAdminWhatsApp();
+      const waBody = [
+        `${URGENCY_EMOJI[input.urgency]} *myUNO Help Request*`,
+        `Тема: *${TOPIC_LABEL_RU[input.topic]}*`,
+        input.subject ? `Заголовок: ${input.subject}` : null,
+        `Срочность: ${input.urgency}`,
+        `Канал: ${input.preferred_channel}`,
+        finalEmail ? `Email: ${finalEmail}` : null,
+        finalPhone ? `Phone: ${finalPhone}` : null,
+        input.source_route ? `Откуда: ${input.source_route}` : null,
+        "",
+        input.message.slice(0, 600),
+        "",
+        `ID: ${hr.id}`,
+      ].filter(Boolean).join("\n");
+      sendWhatsApp({ to: adminWa, body: waBody }).catch((e) => console.warn("[submit-help-request] wa send failed:", e));
+    } catch (e) {
+      console.warn("[submit-help-request] whatsapp prep failed:", e);
+    }
+
+  }
 
   try {
     const adminEmails = await getAdminEmails();

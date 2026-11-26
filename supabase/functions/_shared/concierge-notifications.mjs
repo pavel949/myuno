@@ -1,6 +1,11 @@
 import { createWorker } from './consultation-outbox/worker.mjs';
 import { schedulerAuthorization } from './consultation-outbox/adapters.mjs';
 
+export const conciergeOutboxEnabled = value => value === 'true';
+export function stampConciergeTransport(sourceData, enabled) {
+  return {...(sourceData ?? {}), concierge_notification_transport: enabled ? 'outbox_v1' : 'legacy'};
+}
+
 export const CONCIERGE_RECIPIENTS = Object.freeze(['66630827085', '66954243332']);
 const clean = (value, max) => String(value ?? '').replace(/[\u0000-\u001f\u007f]/g, ' ').slice(0, max);
 export function conciergeMessage(lead) {

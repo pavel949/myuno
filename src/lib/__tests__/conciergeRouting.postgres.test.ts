@@ -23,7 +23,7 @@ beforeAll(async()=>{
  CREATE TABLE system_settings(key text PRIMARY KEY,value jsonb);
  CREATE TABLE crm_contacts(id uuid PRIMARY KEY DEFAULT gen_random_uuid(),company_id uuid,first_name text,email text,phone text,language text,source text,created_by uuid,created_at timestamptz DEFAULT now());
  CREATE TABLE crm_tasks(id uuid PRIMARY KEY DEFAULT gen_random_uuid(),company_id uuid,contact_id uuid,title text,description text,task_type text,priority text,status text,assigned_to uuid,created_by uuid);
- CREATE TABLE help_requests(id uuid PRIMARY KEY DEFAULT gen_random_uuid(),crm_task_id uuid,crm_contact_id uuid,subject text,message text,topic text,urgency text,language text,contact_email text,contact_phone text);
+ CREATE TABLE help_requests(id uuid PRIMARY KEY DEFAULT gen_random_uuid(),crm_task_id uuid,crm_contact_id uuid,subject text,message text,topic text,urgency text,language text,contact_email text,contact_phone text,source_data jsonb);
  GRANT USAGE ON SCHEMA public TO service_role,anon,authenticated;`);
  const migration=await sql.reserve();
  try {await migration.unsafe(readFileSync('docs/hardening/concierge-crm-routing/forward.sql','utf8'));} catch(error){await migration.unsafe('ROLLBACK');throw error;} finally{migration.release();}
@@ -31,9 +31,10 @@ beforeAll(async()=>{
  await sql`INSERT INTO management_company_members(company_id,user_id) VALUES(${company},${owner})`;
 },30000);
 afterAll(async()=>{if(sql)await sql.end();if(started)run('pg_ctl',['-D',join(directory,'data'),'-m','immediate','-w','stop']);if(directory)rmSync(directory,{recursive:true,force:true});});
-async function insert(){const [r]=await sql`INSERT INTO help_requests(message,topic,urgency,language,contact_email) VALUES('Synthetic request','general','normal','en','fixture@example.test') RETURNING id`;return r.id;}
+async function insert(){const [r]=await sql`INSERT INTO help_requests(message,topic,urgency,language,contact_email,source_data) VALUES('Synthetic request','general','normal','en','fixture@example.test','{"concierge_notification_transport":"outbox_v1"}') RETURNING id`;return r.id;}
 async function claim(){return sql.begin(async c=>{await c.unsafe('SET LOCAL ROLE service_role');return c`SELECT * FROM claim_concierge_notifications()`;});}
 describe('unapplied concierge CRM and two-recipient outbox contract',()=>{
+ it('does not enqueue legacy or unmarked requests during rolling activation',async()=>{await sql`INSERT INTO help_requests(message) VALUES('Synthetic legacy request')`;expect(await sql`SELECT * FROM private.concierge_notification_outbox`).toHaveLength(0);});
  it('retains request and two pending copies when route is missing',async()=>{await insert();await expect(claim()).rejects.toBeDefined();expect(await sql`SELECT * FROM crm_tasks`).toHaveLength(0);expect(await sql`SELECT * FROM private.concierge_notification_outbox WHERE state='pending'`).toHaveLength(2);});
  it('creates one CRM task before claiming the two independent copies',async()=>{await sql`INSERT INTO system_settings VALUES('concierge_crm_route',${sql.json({company_id:company,owner_user_id:owner})})`;const jobs=await claim();expect(jobs).toHaveLength(2);expect(new Set(jobs.map(j=>j.lead.recipient))).toEqual(new Set(['66630827085','66954243332']));expect(await sql`SELECT * FROM crm_tasks`).toHaveLength(1);expect(await sql`SELECT * FROM crm_contacts`).toHaveLength(0);expect(await claim()).toHaveLength(0);});
  it('never invents contact identity while keeping separate request tasks',async()=>{await insert();await claim();expect(await sql`SELECT * FROM crm_contacts`).toHaveLength(0);expect(await sql`SELECT * FROM crm_tasks`).toHaveLength(2);});

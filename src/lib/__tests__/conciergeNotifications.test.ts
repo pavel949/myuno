@@ -1,9 +1,10 @@
 import {describe,it,expect,vi} from 'vitest';
 import {webcrypto} from 'node:crypto';
 import {CONCIERGE_CONTACTS} from '../config/contacts';
-import {conciergeSender,conciergeMessage,createConciergeRuntime,CONCIERGE_RECIPIENTS} from '../../../supabase/functions/_shared/concierge-notifications.mjs';
+import {conciergeSender,conciergeMessage,createConciergeRuntime,CONCIERGE_RECIPIENTS,conciergeOutboxEnabled,stampConciergeTransport} from '../../../supabase/functions/_shared/concierge-notifications.mjs';
 const lead={id:'00000000-0000-4000-8000-000000000001',recipient:'66630827085',topic:'general',message:'Synthetic request',language:'th'};
 describe('concierge WhatsApp routing',()=>{
+ it('requires an exact server opt-in and overwrites forged browser transport markers',()=>{for(const value of [undefined,'false','TRUE','1',true])expect(conciergeOutboxEnabled(value)).toBe(false);expect(conciergeOutboxEnabled('true')).toBe(true);expect(stampConciergeTransport({source:'fixture',concierge_notification_transport:'outbox_v1'},false)).toEqual({source:'fixture',concierge_notification_transport:'legacy'});expect(stampConciergeTransport({},true).concierge_notification_transport).toBe('outbox_v1');});
  it('server allowlist matches the public directory',()=>expect(CONCIERGE_RECIPIENTS).toEqual(CONCIERGE_CONTACTS.map(c=>c.phone.slice(1))));
  it('keeps original request and canonical source link with English labels',()=>{const body=conciergeMessage(lead);expect(body).toContain('Synthetic request');expect(body).toContain('Language: th');expect(body).toContain('source=help_requests&request='+lead.id);});
  it('does not enable sending without configured credentials',()=>expect(conciergeSender({})).toEqual({}));
