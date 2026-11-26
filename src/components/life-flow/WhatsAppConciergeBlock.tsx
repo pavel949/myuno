@@ -3,7 +3,8 @@
  * Calm, trust-building block. No gradients, no glow.
  */
 import { useLanguage } from '@/contexts/LanguageContext';
-import { COMPANY_CONTACTS } from '@/lib/config/contacts';
+import { useState } from 'react';
+import { ConciergeHelpSheet } from '@/components/concierge/ConciergeHelpSheet';
 import { MessageCircle, Clock } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
@@ -17,19 +18,7 @@ export function WhatsAppConciergeBlock({ context = 'trip', className }: WhatsApp
   const { language } = useLanguage();
   const isRu = language === 'ru';
 
-  const messages: Record<string, { ru: string; en: string }> = {
-    trip: {
-      ru: 'Здравствуйте! Помогите с моей ситуацией на Пхукете',
-      en: 'Hi! I need help with my situation in Phuket',
-    },
-    general: {
-      ru: 'Здравствуйте! Мне нужна помощь',
-      en: 'Hi! I need help',
-    },
-  };
-
-  const msg = messages[context] || messages.trip;
-  const whatsappUrl = `https://wa.me/${COMPANY_CONTACTS.whatsapp.number}?text=${encodeURIComponent(isRu ? msg.ru : msg.en)}`;
+  const [open, setOpen] = useState(false);
 
   return (
     <motion.div
@@ -57,17 +46,19 @@ export function WhatsAppConciergeBlock({ context = 'trip', className }: WhatsApp
 
         <Button
           className="w-full bg-success hover:bg-success/90 text-success-foreground"
-          onClick={() => window.open(whatsappUrl, '_blank')}
+          onClick={() => setOpen(true)}
         >
           <MessageCircle className="w-4 h-4" />
-          {isRu ? 'Написать в WhatsApp' : 'Message on WhatsApp'}
+          {isRu ? 'Оставить заявку' : language === 'th' ? 'ส่งคำขอ' : 'Send a request'}
         </Button>
 
         <p className="text-center text-[10px] text-muted-foreground flex items-center justify-center gap-1">
           <Clock className="w-3 h-3" />
-          {isRu ? 'Обычно отвечаем за 15 минут' : 'Usually reply within 15 minutes'}
+          {isRu ? 'Команда myUNO уточнит детали' : 'The myUNO team will confirm the details'}
         </p>
       </div>
+      {open && <ConciergeHelpSheet open={open} onOpenChange={setOpen} topic="general"
+        sourceData={{source: 'life_flow_concierge', context}} />}
     </motion.div>
   );
 }

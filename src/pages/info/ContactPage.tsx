@@ -8,7 +8,7 @@ import {
   Mail, Phone, MapPin, Clock, MessageCircle, 
   Globe, Building2, Headphones, Send 
 } from 'lucide-react';
-import { COMPANY_CONTACTS, getWhatsAppUrl, getTelLink, getMailtoLink } from '@/lib/config';
+import { COMPANY_CONTACTS, CONCIERGE_CONTACTS, getTelLink, getMailtoLink } from '@/lib/config';
 
 export default function ContactPage() {
   const { language } = useLanguage();
@@ -31,14 +31,18 @@ export default function ContactPage() {
       actionLabel: isRu ? 'Позвонить' : 'Call',
       href: getTelLink(),
     },
-    {
+    ...CONCIERGE_CONTACTS.map(contact => ({
       icon: MessageCircle,
-      title: 'WhatsApp',
-      description: `${COMPANY_CONTACTS.contactPerson} · ${isRu ? 'Английский и русский' : 'English and Russian'}`,
-      action: COMPANY_CONTACTS.phone.display,
-      actionLabel: isRu ? 'Написать' : 'Message',
-      href: COMPANY_CONTACTS.whatsapp.link,
-    },
+      title: contact.name ? `WhatsApp · ${contact.name}` : 'WhatsApp · myUNO',
+      description: contact.languages.map(code => ({
+        ru: { th: 'Тайский', en: 'Английский', ru: 'Русский' },
+        th: { th: 'ไทย', en: 'อังกฤษ', ru: 'รัสเซีย' },
+        en: { th: 'Thai', en: 'English', ru: 'Russian' },
+      }[language === 'ru' || language === 'th' ? language : 'en'][code])).join(' · '),
+      action: contact.display,
+      actionLabel: isRu ? 'Написать' : language === 'th' ? 'ส่งข้อความ' : 'Message',
+      href: contact.whatsapp,
+    })),
   ];
 
   const departments = [
@@ -71,7 +75,7 @@ export default function ContactPage() {
         />
 
         {/* Main Contact Methods */}
-        <div className="grid gap-4 md:grid-cols-3 mb-8">
+        <div className="grid gap-4 sm:grid-cols-2 mb-8">
           {contactMethods.map((method, index) => (
             <Card key={index} className="text-center">
               <CardContent className="pt-6">

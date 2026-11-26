@@ -7377,7 +7377,7 @@
     },
     {
       "file": "src/components/life-flow/WhatsAppConciergeBlock.tsx",
-      "sha256": "d8c3640961a961ccfb49dd00cec0ee77859754c9b33d5edea72169f190c70a80",
+      "sha256": "b75f629ad88114bc97163a808edfa5b6605e45ad8e10e7307c4994c3e2fd959d",
       "directRouteDeclarations": [],
       "runtime": "NOTTESTED",
       "visual": "NOTTESTED",
@@ -7387,7 +7387,7 @@
           "source": "@/components/ui/button",
           "instances": 1,
           "lines": [
-            58
+            47
           ]
         }
       ]
@@ -20687,7 +20687,7 @@
     },
     {
       "file": "src/pages/Support.tsx",
-      "sha256": "b69c4a1b694d675e0a5badfacc93e09bf3d38be57a3598db3d0e9a06f1fdf30c",
+      "sha256": "125b87c7788d0bbbea32705c035fca892255287a290c09e7f78ea3237b69fba4",
       "directRouteDeclarations": [
         {
           "id": "432ef2d5d1b4244c",
@@ -20704,7 +20704,7 @@
           "source": "@/components/uno/PageContainer",
           "instances": 1,
           "lines": [
-            139
+            136
           ]
         },
         {
@@ -20712,7 +20712,7 @@
           "source": "@/components/uno/PageHeader",
           "instances": 1,
           "lines": [
-            140
+            137
           ]
         },
         {
@@ -20720,14 +20720,14 @@
           "source": "@/components/uno/SectionCard",
           "instances": 8,
           "lines": [
-            168,
-            197,
-            242,
-            262,
-            289,
-            309,
-            329,
-            376
+            165,
+            194,
+            239,
+            259,
+            286,
+            306,
+            326,
+            373
           ]
         },
         {
@@ -20735,7 +20735,7 @@
           "source": "@/components/ui/textarea",
           "instances": 1,
           "lines": [
-            264
+            261
           ]
         }
       ]
@@ -20875,7 +20875,7 @@
     },
     {
       "file": "src/pages/VipConcierge.tsx",
-      "sha256": "61e49d8075735dd392db6421a315d05de2890e059029d93d3a33f7fe793e7116",
+      "sha256": "83008e623f5ca263dadba4ba518f937bd0d6a739b7fe53cb45c919d090cdf831",
       "directRouteDeclarations": [
         {
           "id": "7567752e736dfb04",
@@ -20892,9 +20892,9 @@
           "source": "@/components/ui/button",
           "instances": 3,
           "lines": [
-            188,
-            196,
-            274
+            192,
+            200,
+            279
           ]
         },
         {
@@ -20902,7 +20902,7 @@
           "source": "@/components/uno/PageContainer",
           "instances": 1,
           "lines": [
-            159
+            163
           ]
         },
         {
@@ -20910,7 +20910,7 @@
           "source": "@/components/uno/PageHeader",
           "instances": 1,
           "lines": [
-            160
+            164
           ]
         }
       ]
@@ -29684,7 +29684,7 @@
     },
     {
       "file": "src/pages/info/ContactPage.tsx",
-      "sha256": "9953948498025de2bb8dd914143fe6e36799f54149c75bde62c87c0d113e58ef",
+      "sha256": "e0b14270b8a3751c8dc40e5c9c395b0064be74d8e63dbffd585cc923f6a52c86",
       "directRouteDeclarations": [
         {
           "id": "2e2ee6014b499382",
@@ -29701,7 +29701,7 @@
           "source": "@/components/ui/button",
           "instances": 1,
           "lines": [
-            84
+            88
           ]
         },
         {
@@ -29709,10 +29709,10 @@
           "source": "@/components/ui/card",
           "instances": 4,
           "lines": [
-            76,
-            101,
-            127,
-            159
+            80,
+            105,
+            131,
+            163
           ]
         },
         {
@@ -29720,7 +29720,7 @@
           "source": "@/components/uno/PageContainer",
           "instances": 1,
           "lines": [
-            67
+            71
           ]
         },
         {
@@ -29728,7 +29728,7 @@
           "source": "@/components/uno/PageHeader",
           "instances": 1,
           "lines": [
-            68
+            72
           ]
         }
       ]

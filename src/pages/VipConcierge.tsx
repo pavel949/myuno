@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { 
   Crown, 
   Sparkles, 
@@ -25,7 +25,9 @@ import { SectionCard } from '@/components/uno/SectionCard';
 import { Button } from '@/components/ui/button';
 import { FadeInUp, AnimatedList, AnimatedItem } from '@/components/layout/AnimatedList';
 import { cn } from '@/lib/utils';
-import { COMPANY_CONTACTS, getTelLink } from '@/lib/config/contacts';
+import { getTelLink } from '@/lib/config/contacts';
+
+import { ConciergeHelpSheet } from '@/components/concierge/ConciergeHelpSheet';
 
 interface VipService {
   id: string;
@@ -153,6 +155,8 @@ const vipServices: VipService[] = [
 
 export default function VipConcierge() {
   const { language, t } = useLanguage();
+  const [request, setRequest] = useState<{service?: VipService} | null>(null);
+  const requestLabel = language === 'ru' ? 'Оставить заявку' : language === 'th' ? 'ส่งคำขอ' : 'Send a request';
 
   return (
     <AppLayout>
@@ -197,10 +201,10 @@ export default function VipConcierge() {
                 size="lg"
                 variant="outline"
                 className="flex-1 border-accent-purple/50 text-accent-purple hover:bg-accent-purple/10"
-                onClick={() => window.open(COMPANY_CONTACTS.whatsapp.link, '_blank')}
+                onClick={() => setRequest({})}
               >
                 <MessageCircle className="w-5 h-5 mr-2" />
-                WhatsApp
+                {requestLabel}
               </Button>
             </div>
           </div>
@@ -237,9 +241,10 @@ export default function VipConcierge() {
             const Icon = service.icon;
             return (
               <AnimatedItem key={service.id}>
-              <div 
-                  className="p-4 rounded-none border bg-card cursor-pointer hover:border-accent-purple/30 transition-colors"
-                  onClick={() => window.open(COMPANY_CONTACTS.whatsapp.link, '_blank')}
+              <button
+                  type="button"
+                  className="w-full text-left p-4 rounded-none border bg-card cursor-pointer hover:border-accent-purple/30 transition-colors"
+                  onClick={() => setRequest({service})}
                 >
                   <div className="flex items-center gap-4">
                     <div className={cn("p-3 rounded-none", service.bgColor)}>
@@ -255,7 +260,7 @@ export default function VipConcierge() {
                     </div>
                     <MessageCircle className="w-5 h-5 text-muted-foreground flex-shrink-0" />
                   </div>
-                </div>
+                </button>
               </AnimatedItem>
             );
           })}
@@ -273,13 +278,21 @@ export default function VipConcierge() {
             </p>
             <Button
               className="w-full bg-gradient-to-r from-accent-purple to-accent-purple/80 hover:from-accent-purple/90 hover:to-accent-purple/70 text-white"
-              onClick={() => window.open(COMPANY_CONTACTS.whatsapp.link, '_blank')}
+              onClick={() => setRequest({})}
             >
               <MessageCircle className="w-4 h-4 mr-2" />
-              {t('vip.messageWhatsApp')}
+              {requestLabel}
             </Button>
           </div>
         </FadeInUp>
+        {request && <ConciergeHelpSheet
+          key={request?.service?.id ?? 'general'}
+          open={request !== null}
+          onOpenChange={open => { if (!open) setRequest(null); }}
+          topic="general"
+          initialSubject={request?.service ? (language === 'ru' ? request.service.titleRu : request.service.title) : 'myUNO VIP'}
+          sourceData={{ source: 'vip_concierge', service_id: request?.service?.id ?? null }}
+        />}
       </PageContainer>
     </AppLayout>
   );
