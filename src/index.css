@@ -166,7 +166,7 @@ body {
   }
 
 
-  /* Typography — Source Serif 4 (display), Geist (body) — DS 2.1 */
+  /* Typography — Outfit (display), Manrope (body) — Design Bible v4 */
   h1 {
     @apply font-display font-bold tracking-tight;
     font-size: var(--type-page-h1-size);

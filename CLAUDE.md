@@ -210,50 +210,19 @@
 
 ## 6. DESIGN SYSTEM
 
-> **See `DESIGN.md`** for the full, canonical design system. Always read it before making visual/UI decisions.
-> `DESIGN.md` was re-synced 2026-05-14 against `src/styles/tokens.css` runtime; this section is its short-form mirror.
+Use [DESIGN.md](DESIGN.md) for current visual rules. The single runtime source is
+`src/styles/tokens.css`. Use semantic utilities (`bg-primary`, `text-foreground`,
+`bg-card`, `border-border`), not raw color/geometry literals.
 
-**Aesthetic direction (DS 2.1):** civic infrastructure — calm, authoritative, light-first. Reference points (per `tokens.css` header): GOV.UK, e-Estonia, The Economist, Apple support docs. **No mint, no glassmorphism, no glow, no decorative gradients.** Sharp corners by default (`--radius: 0`).
-
-**Light theme — `:root` (default):**
-- `--background` `#F7F5F1` (cream)
-- `--foreground` `#1C1916` (ink)
-- `--primary` `#0A2240` (navy) — CTAs, brand
-- `--accent` `#D96B1A` (orange) — **singular** accent, ≤3% of screen
-
-**Dark theme — `.dark` (admin/MC opt-in only):**
-- `--background` `#051428` (navy-900)
-- `--foreground` `#F7F5F1` (cream)
-- `--primary` `#D96B1A` (orange) — better contrast on navy than navy-on-navy
-- `--accent` navy-light
-
-**⛔ Retired in DS 2.1 (do not reintroduce):**
-- Mint `#00D68F` as primary (was dark-mode primary in DS 2.0)
-- 6-color cluster rainbow (mint/blue/gold/purple/teal/red) — clusters now muted navy/orange/stone
-- Dark-default theme — light is default, dark is opt-in
-- Golos Text / DM Sans / JetBrains Mono — replaced by Source Serif 4 + Geist + IBM Plex Mono
-
-**Border radius (only these are permitted):**
-- `--radius` (default): **0px** — buttons, cards, panels, inputs, modals
-- `--radius-sm`: 2px — mini-badges, category chips
-- `--radius-full`: 9999px — avatars, status dots, pill toggles
-- 8–16px mid-range radius is **forbidden** (mid-tokens collapsed to 0)
-
-**Fonts (canonical, matches `tokens.css` + DESIGN.md Typography table):**
-- Display / headings: **Source Serif 4** (both languages, primary)
-- Body / UI: **Geist** (both languages, primary)
-- Numerics / data / mono: **IBM Plex Mono** with `font-feature-settings: "tnum"`
-- Locale fallback (RU): Unbounded → Golos Text → Noto Serif / Noto Sans
-- Locale fallback (EN): Noto Serif → Noto Sans → Georgia / system-ui
-- Thai glyphs: **Noto Sans Thai**, supplied by the canonical font stylesheet; Latin text retains Source Serif 4 / Geist.
-- Legacy fallback: JetBrains Mono may remain after IBM Plex Mono in the canonical stack. Cormorant Garamond is allowed only in the existing `/newbuilds/` luxury exception.
-- ⛔ Forbidden font families: Syne, DM Sans, Playfair Display.
-
-**Other rules:**
-- **Components:** shadcn/ui + Radix UI. Mobile = Sheet (bottom), not Dialog
-- **Min touch target:** 44×44 on `pointer: coarse`
-- **Runtime tokens:** `src/styles/tokens.css` is the **source of truth**. `src/design-system/tokens.json` (DS 2.0) is deprecated — do not use.
-- **Use semantic tokens, never raw brand colors:** `bg-primary` / `text-accent` / `text-foreground` / `bg-card` / `border-border` — not `bg-navy` / `text-orange-400` / `text-white` / `bg-white/0.06`. Raw colors break theme-switch and accumulate as tech debt.
+- Design Bible v4: Navy, paper, restrained gold. Light remains the default;
+  the dark theme is the same system, not a second set of components.
+- Outfit display, Manrope UI, IBM Plex Mono numerics. Preserve locale-aware
+  fallbacks, including Noto Sans Thai and Manrope for Cyrillic-heading glyphs.
+- Use 4/8/12px for control/card/media and pills for avatars, status dots and
+  explicit pill controls. Do not add `rounded-xl`, `rounded-2xl` or
+  `rounded-3xl`; existing uses resolve to 12px.
+- Preserve shadcn/Radix behavior, keyboard focus, visible error/loading states
+  and 44×44 touch targets. Avoid decorative gradients, glow and glass effects.
 
 ---
 

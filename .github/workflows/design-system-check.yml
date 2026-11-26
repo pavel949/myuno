@@ -30,7 +30,7 @@ jobs:
       - name: Guard authored theme sources
         run: |
           npm run design:check
-          node --test scripts/design-system-audit.test.mjs scripts/design-system-adoption-register.test.mjs
+          node --test scripts/design-system-audit.test.mjs scripts/design-system-adoption-register.test.mjs scripts/v4-foundation.test.mjs
           node scripts/design-system-adoption-register.mjs --check
         env:
           NODE_OPTIONS: --require ./scripts/qa/local-network-only.cjs
