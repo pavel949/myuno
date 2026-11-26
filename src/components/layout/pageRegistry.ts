@@ -325,7 +325,6 @@ export const SellItemPage = lazy(() => import('@/pages/market/SellItemPage'));
 // ── Classifieds (Барахолка) ──
 export const ClassifiedsIndex = lazy(() => import('@/pages/classifieds/ClassifiedsIndex'));
 export const ClassifiedDetailPage = lazy(() => import('@/pages/classifieds/ClassifiedDetailPage'));
-export const ClassifiedsSellPage = lazy(() => import('@/pages/classifieds/ClassifiedsSellPage'));
 
 // ── Other ──
 export const Favorites = lazy(() => import('@/pages/Favorites'));

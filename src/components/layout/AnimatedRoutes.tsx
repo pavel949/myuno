@@ -633,7 +633,7 @@ export const AnimatedRoutes: React.FC = () => {
         
         {/* ── Classifieds (Барахолка) ── */}
         <Route path="/classifieds" element={<LazyPage><Pages.ClassifiedsIndex /></LazyPage>} />
-        <Route path="/classifieds/sell" element={<AuthGuard><LazyPage><Pages.ClassifiedsSellPage /></LazyPage></AuthGuard>} />
+        <Route path="/classifieds/sell" element={<AuthGuard><LazyPage><Pages.SellItemPage key="classifieds-sell" /></LazyPage></AuthGuard>} />
         <Route path="/classifieds/:id" element={<LazyPage><Pages.ClassifiedDetailPage /></LazyPage>} />
         
         {/* ── Monetization Landing Pages ── */}
