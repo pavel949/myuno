@@ -1,13 +1,13 @@
 import React from 'react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen, within } from '@testing-library/react';
 import { MemoryRouter, Route, Routes, useLocation } from 'react-router-dom';
 import GuestComplexDetail from '../GuestComplexDetail';
 import { complexVideoSource } from '@/lib/real-estate/complexMedia';
 import { APP_ROUTES } from '@/lib/config/routes';
 const state = vi.hoisted(() => ({
   language: 'en',
-  project: { data: { id: 'complex', name_en: 'Ocean Place', name_ru: '', description_en: 'A peaceful place.', images: [] as string[], video_url: undefined as string | undefined, units_available: 19, amenities: [] as string[] }, isLoading: false, isError: false, refetch: vi.fn() },
+  project: { data: { id: 'complex', name_en: 'Ocean Place', name_ru: '', description_en: 'A peaceful place.', images: [] as string[], gallery_urls: undefined as string[] | undefined, video_url: undefined as string | undefined, units_available: 19, amenities: [] as string[] }, isLoading: false, isError: false, refetch: vi.fn() },
   rent: { data: { properties: [] as Array<{ id: string; management_company_id?: string }>, total: 0 }, isLoading: false, isError: false, isSuccess: true, refetch: vi.fn() },
   sale: { data: { properties: [] as Array<{ id: string; management_company_id?: string }>, total: 0 }, isLoading: false, isError: false, isSuccess: true, refetch: vi.fn() },
   units: vi.fn(),
@@ -20,7 +20,7 @@ vi.mock('@/components/property/PropertyListingCard', () => ({ PropertyListingCar
 vi.mock('@/components/property/PhotoLightbox', () => ({ PhotoLightbox: () => null }));
 vi.mock('@/components/seo', () => ({ SEOHead: () => null }));
 afterEach(cleanup);
-beforeEach(() => { state.language = 'en'; state.project.data.images = []; state.project.data.amenities = []; state.project.data.video_url = undefined; state.project.isError = false; state.project.isLoading = false; state.rent.data = { properties: [], total: 0 }; state.sale.data = { properties: [], total: 0 }; state.rent.isError = false; state.units.mockClear(); });
+beforeEach(() => { state.language = 'en'; state.project.data.images = []; state.project.data.gallery_urls = undefined; state.project.data.amenities = []; state.project.data.video_url = undefined; state.project.isError = false; state.project.isLoading = false; state.rent.data = { properties: [], total: 0 }; state.sale.data = { properties: [], total: 0 }; state.rent.isError = false; state.units.mockClear(); });
 function LocationProbe() { const location = useLocation(); return <output data-testid="location">{location.search}</output>; }
 const mount = (search = '') => render(<MemoryRouter initialEntries={[`/property/complex/complex${search}`]}><Routes><Route path="/property/complex/:id" element={<GuestComplexDetail />} /></Routes><LocationProbe /></MemoryRouter>);
 
@@ -60,6 +60,17 @@ describe('informational complex detail', () => {
     const homes = screen.getByRole('heading', { name: 'Homes to rent' });
     expect(homes.compareDocumentPosition(screen.getByRole('heading', { name: 'A closer look' })) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
     expect(homes.compareDocumentPosition(screen.getByRole('heading', { name: 'Get a feel for the place' })) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  });
+  it('renders the same selected editorial gallery as the project editor and excludes unsafe media', () => {
+    state.project.data.images = ['/catalog/complex/legacy.jpg'];
+    state.project.data.gallery_urls = ['/catalog/complex/second.jpg', 'javascript:alert(1)', '/catalog/complex/first.jpg', '/catalog/complex/second.jpg'];
+    const { container } = mount();
+    const sources = [...container.querySelectorAll('img')].map(img => img.getAttribute('src'));
+    expect(sources).not.toContain('/catalog/complex/legacy.jpg');
+    expect(sources).not.toContain('javascript:alert(1)');
+    expect(sources.indexOf('/catalog/complex/second.jpg')).toBeGreaterThanOrEqual(0);
+    expect(sources.indexOf('/catalog/complex/first.jpg')).toBeGreaterThan(sources.indexOf('/catalog/complex/second.jpg'));
+    expect(within(screen.getByRole('region', { name: 'Property photos' })).getByText('2 photos')).toBeVisible();
   });
   it('leaves the main landmark to the owning route shell', () => {
     render(<MemoryRouter initialEntries={['/property/complex/complex']}><main aria-label="Property shell"><Routes><Route path="/property/complex/:id" element={<GuestComplexDetail />} /></Routes></main></MemoryRouter>);

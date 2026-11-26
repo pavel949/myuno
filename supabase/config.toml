@@ -164,20 +164,12 @@ project_id = "erfwtoavipwjqmylpizt"
   [functions.drive-watch-cron]
     verify_jwt = false
 
-[functions.process-email-queue]
-verify_jwt = false
 
-[functions.send-transactional-email]
-verify_jwt = false
 
 [functions.preview-transactional-email]
 verify_jwt = false
 
-[functions.handle-email-unsubscribe]
-verify_jwt = false
 
-[functions.handle-email-suppression]
-verify_jwt = false
 
   [functions.verify-signup-integrity]
     verify_jwt = false
@@ -196,4 +188,7 @@ verify_jwt = false
 
 # Application admits only the dedicated scheduler secret before privileged work.
 [functions.dispatch-concierge-notifications]
+verify_jwt = false
+
+[functions.handle-email-events]
 verify_jwt = false

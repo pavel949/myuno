@@ -20,7 +20,7 @@ describe('canonical first-paint bootstrap', () => {
         expect(found, match[1]).toBe(true);
       }
     });
-    expect(fontHref).toContain('https://fonts.googleapis.com/css2?family=Geist');
+    expect(fontHref).toContain('https://fonts.googleapis.com/css2?family=Outfit');
     expect(css).not.toContain('--cat-emergency');
   });
   it('supplies Thai glyphs through the same stylesheet and first-paint locale tokens', () => {

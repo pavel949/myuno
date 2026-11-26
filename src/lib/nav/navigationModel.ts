@@ -40,7 +40,7 @@ import {
   shouldShowAppsLauncher, type NavRoleKey, type NavItem,
 } from '@/lib/navConfig';
 
-export { GUEST_STAY_SIDEBAR_DRAFT } from './guestStayNavDraft';
+// In-stay screens use the mounted guest routes rather than a separate sidebar.
 export { FLOATING, FLOATING_OFFSET } from './floatingStack';
 /** @see src/lib/nav/roleIA.ts — role, URL, and shell boundaries */
 
@@ -52,18 +52,36 @@ export {
 };
 export type { NavRoleKey, NavItem };
 
-/** Public header: keep the desktop menu task-focused; partner paths live in a separate menu. */
+/** Public header destinations reuse the existing rental, sale, and local guides. */
 export const GUEST_TOP_NAV: NavItem[] = [
-  { path: APP_ROUTES.PROPERTY, icon: Building2, labelEn: 'Homes', labelRu: 'Жильё', labelTh: 'ที่พัก' },
-  { path: APP_ROUTES.EXPERIENCES, icon: Compass, labelEn: 'Experiences', labelRu: 'Впечатления', labelTh: 'ประสบการณ์' },
+  { path: APP_ROUTES.PROPERTY_RENT, icon: Building2, labelEn: 'Stays', labelRu: 'Жильё', labelTh: 'ที่พัก' },
   { path: APP_ROUTES.GOAL_SERVICES, icon: Wrench, labelEn: 'Services', labelRu: 'Услуги', labelTh: 'บริการ' },
-  { path: APP_ROUTES.BOOKINGS, icon: CalendarDays, labelEn: 'Bookings', labelRu: 'Бронирования', labelTh: 'การจอง' },
+  { path: APP_ROUTES.PROPERTY_BUY, icon: Building2, labelEn: 'Homes for sale', labelRu: 'Купить', labelTh: 'ซื้อที่อยู่อาศัย' },
+  { path: APP_ROUTES.RELOCATE, icon: Compass, labelEn: 'Living', labelRu: 'Жизнь', labelTh: 'ใช้ชีวิต' },
+  { path: APP_ROUTES.AREA_INDEX, icon: MapPin, labelEn: 'Areas', labelRu: 'Районы', labelTh: 'ย่านต่าง ๆ' },
 ];
 
-/** Desktop has a dedicated Experiences destination; mobile groups it under Services. */
-export function getActiveGuestTopNavItem(pathname: string): NavItem | null {
-  const direct = GUEST_TOP_NAV.find(item => pathname === item.path || pathname.startsWith(`${item.path}/`));
-  return direct ?? GUEST_TOP_NAV.find(item => isBottomBarItemActive(item, pathname)) ?? null;
+const matchesPath = (path: string, prefix: string) => path === prefix || path.startsWith(`${prefix}/`);
+
+function guestPropertyIntent(pathname: string, search: string): 'rent' | 'buy' | null {
+  const salePaths = [APP_ROUTES.PROPERTY_BUY, APP_ROUTES.OFFPLAN, '/property/resale', '/newbuilds', '/discover/buy'];
+  if (salePaths.some(path => matchesPath(pathname, path))) return 'buy';
+  if (!matchesPath(pathname, APP_ROUTES.PROPERTY) && !matchesPath(pathname, '/discover/stay')) return null;
+  const params = new URLSearchParams(search);
+  const mode = params.get('mode');
+  return mode === 'buy' || mode === 'sale' || (!mode && params.get('f.listingType') === 'sale') ? 'buy' : 'rent';
+}
+
+export function getActiveGuestTopNavItem(pathname: string, search = ''): NavItem | null {
+  if (matchesPath(pathname, APP_ROUTES.NEWBUILDS_AREAS)) {
+    return GUEST_TOP_NAV.find(item => item.path === APP_ROUTES.AREA_INDEX) ?? null;
+  }
+  const intent = guestPropertyIntent(pathname, search);
+  if (intent) {
+    const destination = intent === 'buy' ? APP_ROUTES.PROPERTY_BUY : APP_ROUTES.PROPERTY_RENT;
+    return GUEST_TOP_NAV.find(item => item.path === destination) ?? null;
+  }
+  return GUEST_TOP_NAV.find(item => isBottomBarItemActive(item, pathname)) ?? null;
 }
 
 /** Primary 5-slot navigation (alias of NAV_BY_ROLE for clarity). */
@@ -75,7 +93,7 @@ export const PRIMARY_NAV = NAV_BY_ROLE;
 // Each role gets exactly 5 slots. The slot composition encodes
 // product-level "what matters most" for that role:
 //
-//  guest      → Home · Homes · Bookings · Services · Profile
+//  guest      → Explore · Trips · Services · Homes · Me
 //                  (consumer browsing + monetization entry points)
 //  investor   → Home · Invest · Discover · Property · Me
 //                  (capital workflow first, browse second)
@@ -188,7 +206,17 @@ export function isBottomBarItemActive(item: NavItem, pathname: string): boolean 
 export function getActiveBottomBarItem(
   role: NavRoleKey,
   pathname: string,
+  search = '',
 ): NavItem | null {
+  if (role === 'guest') {
+    const intent = guestPropertyIntent(pathname, search);
+    if (intent || [APP_ROUTES.AREA_INDEX, APP_ROUTES.RELOCATE].some(path => matchesPath(pathname, path))) {
+      const destination = intent === 'buy' && !matchesPath(pathname, APP_ROUTES.NEWBUILDS_AREAS)
+        ? APP_ROUTES.PROPERTY_BUY
+        : APP_ROUTES.HOME;
+      return getBottomBarItems(role).find(item => item.path === destination) ?? null;
+    }
+  }
   const matches = getBottomBarItems(role).filter((item) =>
     isBottomBarItemActive(item, pathname),
   );

@@ -68,12 +68,12 @@ export const CompactFooter = forwardRef<HTMLElement>((_props, ref) => {
   // ─── Desktop: slim 3-row footer ────────────────────────────────────────
   if (isLargeDesktop) {
     return (
-      <footer ref={ref} className="border-t border-border bg-background mt-auto">
+      <footer ref={ref} className="myuno-public-footer border-t border-border mt-auto">
         <div className={cn(ECOSYSTEM_PAGE_CONTAINER, 'py-8 lg:py-10')}>
           {/* Row 1 — brand + socials */}
           <div className="flex flex-col gap-6 sm:flex-row sm:items-start sm:justify-between">
             <div className="max-w-md space-y-2">
-              <BrandWordmark as="static" />
+              <BrandWordmark as="static" tone="onNavy" />
               <p className="font-sans text-body-sm leading-relaxed text-muted-foreground">
                 {t(ECOSYSTEM_FOOTER_UI.brandTagline)}
               </p>
@@ -136,11 +136,11 @@ export const CompactFooter = forwardRef<HTMLElement>((_props, ref) => {
 
   // ─── Mobile: centered slim footer + PWA install ────────────────────────
   return (
-    <footer ref={ref} className="border-t border-border bg-background mt-auto pb-20 md:pb-0">
+    <footer ref={ref} className="myuno-public-footer border-t border-border mt-auto pb-20 md:pb-0">
       <div className={cn(ECOSYSTEM_PAGE_CONTAINER, 'space-y-5 py-6')}>
         <div className="mx-auto max-w-md space-y-2 text-center">
           <div className="flex justify-center">
-            <BrandWordmark as="static" />
+            <BrandWordmark as="static" tone="onNavy" />
           </div>
           <p className="px-1 font-sans text-body-sm leading-relaxed text-muted-foreground">
             {t(ECOSYSTEM_FOOTER_UI.brandTagline)}

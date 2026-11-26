@@ -79,7 +79,11 @@ async def main():
                 async def visible_search(focused=False):
                     # Submission closes the editor and focuses results; criteria can be reopened.
                     if focused:
-                        await expect(page.get_by_role('heading',level=2)).to_be_focused()
+                        results_heading = re.compile(
+                            r'^(?:Найдено объектов|Проверено, подходит по датам):\s+\d+$' if ru
+                            else r'^(?:Places found|Checked date matches):\s+\d+$'
+                        )
+                        await expect(page.get_by_role('heading',level=2,name=results_heading)).to_be_focused()
                         await expect(page.locator('.premium-search-criteria')).not_to_have_attribute('open','')
                     await open_editor()
                     await expect(page.get_by_role('combobox', name=type_label)).to_be_visible()
@@ -122,7 +126,8 @@ async def main():
                     await expect(summary).to_contain_text('10')
                     await expect(summary).to_contain_text('15')
                     await expect(summary).to_contain_text('3')
-                    await expect(summary).to_contain_text('1 фильтров' if ru else '1 filters')
+                    await expect(summary.locator('small')).to_contain_text(re.compile(r' · 1 (?:фильтр|filter)$'))
+                    assert (await summary.locator('small').text_content()).endswith('1 фильтр' if ru else '1 filter')
                     await page.screenshot(path=str(OUTPUT/f'{lang}-{width}-collapsed.png'),full_page=True)
                     await expect(page.get_by_role('button',name='Все компании' if ru else 'All companies',exact=True)).to_have_count(0)
                     quick = page.locator('.property-discovery-features')

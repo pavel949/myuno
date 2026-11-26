@@ -24,7 +24,10 @@ export function AdminOperationalAlerts({ search = '' }: { search?: string }) {
     { key: 'openTickets', icon: MessageSquare, label: label('Support requests', 'Обращения в поддержку', 'คำขอความช่วยเหลือ'), hint: label('Open and in progress', 'Открыты и в работе', 'เปิดอยู่และกำลังดำเนินการ'), href: '/admin/tickets?status=active' },
   ] as const;
   const matching = decisions.filter(item => `${item.label} ${item.hint}`.toLocaleLowerCase().includes(search.toLocaleLowerCase()));
-  const active = matching.filter(item => data?.[item.key] == null || data[item.key] !== 0);
+  // When every pending order is already older than 24 hours, the general
+  // pending row repeats the same work; show the older-than-24h row only.
+  const samePending = data?.pendingOrders != null && data.pendingOrders === data.pendingOrders24h;
+  const active = matching.filter(item => (data?.[item.key] == null || data[item.key] !== 0) && !(item.key === 'pendingOrders' && samePending));
   const shown = active.slice(0, 3);
   return <Surface variant="card" padding="md" className="h-full min-w-0">
     <h2 className="text-xl font-semibold">{label('Needs a decision', 'Требует решения', 'รายการที่ต้องตัดสินใจ')}</h2>

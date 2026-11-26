@@ -3,6 +3,8 @@
  * Sixt-inspired but cleaner, calmer, trust-centric
  */
 
+import { dailyPrice } from './TransportFilterSidebar';
+import { pickLang } from '@/lib/i18n/pickLang';
 import { memo } from 'react';
 import { Users, Briefcase, Fuel, Settings2, ShieldCheck, Sparkles } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -21,6 +23,7 @@ interface VehicleCardProps {
 export const VehicleCard = memo(function VehicleCard({ vehicle, onClick, className }: VehicleCardProps) {
   const { language } = useLanguage();
   const isRu = language === 'ru';
+  const quotedDailyPrice = dailyPrice(vehicle);
   const name = isRu ? vehicle.name_ru : vehicle.name_en;
   const currencySymbol = getCurrencySymbol(vehicle.currency || 'THB');
   const transmissionLabel = getTransmissionLabel(vehicle.transmission, isRu ? 'ru' : 'en');
@@ -121,15 +124,13 @@ export const VehicleCard = memo(function VehicleCard({ vehicle, onClick, classNa
         <div className="pt-2 border-t border-border/50">
           <div className="flex items-end justify-between">
             <div>
-              <p className="text-[10px] text-muted-foreground uppercase tracking-wider">
-                {isRu ? 'От' : 'From'}
-              </p>
-              <p className="text-lg font-bold text-foreground">
-                {currencySymbol}{vehicle.price_per_day?.toLocaleString() || '—'}
-                <span className="text-xs font-normal text-muted-foreground ml-0.5">
-                  /{isRu ? 'день' : 'day'}
-                </span>
-              </p>
+              {quotedDailyPrice === null ? <p className="text-sm font-semibold text-foreground">{pickLang(language, { ru: 'Цена по запросу', en: 'Price on request', th: 'สอบถามราคา' })}</p> : <>
+                <p className="text-xs uppercase tracking-wider text-muted-foreground">{isRu ? 'От' : 'From'}</p>
+                <p className="text-lg font-bold text-foreground">
+                  {currencySymbol}{quotedDailyPrice.toLocaleString()}
+                  <span className="ml-0.5 text-xs font-normal text-muted-foreground">/{isRu ? 'день' : 'day'}</span>
+                </p>
+              </>}
             </div>
 
             {vehicle.price_per_month && (

@@ -12,6 +12,10 @@ import { getCorsHeaders } from "../_shared/cors.ts";
 
 const NOTIFICATION_TYPE = "booking_message_rule";
 
+function escapeHtml(v: string): string {
+  return v.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+}
+
 Deno.serve(async (req) => {
   const corsHeaders = getCorsHeaders(req);
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
@@ -75,10 +79,10 @@ Deno.serve(async (req) => {
                   from: "myUNO <noreply@myuno.ai>",
                   to: [guestEmail],
                   subject,
-                  html: `<p>${body.replace(/\n/g, "</p><p>")}</p>`,
+                  html: `<p>${escapeHtml(body).replace(/\n/g, "</p><p>")}</p>`,
                 }),
               });
-              if (!res.ok) throw new Error(await res.text());
+              if (!res.ok) { await res.body?.cancel(); throw new Error(`email send failed (${res.status})`); }
             }
             await supabase.from("booking_notifications_log").insert({
               booking_id: null,

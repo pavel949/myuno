@@ -8,8 +8,8 @@ import postcss from 'postcss';
 import postcssImport from 'postcss-import';
 import tailwindcss from 'tailwindcss';
 import autoprefixer from 'autoprefixer';
-const root = process.cwd();
-const output = '/tmp/browser/today-isolated';
+const root = process.cwd().replaceAll('\\', '/');
+const output = process.env.PMS_TODAY_FIXTURE_OUTPUT || '/tmp/browser/today-isolated';
 await mkdir(output, { recursive: true });
 const virtual = {
   '@/contexts/LanguageContext': `export const useLanguage=()=>({language:new URLSearchParams(location.search).get('lang')||'ru'});`,

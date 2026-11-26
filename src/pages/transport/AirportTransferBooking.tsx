@@ -42,12 +42,24 @@ const transferSteps: BookingStep[] = [
 ];
 
 export default function AirportTransferBooking() {
+  const [searchParams] = useSearchParams();
+  const { user } = useAuth();
+  const linkedBooking = searchParams.get('booking_id');
+  const tripBookingId = linkedBooking && /^[\da-f]{8}(?:-[\da-f]{4}){3}-[\da-f]{12}$/i.test(linkedBooking)
+    ? linkedBooking
+    : undefined;
+  const tripDraft = tripBookingId ? `${user?.id ?? 'guest'}:${tripBookingId}` : undefined;
+  return <AirportTransferForm key={tripDraft ?? 'transfer'} tripBookingId={tripBookingId} tripDraft={tripDraft} />;
+}
+
+function AirportTransferForm({ tripBookingId, tripDraft }: { tripBookingId?: string; tripDraft?: string }) {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { language } = useLanguage();
   const tr = (en: string, ru: string, th: string) => language === 'ru' ? ru : language === 'th' ? th : en;
   const stepRef = useRef<HTMLDivElement>(null);
   const submitLock = useRef(false);
+  const mergeTripLock = useRef(false);
   const { user } = useAuth();
 
   const { vehicleTypes, isLoading: isLoadingVehicles, error: vehicleError, refetch: refetchVehicles } = useVehicleTypes('airport_transfer');
@@ -73,6 +85,7 @@ export default function AirportTransferBooking() {
   const [destinationCoords, setDestinationCoords] = useState<{ lat: number; lng: number; placeId?: string } | null>(null);
   const [nightSurchargeCfg, setNightSurchargeCfg] = useState<{ start: string; end: string; sedan: number; van: number } | null>(null);
   const [authGateOpen, setAuthGateOpen] = useState(false);
+  const [tripPrefillState, setTripPrefillState] = useState<'idle' | 'loading' | 'ready' | 'unavailable'>('idle');
   const pendingSubmitRef = useRef(false);
 
   const [formData, setFormData] = useState<TransferFormData>({
@@ -102,7 +115,7 @@ export default function AirportTransferBooking() {
 
   // Persist the draft so a refresh, OAuth callback, or accidental nav doesn't wipe what the user typed.
   const { clear: clearDraft } = useBookingDraft(
-    'transfer_airport',
+    tripDraft ? `transfer_airport:${tripDraft}` : 'transfer_airport',
     { formData, step, source },
     (draft) => {
       if (draft.formData && typeof draft.formData === 'object') {
@@ -118,6 +131,51 @@ export default function AirportTransferBooking() {
     },
   );
 
+  const applyStayDetails = async () => {
+    if (!tripBookingId || !user?.id || mergeTripLock.current) return;
+    mergeTripLock.current = true;
+    setTripPrefillState('loading');
+    try {
+      const { data: stay, error } = await supabase
+        .from('property_bookings')
+        .select('property_id, guests_count')
+        .eq('id', tripBookingId)
+        .eq('guest_id', user.id)
+        .in('status', ['confirmed', 'pending', 'pending_deposit', 'deposit_paid'])
+        .maybeSingle();
+      if (error || !stay) {
+        setTripPrefillState('unavailable');
+        return;
+      }
+
+      const { data: publicProperty } = await supabase
+        .from('public_property_catalog')
+        .select('address')
+        .eq('id', stay.property_id)
+        .maybeSingle();
+      const address = publicProperty?.address?.trim();
+      const guests = stay.guests_count;
+      const passengers = guests && Number.isSafeInteger(guests) && guests > 0 ? String(guests) : undefined;
+      if (!address && !passengers) {
+        setTripPrefillState('unavailable');
+        return;
+      }
+      if (address) {
+        setDestinationCoords(null);
+        setPickupCoords(null);
+      }
+      setFormData(current => ({
+        ...current,
+        ...(address ? { destinationAddress: address, selectedDestinationId: '' } : {}),
+        ...(passengers ? { passengers } : {}),
+      }));
+      setTripPrefillState('ready');
+    } catch {
+      setTripPrefillState('unavailable');
+    } finally {
+      mergeTripLock.current = false;
+    }
+  };
 
 
   // A missing active rule means the day rate applies. A failed read leaves the price unresolved.
@@ -594,7 +652,10 @@ export default function AirportTransferBooking() {
             type="button"
             aria-label={tr('Back', 'Назад', 'ย้อนกลับ')}
             disabled={isSubmitting || !!pendingCheckout || orderUnverified}
-            onClick={() => step > 0 ? moveToStep(step - 1) : navigate(APP_ROUTES.TRANSPORT)}
+            onClick={() => {
+              if (step > 0) moveToStep(step - 1);
+              else navigate(tripBookingId && user ? `/trip/${tripBookingId}` : APP_ROUTES.TRANSPORT);
+            }}
             className="inline-flex items-center justify-center gap-1 text-sm font-medium transition-colors disabled:opacity-50"
           >
             <ChevronLeft className="w-4 h-4" />
@@ -658,6 +719,28 @@ export default function AirportTransferBooking() {
         </>}
       >
         <div ref={stepRef} tabIndex={-1} className="scroll-mt-24 focus:outline-none">
+          {step === 0 && tripBookingId && user && (
+            <div className="mb-4 space-y-2 border bg-card p-3">
+              {tripPrefillState === 'ready' ? (
+                <p role="status" className="text-sm">
+                  {tr('Stay details added. Review the route and passenger count.', 'Данные проживания добавлены. Проверьте маршрут и число пассажиров.', 'เพิ่มข้อมูลที่พักแล้ว ตรวจสอบเส้นทางและจำนวนผู้โดยสาร')}
+                </p>
+              ) : (
+                <>
+                  <Button type="button" variant="outline" onClick={applyStayDetails} disabled={tripPrefillState === 'loading'}>
+                    {tripPrefillState === 'loading'
+                      ? tr('Loading stay details…', 'Загружаем данные проживания…', 'กำลังโหลดข้อมูลที่พัก…')
+                      : tr('Use stay details', 'Использовать данные проживания', 'ใช้ข้อมูลที่พัก')}
+                  </Button>
+                  {tripPrefillState === 'unavailable' && (
+                    <p role="status" className="text-sm text-muted-foreground">
+                      {tr('Stay details are unavailable. Enter them below or try again.', 'Данные проживания недоступны. Заполните поля ниже или попробуйте ещё раз.', 'ไม่พบข้อมูลที่พัก กรอกข้อมูลด้านล่างหรือลองอีกครั้ง')}
+                    </p>
+                  )}
+                </>
+              )}
+            </div>
+          )}
           {quoteFailed && <div className="mb-4 space-y-2">
             <p role="alert" className="text-sm text-destructive">{tr('Could not load transfer rates.', 'Не удалось загрузить тарифы трансфера.', 'โหลดราคาค่ารถรับส่งไม่สำเร็จ')}</p>
             <Button type="button" variant="outline" onClick={() => {

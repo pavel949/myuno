@@ -7,6 +7,7 @@ import { PageContainer } from '@/components/uno/PageContainer';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { StatusTag, recordedStatusTone } from '@/components/ui/status-tag';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import {
@@ -146,15 +147,15 @@ const VendorBookings = () => {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'pending':
-        return <Badge variant="outline" className="bg-warning/10 text-warning border-warning/20">{isRussian ? 'Ожидает' : 'Pending'}</Badge>;
+        return <StatusTag tone={recordedStatusTone(status)}>{isRussian ? 'Ожидает' : 'Pending'}</StatusTag>;
       case 'confirmed':
-        return <Badge variant="outline" className="bg-info/10 text-info border-info/20">{isRussian ? 'Подтверждено' : 'Confirmed'}</Badge>;
+        return <StatusTag tone={recordedStatusTone(status)}>{isRussian ? 'Подтверждено' : 'Confirmed'}</StatusTag>;
       case 'completed':
-        return <Badge variant="outline" className="bg-success/10 text-success border-success/20">{isRussian ? 'Завершено' : 'Completed'}</Badge>;
+        return <StatusTag tone={recordedStatusTone(status)}>{isRussian ? 'Завершено' : 'Completed'}</StatusTag>;
       case 'cancelled':
-        return <Badge variant="outline" className="bg-destructive/10 text-destructive border-destructive/20">{isRussian ? 'Отменено' : 'Cancelled'}</Badge>;
+        return <StatusTag tone={recordedStatusTone(status)}>{isRussian ? 'Отменено' : 'Cancelled'}</StatusTag>;
       default:
-        return <Badge variant="outline">{status}</Badge>;
+        return <StatusTag tone={recordedStatusTone(status)}>{status}</StatusTag>;
     }
   };
 

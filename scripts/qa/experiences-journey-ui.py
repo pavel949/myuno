@@ -101,12 +101,9 @@ async def main():
                 async def open_filters():
                     await page.get_by_role('button',name=filter_name,exact=True).click()
                     await expect(page.get_by_role('dialog',name=filter_name,exact=True)).to_be_visible()
-                async def close_filters():
+                async def apply_filters():
                     await page.get_by_role('button',name=done_name,exact=True).click()
                     await expect(page.get_by_role('dialog')).to_have_count(0)
-
-                def type_button(label):
-                    return page.get_by_role('group', name=c['types']).get_by_role('button', name=label, exact=True)
 
                 try:
                     await goto('/experiences?maxPrice=2500&duration=short&ref=budget-check')
@@ -115,8 +112,11 @@ async def main():
                     maximum = page.get_by_role('spinbutton').last
                     await expect(maximum).to_have_value('2500')
                     await maximum.fill('1800')
+                    await expect(cards()).to_have_count(2)
+                    await expect(page.get_by_test_id('fixture-location')).to_contain_text('maxPrice=2500')
+                    await apply_filters()
                     await expect(cards()).to_have_count(1)
-                    await close_filters()
+                    await expect(page.get_by_test_id('fixture-location')).to_contain_text('maxPrice=1800')
                     await expect(page.get_by_test_id('fixture-location')).to_contain_text('ref=budget-check')
                     await page.get_by_role('button', name=c['clear'], exact=True).click()
                     await expect(page.get_by_test_id('fixture-location')).to_have_text('/experiences?ref=budget-check')
@@ -143,8 +143,7 @@ async def main():
                     await goto()
                     active = page.locator('.consumer-nav a[aria-current="page"]')
                     await expect(active).to_have_count(1)
-                    await expect(active).to_have_attribute('href', '/experiences')
-                    await expect(page.locator('.consumer-nav a[href="/discover/services"][aria-current]')).to_have_count(0)
+                    await expect(active).to_have_attribute('href', '/discover/services')
                     if width == 390:
                         await page.get_by_role('button', name=c['menu'], exact=True).click()
                         dialog = page.get_by_role('dialog', name='myUNO', exact=True)
@@ -152,6 +151,7 @@ async def main():
                         await expect(dialog.locator('a[aria-current="page"]')).to_have_attribute('href', '/experiences')
                         await page.keyboard.press('Escape')
                         await expect(dialog).not_to_be_visible()
+                    row['checks'].append('Desktop Services and the direct mobile Experiences link expose their selected state')
                     menu = page.get_by_role('region', name=c['category_menu'], exact=True)
                     # Only groups backed by returned offers are promoted publicly.
                     await expect(menu.locator('[data-category-id]')).to_have_count(3)
@@ -172,7 +172,7 @@ async def main():
                     await open_filters()
                     category_label={'ru':'Категория','en':'Category','th':'หมวดหมู่'}[lang]
                     await page.get_by_role('combobox',name=category_label,exact=True).select_option('islands')
-                    await close_filters()
+                    await apply_filters()
                     await expect(page.get_by_test_id('fixture-location')).to_contain_text('category=islands')
                     await expect(page.get_by_test_id('fixture-location')).to_contain_text('ref=synthetic')
                     await expect(cards()).to_have_count(1)
@@ -195,24 +195,39 @@ async def main():
                     await expect(menu.locator('[data-category-id]')).to_have_count(3)
                     row['checks'].append('Category result, native card Enter/destination/public journey state and real router history preserve filters')
 
-                    await open_filters()
-                    await type_button(c['tour']).click()
-                    await expect(type_button(c['tour'])).to_have_attribute('aria-pressed','true')
-                    await close_filters()
+                    await goto('/experiences?ref=synthetic&type=tour')
                     await expect(cards()).to_have_count(3)
-                    assert await page.evaluate('window.fixtureReadOptions.type')=='tour'
+                    assert await page.evaluate('window.fixtureReadOptions.type') == 'tour'
                     await open_filters()
-                    await type_button(c['activity']).click()
-                    await expect(type_button(c['activity'])).to_have_attribute('aria-pressed','true')
-                    await close_filters()
+                    topic = page.get_by_role('combobox', name=category_label, exact=True)
+                    diving = topic.locator('option[value="diving"]')
+                    remove_type = {'ru':'Убрать тип','en':'Remove type','th':'ลบประเภท'}[lang]
+                    await expect(diving).to_have_count(0)
+                    await page.get_by_role('button', name=remove_type, exact=True).click()
+                    await expect(diving).to_have_count(1)
+                    await topic.select_option('diving')
+                    await expect(page.get_by_test_id('fixture-location')).to_have_text('/experiences?ref=synthetic&type=tour')
+                    assert await page.evaluate('window.fixtureReadOptions.type') == 'tour'
+                    await page.keyboard.press('Escape')
+                    await expect(page.get_by_role('dialog')).to_have_count(0)
+                    await expect(page.get_by_role('button', name=filter_name, exact=True)).to_be_focused()
+                    await expect(cards()).to_have_count(3)
+                    await open_filters()
+                    await expect(diving).to_have_count(0)
+                    await page.get_by_role('button', name=remove_type, exact=True).click()
+                    await topic.select_option('diving')
+                    await apply_filters()
+                    await expect(page.get_by_test_id('fixture-location')).to_have_text('/experiences?ref=synthetic&category=diving')
+                    assert await page.evaluate('window.fixtureReadOptions.category') == 'diving'
                     await expect(cards()).to_have_count(1)
                     await page.get_by_test_id('history-back').click()
-                    await open_filters()
-                    await expect(type_button(c['tour'])).to_have_attribute('aria-pressed','true')
-                    await close_filters()
                     await expect(cards()).to_have_count(3)
+                    assert await page.evaluate('window.fixtureReadOptions.type') == 'tour'
+                    await open_filters()
+                    await expect(page.get_by_role('button', name=remove_type, exact=True)).to_be_visible()
+                    await apply_filters()
                     await screenshot('03-type-history')
-                    row['checks'].append('Modal type selection and browser Back preserve the actual reader filter')
+                    row['checks'].append('Draft topic follows the edited legacy type, Escape restores it, Apply updates the real reader, and Back preserves the prior filter')
 
                     await page.get_by_role('button', name=c['clear'], exact=True).click()
                     search = page.get_by_role('searchbox', name=c['search'], exact=True)
@@ -220,19 +235,24 @@ async def main():
                     await open_filters()
                     select = page.get_by_role('combobox', name=c['sort'], exact=True)
                     await select.select_option('price_asc')
+                    await expect(page.get_by_test_id('fixture-location')).not_to_contain_text('sort=')
+                    await apply_filters()
                     await expect(page.get_by_test_id('fixture-location')).to_contain_text('sort=price_asc')
                     await expect(page.get_by_test_id('fixture-location')).to_contain_text('q=Synthetic')
                     expected = ['Тестовая культурная экскурсия', 'Тестовый дайвинг', 'Тестовая экскурсия на остров', 'Тестовое предложение без цены'] if lang == 'ru' else ['Synthetic culture tour', 'Synthetic diving activity', 'Synthetic island tour', 'Synthetic unknown price']
                     assert await titles() == expected, await titles()
                     assert '฿' not in await cards().last.inner_text(), 'Unknown price was presented as a recorded amount'
+                    await open_filters()
                     await select.select_option('price_desc')
+                    await expect(page.get_by_test_id('fixture-location')).to_contain_text('sort=price_asc')
+                    await apply_filters()
+                    await expect(page.get_by_test_id('fixture-location')).to_contain_text('sort=price_desc')
                     assert await titles() == [expected[2], expected[1], expected[0], expected[3]], await titles()
-                    await close_filters()
                     await page.get_by_test_id('history-back').click()
                     await open_filters()
                     await expect(select).to_have_value('price_asc')
                     assert await titles() == expected, await titles()
-                    await close_filters()
+                    await apply_filters()
                     await expect(search).to_have_value('Synthetic')
                     await screenshot('04-search-sort')
                     row['checks'].append('Actual search/native sort persist in URL/history; unknown prices remain last and never become free')

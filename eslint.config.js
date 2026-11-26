@@ -79,8 +79,11 @@ const LEGACY_PALETTE_REGEX =
 
 const GLASSMORPHISM_REGEX = "\\bbackdrop-blur(?:-(?:none|sm|md|lg|xl|2xl|3xl))?\\b";
 
+// Design Bible v4 (2026-11-25): rounded / rounded-sm (4px control),
+// rounded-md (8px card), rounded-lg (12px media), rounded-full are canon.
+// xl/2xl/3xl are aliases of lg — use rounded-lg so intent stays explicit.
 const LEGACY_RADII_REGEX =
-  "\\brounded(?:-(?:sm|md|lg|xl|2xl|3xl))?(?![-_a-z0-9])";
+  "\\brounded-(?:xl|2xl|3xl)(?![-_a-z0-9])";
 
 // Bible-v2 §00 H03 — no hardcoded hex colors outside tokens.css.
 // Matches "#RRGGBB" with word boundary; ignores 3-char shortcuts to avoid
@@ -111,12 +114,12 @@ const CANON_VISUAL_RULES = [
   {
     selector: `Literal[value=/${LEGACY_RADII_REGEX}/]`,
     message:
-      "Canon §5: rounded-{sm,md,lg,xl,2xl,3xl} are forbidden — surfaces must be square (0px). Allowed: rounded-full (avatars/icon chips only).",
+      "Design Bible v4 radii: use rounded-sm (4px control), rounded-md (8px card), rounded-lg (12px media) or rounded-full — not rounded-xl/2xl/3xl.",
   },
   {
     selector: `TemplateElement[value.raw=/${LEGACY_RADII_REGEX}/]`,
     message:
-      "Canon §5: legacy rounded utility in template literal is forbidden. Use square corners or rounded-full.",
+      "Design Bible v4 radii: use rounded-sm / rounded-md / rounded-lg / rounded-full in template literals — not rounded-xl/2xl/3xl.",
   },
   {
     selector: `Literal[value=/${HEX_COLOR_REGEX}/]`,

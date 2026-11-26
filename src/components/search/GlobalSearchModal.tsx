@@ -10,10 +10,37 @@ import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useGlobalSearch, SearchResult } from '@/hooks/useGlobalSearch';
 import { searchTypeConfig, trendingSearches } from '@/lib/searchData';
+import { pickLang } from '@/lib/i18n/pickLang';
 
 interface GlobalSearchModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+}
+
+const marketplaceLabels = {
+  rentals: { en: 'Rentals', ru: 'Аренда', th: 'เช่าที่พัก' },
+  buy: { en: 'Buy property', ru: 'Купить недвижимость', th: 'ซื้ออสังหาริมทรัพย์' },
+  property: { en: 'Property', ru: 'Недвижимость', th: 'อสังหาริมทรัพย์' },
+  yachts: { en: 'Yachts', ru: 'Яхты', th: 'เรือยอชท์' },
+  experiences: { en: 'Experiences', ru: 'Впечатления', th: 'กิจกรรม' },
+  knowledge: { en: 'Knowledge', ru: 'База знаний', th: 'คลังความรู้' },
+  services: { en: 'Services', ru: 'Услуги', th: 'บริการ' },
+  catalogue: { en: 'Catalogue', ru: 'Каталог', th: 'แคตตาล็อก' },
+};
+
+function marketplaceOf(item: SearchResult): keyof typeof marketplaceLabels {
+  const [pathname, search] = item.path.split('?', 2);
+  if (/^\/(?:knowledge|relocation)(?:\/|$)/.test(pathname)) return 'knowledge';
+  if (item.type === 'yachts' || /^\/yachts?(?:\/|$)/.test(pathname)) return 'yachts';
+  if (/^\/(?:experiences|tours)(?:\/|$)/.test(pathname)) return 'experiences';
+  if (item.type === 'property' || /^\/property(?:\/|$)/.test(pathname)) {
+    const mode = new URLSearchParams(search).get('mode');
+    if (mode === 'buy' || /^\/property\/(?:buy|resale|offplan)(?:\/|$)/.test(pathname)) return 'buy';
+    if (mode === 'rent' || /^\/property\/rent(?:\/|$)/.test(pathname)) return 'rentals';
+    return 'property';
+  }
+  if (item.type === 'services' || /^\/(?:services|transport)(?:\/|$)/.test(pathname)) return 'services';
+  return 'catalogue';
 }
 
 // Web Speech API typings (browser-only, optional)
@@ -34,6 +61,7 @@ export const GlobalSearchModal = memo(forwardRef<HTMLDivElement, GlobalSearchMod
     const [query, setQuery] = useState('');
     const [listening, setListening] = useState(false);
     const inputRef = useRef<HTMLInputElement>(null);
+    const resultsRef = useRef<HTMLDivElement>(null);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const recognitionRef = useRef<any>(null);
     const [recentSearches, setRecentSearches] = useState<string[]>(() => {
@@ -117,14 +145,34 @@ export const GlobalSearchModal = memo(forwardRef<HTMLDivElement, GlobalSearchMod
     const actions = dbResults.filter((r) => r.isAction);
     const categories = dbResults.filter((r) => !r.isAction && r.isCategory);
     const entities = dbResults.filter((r) => !r.isAction && !r.isCategory);
+    const markets = new Map<keyof typeof marketplaceLabels, SearchResult[]>();
+    for (const item of entities) {
+      const market = marketplaceOf(item);
+      const matches = markets.get(market);
+      if (matches) matches.push(item);
+      else markets.set(market, [item]);
+    }
+
+    const handleResultKeys = (event: React.KeyboardEvent<HTMLDivElement>) => {
+      if (event.key !== 'ArrowDown' && event.key !== 'ArrowUp') return;
+      const rows = Array.from(resultsRef.current?.querySelectorAll<HTMLButtonElement>('[data-search-result]') ?? []);
+      const index = rows.findIndex(row => row === event.target);
+      if (event.target !== inputRef.current && index === -1) return;
+      const next = event.key === 'ArrowDown' ? rows[index + 1] : index === 0 ? inputRef.current : rows[index - 1];
+      if (next) {
+        event.preventDefault();
+        next.focus();
+      }
+    };
 
     const voiceSupported = !!getSpeechRecognition();
+    const dialogLabel = pickLang(language, { en: 'Search myUNO', ru: 'Поиск на myUNO', th: 'ค้นหาใน myUNO' });
 
     return (
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent ref={ref} className="sm:max-w-lg p-0 gap-0 max-h-[85vh] overflow-hidden" hideCloseButton aria-describedby={undefined}>
+        <DialogContent ref={ref} className="sm:max-w-lg p-0 gap-0 max-h-[85vh] overflow-hidden" hideCloseButton aria-describedby={undefined} onKeyDown={handleResultKeys}>
           <VisuallyHidden>
-            <DialogTitle>Search</DialogTitle>
+            <DialogTitle>{dialogLabel}</DialogTitle>
           </VisuallyHidden>
 
           {/* Input */}
@@ -133,6 +181,8 @@ export const GlobalSearchModal = memo(forwardRef<HTMLDivElement, GlobalSearchMod
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
               <Input
                 ref={inputRef}
+                type="search"
+                aria-label={dialogLabel}
                 placeholder={language === 'ru' ? 'Спросите или найдите что угодно...' : 'Ask or find anything...'}
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
@@ -167,7 +217,7 @@ export const GlobalSearchModal = memo(forwardRef<HTMLDivElement, GlobalSearchMod
           </div>
 
           {/* Content */}
-          <div className="overflow-y-auto max-h-[65vh]">
+          <div ref={resultsRef} className="overflow-y-auto max-h-[65vh]">
             <AnimatePresence mode="wait">
               {query ? (
                 <motion.div
@@ -229,6 +279,7 @@ export const GlobalSearchModal = memo(forwardRef<HTMLDivElement, GlobalSearchMod
                     <ResultSection
                       title={language === 'ru' ? 'Действия' : 'Actions'}
                       icon={<Compass className="w-3.5 h-3.5" />}
+                      count={actions.length}
                     >
                       {actions.map((item, i) => (
                         <ActionRow key={item.id} item={item} language={language} index={i} onSelect={handleSelect} />
@@ -238,7 +289,7 @@ export const GlobalSearchModal = memo(forwardRef<HTMLDivElement, GlobalSearchMod
 
                   {/* CATEGORIES */}
                   {categories.length > 0 && (
-                    <ResultSection title={language === 'ru' ? 'Категории' : 'Categories'}>
+                    <ResultSection title={language === 'ru' ? 'Категории' : 'Categories'} count={categories.length}>
                       {categories.map((item, i) => (
                         <EntityRow key={item.id} item={item} language={language} index={i} onSelect={handleSelect} />
                       ))}
@@ -246,13 +297,13 @@ export const GlobalSearchModal = memo(forwardRef<HTMLDivElement, GlobalSearchMod
                   )}
 
                   {/* ENTITIES */}
-                  {entities.length > 0 && (
-                    <ResultSection title={language === 'ru' ? 'Каталог' : 'Catalogue'}>
-                      {entities.map((item, i) => (
+                  {[...markets].map(([market, matches]) => (
+                    <ResultSection key={market} title={pickLang(language, marketplaceLabels[market])} count={matches.length}>
+                      {matches.map((item, i) => (
                         <EntityRow key={item.id} item={item} language={language} index={i} onSelect={handleSelect} />
                       ))}
                     </ResultSection>
-                  )}
+                  ))}
 
                   {/* ZERO STATE */}
                   {!isLoading && !aiLoading && dbResults.length === 0 && !aiAnswer && (
@@ -358,13 +409,16 @@ interface ResultSectionProps {
   title: string;
   icon?: React.ReactNode;
   children: React.ReactNode;
+  count: number;
 }
-function ResultSection({ title, icon, children }: ResultSectionProps) {
+function ResultSection({ title, icon, children, count }: ResultSectionProps) {
   return (
     <section>
       <div className="px-1 mb-1.5 flex items-center gap-1.5">
         {icon}
-        <h4 className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">{title}</h4>
+        <h2 className="text-sm font-semibold text-muted-foreground">
+          {title}{' '}<span className="tabular-nums">{count}</span>
+        </h2>
       </div>
       <div className="space-y-1">{children}</div>
     </section>
@@ -383,11 +437,13 @@ function ActionRow({ item, language, index, onSelect }: RowProps) {
   const desc = language === 'ru' ? item.descriptionRu : item.descriptionEn;
   return (
     <motion.button
+      type="button"
+      data-search-result
       initial={{ opacity: 0, y: 6 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: Math.min(index, 6) * 0.03 }}
       onClick={() => onSelect(item)}
-      className="w-full flex items-center gap-3 p-3 hover:bg-muted transition-colors text-left border border-transparent hover:border-border"
+      className="ds-focus w-full flex items-center gap-3 p-3 hover:bg-muted transition-colors text-left border border-transparent hover:border-border"
     >
       <div className="w-10 h-10 bg-primary/10 border border-primary/25 flex items-center justify-center flex-shrink-0">
         <ArrowRight className="w-5 h-5 text-primary" />
@@ -396,7 +452,6 @@ function ActionRow({ item, language, index, onSelect }: RowProps) {
         <p className="font-medium text-sm text-foreground truncate">{title}</p>
         {desc && <p className="text-xs text-muted-foreground truncate">{desc}</p>}
       </div>
-      <span className="text-[10px] text-muted-foreground font-mono opacity-60">↵</span>
     </motion.button>
   );
 }
@@ -406,11 +461,13 @@ function EntityRow({ item, language, index, onSelect }: RowProps) {
   const Icon = config?.icon || Search;
   return (
     <motion.button
+      type="button"
+      data-search-result
       initial={{ opacity: 0, y: 6 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: Math.min(index, 8) * 0.03 }}
       onClick={() => onSelect(item)}
-      className="w-full flex items-center gap-3 p-2.5 hover:bg-muted transition-colors text-left"
+      className="ds-focus w-full flex items-center gap-3 p-2.5 hover:bg-muted transition-colors text-left"
     >
       {item.image ? (
         <img src={item.image} alt="" className="w-11 h-11 object-cover flex-shrink-0" />

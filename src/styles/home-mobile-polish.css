@@ -111,6 +111,9 @@
     font-size: var(--home-ui-body-small);
     font-weight: 600;
   }
+  .cinematic-home.home-refined .home-reference-search .home-search-modes[data-activities] {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
   .cinematic-home.home-refined .home-reference-search .home-search-modes button[aria-pressed=true] {
     border-color: hsl(var(--home-ui-control-navy));
     background: hsl(var(--home-ui-control-navy));

@@ -65,6 +65,13 @@ export interface ResaleFilters {
   tab?: 'all' | 'assignment' | 'ready';
 }
 
+export function resaleOfferCurrency(property: Pick<ResaleProperty, 'status' | 'price_negotiable' | 'currency'>): string | null {
+  const currency = property.currency?.trim().toUpperCase();
+  return property.status === 'active' && property.price_negotiable === true && currency && /^[A-Z]{3}$/.test(currency)
+    ? currency
+    : null;
+}
+
 export function useResaleProperties(filters?: ResaleFilters) {
   return useQuery({
     queryKey: ['resale-properties', filters],

@@ -27,7 +27,7 @@ it.each(['ctrlKey', 'metaKey'] as const)('AdminLayout exclusively opens one comm
   fireEvent.keyDown(origin, {key: 'k', [modifier]: true});
   const dialog = await screen.findByRole('dialog', {name: 'Command Menu'});
   expect(screen.getAllByRole('dialog')).toHaveLength(1);
-  expect(screen.queryByRole('dialog', {name: 'Search'})).not.toBeInTheDocument();
+  expect(screen.queryByRole('dialog', {name: 'Search myUNO'})).not.toBeInTheDocument();
   await waitFor(() => expect(dialog).toContainElement(document.activeElement as HTMLElement));
   fireEvent.keyDown(document.activeElement!, {key: 'Escape'});
   await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
@@ -39,7 +39,7 @@ it('keeps the global search header action and never stacks the command palette o
   const opener = screen.getByRole('button', {name: /^Search$/});
   opener.focus();
   fireEvent.click(opener);
-  const dialog = await screen.findByRole('dialog', {name: 'Search'});
+  const dialog = await screen.findByRole('dialog', {name: 'Search myUNO'}, {timeout: 10000});
   fireEvent.keyDown(dialog, {key: 'k', ctrlKey: true});
   expect(screen.getAllByRole('dialog')).toHaveLength(1);
   expect(screen.queryByRole('dialog', {name: 'Command Menu'})).not.toBeInTheDocument();

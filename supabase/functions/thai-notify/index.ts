@@ -17,6 +17,15 @@ import { getCorsHeaders } from "../_shared/cors.ts";
 import { sendWhatsApp } from "../_shared/whatsapp.ts";
 import { sendEmail, buildEmailHtml } from "../_shared/notify-utils.ts";
 import { getAdminWhatsApp, getAdminEmails, getMailFrom } from "../_shared/admin-config.ts";
+import { requireServiceCaller } from "../_shared/internal-secret.ts";
+import { requireAuth } from "../_shared/auth-guard.ts";
+
+const FRESH_MS = 10 * 60 * 1000;
+function isFresh(ts: string | null | undefined): boolean {
+  if (!ts) return false;
+  const t = new Date(ts).getTime();
+  return Number.isFinite(t) && Date.now() - t <= FRESH_MS;
+}
 
 const SITE_URL = "https://myuno.app";
 
@@ -65,10 +74,21 @@ Deno.serve(async (req) => {
     const sb = createServiceClient();
     const { kind, bookingId, messageId, leadId } = await req.json();
 
+    // Caller identity: trusted server caller, or a signed-in user whose
+    // relation to the record is verified per kind below.
+    const isService = (await requireServiceCaller(req, corsHeaders)) === null;
+    let callerId: string | null = null;
+    if (!isService && kind !== "partner_lead") {
+      const auth = await requireAuth(req, corsHeaders);
+      if (auth instanceof Response) return auth;
+      callerId = auth.user.id;
+    }
+    const forbid = () => json({ success: false, error: "forbidden" }, 403, corsHeaders);
+
     if (kind === "new_booking" || kind === "booking_status") {
       const { data: booking } = await sb
         .from("thai_bookings")
-        .select("id, status, date_time, total_amount_thb, notes, business_id, customer_id, service_id")
+        .select("id, status, date_time, total_amount_thb, notes, business_id, customer_id, service_id, created_at")
         .eq("id", bookingId)
         .maybeSingle();
       if (!booking) return json({ success: false, error: "booking not found" }, 404, corsHeaders);
@@ -78,6 +98,11 @@ Deno.serve(async (req) => {
         .select("name_ru, name_en, name_th, phone, owner_id")
         .eq("id", booking.business_id)
         .maybeSingle();
+
+      if (!isService) {
+        if (kind === "new_booking" && (booking.customer_id !== callerId || !isFresh(booking.created_at))) return forbid();
+        if (kind === "booking_status" && business?.owner_id !== callerId) return forbid();
+      }
       const { data: service } = booking.service_id
         ? await sb.from("thai_business_services").select("name_ru, name_th").eq("id", booking.service_id).maybeSingle()
         : { data: null };
@@ -156,6 +181,7 @@ Deno.serve(async (req) => {
         ? await sb.from("thai_businesses").select("name_ru, name_en, name_th, phone, owner_id").eq("id", chat.business_id).maybeSingle()
         : { data: null };
       if (!chat || !business) return json({ success: false, error: "chat not found" }, 404, corsHeaders);
+      if (!isService && msg.sender_id !== callerId) return forbid();
 
       const bizName = business.name_ru || business.name_en || business.name_th || "—";
       const bizNameTh = business.name_th || business.name_en || business.name_ru || "—";
@@ -200,6 +226,8 @@ Deno.serve(async (req) => {
         .eq("id", leadId)
         .maybeSingle();
       if (!lead) return json({ success: false, error: "lead not found" }, 404, corsHeaders);
+      // Public partner form: only a just-created lead may trigger the admin alert.
+      if (!isService && !isFresh(lead.created_at)) return forbid();
 
       const adminWa = await getAdminWhatsApp();
       const adminEmails = await getAdminEmails();
@@ -242,7 +270,7 @@ Deno.serve(async (req) => {
     return json({ success: false, error: "unknown kind" }, 400, corsHeaders);
   } catch (error) {
     console.error("[thai-notify] error:", error);
-    return json({ success: false, error: error instanceof Error ? error.message : "unknown" }, 500, getCorsHeaders(req));
+    return json({ success: false, error: "internal error" }, 500, getCorsHeaders(req));
   }
 });
 

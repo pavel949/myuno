@@ -7,11 +7,12 @@
  *  - Tablet  (768–1023): logo + 5 nav pills + search-icon + utilities + avatar
  *  - Desktop (≥1024): logo + 5 nav pills + full search input + utilities + avatar
  *
- * Reads PRIMARY_NAV[role] from the SSOT navigation model.
+ * Consumer roles use ConsumerHeader; workspace roles use the shell sidebar.
  */
-import React, { memo, useCallback, useEffect, useRef, useState } from 'react';
-import { Link, NavLink, useLocation } from 'react-router-dom';
+import { memo } from 'react';
+import { Link, useLocation } from 'react-router-dom';
 import { ConsumerHeader } from './ConsumerHeader';
+import { useTopBarSearch } from './useTopBarSearch';
 import { Search, SlidersHorizontal } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { APP_ROUTES } from '@/lib/config/routes';
@@ -22,7 +23,6 @@ import { GlobalPreferencesControls } from '@/components/uno/GlobalPreferencesCon
 import { MiniCart } from '@/components/market/MiniCart';
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { GlobalSearchModal } from '@/components/search/GlobalSearchModal';
 import { UserAvatarMenu } from '@/components/layout/UserAvatarMenu';
 import { BrandWordmark } from '@/components/uno/BrandWordmark';
 import { Breadcrumbs } from '@/components/nav/Breadcrumbs';
@@ -31,7 +31,6 @@ import { SidebarTrigger } from '@/components/ui/sidebar';
 import { ECOSYSTEM_HEADER_INNER } from '@/design-system/ecosystemLayout';
 import { shouldShowBreadcrumbs } from '@/lib/config/routeMeta';
 import {
-  PRIMARY_NAV,
   hasSidebar,
   type NavRoleKey,
 } from '@/lib/nav/navigationModel';
@@ -54,8 +53,8 @@ export const TopBar = memo(function TopBar({
   const { t, language } = useLanguage();
   const location = useLocation();
   const isRu = language === 'ru';
-  const [searchOpen, setSearchOpen] = useState(false);
-  const searchOrigin = useRef<HTMLElement | null>(null);
+  // AdminLayout's command palette owns the admin keyboard shortcut.
+  const { openSearch, searchDialog } = useTopBarSearch(role !== 'admin');
   const scrolled = useScrolled(60);
 
   const sidebarVisible = hasSidebar(role);
@@ -63,51 +62,13 @@ export const TopBar = memo(function TopBar({
   const headerFrame = role === 'admin'
     ? 'mx-auto w-full max-w-none px-[var(--page-padding-x)]'
     : ECOSYSTEM_HEADER_INNER;
-  const cartEnabled = showCart ?? isConsumer;
-  const navItems = PRIMARY_NAV[role];
+  const cartEnabled = showCart === true;
   const showCrumbs = shouldShowBreadcrumbs(location.pathname);
-
-  const openSearch = useCallback((event?: React.MouseEvent<HTMLElement>) => {
-    if (role === 'admin') searchOrigin.current = event?.currentTarget
-      ?? (document.activeElement instanceof HTMLElement ? document.activeElement : null);
-    setSearchOpen(true);
-  }, [role]);
-  const handleSearchOpenChange = useCallback((open: boolean) => {
-    setSearchOpen(open);
-    // This controlled search has no Radix DialogTrigger to restore focus to.
-    if (!open && role === 'admin') {
-      const origin = searchOrigin.current;
-      requestAnimationFrame(() => { if (origin?.isConnected) origin.focus({ preventScroll: true }); });
-    }
-  }, [role]);
-  const handleKeyDown = useCallback((e: KeyboardEvent) => {
-    // AdminLayout's command palette exclusively owns this shortcut.
-    if (role === 'admin') return;
-    if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
-      e.preventDefault();
-      openSearch();
-    }
-  }, [openSearch, role]);
-
-  useEffect(() => {
-    document.addEventListener('keydown', handleKeyDown);
-    const openHandler = () => openSearch();
-    window.addEventListener('myuno:open-search', openHandler);
-    return () => {
-      document.removeEventListener('keydown', handleKeyDown);
-      window.removeEventListener('myuno:open-search', openHandler);
-    };
-  }, [handleKeyDown, openSearch]);
-
-  const isActive = (path: string, exact?: boolean) => {
-    if (exact) return location.pathname === path;
-    return location.pathname === path || location.pathname.startsWith(`${path}/`);
-  };
 
   if (isConsumer) return (
     <>
-      <ConsumerHeader onSearch={() => openSearch()} />
-      <GlobalSearchModal open={searchOpen} onOpenChange={handleSearchOpenChange} />
+      <ConsumerHeader onSearch={openSearch} />
+      {searchDialog}
     </>
   );
 
@@ -139,37 +100,9 @@ export const TopBar = memo(function TopBar({
           {/* Logo */}
           <BrandWordmark className={role === 'owner' || role === 'admin' ? 'min-h-11 items-center' : undefined} />
 
-          {/* Nav pills (≥md). Consumer roles get them on tablet+; workspace roles
-              have a sidebar — pills are redundant, hidden. */}
-          {isConsumer && (
-            <nav className="hidden md:flex items-center gap-0.5 ml-2">
-              {navItems.map((item) => {
-                const Icon = item.icon;
-                const active = isActive(item.path, item.exact);
-                const label = pickLang(language, { ru: item.labelRu, en: item.labelEn, th: item.labelTh });
-                return (
-                  <NavLink
-                    key={item.path}
-                    to={item.path}
-                    aria-label={label}
-                    className={cn(
-                      'flex items-center gap-1.5 px-3 py-2 rounded-none text-[13px] font-medium transition-colors',
-                      active
-                        ? 'bg-primary/10 text-primary'
-                        : 'text-muted-foreground hover:text-foreground hover:bg-muted/40',
-                    )}
-                  >
-                    <Icon className="size-5" aria-hidden />
-                    <span className="hidden lg:inline">{label}</span>
-                  </NavLink>
-                );
-              })}
-            </nav>
-          )}
-
           {/* Desktop search input (lg+) */}
           <button
-            onClick={openSearch}
+            onClick={(event) => openSearch(event.currentTarget)}
             className={cn(
               'hidden lg:flex items-center gap-3 mx-4 flex-1 max-w-sm',
               'px-4 py-2 rounded-none',
@@ -198,7 +131,7 @@ export const TopBar = memo(function TopBar({
           {/* Right utilities */}
           <div className="flex items-center gap-0.5 lg:gap-1.5 ml-auto shrink-0">
             <button
-              onClick={openSearch}
+              onClick={(event) => openSearch(event.currentTarget)}
               className="lg:hidden flex items-center justify-center w-11 h-11 rounded-none hover:bg-muted/40 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
               aria-label={pickLang(language, { ru: 'Поиск', en: 'Search', th: 'ค้นหา' })}
             >
@@ -250,7 +183,7 @@ export const TopBar = memo(function TopBar({
         )}
       </header>
 
-      <GlobalSearchModal open={searchOpen} onOpenChange={handleSearchOpenChange} />
+      {searchDialog}
     </>
   );
 });

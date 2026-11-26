@@ -2,11 +2,11 @@
 import { createStripeClient } from "../_shared/stripe.ts";
 import { createClient } from "../_shared/supabase.ts";
 import { withRateLimit, RATE_LIMITS } from '../_shared/rate-limit.ts';
-import { getCorsHeaders } from "../_shared/cors.ts";
+import { getCorsHeaders, getAllowedOrigin } from "../_shared/cors.ts";
 
 
 const logStep = (step: string, details?: unknown) => {
-  console.info(`[CREATE-VENDOR-SUB] ${step}`, details ? JSON.stringify(details) : '');
+  void details; console.info(`[CREATE-VENDOR-SUB] ${step}`);
 };
 
 Deno.serve(async (req) => {
@@ -115,7 +115,7 @@ Deno.serve(async (req) => {
       throw new Error(`Stripe price ID not configured for ${plan.slug} (${billingCycle})`);
     }
 
-    const origin = req.headers.get("origin") || "https://uno.app";
+    const origin = getAllowedOrigin(req.headers.get("origin"));
 
     const session = await stripe.checkout.sessions.create({
       customer: customerId,

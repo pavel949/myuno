@@ -54,6 +54,7 @@ interface ResponsiveModalProps {
   className?: string;
   /** Mobile sheet height */
   mobileHeight?: string;
+  closeLabel?: string;
 }
 
 export function ResponsiveModal({
@@ -67,6 +68,7 @@ export function ResponsiveModal({
   footer,
   className,
   mobileHeight = 'max-h-[85dvh]',
+  closeLabel,
 }: ResponsiveModalProps) {
   const isDesktop = useIsDesktop();
 
@@ -74,6 +76,7 @@ export function ResponsiveModal({
     return (
       <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent
+          closeLabel={closeLabel}
           className={cn(
             SIZE_CLASSES[size],
             'p-0 gap-0 overflow-hidden rounded-none border-border/60',
@@ -125,6 +128,7 @@ export function ResponsiveModal({
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent
         side="bottom"
+        closeLabel={closeLabel}
         className={cn(
           'rounded-none p-0 flex flex-col overflow-hidden',
           mobileHeight,

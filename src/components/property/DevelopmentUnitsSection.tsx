@@ -7,15 +7,18 @@ import { publicNewbuildUnit } from '@/lib/real-estate/publicNewbuildPresentation
  */
 import React from 'react';
 import { BedDouble, Bath, Maximize2, Layers } from 'lucide-react';
+import { Link, type Location } from 'react-router-dom';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useProjectUnits, type ProjectUnit } from '@/hooks/useProjectUnits';
 import { Skeleton } from '@/components/ui/skeleton';
+import { APP_ROUTES } from '@/lib/config/routes';
 
 interface DevelopmentUnitsSectionProps {
   developmentId: string;
   onSelectUnit?: (unit: ProjectUnit) => void;
+  unitListingContext?: Pick<Location, 'search' | 'state'>;
 }
 
 const VIEW_LABELS: Record<string, { en: string; ru: string }> = {
@@ -25,7 +28,7 @@ const VIEW_LABELS: Record<string, { en: string; ru: string }> = {
   mountain_view: { en: 'Mountain View', ru: 'Вид на горы' },
 };
 
-export function DevelopmentUnitsSection({ developmentId, onSelectUnit }: DevelopmentUnitsSectionProps) {
+export function DevelopmentUnitsSection({ developmentId, onSelectUnit, unitListingContext }: DevelopmentUnitsSectionProps) {
   const { language } = useLanguage();
   const isRu = language === 'ru';
   const { data: units, isLoading, isError, refetch } = useProjectUnits(developmentId);
@@ -50,11 +53,21 @@ export function DevelopmentUnitsSection({ developmentId, onSelectUnit }: Develop
         const planUrl = projectPublicDocumentUrl(unit.floor_plan_url);
         const planLabel = pickLang(language, { ru: 'Открыть план (новая вкладка)', en: 'Open plan (new tab)', th: 'เปิดแปลน (แท็บใหม่)' });
         return (
-          <div key={unit.id} className="space-y-2 rounded-none border border-border/50 p-3">
-            <div className="flex items-start justify-between gap-3">
+          <div key={unit.id} className="space-y-2 rounded-[var(--bible-radius-card)] border border-border/50 p-3">
+            <div className="flex flex-wrap items-start justify-between gap-3">
               <div>
-                <h4 className="font-medium text-sm">{name}</h4>
-                <div className="flex items-center gap-2 text-xs text-muted-foreground mt-0.5">
+                <h4 className="font-medium text-sm">
+                  {unit.unit_code && unitListingContext ? (
+                    <Link
+                      className="inline-flex min-h-11 items-center underline underline-offset-4"
+                      to={{ pathname: APP_ROUTES.OFFPLAN_UNIT_DETAIL(developmentId, unit.id), search: unitListingContext.search }}
+                      state={unitListingContext.state}
+                    >
+                      {name}
+                    </Link>
+                  ) : name}
+                </h4>
+                <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground mt-0.5">
                   {Number.isFinite(unit.area_sqm) && unit.area_sqm > 0 && <span className="flex items-center gap-0.5"><Maximize2 className="w-3 h-3" />{unit.area_sqm} m²</span>}
                   {unit.bedrooms != null && unit.bedrooms > 0 && <span className="flex items-center gap-0.5"><BedDouble className="w-3 h-3" />{unit.bedrooms}</span>}
                   {unit.bathrooms != null && <span className="flex items-center gap-0.5"><Bath className="w-3 h-3" />{unit.bathrooms}</span>}

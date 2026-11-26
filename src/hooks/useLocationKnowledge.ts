@@ -31,6 +31,7 @@ export interface LocalizedKnowledge {
   summary: string;
   icon: string | null;
   sort_order: number;
+  updatedAt?: string;
 }
 
 // Knowledge section types
@@ -52,7 +53,7 @@ export function useKnowledgeSections() {
   const { language } = useLanguage();
 
   return useQuery({
-    queryKey: ['location-knowledge', 'sections', currentCity?.id],
+    queryKey: ['location-knowledge', 'sections', currentCity?.id, language],
     queryFn: async (): Promise<LocalizedKnowledge[]> => {
       if (!currentCity?.id) return [];
 
@@ -90,7 +91,7 @@ export function useKnowledgeBySection(section: string) {
   const { language } = useLanguage();
 
   return useQuery({
-    queryKey: ['location-knowledge', 'section', currentCity?.id, section],
+    queryKey: ['location-knowledge', 'section', currentCity?.id, section, language],
     queryFn: async (): Promise<LocalizedKnowledge[]> => {
       if (!currentCity?.id) return [];
 
@@ -128,7 +129,7 @@ export function useKnowledgeArticle(section: string, slug: string) {
   const { language } = useLanguage();
 
   return useQuery({
-    queryKey: ['location-knowledge', 'article', currentCity?.id, section, slug],
+    queryKey: ['location-knowledge', 'article', currentCity?.id, section, slug, language],
     queryFn: async (): Promise<LocalizedKnowledge | null> => {
       if (!currentCity?.id) return null;
 
@@ -139,12 +140,10 @@ export function useKnowledgeArticle(section: string, slug: string) {
         .eq('section', section)
         .eq('slug', slug)
         .eq('is_published', true)
-        .single();
+        .maybeSingle();
 
-      if (error) {
-        if (error.code === 'PGRST116') return null; // Not found
-        throw error;
-      }
+      if (error) throw error;
+      if (!data) return null;
 
       return {
         id: data.id,
@@ -155,6 +154,7 @@ export function useKnowledgeArticle(section: string, slug: string) {
         summary: language === 'ru' ? (data.summary_ru || data.summary_en || '') : (data.summary_en || ''),
         icon: data.icon,
         sort_order: data.sort_order || 0,
+        updatedAt: data.updated_at,
       };
     },
     enabled: !!currentCity?.id && !!section && !!slug,

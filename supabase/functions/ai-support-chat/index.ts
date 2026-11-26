@@ -1,3 +1,4 @@
+import { sanitizeChatMessages, promptSafe } from "../_shared/chat-messages.ts";
 // Deno.serve used (native edge runtime)
 import { withRateLimit, RATE_LIMITS, getClientIdentifier } from "../_shared/rate-limit.ts";
 import { createClient } from "../_shared/supabase.ts";
@@ -84,10 +85,10 @@ Deno.serve(async (req) => {
     let systemPrompt = SYSTEM_PROMPT;
     const lang = typeof pageContext?.lang === "string" ? pageContext.lang : "";
     if (pageContext && typeof pageContext === "object") {
-      const path = typeof pageContext.path === "string" ? pageContext.path : "";
-      const title = typeof pageContext.title === "string" ? pageContext.title : "";
+      const path = typeof pageContext.path === "string" ? promptSafe(pageContext.path, 200) : "";
+      const title = typeof pageContext.title === "string" ? promptSafe(pageContext.title, 120) : "";
       if (path || title) {
-        systemPrompt += `\n\nКонтекст пользователя: страница "${title}" (${path}), язык интерфейса: ${lang || "auto"}. Если вопрос относится к этой странице — используй её контекст в ответе.`;
+        systemPrompt += `\n\nКонтекст пользователя: страница "${title}" (${path}), язык интерфейса: ${promptSafe(lang, 8) || "auto"}. Если вопрос относится к этой странице — используй её контекст в ответе.`;
       }
     }
 
@@ -143,7 +144,7 @@ Deno.serve(async (req) => {
         model: "google/gemini-3-flash-preview",
         messages: [
           { role: "system", content: systemPrompt },
-          ...messages,
+          ...sanitizeChatMessages(messages),
         ],
         stream: true,
       }),

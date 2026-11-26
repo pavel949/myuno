@@ -247,7 +247,7 @@ export default function StartOnboardingV2() {
                   <Button type="button" variant="ghost" size="sm" onClick={o.next} disabled={!stepValid}>
                     {T(COPY.refine, lang)}
                   </Button>
-                  <Button type="button" onClick={o.submit} disabled={!o.canSubmit || o.isSubmitting}>
+                  <Button type="button" variant="conversion" onClick={o.submit} disabled={!o.canSubmit || o.isSubmitting}>
                     {o.isSubmitting ? (
                       <>
                         <Loader2 className="mr-1 h-4 w-4 animate-spin" />
@@ -262,7 +262,7 @@ export default function StartOnboardingV2() {
                   </Button>
                 </div>
               ) : (
-                <Button type="button" onClick={o.submit} disabled={!o.canSubmit || o.isSubmitting}>
+                <Button type="button" variant="conversion" onClick={o.submit} disabled={!o.canSubmit || o.isSubmitting}>
                   {o.isSubmitting ? (
                     <>
                       <Loader2 className="mr-1 h-4 w-4 animate-spin" />

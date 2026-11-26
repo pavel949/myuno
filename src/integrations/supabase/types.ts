@@ -8546,6 +8546,35 @@ export type Database = {
         }
         Relationships: []
       }
+      fasttrack_request_receipts: {
+        Row: {
+          booking_id: string | null
+          request_digest: string
+          request_key: string
+          user_id: string
+        }
+        Insert: {
+          booking_id?: string | null
+          request_digest: string
+          request_key: string
+          user_id: string
+        }
+        Update: {
+          booking_id?: string | null
+          request_digest?: string
+          request_key?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fasttrack_request_receipts_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: true
+            referencedRelation: "airport_bookings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       favorites: {
         Row: {
           created_at: string
@@ -36969,6 +36998,7 @@ export type Database = {
         Args: { p_company_id: string; p_property_id: string }
         Returns: boolean
       }
+      actor_has_active_platform_admin: { Args: never; Returns: boolean }
       actor_has_platform_admin: { Args: never; Returns: boolean }
       actor_is_operating_company_overseer: {
         Args: { _company_id: string }
@@ -37197,6 +37227,18 @@ export type Database = {
         }
         Returns: string
       }
+      create_fasttrack_request: {
+        Args: {
+          p_actor: string
+          p_booking: Json
+          p_passengers: Json
+          p_request_key: string
+        }
+        Returns: {
+          booking_id: string
+          created: boolean
+        }[]
+      }
       create_managed_property_checked: {
         Args: {
           p_company_id: string
@@ -37260,10 +37302,6 @@ export type Database = {
         Returns: Json
       }
       credit_cashback: { Args: { p_order_id: string }; Returns: Json }
-      delete_email: {
-        Args: { message_id: number; queue_name: string }
-        Returns: boolean
-      }
       detect_booking_conflicts: {
         Args: { p_property_id: string }
         Returns: {
@@ -37295,11 +37333,6 @@ export type Database = {
       discard_drive_import_review: {
         Args: { p_job_id: string }
         Returns: undefined
-      }
-      email_queue_dispatch: { Args: never; Returns: undefined }
-      enqueue_email: {
-        Args: { payload: Json; queue_name: string }
-        Returns: number
       }
       ensure_multi_role_qa_bundle: { Args: never; Returns: Json }
       find_or_create_identity: {
@@ -37557,6 +37590,18 @@ export type Database = {
         Returns: string
       }
       list_pending_flower_deliveries: { Args: never; Returns: Json }
+      manage_nonplatform_role_checked: {
+        Args: {
+          p_grant: boolean
+          p_role: Database["public"]["Enums"]["app_role"]
+          p_user_id: string
+        }
+        Returns: Json
+      }
+      manage_uno_team_membership_checked: {
+        Args: { p_grant: boolean; p_user_id: string }
+        Returns: Json
+      }
       match_ai_knowledge: {
         Args: {
           filter_lang?: string
@@ -37595,15 +37640,6 @@ export type Database = {
       mcc_derive_user_state: {
         Args: { p_event_name: string; p_landing_id?: string; p_user_id: string }
         Returns: string
-      }
-      move_to_dlq: {
-        Args: {
-          dlq_name: string
-          message_id: number
-          payload: Json
-          source_queue: string
-        }
-        Returns: number
       }
       nearby_pois: {
         Args: {
@@ -37662,14 +37698,6 @@ export type Database = {
       publish_property_to_marketplace: {
         Args: { p_owner_property_id: string }
         Returns: string
-      }
-      read_email_batch: {
-        Args: { batch_size: number; queue_name: string; vt: number }
-        Returns: {
-          message: Json
-          msg_id: number
-          read_ct: number
-        }[]
       }
       reassign_property_operating_space: {
         Args: { p_property_id: string; p_reason: string; p_to_space_id: string }

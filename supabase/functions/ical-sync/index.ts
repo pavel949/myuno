@@ -6,6 +6,9 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
 import { withRateLimit, RATE_LIMITS } from "../_shared/rate-limit.ts";
 import { validateExternalUrlForSSRF } from "../_shared/ssrf-guard.ts";
 import { propertyBookingHoldsInventory } from "../_shared/property-inventory.ts";
+import { requireServiceCaller } from '../_shared/internal-secret.ts';
+import { requireAuth } from '../_shared/auth-guard.ts';
+import { fetchUserRoles, hasAnyRole, PLATFORM_ADMIN_ROLES } from '../_shared/authz.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': 'https://myuno.app',
@@ -227,6 +230,16 @@ Deno.serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,
     );
 
+    // Service callers (cron) may sync all calendars; signed-in users only their
+    // own calendars unless they are platform admins.
+    let ownerScope: string | null = null;
+    if ((await requireServiceCaller(req, corsHeaders)) !== null) {
+      const auth = await requireAuth(req, corsHeaders);
+      if (auth instanceof Response) return auth;
+      const roles = await fetchUserRoles(supabase, auth.user.id);
+      if (!hasAnyRole(roles, PLATFORM_ADMIN_ROLES)) ownerScope = auth.user.id;
+    }
+
     let calendarIds: string[] = [];
     if (req.method === 'POST') {
       const body = await req.json().catch(() => ({}));
@@ -237,6 +250,8 @@ Deno.serve(async (req) => {
       .from('property_external_calendars')
       .select('*, owner_properties!inner(id, owner_id)')
       .eq('is_active', true);
+    // Bind BOTH the calendar owner and the target property's owner to the caller.
+    if (ownerScope) query = query.eq('owner_id', ownerScope).eq('owner_properties.owner_id', ownerScope);
     if (calendarIds.length > 0) query = query.in('id', calendarIds);
 
     const { data: calendars, error: calendarsError } = await query;
@@ -253,6 +268,10 @@ Deno.serve(async (req) => {
     const results: Array<Record<string, unknown>> = [];
 
     for (const calendar of calendars || []) {
+      if (ownerScope) {
+        const op = Array.isArray(calendar.owner_properties) ? calendar.owner_properties[0] : calendar.owner_properties;
+        if (calendar.owner_id !== ownerScope || op?.owner_id !== ownerScope) continue;
+      }
       try {
         console.info(`Fetching iCal: ${calendar.name}`);
         // SSRF guard: ical_url is user-supplied DB data — block loopback,

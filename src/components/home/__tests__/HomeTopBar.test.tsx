@@ -1,4 +1,5 @@
 import React from 'react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter, useLocation } from 'react-router-dom';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -19,11 +20,20 @@ vi.mock('@/contexts/LanguageContext', () => ({ useLanguage: () => ({ language: s
 vi.mock('@/integrations/supabase/client', () => ({ supabase: { from: state.from, channel: state.channel, removeChannel: state.removeChannel } }));
 
 function Location() { return <output aria-label="Current route">{useLocation().pathname}</output>; }
-const wrapper = ({ children }: { children: React.ReactNode }) => <MemoryRouter>{children}<Location /></MemoryRouter>;
+let queryClient: QueryClient;
+const wrapper = ({ children }: { children: React.ReactNode }) => (
+  <QueryClientProvider client={queryClient}>
+    <MemoryRouter>{children}<Location /></MemoryRouter>
+  </QueryClientProvider>
+);
 const props = { personas: [], onRoleSheetOpen: vi.fn() };
 
-afterEach(cleanup);
+afterEach(() => {
+  cleanup();
+  queryClient.clear();
+});
 beforeEach(() => {
+  queryClient = new QueryClient({ defaultOptions: { queries: { retry: false, gcTime: 0 } } });
   vi.clearAllMocks();
   state.user = { id: 'account-a', user_metadata: { full_name: 'Example Person' } };
   state.language = 'en';
@@ -85,7 +95,7 @@ describe('home notification source', () => {
     rerender(<HomeTopBar {...props} />);
     expect(screen.getByRole('button', { name: 'Notifications' })).toBeInTheDocument();
     expect(state.removeChannel).toHaveBeenCalledOnce();
-    expect(state.read).toHaveBeenLastCalledWith('account-b');
+    await waitFor(() => expect(state.read).toHaveBeenLastCalledWith('account-b'));
     state.user = null;
     rerender(<HomeTopBar {...props} />);
     expect(screen.getByRole('button', { name: 'Notifications' })).toBeInTheDocument();

@@ -1,7 +1,8 @@
+import { csvCell } from '@/lib/export/csvSafe';
 import { pickLang } from '@/lib/i18n/pickLang';
 import '@/styles/premium-workspace.css';
 import { propertyBookingStatus } from '@/lib/propertyBookingPresentation';
-import { useState, useMemo } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { useNavigate, useSearchParams, useLocation } from 'react-router-dom';
 import { format, differenceInCalendarDays } from 'date-fns';
 import { bangkokTodayISO, parseCivilDate } from '@/lib/hotelDates';
@@ -36,6 +37,8 @@ import { cn } from '@/lib/utils';
 type StatusFilter = 'all' | 'upcoming' | 'active' | 'pending' | 'completed' | 'cancelled';
 type SortKey = 'check_in' | 'created_at' | 'total_amount' | 'guest_name';
 type BulkAction = 'confirm' | 'cancel';
+type BulkSelection = { ids: Set<string>; scope: string };
+type BulkReview = { action: BulkAction; ids: string[]; scope: string };
 
 const STATUS_FILTERS: { value: StatusFilter; label: string; labelRu: string; labelTh: string }[] = [
   { value: 'all', label: 'All', labelRu: 'Все', labelTh: "ทั้งหมด" },
@@ -86,8 +89,8 @@ export default function MCBookingsPage() {
   // Free-text search can contain guest details; keep it out of shareable URLs.
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedBooking, setSelectedBooking] = useState<PropertyBooking | null>(null);
-  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
-  const [pendingBulkAction, setPendingBulkAction] = useState<BulkAction | null>(null);
+  const [bulkSelection, setBulkSelection] = useState<BulkSelection | null>(null);
+  const [bulkReview, setBulkReview] = useState<BulkReview | null>(null);
   const [bulkBusy, setBulkBusy] = useState(false);
 
   const filteredBookings = useMemo(() => {
@@ -148,6 +151,33 @@ export default function MCBookingsPage() {
     return filtered;
   }, [bookings, statusFilter, searchQuery, sortKey, sortAsc]);
 
+  const selectionScope = JSON.stringify([statusFilter, searchQuery]);
+  const visibleIds = useMemo(() => new Set(filteredBookings.map(booking => booking.id)), [filteredBookings]);
+  const selectedVisibleIds = new Set(bulkSelection?.scope === selectionScope
+    ? [...bulkSelection.ids].filter(id => visibleIds.has(id)) : []);
+  const allVisibleSelected = visibleIds.size > 0 && [...visibleIds].every(id => selectedVisibleIds.has(id));
+  const pendingReview = bulkReview?.scope === selectionScope
+    && bulkReview.ids.length === selectedVisibleIds.size
+    && bulkReview.ids.every(id => selectedVisibleIds.has(id))
+    ? bulkReview
+    : null;
+
+  // Do not carry checkmarks into a different filter, including browser history changes.
+  useEffect(() => {
+    setBulkSelection(previous => previous?.scope === selectionScope ? previous : null);
+    setBulkReview(previous => previous?.scope === selectionScope ? previous : null);
+  }, [selectionScope]);
+
+  // Prune records removed by a data refresh, even if they later reappear.
+  useEffect(() => {
+    setBulkSelection(previous => {
+      if (!previous) return previous;
+      const next = [...previous.ids].filter(id => visibleIds.has(id));
+      return next.length === previous.ids.size ? previous : { ...previous, ids: new Set(next) };
+    });
+    setBulkReview(previous => previous?.ids.some(id => !visibleIds.has(id)) ? null : previous);
+  }, [visibleIds]);
+
   // Stats
   const stats = useMemo(() => {
     if (!bookings) return { total: 0, upcoming: 0, active: 0, pending: 0 };
@@ -166,28 +196,36 @@ export default function MCBookingsPage() {
   }, { replace: true, state: location.state });
 
   const toggleSelectBooking = (id: string) => {
-    setSelectedIds(prev => {
-      const next = new Set(prev);
+    if (bulkBusy || !visibleIds.has(id)) return;
+    setBulkReview(null);
+    setBulkSelection(previous => {
+      const next = new Set(previous?.scope === selectionScope
+        ? [...previous.ids].filter(value => visibleIds.has(value)) : []);
       if (next.has(id)) next.delete(id); else next.add(id);
-      return next;
+      return { ids: next, scope: selectionScope };
     });
   };
 
   const toggleSelectAll = () => {
-    if (selectedIds.size === filteredBookings.length) {
-      setSelectedIds(new Set());
-    } else {
-      setSelectedIds(new Set(filteredBookings.map(b => b.id)));
-    }
+    if (bulkBusy) return;
+    setBulkReview(null);
+    setBulkSelection(allVisibleSelected ? null : { ids: new Set(visibleIds), scope: selectionScope });
   };
 
   const clearSelection = () => {
-    setSelectedIds(new Set());
-    setPendingBulkAction(null);
+    setBulkSelection(null);
+    setBulkReview(null);
   };
 
-  const executeBulkAction = (action: BulkAction) => {
-    const ids = Array.from(selectedIds);
+  const startBulkReview = (action: BulkAction) => {
+    if (bulkBusy || selectedVisibleIds.size === 0) return;
+    setBulkReview({ action, scope: selectionScope, ids: [...selectedVisibleIds] });
+  };
+
+  const executeBulkAction = () => {
+    // Submit exactly the reviewed IDs, or nothing. Do not silently shrink the batch.
+    if (bulkBusy || !pendingReview || pendingReview.ids.length === 0) return;
+    const { action, ids } = pendingReview;
     const status = action === 'confirm' ? 'confirmed' : 'cancelled';
     setBulkBusy(true);
     supabase.from('orders').update({ status }).in('id', ids).then(({ error }) => {
@@ -219,7 +257,7 @@ export default function MCBookingsPage() {
       source: b.source || 'manual',
     }));
     const header = Object.keys(rows[0] || {}).join(',');
-    const csv = [header, ...rows.map(r => Object.values(r).map(v => `"${v}"`).join(','))].join('\n');
+    const csv = [header, ...rows.map(r => Object.values(r).map(v => csvCell(v)).join(','))].join('\n');
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -347,49 +385,61 @@ export default function MCBookingsPage() {
       </section>
 
       {/* Bulk actions toolbar */}
-      {selectedIds.size > 0 && (
+      {selectedVisibleIds.size > 0 && (
         <div className="flex flex-wrap items-center gap-x-2 gap-y-1 mb-3 p-2 bg-muted border border-border rounded-none" role="group" aria-label={pickLang(language, {"ru": "Действия с выбранными бронированиями", "en": "Selected booking actions", "th": "การดำเนินการกับการจองที่เลือก"})}>
           <Checkbox
             className="h-11 w-11 shrink-0"
-            checked={selectedIds.size === filteredBookings.length}
+            checked={allVisibleSelected || 'indeterminate'}
+            disabled={bulkBusy}
             onCheckedChange={toggleSelectAll}
             aria-label={pickLang(language, {"ru": "Выбрать все видимые бронирования", "en": "Select all visible bookings", "th": "เลือกการจองที่แสดงทั้งหมด"})}
           />
           <span className="text-sm font-medium">
-            {selectedIds.size} {pickLang(language, {"ru": "выбрано", "en": "selected", "th": "รายการที่เลือก"})}
+            {selectedVisibleIds.size} {pickLang(language, {"ru": "выбрано", "en": "selected", "th": "รายการที่เลือก"})}
           </span>
           <div className="flex flex-wrap items-center gap-1 w-full sm:w-auto sm:ml-auto">
-            {pendingBulkAction === null ? (
+            {pendingReview === null ? (
               <>
-                <Button className="min-h-11 px-2" size="sm" variant="outline" onClick={() => setPendingBulkAction('confirm')}>
+                <Button className="min-h-11 px-2" size="sm" variant="outline" disabled={bulkBusy} onClick={() => startBulkReview('confirm')}>
                   <Check className="w-3.5 h-3.5 mr-1" />
                   {pickLang(language, {"ru": "Подтвердить", "en": "Confirm", "th": "ยืนยัน"})}
                 </Button>
-                <Button className="min-h-11 px-2" size="sm" variant="outline" onClick={() => setPendingBulkAction('cancel')}>
+                <Button className="min-h-11 px-2" size="sm" variant="outline" disabled={bulkBusy} onClick={() => startBulkReview('cancel')}>
                   <X className="w-3.5 h-3.5 mr-1" />
                   {pickLang(language, {"ru": "Отменить", "en": "Cancel", "th": "ยกเลิก"})}
                 </Button>
-                <Button className="min-h-11 px-2" size="sm" variant="ghost" onClick={clearSelection}>
+                <Button className="min-h-11 px-2" size="sm" variant="ghost" disabled={bulkBusy} onClick={clearSelection}>
                   {pickLang(language, {"ru": "Снять выбор", "en": "Clear", "th": "ล้าง"})}
                 </Button>
               </>
             ) : (
               <>
-                <span className="text-sm text-muted-foreground break-words flex-1 min-w-0">
-                  {pendingBulkAction === 'confirm'
-                    ? (isRu ? `Подтвердить ${selectedIds.size} бронирований?` : `Confirm ${selectedIds.size} bookings?`)
-                    : (isRu ? `Отменить ${selectedIds.size} бронирований?` : `Cancel ${selectedIds.size} bookings?`)}
-                </span>
+                <div className="w-full min-w-0 space-y-1 text-sm text-muted-foreground">
+                  <p>{pendingReview.action === 'confirm'
+                    ? pickLang(language, { ru: 'Подтвердить эти бронирования?', en: 'Confirm these bookings?', th: 'ยืนยันการจองเหล่านี้ใช่ไหม' })
+                    : pickLang(language, { ru: 'Отменить эти бронирования?', en: 'Cancel these bookings?', th: 'ยกเลิกการจองเหล่านี้ใช่ไหม' })}</p>
+                  <ul className="max-h-40 overflow-y-auto break-words" aria-label={pickLang(language, { ru: 'Проверяемые бронирования', en: 'Bookings under review', th: 'การจองที่กำลังตรวจสอบ' })}>
+                    {filteredBookings.filter(booking => pendingReview.ids.includes(booking.id)).map(booking => (
+                      <li key={booking.id}>
+                        {booking.guest_name || pickLang(language, { ru: 'Гость', en: 'Guest', th: 'ผู้เข้าพัก' })} · {booking.check_in} → {booking.check_out}
+                        {(booking as PropertyBooking & { owner_properties?: { title?: string } }).owner_properties?.title && (
+                          <> · {(booking as PropertyBooking & { owner_properties?: { title?: string } }).owner_properties?.title}</>
+                        )}
+                        {' '}<code className="text-xs">{booking.id}</code>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
                 <Button
                   size="sm"
                   className="min-h-11 min-w-11"
-                  variant={pendingBulkAction === 'cancel' ? 'destructive' : 'default'}
+                  variant={pendingReview.action === 'cancel' ? 'destructive' : 'default'}
                   disabled={bulkBusy}
-                  onClick={() => executeBulkAction(pendingBulkAction)}
+                  onClick={executeBulkAction}
                 >
                   {pickLang(language, {"ru": "Да", "en": "Yes", "th": "ใช่"})}
                 </Button>
-                <Button className="min-h-11 min-w-11" size="sm" variant="ghost" disabled={bulkBusy} onClick={() => setPendingBulkAction(null)}>
+                <Button className="min-h-11 min-w-11" size="sm" variant="ghost" disabled={bulkBusy} onClick={() => setBulkReview(null)}>
                   {pickLang(language, {"ru": "Нет", "en": "No", "th": "ไม่"})}
                 </Button>
               </>
@@ -453,7 +503,8 @@ export default function MCBookingsPage() {
                         <Checkbox
                           className="w-11 h-11"
                           onClick={(e) => e.stopPropagation()}
-                          checked={selectedIds.has(booking.id)}
+                          checked={selectedVisibleIds.has(booking.id)}
+                          disabled={bulkBusy}
                           onCheckedChange={() => toggleSelectBooking(booking.id)}
                           aria-label={isRu ? `Выбрать бронирование: ${guestName}` : `Select booking: ${guestName}`}
                         />

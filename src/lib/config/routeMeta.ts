@@ -218,7 +218,7 @@ export function getRouteCrumbs(pathname: string): BreadcrumbCrumb[] {
       return;
     }
 
-    const meta = SEGMENT_META[seg];
+    const meta = (segments[0] === 'admin' && seg !== 'admin' ? ADMIN_SEGMENT_META[seg] : undefined) ?? SEGMENT_META[seg];
     if (meta?.hidden) return;
 
     crumbs.push({
@@ -244,6 +244,61 @@ export function getRouteCrumbs(pathname: string): BreadcrumbCrumb[] {
 
   return crumbs;
 }
+
+/** Admin sub-section labels, scoped to /admin so generic slugs elsewhere keep their own meaning. */
+const ADMIN_SEGMENT_META: Record<string, SegmentMeta> = {
+  'operations': { labelRu: 'Операции', labelEn: 'Operations' },
+  'inbox': { labelRu: 'Входящие', labelEn: 'Inbox' },
+  'catalog': { labelRu: 'Каталог', labelEn: 'Catalog' },
+  'users': { labelRu: 'Участники', labelEn: 'Users' },
+  'finance': { labelRu: 'Финансы', labelEn: 'Finance' },
+  'settings': { labelRu: 'Настройки', labelEn: 'Settings' },
+  'tickets': { labelRu: 'Обращения', labelEn: 'Tickets' },
+  'disputes': { labelRu: 'Споры', labelEn: 'Disputes' },
+  'providers': { labelRu: 'Поставщики', labelEn: 'Providers' },
+  'partner-applications': { labelRu: 'Заявки партнёров', labelEn: 'Partner applications' },
+  'properties': { labelRu: 'Объекты', labelEn: 'Properties' },
+  'moderation': { labelRu: 'Модерация', labelEn: 'Moderation' },
+  'crm': { labelRu: 'CRM', labelEn: 'CRM' },
+  'leads': { labelRu: 'Лиды', labelEn: 'Leads' },
+  'analytics': { labelRu: 'Аналитика', labelEn: 'Analytics' },
+  'consultations': { labelRu: 'Консультации', labelEn: 'Consultations' },
+  'contracts': { labelRu: 'Контракты', labelEn: 'Contracts' },
+  'developers': { labelRu: 'Девелоперы', labelEn: 'Developers' },
+  'newbuilds': { labelRu: 'Новостройки', labelEn: 'New builds' },
+  'pm-companies': { labelRu: 'Управляющие компании', labelEn: 'Management companies' },
+  'services': { labelRu: 'Услуги', labelEn: 'Services' },
+  'experiences': { labelRu: 'Впечатления', labelEn: 'Experiences' },
+  'events': { labelRu: 'События', labelEn: 'Events' },
+  'cities': { labelRu: 'Города', labelEn: 'Cities' },
+  'marketing': { labelRu: 'Маркетинг', labelEn: 'Marketing' },
+  'ai-agents': { labelRu: 'ИИ-ассистенты', labelEn: 'AI assistants' },
+  'ai-knowledge': { labelRu: 'База знаний ИИ', labelEn: 'AI knowledge' },
+  'data-import': { labelRu: 'Импорт данных', labelEn: 'Data import' },
+  'intake': { labelRu: 'Приём данных', labelEn: 'Intake' },
+  'legal': { labelRu: 'Юридические услуги', labelEn: 'Legal' },
+  'legal-documents': { labelRu: 'Юридические документы', labelEn: 'Legal documents' },
+  'api-keys': { labelRu: 'API-ключи', labelEn: 'API keys' },
+  'acquisition-metrics': { labelRu: 'Привлечение', labelEn: 'Acquisition' },
+  'investments': { labelRu: 'Инвестиции', labelEn: 'Investments' },
+  'marketplace': { labelRu: 'Маркетплейс', labelEn: 'Marketplace' },
+  'vendors': { labelRu: 'Продавцы', labelEn: 'Vendors' },
+  'products': { labelRu: 'Товары', labelEn: 'Products' },
+  'categories': { labelRu: 'Категории', labelEn: 'Categories' },
+  'subcategories': { labelRu: 'Подкатегории', labelEn: 'Subcategories' },
+  'thai-business': { labelRu: 'Тайский бизнес', labelEn: 'Thai business' },
+  'transport': { labelRu: 'Транспорт', labelEn: 'Transport' },
+  'nb-leads': { labelRu: 'Лиды новостроек', labelEn: 'New build leads' },
+  'activities': { labelRu: 'Активности', labelEn: 'Activities' },
+  'lookups': { labelRu: 'Справочники', labelEn: 'Lookups' },
+  'master-catalog': { labelRu: 'Мастер-каталог', labelEn: 'Master catalog' },
+  'flowers': { labelRu: 'Цветы', labelEn: 'Flowers' },
+  'cleaning': { labelRu: 'Клининг', labelEn: 'Cleaning' },
+  'console': { labelRu: 'Консоль', labelEn: 'Console' },
+  'projects': { labelRu: 'Проекты', labelEn: 'Projects' },
+  'mc-dashboard': { labelRu: 'Панель УК', labelEn: 'MC dashboard' },
+  'claims': { labelRu: 'Заявки на места', labelEn: 'Place claims' },
+};
 
 /** Convenience: resolve label for a single segment (used by tests / SEO). */
 export function getSegmentLabel(seg: string, lang: LangCode): string {

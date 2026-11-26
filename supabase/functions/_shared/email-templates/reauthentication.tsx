@@ -19,10 +19,10 @@ interface ReauthenticationEmailProps {
 export const ReauthenticationEmail = ({ token }: ReauthenticationEmailProps) => (
   <Html lang="en" dir="ltr">
     <Head />
-    <Preview>Your myUNO verification code</Preview>
+    <Preview>Your verification code</Preview>
     <Body style={main}>
       <Container style={container}>
-        <Heading style={h1}>Verification code</Heading>
+        <Heading style={h1}>Confirm reauthentication</Heading>
         <Text style={text}>Use the code below to confirm your identity:</Text>
         <Text style={codeStyle}>{token}</Text>
         <Text style={footer}>
@@ -51,11 +51,10 @@ const text = {
   margin: '0 0 24px',
 }
 const codeStyle = {
-  fontFamily: "'JetBrains Mono', Courier, monospace",
-  fontSize: '28px',
+  fontFamily: 'Courier, monospace',
+  fontSize: '24px',
   fontWeight: 'bold' as const,
-  color: 'hsl(224, 55%, 32%)',
-  letterSpacing: '4px',
+  color: 'hsl(222, 47%, 11%)',
   margin: '0 0 30px',
 }
 const footer = { fontSize: '12px', color: '#999999', margin: '32px 0 0' }

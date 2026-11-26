@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -33,10 +33,18 @@ export function OperationsBookingsTab() {
   const listHeading = useRef<HTMLHeadingElement>(null);
   const queryClient = useQueryClient();
 
-  const searchQuery = queue.search;
+  const [searchQuery, setSearchQuery] = useState('');
+  const searchScope = pickLang(language, { en: 'Order text search on this page', ru: 'Поиск заказов на этой странице', th: 'ค้นหาข้อความคำสั่งซื้อในหน้านี้' });
+  useEffect(() => {
+    if (!params.has('q')) return;
+    const clean = new URLSearchParams(params);
+    clean.delete('q');
+    setParams(clean, { replace: true });
+  }, [params, setParams]);
   const statusFilter = queue.status;
   const updateFilter = (key: string, value: string) => setParams(previous => {
     const next = new URLSearchParams(previous);
+    next.delete('q');
     if (!value || value === 'all') next.delete(key); else next.set(key, value);
     if (key !== 'order_page') next.delete('order_page');
     return next;
@@ -95,6 +103,7 @@ export function OperationsBookingsTab() {
   });
 
   const openStatus = (status: typeof orderStatusCards[number]['status']) => {
+    setSearchQuery('');
     setParams(previous => {
       const next = new URLSearchParams(previous);
       next.set('status', status);
@@ -106,8 +115,8 @@ export function OperationsBookingsTab() {
   };
 
   const filteredOrders = orders?.filter((o) => {
-    if (!searchQuery) return true;
-    const q = searchQuery.toLowerCase();
+    const q = searchQuery.trim().toLowerCase();
+    if (!q) return true;
     const profile = profileMap.get(o.customer_user_id);
     const customerName = profile?.full_name || '';
     const primaryParticipant = o.order_participants?.find((p: any) => p.role === 'primary');
@@ -187,13 +196,17 @@ export function OperationsBookingsTab() {
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
                 placeholder={t('admin.orders.searchPlaceholder')}
+                type="search"
+                aria-label={searchScope}
+                aria-describedby="operations-orders-search-scope"
+                autoComplete="off"
                 value={searchQuery}
-                onChange={(e) => updateFilter('q', e.target.value)}
+                onChange={event => setSearchQuery(event.target.value)}
                 className="pl-9"
               />
             </div>
             <Select value={statusFilter} onValueChange={value => updateFilter('status', value)}>
-              <SelectTrigger className="w-full sm:w-[180px]">
+              <SelectTrigger aria-label={t('admin.orders.status')} className="w-full sm:w-[180px]">
                 <SelectValue placeholder={t('admin.orders.status')} />
               </SelectTrigger>
               <SelectContent>
@@ -205,11 +218,11 @@ export function OperationsBookingsTab() {
                 <SelectItem value="cancelled">{t('admin.orders.filter.cancelled')}</SelectItem>
               </SelectContent>
             </Select>
-            <Button variant="outline" onClick={() => setParams(previous => { const next = new URLSearchParams(previous); ['q', 'status', 'created_before', 'order_page'].forEach(key => next.delete(key)); return next; })}>{pickLang(language, { en: 'Reset filters', ru: 'Сбросить фильтры', th: 'ล้างตัวกรอง' })}</Button>
+            <Button variant="outline" onClick={() => { setSearchQuery(''); setParams(previous => { const next = new URLSearchParams(previous); ['q', 'status', 'created_before', 'order_page'].forEach(key => next.delete(key)); return next; }); }}>{pickLang(language, { en: 'Reset filters', ru: 'Сбросить фильтры', th: 'ล้างตัวกรอง' })}</Button>
           </div>
-          <p className="text-xs text-muted-foreground">{pickLang(language, {en:'Text search applies to this page; status and date filters apply to all orders.',ru:'Текстовый поиск — на текущей странице; статус и дата — по всем заказам.',th:'ค้นหาข้อความในหน้านี้ ตัวกรองสถานะและวันที่ใช้กับทุกคำสั่งซื้อ'})}</p>
+          <p id="operations-orders-search-scope" className="text-xs text-muted-foreground">{pickLang(language, {en:'Text search applies to this page; status and date filters apply to all orders.',ru:'Текстовый поиск — на текущей странице; статус и дата — по всем заказам.',th:'ค้นหาข้อความในหน้านี้ ตัวกรองสถานะและวันที่ใช้กับทุกคำสั่งซื้อ'})}</p>
           {!error && !isLoading && <div className="flex flex-wrap items-center gap-3 py-3">
-            <p role="status" className="text-sm">{pickLang(language, {en:'Matching orders',ru:'Подходящие заказы',th:'คำสั่งซื้อที่ตรงกัน'})}: {result?.count ?? pickLang(language,{en:'Count unavailable',ru:'Количество недоступно',th:'จำนวนไม่พร้อมใช้งาน'})} · {pickLang(language,{en:'Page',ru:'Страница',th:'หน้า'})} {page+1}</p>
+            <p role="status" className="text-sm">{searchQuery.trim() && <>{pickLang(language, { en: 'Matches on this page', ru: 'Найдено на этой странице', th: 'ผลการค้นหาในหน้านี้' })}: {filteredOrders?.length ?? 0} · </>}{pickLang(language, {en:'Orders across all pages (status and date)',ru:'Заказы на всех страницах (статус и дата)',th:'คำสั่งซื้อทุกหน้า (สถานะและวันที่)'})}: {result?.count ?? pickLang(language,{en:'Count unavailable',ru:'Количество недоступно',th:'จำนวนไม่พร้อมใช้งาน'})} · {pickLang(language,{en:'Page',ru:'Страница',th:'หน้า'})} {page+1}</p>
             <Button variant="outline" disabled={page===0||isFetching} onClick={()=>updateFilter('order_page',String(page-1))}>{pickLang(language,{en:'Previous',ru:'Назад',th:'ก่อนหน้า'})}</Button>
             <Button variant="outline" disabled={isFetching||result?.count==null||(page+1)*pageSize>=result.count} onClick={()=>updateFilter('order_page',String(page+1))}>{pickLang(language,{en:'Next',ru:'Далее',th:'ถัดไป'})}</Button>
           </div>}

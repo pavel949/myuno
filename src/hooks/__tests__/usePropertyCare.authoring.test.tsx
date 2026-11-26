@@ -46,11 +46,33 @@ describe('managed authoring mutations', () => {
   });
   it('preserves independently verified provider updates with exact provider filtering', async () => {
     mocks.independent.mockResolvedValue({ ...safe, provider_id: 'provider-a' });
-    const chain = { update: vi.fn().mockReturnThis(), eq: vi.fn().mockReturnThis(), select: vi.fn().mockReturnThis(), single: vi.fn().mockResolvedValue({ data: safe, error: null }) };
+    const chain = { update: vi.fn().mockReturnThis(), eq: vi.fn().mockReturnThis(), is: vi.fn().mockReturnThis(), select: vi.fn().mockReturnThis(), maybeSingle: vi.fn().mockResolvedValue({ data: safe, error: null }) };
     mocks.from.mockReturnValue(chain);
     const { result } = renderHook(useUpdateOwnerProperty, { wrapper });
-    await act(async () => { await result.current.mutateAsync({ id: 'property-a', title: 'Provider edit', _authoring: true, _silent: true }); });
+    await act(async () => { await result.current.mutateAsync({ id: 'property-a', title: 'Provider edit', _authoring: true, _expectedUpdatedAt: 'version-1', _silent: true }); });
     expect(chain.eq).toHaveBeenCalledWith('provider_id', 'provider-a');
+    expect(chain.eq).toHaveBeenCalledWith('updated_at', 'version-1');
+    expect(chain.is).toHaveBeenCalledWith('deleted_at', null);
     expect(mocks.save).not.toHaveBeenCalled();
   });
+});
+
+it('rejects stale owner updates without a retry or managed fallback, and fails closed without a version', async () => {
+  mocks.independent.mockResolvedValue({ ...safe, owner_id: 'employee-a' });
+  const chain = {
+    update: vi.fn().mockReturnThis(), eq: vi.fn().mockReturnThis(), is: vi.fn().mockReturnThis(),
+    select: vi.fn().mockReturnThis(), maybeSingle: vi.fn().mockResolvedValue({ data: null, error: null }),
+  };
+  mocks.from.mockReturnValue(chain);
+  const { result } = renderHook(useUpdateOwnerProperty, { wrapper });
+  const input = { id: 'property-a', title: 'Draft edit', _authoring: true, _silent: true };
+  await act(async () => {
+    await expect(result.current.mutateAsync(input)).rejects.toMatchObject({ name: 'PropertyAuthoringConflict' });
+    expect(mocks.from).not.toHaveBeenCalled();
+    await expect(result.current.mutateAsync({ ...input, _expectedUpdatedAt: 'version-1' })).rejects.toMatchObject({ name: 'PropertyAuthoringConflict' });
+  });
+  expect(chain.eq.mock.calls).toEqual([['id', 'property-a'], ['updated_at', 'version-1'], ['owner_id', 'employee-a']]);
+  expect(chain.is).toHaveBeenCalledWith('deleted_at', null);
+  expect(chain.update).toHaveBeenCalledExactlyOnceWith({ title: 'Draft edit' });
+  expect(mocks.save).not.toHaveBeenCalled();
 });

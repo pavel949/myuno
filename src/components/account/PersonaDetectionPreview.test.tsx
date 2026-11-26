@@ -34,7 +34,7 @@ describe('PersonaDetectionPreview', () => {
     profileMock.mockReturnValue({ profile: null, isLoading: true });
     const { container } = renderWith();
     // Skeleton blocks use the shimmer animation utility class
-    expect(container.querySelectorAll('.before\\:animate-shimmer').length).toBe(3);
+    expect(container.querySelectorAll('.motion-safe\\:before\\:animate-shimmer')).toHaveLength(3);
     expect(screen.queryByText(/Your profile signals/i)).not.toBeInTheDocument();
   });
 

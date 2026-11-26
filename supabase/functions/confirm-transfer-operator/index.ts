@@ -1,8 +1,9 @@
 // Operator confirms transfer booking via HMAC-signed link
 // GET /functions/v1/confirm-transfer-operator?id=<order_id>&t=<exp.sig>
-// Email delivery via Lovable Emails (send-transactional-email).
+// Email delivery via Lovable Emails (managed send helper).
 import { createClient } from 'npm:@supabase/supabase-js@2';
 import { NOTIFY_CORS as corsHeaders } from '../_shared/notify-utils.ts';
+import { sendLoggedTemplateEmail } from '../_shared/transactional-email-templates/send-logged.ts';
 
 type Lang = 'ru' | 'en' | 'th';
 
@@ -258,10 +259,8 @@ Deno.serve(async (req) => {
     // Customer email — via Lovable Emails (queue + retries + suppression).
     if (customerEmail) {
       const stripBold = (s: string) => s.replace(/<\/?b>/g, '');
-      const { error: emailErr } = await sb().functions.invoke('send-transactional-email', {
-        body: {
-          templateName: 'transfer-customer-confirmed',
-          recipientEmail: customerEmail,
+      try {
+        await sendLoggedTemplateEmail('transfer-customer-confirmed', customerEmail, {
           idempotencyKey: `transfer-confirmed-${orderId}`,
           templateData: {
             subjectText: t.emailSubject(order.order_number),
@@ -279,9 +278,10 @@ Deno.serve(async (req) => {
             operatorWa: opWa,
             operatorWaLink: opPhone ? `https://wa.me/${opPhone}` : '',
           },
-        },
-      });
-      if (emailErr) console.error('[email] customer confirm failed', emailErr);
+        });
+      } catch (emailErr) {
+        console.error('[email] customer confirm failed', emailErr instanceof Error ? emailErr.message : emailErr);
+      }
     }
 
     // WhatsApp customer — localized

@@ -33,16 +33,18 @@ async def check_header(page, marketing):
         # The mobile product deliberately moves secondary settings off the header.
         # Verify the real menu route/controls instead of waiting on hidden widgets.
         await expect(language).to_have_count(0)
-        trigger = header.locator('.consumer-account-trigger:visible, .consumer-menu:visible')
+        trigger = header.locator('.consumer-menu:visible')
+        account = header.locator('.consumer-account-trigger:visible')
         await expect(trigger).to_have_count(1)
         target = await trigger.bounding_box()
         assert target and target['width'] >= 44 and target['height'] >= 44, {'mobileMenuTarget': target}
-        account_menu = await trigger.evaluate("e=>e.classList.contains('consumer-account-trigger')")
-        labels = ({'ru': 'Меню аккаунта', 'en': 'Account menu', 'th': 'เมนูบัญชี'} if account_menu
-                  else {'ru': 'Открыть меню', 'en': 'Open menu', 'th': 'เปิดเมนู'})
-        await expect(trigger).to_have_accessible_name(labels[lang])
-        await trigger.click()
-        if account_menu:
+        await expect(trigger).to_have_accessible_name({'ru': 'Открыть меню', 'en': 'Open menu', 'th': 'เปิดเมนู'}[lang])
+        if await account.count():
+            await expect(account).to_have_count(1)
+            await expect(account).to_have_accessible_name({'ru': 'Меню аккаунта', 'en': 'Account menu', 'th': 'เมนูบัญชี'}[lang])
+            box = await account.bounding_box()
+            assert box and box['width'] >= 44 and box['height'] >= 44, {'accountTarget': box}
+            await account.click()
             menu = page.get_by_role('menu')
             await expect(menu).to_be_visible()
             settings = menu.get_by_role('menuitem', name={'ru': 'Настройки', 'en': 'Settings', 'th': 'การตั้งค่า'}[lang], exact=True)
@@ -50,16 +52,19 @@ async def check_header(page, marketing):
             await expect(settings).to_be_visible()
             settings_box = await settings.bounding_box()
             assert settings_box and settings_box['height'] >= 44, {'settingsTarget': settings_box}
-            assert not await bounds(page, menu.get_by_role('menuitem')), 'mobile menu horizontal overflow'
-        else:
-            dialog = page.get_by_role('dialog')
-            await expect(dialog).to_be_visible()
-            sheet_language = dialog.locator('[data-testid="language-switch"]:visible')
-            await expect(sheet_language).to_have_count(1)
-            await expect(sheet_language).to_have_text(lang.upper())
+            assert not await bounds(page, menu.get_by_role('menuitem')), 'mobile account menu horizontal overflow'
+            await page.keyboard.press('Escape')
+            await expect(menu).to_have_count(0)
+            await expect(account).to_be_focused()
+        await trigger.click()
+        dialog = page.get_by_role('dialog')
+        await expect(dialog).to_be_visible()
+        sheet_language = dialog.locator('[data-testid="language-switch"]:visible')
+        await expect(sheet_language).to_have_count(1)
+        await expect(sheet_language).to_have_text(lang.upper())
+        await expect(dialog.locator('a[href="/cart"]')).to_be_visible()
         await page.keyboard.press('Escape')
-        await expect(page.get_by_role('menu')).to_have_count(0)
-        await expect(page.get_by_role('dialog')).to_have_count(0)
+        await expect(dialog).to_have_count(0)
         await expect(trigger).to_be_focused()
     else:
         await expect(language).to_have_count(1)
@@ -309,7 +314,7 @@ async def run_language(browser, lang, results):
                         bottom = page.locator('nav.fixed.bottom-0')
                         row['bottomBoundsFailures'] = await bounds(page, bottom.locator('a'))
                         assert not row['bottomBoundsFailures'], {'bottomBounds': row['bottomBoundsFailures']}
-                        name = {'ru': 'Бронирования', 'en': 'Bookings', 'th': 'การจอง'}[lang]
+                        name = {'ru': 'Поездки', 'en': 'Trips', 'th': 'ทริป'}[lang]
                         await expect(bottom.get_by_role('link', name=name, exact=True)).to_have_attribute('href', '/bookings')
                 elif surface in ['owners', 'business']:
                     await check_owner_business(page, surface, row, results)

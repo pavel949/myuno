@@ -73,6 +73,7 @@ export function VehicleClassNav({ selected, onChange, counts }: VehicleClassNavP
               <button
                 key={cls.id}
                 type="button"
+                aria-pressed={isActive}
                 onClick={() => onChange(cls.id)}
                 className={cn(
                   'flex items-center gap-2 pl-3 pr-4 py-2.5 min-h-11 rounded-full text-sm font-semibold whitespace-nowrap transition-all duration-200 shrink-0',

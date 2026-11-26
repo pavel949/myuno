@@ -10,6 +10,7 @@
 import { createServiceClient } from "../_shared/supabase.ts";
 import { sendWhatsApp } from "../_shared/whatsapp.ts";
 import { getCorsHeaders } from "../_shared/cors.ts";
+import { requireServiceCaller } from "../_shared/internal-secret.ts";
 
 
 Deno.serve(async (req) => {
@@ -17,6 +18,7 @@ Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
+  { const denied = await requireServiceCaller(req, corsHeaders); if (denied) return denied; }
 
   try {
     const { booking_id } = await req.json();

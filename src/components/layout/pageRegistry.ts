@@ -19,7 +19,6 @@ export const ForDevelopers = lazy(() => import('@/pages/ForDevelopers'));
 export const ForLocalServiceProviders = lazy(() => import('@/pages/ForLocalServices'));
 export const ForBusinessPage = lazy(() => import('@/pages/ForBusinessPage'));
 export const Discover = lazy(() => import('@/pages/discover/DiscoveryHubPage'));
-export const ServicesDiscover = lazy(() => import('@/pages/services/ServicesIndex'));
 export const SituationNavigator = lazy(() => import('@/components/navigation/v3/NavigatorPageV3'));
 export const SituationDetail = lazy(() => import('@/components/navigation/v3/SituationDetailPage'));
 // Wave 3 stabilize: PlatformCatalog removed (orphan — /catalog redirects to /discover).
@@ -59,6 +58,7 @@ export const PropertyDepositSuccess = lazy(() => import('@/pages/property/Proper
 export const NewbuildLanding = lazy(() => import('@/pages/property/NewbuildLanding'));
 export const OffplanIndex = lazy(() => import('@/pages/property/OffplanIndex'));
 export const OffplanDetail = lazy(() => import('@/pages/property/OffplanDetail'));
+export const OffplanUnitDetail = lazy(() => import('@/pages/property/OffplanUnitDetail'));
 export const DevelopersIndex = lazy(() => import('@/pages/property/DevelopersIndex'));
 export const DeveloperDetail = lazy(() => import('@/pages/property/DeveloperDetail'));
 export const PropertyConsultation = lazy(() => import('@/pages/property/PropertyConsultation'));
@@ -81,6 +81,7 @@ export const ClearViewForDevelopersLanding = lazy(() => import('@/pages/clearvie
 export const StorefrontDemoLanding = lazy(() => import('@/pages/owner/StorefrontDemoLanding'));
 export const InvestmentCalculatorPage = lazy(() => import('@/pages/invest/InvestmentCalculatorPage'));
 export const ResaleDetail = lazy(() => import('@/pages/property/ResaleDetail'));
+export const ResaleOffer = lazy(() => import('@/pages/property/ResaleOffer'));
 export const CommercialIndex = lazy(() => import('@/pages/property/CommercialIndex'));
 export const CommercialDetail = lazy(() => import('@/pages/property/CommercialDetail'));
 export const LandIndex = lazy(() => import('@/pages/property/LandIndex'));
@@ -326,7 +327,6 @@ export const SellItemPage = lazy(() => import('@/pages/market/SellItemPage'));
 // ── Classifieds (Барахолка) ──
 export const ClassifiedsIndex = lazy(() => import('@/pages/classifieds/ClassifiedsIndex'));
 export const ClassifiedDetailPage = lazy(() => import('@/pages/classifieds/ClassifiedDetailPage'));
-export const ClassifiedsSellPage = lazy(() => import('@/pages/classifieds/ClassifiedsSellPage'));
 
 // ── Other ──
 export const Favorites = lazy(() => import('@/pages/Favorites'));

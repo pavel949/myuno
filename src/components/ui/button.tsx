@@ -14,7 +14,7 @@ import { getFeedbackSettings } from "@/hooks/useFeedbackSettings";
  *
  * Strict rules from canon:
  *  - Four variants only: default (navy), outline (secondary), ghost, destructive.
- *  - radius: 0  (canon §5 — no rounded-{sm,md,lg,xl} on buttons).
+ *  - radius: 4px control (Design Bible v4 r-control).
  *  - No box-shadow, no -translate-y, no scale, no ripple, no glow.
  *  - Font weight 500 (medium), body 15px.
  *  - Min touch target 44px (canon §7.4).
@@ -23,13 +23,16 @@ import { getFeedbackSettings } from "@/hooks/useFeedbackSettings";
  * Haptic + sound feedback retained — that's behaviour, not visual styling.
  */
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-none text-body font-sans font-medium leading-none transition-colors duration-150 active:brightness-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ring-offset-background disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
+  "ds-focus inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-sm text-body font-sans font-medium leading-none transition-colors duration-150 active:brightness-95 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
   {
     variants: {
       variant: {
         // Primary CTA — canon §8.1 Primary (navy): bg navy, white text, no border, no shadow.
         default:
           "bg-primary text-primary-foreground hover:bg-[hsl(var(--primary-hover))]",
+        // Reserve, list a property, or finish onboarding.
+        conversion:
+          "bg-[hsl(var(--bible-gold))] text-[color:hsl(var(--brand-navy-900))] hover:bg-[hsl(var(--bible-gold-hover))]",
         // Secondary — canon §8.1 Secondary (outline): transparent, navy text, 1.5px navy border.
         outline:
           "bg-transparent text-primary border-[1.5px] border-primary hover:bg-muted",
@@ -46,10 +49,10 @@ const buttonVariants = cva(
         link: "text-primary underline-offset-4 hover:underline bg-transparent",
       },
       size: {
-        // Default — canon: 44px touch target, padding 12×24.
-        default: "h-11 px-6 py-3",
+        // Default: 48px on mobile, 40px on desktop.
+        default: "h-[var(--bible-button-height)] px-6 py-3",
         // Small — for table actions / dense toolbars.
-        sm: "h-9 px-4 text-sm",
+        sm: "h-8 px-4 text-body-sm",
         // Large — for sticky bottom CTAs on conversion forms.
         lg: "h-12 px-8",
         // Icon-only — square 44×44.

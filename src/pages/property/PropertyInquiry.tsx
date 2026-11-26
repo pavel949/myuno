@@ -293,6 +293,10 @@ export default function PropertyInquiry() {
 
 
   const datePricingBlocked = !datePricingReady;
+  const cleaningFee = rentalTerms?.extra_cleaning_price || propertyExt?.cleaning_fee || 0;
+  const showCleaningFee = isInstantBooking && !datePricingBlocked && Number.isFinite(cleaningFee) && cleaningFee > 0;
+  // The property-deposit quote adds the recorded cleaning charge to the stay subtotal.
+  const estimatedBookingTotal = showCleaningFee ? Math.round(pricing.total + cleaningFee) : pricing.total;
   const nameError = showFieldErrors && !formData.name.trim();
   const phoneError = showFieldErrors && !formData.phone.trim();
   const inquiryKey = useMemo(() => id && user?.id && checkIn && checkOut
@@ -343,7 +347,7 @@ export default function PropertyInquiry() {
             <h1 className="text-lg font-display font-bold">
               {isInstantBooking 
                 ? (isRu ? 'Подтвердить и оплатить' : 'Confirm and pay')
-                : (isRu ? 'Запросить бронирование' : 'Request to book')}
+                : t({ ru: 'Запросить бронирование', en: 'Request to book', th: 'ส่งคำขอจอง' })}
             </h1>
           </div>
         </div>
@@ -496,11 +500,19 @@ export default function PropertyInquiry() {
               )}
             </div>}
 
+            {showCleaningFee && (
+              <div className="flex flex-wrap items-baseline justify-between gap-2 text-body-sm">
+                <span>{t({ en: 'Cleaning fee', ru: 'Плата за уборку', th: 'ค่าทำความสะอาด' })}</span>
+                <span>{formatPrice(cleaningFee)}</span>
+              </div>
+            )}
             <Separator />
 
-            <div className="flex items-center justify-between font-semibold text-lg">
+            <div className="flex flex-wrap items-center justify-between gap-2 text-body-lg font-semibold">
               <span className="flex items-center gap-1.5">
-                {isRu ? 'Стоимость проживания' : 'Stay total'}
+                {showCleaningFee
+                  ? t({ en: 'Estimated booking total', ru: 'Расчётная стоимость бронирования', th: 'ยอดจองโดยประมาณ' })
+                  : t({ en: 'Stay total', ru: 'Стоимость проживания', th: 'ค่าที่พักรวม' })}
                 {/* B2 — Currency popover so guests on RUB/THB presets understand
                     what bank actually charges. */}
                 {isInstantBooking && <Popover>
@@ -526,7 +538,7 @@ export default function PropertyInquiry() {
                 </Popover>}
               </span>
               <span className="flex items-baseline gap-1">
-                {datePricingBlocked ? '—' : formatPrice(pricing.total)}
+                {datePricingBlocked ? '—' : formatPrice(estimatedBookingTotal)}
                 {!datePricingBlocked && <sup className="text-[10px] text-muted-foreground font-medium">{listingCurrency}</sup>}
               </span>
             </div>
@@ -762,7 +774,7 @@ export default function PropertyInquiry() {
                 prepayAmount={pricing.prepayAmount}
                 prepayPercent={pricing.prepayPercent}
                 payInFull={!!rentalTerms?.allow_pay_later && payWhen === 'full'}
-                cleaningFee={rentalTerms?.extra_cleaning_price || propertyExt?.cleaning_fee || 0}
+                cleaningFee={cleaningFee}
                 guestName={formData.name}
                 guestPhone={formData.phone}
                 guestEmail={formData.email}
@@ -787,18 +799,23 @@ export default function PropertyInquiry() {
 
         {/* ===== UNIFIED STICKY FOOTER (A3) — visible for both instant + request modes ===== */}
         {user && isFormValid && (
-          <div className="fixed bottom-0 left-0 right-0 z-30 bg-background/95 border-t p-4 safe-area-bottom">
-            <div className="flex items-center justify-between mb-2">
-              <div className="flex items-baseline gap-1">
-                <span className="text-sm font-medium">{formatPrice(pricing.total)}</span>
-                <sup className="text-[10px] text-muted-foreground">{listingCurrency}</sup>
+          <div className="fixed bottom-0 left-0 right-0 z-30 bg-background border-t border-border p-4 safe-area-bottom">
+            <div className="mb-2 flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
+              <div className="flex flex-wrap items-baseline gap-2">
+                <span className="text-body-sm text-muted-foreground">
+                  {showCleaningFee
+                    ? t({ en: 'Estimated booking total', ru: 'Расчётная стоимость бронирования', th: 'ยอดจองโดยประมาณ' })
+                    : t({ en: 'Stay total', ru: 'Стоимость проживания', th: 'ค่าที่พักรวม' })}
+                </span>
+                <strong>{formatPrice(estimatedBookingTotal)} <span className="text-caption font-medium">{listingCurrency}</span></strong>
               </div>
               <span className="text-xs text-muted-foreground">
                 {nights} {pluralizeNights(nights, language)}
               </span>
             </div>
             <Button
-              className="w-full h-12 text-base font-semibold bg-foreground text-background hover:bg-foreground/90"
+              className="w-full min-h-12 h-auto py-3 whitespace-normal text-body font-semibold leading-snug"
+              variant={isInstantBooking && paymentMethod === 'card' ? 'conversion' : 'default'}
               size="lg"
               disabled={isSubmitting}
               onClick={async () => {
@@ -1004,9 +1021,7 @@ export default function PropertyInquiry() {
               {isSubmitting && <Loader2 className="w-5 h-5 animate-spin mr-2" />}
               {isInstantBooking
                 ? (paymentMethod === 'card'
-                    ? (isRu
-                        ? `Подтвердить и оплатить ${formatPrice(payWhen === 'full' ? pricing.total : pricing.prepayAmount)}`
-                        : `Confirm and pay ${formatPrice(payWhen === 'full' ? pricing.total : pricing.prepayAmount)}`)
+                    ? t({ en: 'Continue to payment', ru: 'Перейти к оплате', th: 'ดำเนินการชำระเงิน' })
                     : paymentMethod === 'rub_manual'
                       ? (isRu ? 'Запросить оплату в рублях' : 'Request RUB payment')
                       : (isRu ? 'Связаться с менеджером' : 'Contact manager'))

@@ -2,6 +2,7 @@
 import { createClient } from "../_shared/supabase.ts";
 import { requireAuth } from '../_shared/auth-guard.ts';
 import { getCorsHeaders } from "../_shared/cors.ts";
+import { requireInternalOrStaff } from "../_shared/authz.ts";
 
 
 interface LeadData {
@@ -50,6 +51,9 @@ Deno.serve(async (req) => {
     // Auth guard: require authenticated user
     const authResult = await requireAuth(req, corsHeaders);
     if (authResult instanceof Response) return authResult;
+    // Lead scoring reads/writes private CRM leads: platform admin/sales only.
+    const staffGate = await requireInternalOrStaff(req, corsHeaders, ["admin", "sales"]);
+    if (staffGate instanceof Response) return staffGate;
     
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;

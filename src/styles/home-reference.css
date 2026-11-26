@@ -53,6 +53,137 @@
   display: grid; grid-template-columns: repeat(4,minmax(0,1fr));
   gap: 16px; padding-block: 30px 10px;
 }
+
+.home-hero-section {
+  padding-block-start: var(--section-heading-gap);
+}
+
+.home-hero-banner {
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  align-items: end;
+  min-block-size: var(--bible-home-hero-mobile-height);
+  padding: var(--layout-gutter);
+  overflow: hidden;
+  border-radius: var(--bible-radius-media);
+  background: hsl(var(--brand-navy));
+  color: hsl(var(--brand-cream));
+}
+
+.home-hero-banner-photo,
+.home-hero-banner::after {
+  position: absolute;
+  inset: 0;
+}
+
+.home-hero-banner-photo {
+  z-index: -2;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.home-hero-banner::after {
+  z-index: -1;
+  content: '';
+  background: linear-gradient(180deg, hsl(var(--brand-navy) / 0.08), hsl(var(--brand-navy) / 0.82));
+}
+
+.home-hero-banner h1 {
+  max-inline-size: var(--public-width-reading);
+  color: inherit;
+  font-family: var(--font-display);
+  font-size: var(--type-h1-size);
+  font-weight: 400;
+  line-height: var(--type-h1-leading);
+  text-wrap: balance;
+}
+
+.home-hero-search {
+  position: relative;
+  z-index: 10;
+  margin-block: var(--section-title-gap) var(--section-heading-gap);
+}
+
+.home-sale-band {
+  margin-block-start: var(--section-heading-gap);
+  padding-block-end: var(--layout-page-space-y);
+  background-color: hsl(var(--brand-navy));
+}
+
+.cinematic-home .home-sale-band .home-gallery-heading :is(h2, p, a),
+.cinematic-home .home-sale-band .home-rail-controls button {
+  color: hsl(var(--brand-cream));
+}
+
+.cinematic-home.home-refined .home-hero-search .home-reference-search {
+  max-inline-size: var(--layout-width-wide);
+  margin-inline: auto;
+}
+
+@media (min-width: 1024px) {
+  .home-hero-banner {
+    min-block-size: var(--bible-home-hero-height);
+    padding-inline: calc(var(--layout-gutter) * 2);
+    padding-block-end: var(--bible-home-hero-caption-bottom);
+  }
+
+  .home-hero-banner h1 {
+    font-size: var(--bible-home-hero-heading-size);
+  }
+
+  .home-hero-search {
+    position: sticky;
+    top: var(--bible-chrome-height);
+    margin-block-start: calc(-1 * var(--bible-home-hero-overlap));
+  }
+
+  .cinematic-home.home-refined .home-hero-search .home-search[data-home-discovery-mode] {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.55fr) minmax(0, 1fr) minmax(0, 1fr) auto minmax(0, 1.1fr);
+    grid-template-areas:
+      "modes modes modes duration duration duration"
+      "area dates type bedrooms filters submit";
+    gap: var(--section-title-gap);
+    align-items: end;
+  }
+
+  .cinematic-home.home-refined .home-hero-search .home-search[data-home-discovery-mode="buy"] {
+    grid-template-areas:
+      "modes modes modes modes modes modes"
+      "area type budget bedrooms filters submit";
+  }
+
+  .cinematic-home.home-refined .home-hero-search .home-search[data-home-discovery-mode="activities"] {
+    grid-template-areas:
+      "modes modes modes modes modes modes"
+      "type query query query query submit";
+  }
+
+  .cinematic-home.home-refined .home-hero-search .home-search[data-home-discovery-mode] > * {
+    min-inline-size: 0;
+    margin: 0;
+  }
+
+  .cinematic-home.home-refined .home-hero-search .home-search[data-home-discovery-mode] > .home-search-modes { grid-area: modes; }
+  .cinematic-home.home-refined .home-hero-search .home-search[data-home-discovery-mode] > .home-search-duration { grid-area: duration; }
+  .cinematic-home.home-refined .home-hero-search .home-search[data-home-discovery-mode] > .home-search-location { grid-area: area; }
+  .cinematic-home.home-refined .home-hero-search .home-search[data-home-discovery-mode] > .home-search-dates { grid-area: dates; }
+  .cinematic-home.home-refined .home-hero-search .home-search[data-home-discovery-mode] > .home-search-type { grid-area: type; }
+  .cinematic-home.home-refined .home-hero-search .home-search[data-home-discovery-mode] > .home-search-budget { grid-area: budget; }
+  .cinematic-home.home-refined .home-hero-search .home-search[data-home-discovery-mode] > .home-search-bedrooms { grid-area: bedrooms; }
+  .cinematic-home.home-refined .home-hero-search .home-search[data-home-discovery-mode] > .home-search-query { grid-area: query; }
+  .cinematic-home.home-refined .home-hero-search .home-search[data-home-discovery-mode] > .home-search-refine {
+    grid-area: filters;
+    min-height: var(--touch-target);
+    padding-inline: var(--section-title-gap);
+    border: 1px solid hsl(var(--border));
+    border-radius: var(--bible-radius-control);
+  }
+  .cinematic-home.home-refined .home-hero-search .home-search[data-home-discovery-mode] > .home-search-submit { grid-area: submit; }
+  .cinematic-home.home-refined .home-hero-search .home-search[data-home-discovery-mode] > .home-search-secondary { grid-column: 1 / -1; }
+}
 .cinematic-home.home-refined .home-reference-direction {
   position: relative; isolation: isolate; display: block;
   min-width: 0; aspect-ratio: 1.35 / 1; overflow: hidden;

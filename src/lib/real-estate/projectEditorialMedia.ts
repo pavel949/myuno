@@ -42,9 +42,9 @@ export function publicProjectMediaUrl(value?: string | null, kind: 'photo' | 'co
   }
 }
 
-export function projectEditorialImages(media: ProjectMedia): string[] {
-  const gallery = (media[projectGalleryField(media)] ?? []).map(url => publicProjectMediaUrl(url));
-  return [...new Set([publicProjectMediaUrl(media.cover_image, 'cover'), ...gallery].filter((url): url is string => !!url))];
+export function projectEditorialImages(media: ProjectMedia, normalize = publicProjectMediaUrl): string[] {
+  const gallery = (media[projectGalleryField(media)] ?? []).map(url => normalize(url, 'photo'));
+  return [...new Set([normalize(media.cover_image, 'cover'), ...gallery].filter((url): url is string => !!url))];
 }
 
 export function reorderProjectImages(images: string[], index: number, offset: -1 | 1): string[] {

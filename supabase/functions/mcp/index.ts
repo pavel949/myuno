@@ -29,7 +29,8 @@ var search_properties_default = defineTool({
       { auth: { persistSession: false, autoRefreshToken: false } }
     );
     let q = supabase.from("public_property_catalog").select("id, title, title_en, title_ru, description_en, district, address, property_type, listing_type, price, price_per_night, currency, bedrooms, bathrooms, area_sqm, cover_image, rating").limit(limit);
-    if (query) q = q.or(`title_en.ilike.%${query}%,title_ru.ilike.%${query}%,description_en.ilike.%${query}%`);
+    const safeQuery = typeof query === "string" ? query.replace(/[,()*%\\:."']/g, " ").trim().slice(0, 100) : "";
+    if (safeQuery) q = q.or(`title_en.ilike.%${safeQuery}%,title_ru.ilike.%${safeQuery}%,description_en.ilike.%${safeQuery}%`);
     if (city) q = q.ilike("district", `%${city}%`);
     if (typeof minPrice === "number") q = q.gte("price", minPrice);
     if (typeof maxPrice === "number") q = q.lte("price", maxPrice);

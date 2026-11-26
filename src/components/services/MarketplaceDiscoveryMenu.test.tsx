@@ -1,3 +1,4 @@
+import { useCataloguePanelDraft } from "@/hooks/useCataloguePanelDraft";
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { describe, expect, it, vi } from 'vitest';
@@ -26,6 +27,13 @@ describe('shared marketplace discovery', () => {
     expect(screen.queryByRole('button', { name: 'All categories' })).toBeNull();
     expect(screen.queryByText(/available|confirmed|free/i)).toBeNull();
   });
+  it('keeps descriptive journey choices and their navigation context in the shared menu', () => {
+    render(<MemoryRouter><MarketplaceDiscoveryMenu title="Journey" allHref="/discover" allLabel="All paths"
+      items={[{ id: 'rent', label: 'Rent a home', description: 'Dates and guests', href: '/property/rent', navigationState: { returnTo: '/property?mode=all' } }]} /></MemoryRouter>);
+    expect(screen.getByRole('link', { name: 'Rent a home' })).toHaveAttribute('href', '/property/rent');
+    expect(screen.getByText('Dates and guests')).toBeVisible();
+    expect(screen.getByRole('link', { name: 'All paths' })).toHaveAttribute('href', '/discover');
+  });
   it('does not invent categories when the recorded category list is empty', () => {
     render(<MemoryRouter><MarketplaceDiscoveryMenu title="Categories" items={[]} onSelect={vi.fn()} /></MemoryRouter>);
     expect(screen.queryByRole('region')).toBeNull();
@@ -39,5 +47,44 @@ describe('shared marketplace discovery', () => {
     fireEvent.keyDown(screen.getByRole('dialog'), { key: 'Escape' });
     await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
     await waitFor(() => expect(trigger).toHaveFocus());
+  });
+});
+
+describe('marketplace filter panel draft lifecycle', () => {
+  it('keeps edits local across Close and Escape, restores focus, and applies one batch', async () => {
+    const commit = vi.fn();
+    const initial = new URLSearchParams('district=Rawai&q=travel&ref=campaign');
+    function DraftHarness() {
+      const panel = useCataloguePanelDraft(['district', 'budget'], initial, commit);
+      return <MarketplaceFilterSheet title="Catalogue filters" onApply={() => panel.apply(new URLSearchParams('district=Rawai&q=updated&ref=campaign'))} onOpenChange={panel.openChange}>
+        <label>Area<input value={panel.values.get('district') ?? ''} onChange={e => {
+          const value = e.target.value;
+          panel.setValues(next => { next.set('district', value); return next; });
+        }} /></label>
+        <label>Budget<input value={panel.values.get('budget') ?? ''} onChange={e => {
+          const value = e.target.value;
+          panel.setValues(next => { next.set('budget', value); return next; });
+        }} /></label>
+      </MarketplaceFilterSheet>;
+    }
+    render(<DraftHarness />);
+    const trigger = screen.getByRole('button', { name: 'Catalogue filters' });
+    fireEvent.click(trigger);
+    fireEvent.change(screen.getByRole('textbox', { name: 'Area' }), { target: { value: 'Kata' } });
+    expect(commit).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByRole('button', { name: 'Close' }));
+    await waitFor(() => expect(trigger).toHaveFocus());
+    fireEvent.click(trigger);
+    expect(screen.getByRole('textbox', { name: 'Area' })).toHaveValue('Rawai');
+    fireEvent.change(screen.getByRole('textbox', { name: 'Area' }), { target: { value: 'Patong' } });
+    fireEvent.keyDown(document.activeElement!, { key: 'Escape' });
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    fireEvent.click(trigger);
+    expect(screen.getByRole('textbox', { name: 'Area' })).toHaveValue('Rawai');
+    fireEvent.change(screen.getByRole('textbox', { name: 'Area' }), { target: { value: 'Kata' } });
+    fireEvent.change(screen.getByRole('textbox', { name: 'Budget' }), { target: { value: 'low' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Show offers' }));
+    expect(commit).toHaveBeenCalledOnce();
+    expect(commit.mock.calls[0][0].toString()).toBe('district=Kata&q=updated&ref=campaign&budget=low');
   });
 });

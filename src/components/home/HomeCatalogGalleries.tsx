@@ -1,3 +1,4 @@
+import '@/styles/marketplace-unity.css';
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, Compass, ImageOff, MapPin, Flower2, PlaneLanding, CarFront, House, Sailboat } from 'lucide-react';
@@ -165,7 +166,7 @@ export function HomeServiceGallery() {
   const title = t({ ru: 'Услуги для жизни и отдыха', en: 'Services for life and leisure', th: 'บริการสำหรับชีวิตและการพักผ่อน' });
   // Static taxonomy fallback is never promoted to published supply.
 
-  return <><HomeGallery id="home-services-title" className="home-services" title={title}
+  return <><HomeGallery id="home-services-title" className="home-services marketplace-home-categories" title={title}
     description={t({ ru: 'Выберите задачу — подробности и условия внутри.', en: 'Choose what you need, then check details and terms.', th: 'เลือกสิ่งที่ต้องการ แล้วดูรายละเอียดและเงื่อนไข' })}
     href={R.GOAL_SERVICES} linkLabel={t({ ru: 'Все категории', en: 'All categories', th: 'ทุกหมวดหมู่' })}
     state={!catalog.isLoading && !catalog.error && !categories.length ? <p className="home-catalog-state">{t({ ru: 'Подборка появится после публикации категорий. Полный каталог доступен по ссылке.', en: 'The preview will appear when categories are published. Explore the full catalogue using the link.', th: 'ตัวอย่างจะแสดงเมื่อเผยแพร่หมวดหมู่ ดูรายการทั้งหมดได้จากลิงก์' })}</p> : catalog.isLoading || catalog.error ? <CatalogState loading={catalog.isLoading} error={Boolean(catalog.error)} retry={catalog.refetch}

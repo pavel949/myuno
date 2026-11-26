@@ -14,6 +14,8 @@ import postcss from 'postcss';
 import valueParser from 'postcss-value-parser';
 import ts from 'typescript';
 const hash = value => createHash('sha256').update(value).digest('hex');
+// Checkout line endings must not change source hashes, AST IDs or excerpts.
+export function readNormalizedText(file) { return fs.readFileSync(file, 'utf8').replace(/\r\n/g, '\n'); }
 const primitiveSource = 'src/styles/tokens.css';
 const externalTokens = new Map([
   ['--tw-gradient-from-position','Tailwind corePlugins gradientColorStops defaults'],
@@ -65,7 +67,9 @@ export function fontShorthandFamily(value) {
 }
 export function auditSources(sources) {
   const findings=[]; const definitions=new Map(); const uses=[]; const seenDeclarations=new Map(); const origins=new Map();
-  const expanded=sources.flatMap(source=>{if(!source.file.endsWith('.html'))return [source];return [...source.text.matchAll(/<style\b[^>]*>([\s\S]*?)<\/style>/gi)].map((m,i)=>{const file=source.file+'#inline-'+i+'.css';origins.set(file,{file:source.file,offset:source.text.slice(0,m.index).split('\n').length-1});return {file,text:m[1]};});});
+  // Fingerprints describe the rule, independent of the Git checkout line endings.
+  const normalizedSources = sources.map(source => ({ ...source, text: source.text.replace(/\r\n/g, '\n') }));
+  const expanded=normalizedSources.flatMap(source=>{if(!source.file.endsWith('.html'))return [source];return [...source.text.matchAll(/<style\b[^>]*>([\s\S]*?)<\/style>/gi)].map((m,i)=>{const file=source.file+'#inline-'+i+'.css';origins.set(file,{file:source.file,offset:source.text.slice(0,m.index).split('\n').length-1});return {file,text:m[1]};});});
   const add=(file,line,code,detail,context='') => findings.push({file,line,code,detail,context});
   for(const {file,text} of expanded) {
     if(file.endsWith('.css')) {
@@ -184,16 +188,16 @@ function evaluate(n,env={}) {
   return null;
 }
 export function buildRouteRegister(root) {
-  const config=fs.readFileSync(path.join(root,'src/lib/config/routes.ts'),'utf8'); const configAst=parse('routes.ts',config);const constants={};
+  const config=readNormalizedText(path.join(root,'src/lib/config/routes.ts')); const configAst=parse('routes.ts',config);const constants={};
   function constantsVisit(n){if(ts.isVariableDeclaration(n)&&n.name.getText()==='APP_ROUTES'){let obj=n.initializer;while(ts.isAsExpression(obj))obj=obj.expression;for(const p of obj.properties)if(ts.isPropertyAssignment(p))constants[p.name.getText().replace(/['"]/g,'')]=evaluate(p.initializer,{APP_ROUTES:constants});}ts.forEachChild(n,constantsVisit);} constantsVisit(configAst);
-  const registry=fs.readFileSync(path.join(root,'src/components/layout/pageRegistry.ts'),'utf8');
+  const registry=readNormalizedText(path.join(root,'src/components/layout/pageRegistry.ts'));
   const modules=Object.fromEntries([...registry.matchAll(/export const (\w+) = lazy\(\(\) => import\('([^']+)'\)/g)].map(m=>[m[1],m[2].replace(/^@\//,'src/')+'.tsx']));
-  const qa=walk(path.join(root,'scripts/qa')).filter(p=>/\.(mjs|py|cjs)$/.test(p)).map(p=>({file:path.relative(root,p),text:fs.readFileSync(p,'utf8')}));
+  const qa=walk(path.join(root,'scripts/qa')).filter(p=>/\.(mjs|py|cjs)$/.test(p)).map(p=>({file:path.relative(root,p).replaceAll('\\','/'),text:readNormalizedText(p)}));
   const navFiles=['src/lib/navConfig.ts','src/lib/nav/goalEntries.ts','src/lib/nav/clusterCatalog.ts','src/lib/nav/navigationModel.ts'];
-  const nav=navFiles.map(file=>({file,text:fs.readFileSync(path.join(root,file),'utf8')}));
+  const nav=navFiles.map(file=>({file,text:readNormalizedText(path.join(root,file))}));
   function targets(node,ast){const out=[];function scan(n){if((ts.isJsxSelfClosingElement(n)||ts.isJsxOpeningElement(n))&&['Navigate','CanonicalPublicRedirect'].includes(n.tagName.getText(ast))){const to=n.attributes.properties.find(a=>a.name?.getText(ast)==='to');out.push({expression:to?.initializer?.getText(ast)||null,resolvedTarget:evaluate(to?.initializer,{APP_ROUTES:constants}),observation:'NOTTESTED'});}ts.forEachChild(n,scan);}scan(node);return out;}
   const declarations=[];
-  for(const file of routeFiles){const text=fs.readFileSync(path.join(root,file),'utf8');const ast=parse(file,text);const directImports={};
+  for(const file of routeFiles){const text=readNormalizedText(path.join(root,file));const ast=parse(file,text);const directImports={};
     for(const s of ast.statements)if(ts.isImportDeclaration(s)&&s.importClause?.name)directImports[s.importClause.name.text]=s.moduleSpecifier.text.replace(/^@\//,'src/');
     for(const match of text.matchAll(/const (\w+)\s*=\s*(?:React\.)?lazy\(\(\)\s*=>\s*import\(['"]([^'"]+)['"]/g))directImports[match[1]]=match[2].replace(/^@\//,'src/')+'.tsx';
     for(const statement of ast.statements)if(ts.isImportDeclaration(statement)&&statement.importClause?.namedBindings&&ts.isNamedImports(statement.importClause.namedBindings))for(const item of statement.importClause.namedBindings.elements)directImports[item.name.text]=statement.moduleSpecifier.text.replace(/^@\//,'src/');
@@ -227,7 +231,7 @@ export function buildRouteRegister(root) {
       ts.forEachChild(n,child=>visit(child,nextPath,nextElements));
     } visit(ast);
   }
-  return {schemaVersion:1,status:'SOURCE_ONLY_NOTTESTED',countMeaning:'Route JSX declarations; NOT screen count. Redirects, pathless parents, reused templates, mapped and conditional branches remain distinct source records.',sourceFiles:[...routeFiles,'src/components/layout/pageRegistry.ts','src/lib/config/routes.ts',...navFiles].map(file=>({file,sha256:hash(fs.readFileSync(path.join(root,file)))})),summary:{declarations:declarations.length,directRedirects:declarations.filter(r=>r.kind==='redirect').length,kindCounts:Object.fromEntries([...new Set(declarations.map(r=>r.kind))].map(k=>[k,declarations.filter(r=>r.kind===k).length]))},coverageKey:['actor','resolvedPathPattern','templates','coverage.states'],limitations:['No runtime routes or guards executed','No screenshot or typography evidence','PageRegistry imports can be reused; not unique screen count','Dynamic paths use explicit symbolic placeholders; inspect map expansion and conditional helperEvidence','Fixture references are reuse candidates only, not proof of page or shell coverage'],declarations};
+  return {schemaVersion:1,status:'SOURCE_ONLY_NOTTESTED',countMeaning:'Route JSX declarations; NOT screen count. Redirects, pathless parents, reused templates, mapped and conditional branches remain distinct source records.',sourceFiles:[...routeFiles,'src/components/layout/pageRegistry.ts','src/lib/config/routes.ts',...navFiles].map(file=>({file,sha256:hash(readNormalizedText(path.join(root,file)))})),summary:{declarations:declarations.length,directRedirects:declarations.filter(r=>r.kind==='redirect').length,kindCounts:Object.fromEntries([...new Set(declarations.map(r=>r.kind))].map(k=>[k,declarations.filter(r=>r.kind===k).length]))},coverageKey:['actor','resolvedPathPattern','templates','coverage.states'],limitations:['No runtime routes or guards executed','No screenshot or typography evidence','PageRegistry imports can be reused; not unique screen count','Dynamic paths use explicit symbolic placeholders; inspect map expansion and conditional helperEvidence','Fixture references are reuse candidates only, not proof of page or shell coverage'],declarations};
 }
 export function normalizeRegister(register) {
   const catalogs={templates:{},elements:{},layouts:{},helpers:{},navigation:{},fixtures:{}};

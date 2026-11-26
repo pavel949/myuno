@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { SEOHead } from "@/components/seo";
 import { HomeDiscoverySearch } from "@/components/home/HomeDiscoverySearch";
+import { SearchLeadRequest } from "@/components/search/SearchLeadRequest";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useProperties } from "@/hooks/useProperties";
@@ -241,6 +242,9 @@ export default function PropertyLanding() {
           })}
           <ArrowRight size={18} aria-hidden="true" />
         </Link>
+      </section>
+      <section className="rental-section" id="rental-request">
+        <SearchLeadRequest kind="rent" params={new URLSearchParams("mode=rent")} />
       </section>
       <nav
         className="rental-chapters"

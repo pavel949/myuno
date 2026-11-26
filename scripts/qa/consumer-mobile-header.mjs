@@ -2,14 +2,16 @@
 import {build} from 'esbuild';import fs from 'node:fs/promises';import {existsSync} from 'node:fs';import path from 'node:path';import postcss from 'postcss';import postcssImport from 'postcss-import';import tailwindcss from 'tailwindcss';import autoprefixer from 'autoprefixer';import{createHash}from'node:crypto';
 const root=process.cwd(),out=process.argv[2];if(!out)throw Error('Output path required');await fs.mkdir(out,{recursive:true});
 const virtual={
+// Keep real header navigation; do not bundle unrelated pages for speculative loads.
+'@/lib/prefetchRoute': `export const prefetchRoute=()=>{};`,
 '@/contexts/LanguageContext':`import React from'react';export function useLanguage(){const[language,setLanguage]=React.useState(new URLSearchParams(location.search).get('lang')||'en');return{language,setLanguage:(x)=>{window.fixturePreferences.push('language:'+x);setLanguage(x)}}}`,
 '@/contexts/AuthContext':`export const useAuth=()=>({user:new URLSearchParams(location.search).get('auth')==='yes'?{id:'synthetic',email:'guest@example.invalid',user_metadata:{name:'Example'}}:null});`,
 '@/contexts/ThemeContext':`import React from'react';export function useTheme(){const[theme,set]=React.useState(new URLSearchParams(location.search).get('theme')||'light');return{theme,setTheme:x=>{window.fixturePreferences.push('theme:'+x);document.documentElement.classList.toggle('dark',x==='dark');set(x)}}}`,
 '@/contexts/CurrencyContext':`import React from'react';export const currencies={THB:{code:'THB',symbol:'฿',name:'Thai Baht',nameRu:'Бат'},USD:{code:'USD',symbol:'$',name:'US Dollar',nameRu:'Доллар'}};export function useCurrency(){const[currency,set]=React.useState('THB');return{currency,currencyInfo:currencies[currency],setCurrency:x=>{window.fixturePreferences.push('currency:'+x);set(x)},formatPrice:x=>'฿'+x}}`,
 '@/contexts/CartContext':`export const useCart=()=>({getItemsByType:()=>[],getItemCount:()=>0,removeItem:()=>{throw Error('Cart writer forbidden')}});`,
-'@/hooks/useIsAdmin':`export const useIsAdmin=()=>({isAdmin:false});`,
+'@/hooks/useIsAdmin':`export const useIsAdmin=()=>({isAdmin:new URLSearchParams(location.search).get('roles')==='crowded'});`,
 '@/hooks/useUiSignOut':`export const useUiSignOut=()=>()=>{window.fixtureWrites.push('signout');throw Error('signout forbidden')};`,
-'@/hooks/useUserContext':`export const useUserContext=()=>({availableRoles:['user','owner'],switchContext:()=>{window.fixtureWrites.push('role');throw Error('role forbidden')}});`,
+'@/hooks/useUserContext':`export const useUserContext=()=>({availableRoles:new URLSearchParams(location.search).get('roles')==='crowded'?['user','owner','admin','property_manager','vendor','investor','uno_team']:['user','owner'],switchContext:()=>{window.fixtureWrites.push('role');throw Error('role forbidden')}});`,
 '@/hooks/useNotifications':`export const useNotifications=()=>({unreadCount:0});`,
 '@/hooks/useOwnerType':`export const useOwnerType=()=>({isMCPortal:true,isLoading:false});`,
 '@/contexts/PlatformViewAsContext':`export const usePlatformViewAs=()=>({enter:()=>{throw Error('viewas forbidden')}});`,

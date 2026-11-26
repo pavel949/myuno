@@ -308,7 +308,7 @@ Deno.serve(async (req) => {
         // Frontend fires notify-transfer-booking as fire-and-forget before redirect;
         // if user closed the tab early, the operator never got pinged. Re-trigger here
         // (notify function is idempotent via booking_notifications_log + transfer-op-${id}
-        // idempotency keys in send-transactional-email).
+        // idempotency keys in the managed email send).
         try {
           if (order.order_type === 'vehicle') {
             const { data: fullOrder } = await supabaseAdmin
@@ -505,8 +505,18 @@ Deno.serve(async (req) => {
       // ===== WALLET TOP-UP =====
       if (session.metadata?.type === "wallet_topup") {
         const userId = session.metadata.user_id;
-        const amount = parseFloat(session.metadata.amount);
-        const currency = session.metadata.currency || "THB";
+        // Credit only what Stripe actually charged, and only in the wallet's
+        // own currency (metadata is never trusted for the amount).
+        const paidCurrency = String(session.currency || "").toUpperCase();
+        const { data: walletCur } = await supabaseAdmin
+          .from('wallets').select('currency').eq('user_id', userId).maybeSingle();
+        const walletCurrency = String(walletCur?.currency || "RUB").toUpperCase();
+        if (paidCurrency !== walletCurrency || typeof session.amount_total !== 'number') {
+          logStep("ERROR", "Wallet top-up currency mismatch; not credited");
+          throw new Error('Wallet top-up currency mismatch');
+        }
+        const amount = session.amount_total / 100;
+        const currency = walletCurrency;
 
         logStep("Processing wallet top-up", { userId: redactId(userId) });
 

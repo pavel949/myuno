@@ -10,6 +10,7 @@
  * Webhook: INSERT on leads table → POST to this function
  */
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createServiceClient } from "../_shared/supabase.ts";
 
 const ULTRAMSG_INSTANCE = Deno.env.get("ULTRAMSG_INSTANCE") ?? "";
 const ULTRAMSG_TOKEN = Deno.env.get("ULTRAMSG_TOKEN") ?? "";
@@ -35,7 +36,7 @@ interface Lead {
 
 async function sendWhatsApp(to: string, body: string): Promise<boolean> {
   if (!ULTRAMSG_INSTANCE || !ULTRAMSG_TOKEN) {
-    console.info("[PEYLAA WA] Not configured. Message to", to, ":", body);
+    console.info("[PEYLAA WA] Not configured; message skipped");
     return false;
   }
 
@@ -52,8 +53,7 @@ async function sendWhatsApp(to: string, body: string): Promise<boolean> {
         }),
       }
     );
-    const result = await response.json();
-    console.info("[PEYLAA WA] Response:", result);
+    await response.body?.cancel().catch(() => {});
     return response.ok;
   } catch (err) {
     console.error("[PEYLAA WA] Error:", err);
@@ -118,8 +118,47 @@ serve(async (req) => {
   try {
     const payload = await req.json();
 
-    // Support both direct call and DB webhook format
-    const lead: Lead = payload.record || payload;
+    // Never trust caller-supplied lead contents: accept only the lead id
+    // (direct call or DB webhook) and reload the stored lead server-side.
+    const leadId = String((payload?.record?.id ?? payload?.id) || "");
+    if (!/^[0-9a-f-]{36}$/i.test(leadId)) {
+      return new Response(JSON.stringify({ error: "Lead id required" }), { status: 400, headers: { "Content-Type": "application/json" } });
+    }
+    const sb = createServiceClient();
+    const { data: row } = await sb
+      .from("nb_leads")
+      .select("id, full_name, phone, email, source, message, created_at")
+      .eq("id", leadId)
+      .maybeSingle();
+    const createdMs = row ? Date.parse(String(row.created_at)) : NaN;
+    if (!row || !String(row.source ?? "").startsWith("peylaa_") || !Number.isFinite(createdMs) || Date.now() - createdMs > 10 * 60 * 1000) {
+      return new Response(JSON.stringify({ error: "Forbidden" }), { status: 403, headers: { "Content-Type": "application/json" } });
+    }
+    const { data: prior } = await sb
+      .from("booking_notifications_log")
+      .select("id")
+      .eq("notification_type", "peylaa_lead_whatsapp")
+      .contains("metadata", { lead_id: leadId })
+      .limit(1)
+      .maybeSingle();
+    if (prior) {
+      return new Response(JSON.stringify({ error: "Already notified" }), { status: 409, headers: { "Content-Type": "application/json" } });
+    }
+    await sb.from("booking_notifications_log").insert({
+      notification_type: "peylaa_lead_whatsapp",
+      channel: "whatsapp",
+      sent_at: new Date().toISOString(),
+      metadata: { lead_id: leadId },
+    });
+    const lead: Lead = {
+      id: row.id,
+      full_name: String(row.full_name ?? ""),
+      phone: String(row.phone ?? ""),
+      email: row.email ?? undefined,
+      source: String(row.source ?? ""),
+      notes: row.message ?? undefined,
+      created_at: String(row.created_at),
+    };
 
     if (!lead.phone || !lead.full_name) {
       return new Response(
@@ -128,7 +167,7 @@ serve(async (req) => {
       );
     }
 
-    console.info(`[PEYLAA] New lead: ${lead.full_name} (${lead.phone})`);
+    console.info(`[PEYLAA] New lead: ${lead.id}`);
 
     // Send both notifications in parallel
     const [adminSent, welcomeSent] = await Promise.all([

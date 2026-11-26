@@ -1,5 +1,6 @@
 import { createClient } from '../_shared/supabase.ts'
 import { NOTIFY_CORS as corsHeaders } from '../_shared/notify-utils.ts'
+import { requireServiceCaller } from "../_shared/internal-secret.ts";
 
 interface OrderStatusPayload {
   booking_id: string;
@@ -39,6 +40,7 @@ Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders })
   }
+  { const denied = await requireServiceCaller(req, corsHeaders); if (denied) return denied; }
 
   try {
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!

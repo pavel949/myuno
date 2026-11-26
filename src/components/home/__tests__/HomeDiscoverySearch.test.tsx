@@ -38,6 +38,22 @@ describe('Home discovery themed controls and catalogue handoff', () => {
   });
   afterEach(() => { cleanup(); vi.useRealTimers(); });
 
+  it.each([
+    ['Experiences', '/experiences'],
+    ['Services', '/discover/services'],
+  ])('opens %s with a query and no property restrictions from the homepage', (market, path) => {
+    state.language = 'en';
+    renderControls(<HomeDiscoverySearch allowActivities progressive initialParams={new URLSearchParams('mode=rent&guests=4&district=layan')} />);
+    fireEvent.click(screen.getByRole('button', { name: 'Experiences & services' }));
+    if (market === 'Services') choose('Choose a catalogue', market);
+    fireEvent.change(screen.getByRole('searchbox'), { target: { value: '  boat & tour  ' } });
+    fireEvent.submit(screen.getByRole('form', { name: 'Search myUNO' }));
+
+    const url = new URL(state.navigate.mock.calls[0][0], 'https://myuno.app');
+    expect(url.pathname).toBe(path);
+    expect(Object.fromEntries(url.searchParams)).toEqual({ q: 'boat & tour' });
+  });
+
   it.each(['ru', 'en', 'th'])('keeps only primary criteria expanded initially in %s', language => {
     state.language = language;
     const { container } = renderControls(<HomeDiscoverySearch />);
@@ -46,6 +62,40 @@ describe('Home discovery themed controls and catalogue handoff', () => {
     expect(screen.getByRole('searchbox')).not.toBeVisible();
     expect(screen.getAllByRole('combobox')).toHaveLength(3);
     expect(screen.getByRole('button', { name: language === 'en' ? 'Find a home' : language === 'ru' ? 'Найти жильё' : 'ค้นหาที่พัก' })).toBeVisible();
+  });
+  it('keeps dates and guests together and submits the selected stay criteria', () => {
+    state.language = 'en';
+    renderControls(<HomeDiscoverySearch allowActivities showGuestsInline progressive />);
+    expect(screen.queryByRole('spinbutton')).toBeNull();
+    expect(screen.queryByRole('button', { name: 'Yearly' })).toBeNull();
+    fireEvent.click(screen.getByRole('button', { name: 'Filters' }));
+    expect(screen.getByRole('button', { name: 'Yearly' })).toBeVisible();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Dates and guests' }));
+    fireEvent.click(day('20'));
+    fireEvent.click(day('25'));
+    const party = within(screen.getByRole('dialog')).getByRole('spinbutton', { name: 'Number of guests' });
+    fireEvent.change(party, { target: { value: '4' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Done' }));
+    expect(screen.getByRole('button', { name: 'Dates and guests' })).toHaveAccessibleDescription(/Guests: 4/);
+    fireEvent.submit(screen.getByRole('form', { name: 'Search myUNO' }));
+    const params = new URL(state.navigate.mock.calls[0][0], 'https://myuno.app').searchParams;
+    expect(Object.fromEntries(params)).toMatchObject({ checkIn: '2026-10-20', checkOut: '2026-10-25', guests: '4' });
+  });
+
+  it('starts homepage purchase search with a visible, removable THB budget', () => {
+    state.language = 'en';
+    renderControls(<HomeDiscoverySearch allowActivities progressive />);
+    fireEvent.click(screen.getByRole('button', { name: 'Buy' }));
+    expect(screen.getByRole('combobox', { name: 'Purchase budget' })).toHaveTextContent('10,000,000');
+    fireEvent.submit(screen.getByRole('form'));
+    const limited = new URL(state.navigate.mock.calls[0][0], 'https://myuno.app');
+    expect(Object.fromEntries(limited.searchParams)).toMatchObject({ mode: 'buy', maxPrice: '10000000' });
+
+    choose('Purchase budget', 'No limit');
+    fireEvent.submit(screen.getByRole('form'));
+    const unrestricted = new URL(state.navigate.mock.calls[1][0], 'https://myuno.app');
+    expect(Object.fromEntries(unrestricted.searchParams)).toEqual({ mode: 'buy' });
   });
   it.each([
     ['ru', 'Срок аренды', 'На год', 'Помесячно'],

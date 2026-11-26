@@ -1,3 +1,5 @@
+import { sanitizeChatMessages, promptSafe } from "../_shared/chat-messages.ts";
+import { requireInternalOrUser } from "../_shared/authz.ts";
 /**
  * concierge-intent — M10d (IPP §18 "Seven Doors" intent routing).
  *
@@ -164,7 +166,7 @@ async function callAI(
         model: 'google/gemini-2.5-flash',
         messages: [
           { role: 'system', content: SYSTEM_PROMPT + contextSuffix },
-          ...messages.map(m => ({ role: m.role, content: m.content })),
+          ...sanitizeChatMessages(messages),
         ],
         tools,
         tool_choice: { type: 'function', function: { name: 'recommend_intent' } },
@@ -235,6 +237,7 @@ async function callAI(
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response(null, { headers: corsHeaders });
+  { const gate = await requireInternalOrUser(req, corsHeaders); if (gate instanceof Response) return gate; }
 
   try {
     const body = await req.json();

@@ -1,5 +1,6 @@
 import { PUBLIC_CATALOG_GRID } from '@/design-system/ecosystemLayout';
 import '@/styles/premium-services.css';
+import { useCataloguePanelDraft } from '@/hooks/useCataloguePanelDraft';
 import { useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { CalendarCheck } from 'lucide-react';
@@ -17,13 +18,16 @@ import { MarketplaceFilters } from './MarketplaceFilters';
 import { MarketplaceFilterSheet } from './MarketplaceFilterSheet';
 
 /** Existing public catalogue and booking workflow, with URL-backed discovery. */
-export function MarketplaceServiceGrid({ search = '', returnTo = '/discover/services', onConcierge }: {
-  search?: string; returnTo?: string; onConcierge?: () => void;
+export function MarketplaceServiceGrid({ search = '', returnTo = '/discover/services', onConcierge, categorySlugs }: {
+  search?: string; returnTo?: string; onConcierge?: () => void; categorySlugs?: string[];
 }) {
   const { language } = useLanguage();
   const L = (ru: string, en: string, th: string) => pickLang(language, { ru, en, th });
-  const query = useMarketplaceServices();
-  const { data, isLoading, isError, refetch } = query;
+  const pageScope = JSON.stringify([returnTo, search, categorySlugs]);
+  const [pageState, setPageState] = useState({ scope: pageScope, index: 0 });
+  const pageIndex = pageState.scope === pageScope ? pageState.index : 0;
+  const query = useMarketplaceServices(categorySlugs, true, pageIndex);
+  const { data, isLoading, isError, hasMore, refetch } = query;
   const location = useLocation();
   const navigate = useNavigate();
   const [selected, setSelected] = useState<BookableService | null>(null);
@@ -38,27 +42,31 @@ export function MarketplaceServiceGrid({ search = '', returnTo = '/discover/serv
   const list = filters.date ? candidates.filter(service => availability.data?.[service.id]?.status === 'available') : candidates;
   const failedCount = filters.date ? candidates.filter(service => availability.data?.[service.id]?.error).length : 0;
   const unknownCount = filters.date ? candidates.filter(service => !availability.data?.[service.id] || (availability.data[service.id].status === 'unknown' && !availability.data[service.id].error)).length : 0;
-  const popular = !search.trim() && !filters.active ? popularProviderOffers(list) : [];
+  const popular = pageIndex === 0 && !categorySlugs && !search.trim() && !filters.active ? popularProviderOffers(list) : [];
   const popularIds = new Set(popular.map(service => service.id));
   const rest = list.filter(service => !popularIds.has(service.id));
-  const update = (key: MarketplaceFilterKey, value: string) => {
-    const next = new URLSearchParams(pending.current.params);
+  const panel = useCataloguePanelDraft(MARKETPLACE_FILTER_KEYS, params, next => {
+    pending.current.params = next;
+    navigate({ pathname: location.pathname, search: next.toString(), hash: location.hash }, { state: location.state, preventScrollReset: true });
+  });
+  const update = (key: MarketplaceFilterKey, value: string) => panel.setValues(next => {
     if (value) next.set(key, value); else next.delete(key);
     if (key === 'date') next.delete('today');
     if (key === 'today') next.delete('date');
-    pending.current.params = next;
-    navigate({ pathname: location.pathname, search: next.toString(), hash: location.hash }, { state: location.state, replace: key === 'minPrice' || key === 'maxPrice' });
-  };
-  const clear = () => {
-    const next = new URLSearchParams(pending.current.params);
+    return next;
+  });
+  const clear = () => panel.setValues(next => {
     MARKETPLACE_FILTER_KEYS.forEach(key => next.delete(key));
-    pending.current.params = next;
-    navigate({ pathname: location.pathname, search: next.toString(), hash: location.hash }, { state: location.state });
-  };
-  const filtersUI = <MarketplaceFilterSheet showLabel title={L('Фильтры предложений', 'Offer filters', 'ตัวกรองข้อเสนอ')} activeCount={MARKETPLACE_FILTER_KEYS.filter(key => params.has(key)).length}><MarketplaceFilters filters={filters} params={params}
-    districts={[...new Set((data ?? []).flatMap(serviceDistricts))].sort()}
-    currencies={[...new Set((data ?? []).flatMap(service => service.currency && /^[A-Z]{3}$/.test(service.currency.trim().toUpperCase()) ? [service.currency.trim().toUpperCase()] : []))].sort()}
-    onChange={update} onClear={clear} /></MarketplaceFilterSheet>;
+    return next;
+  });
+  const panelFilters = readMarketplaceFilters(panel.values);
+  const filtersUI = <MarketplaceFilterSheet showLabel title={L('Фильтры предложений', 'Offer filters', 'ตัวกรองข้อเสนอ')} activeCount={MARKETPLACE_FILTER_KEYS.filter(key => params.has(key)).length}
+    onOpenChange={panel.openChange} onApply={() => panel.apply(pending.current.params)} applyDisabled={panelFilters.invalid}>
+    <MarketplaceFilters filters={panelFilters} params={panel.values}
+      districts={[...new Set((data ?? []).flatMap(serviceDistricts))].sort()}
+      currencies={[...new Set((data ?? []).flatMap(service => service.currency && /^[A-Z]{3}$/.test(service.currency.trim().toUpperCase()) ? [service.currency.trim().toUpperCase()] : []))].sort()}
+      onChange={update} onClear={clear} />
+  </MarketplaceFilterSheet>;
   const fallback = onConcierge && <Button variant="outline" className="h-auto min-h-11 max-w-full whitespace-normal text-center" onClick={onConcierge}>{L('Подобрать услугу с консьержем', 'Find a service with concierge', 'ให้คอนเซียร์จช่วยหาบริการ')}</Button>;
   const renderCards = (services: MarketplaceService[]) => <div className={PUBLIC_CATALOG_GRID}>
     {services.map(service => <MarketplaceServiceCard key={service.id} service={service} returnTo={returnTo}
@@ -70,7 +78,7 @@ export function MarketplaceServiceGrid({ search = '', returnTo = '/discover/serv
       })} />)}
   </div>;
 
-  if (!isLoading && !isError && data?.length === 0) return <div className="space-y-4">
+  if (pageIndex === 0 && !hasMore && !isLoading && !isError && data?.length === 0) return <div className="space-y-4">
     {filters.active && filtersUI}<p role="status" className="text-sm text-muted-foreground">{L(
       'Пока нет опубликованных предложений специалистов. Выберите раздел каталога или опишите задачу.',
       'No published provider offers yet. Choose a catalogue section or describe your task.',
@@ -85,7 +93,10 @@ export function MarketplaceServiceGrid({ search = '', returnTo = '/discover/serv
     <p className="text-sm text-muted-foreground">{L('Укажите удобное время. Консьерж MyUNO уточнит доступность. Дождитесь подтверждения записи.', 'Request a suitable time. The MyUNO concierge will check availability. Please wait for booking confirmation.', 'ระบุเวลาที่สะดวก ทีมคอนเซียร์จ MyUNO จะตรวจสอบเวลาว่าง กรุณารอการยืนยันการจอง')}</p>
     {filters.invalid && <p role="alert" className="text-sm text-destructive">{L('Проверьте район, дату, валюту и диапазон цены в фильтрах.', 'Check the area, date, currency and price range in the filters.', 'ตรวจสอบพื้นที่ วันที่ สกุลเงิน และช่วงราคาในตัวกรอง')}</p>}
     {filtersUI}
-    {Boolean(data && data.length >= 60) && <p role="status" className="text-sm text-muted-foreground">{L('Фильтры применяются к подборке из 60 последних опубликованных предложений. За дополнительным подбором обратитесь к консьержу.', 'Filters apply to the latest 60 published offers. Ask concierge for a wider selection.', 'ตัวกรองใช้กับ 60 ข้อเสนอที่เผยแพร่ล่าสุด ติดต่อคอนเซียร์จเพื่อค้นหาเพิ่มเติม')}</p>}
+    {(hasMore || pageIndex > 0) && <p role="status" className="text-sm text-muted-foreground">{L(
+      'Поиск и фильтры применяются к текущей странице. Проверьте следующие предложения, чтобы найти больше.',
+      'Search and filters apply to the current page. Check the next offers to find more.',
+      'การค้นหาและตัวกรองใช้กับหน้านี้ ดูข้อเสนอหน้าถัดไปเพื่อค้นหาเพิ่มเติม')}</p>}
     {isLoading ? <div role="status" aria-label={L('Загружаем услуги', 'Loading services', 'กำลังโหลดบริการ')} className={PUBLIC_CATALOG_GRID}>{Array.from({ length: 4 }, (_, index) => <Skeleton key={index} className="h-64" />)}</div>
       : isError ? <div role="alert" className="border border-border p-4 space-y-3"><p>{L('Не удалось загрузить услуги.', 'Could not load services.', 'โหลดบริการไม่สำเร็จ')}</p><Button variant="outline" onClick={() => refetch()}>{L('Повторить', 'Retry', 'ลองใหม่')}</Button>{fallback}</div>
       : checking ? <p role="status">{L('Проверяем свободное время…', 'Checking request slots…', 'กำลังตรวจสอบเวลาว่าง…')}</p>
@@ -96,7 +107,7 @@ export function MarketplaceServiceGrid({ search = '', returnTo = '/discover/serv
           `The schedule is unknown for ${unknownCount} offers. They are excluded from the selected date results.`,
           `ยังไม่ทราบตารางเวลาของ ${unknownCount} ข้อเสนอ จึงไม่รวมในผลลัพธ์ของวันที่เลือก`)}</p><Button variant="ghost" onClick={() => availability.refetch()}>{L('Проверить снова', 'Check again', 'ตรวจสอบอีกครั้ง')}</Button></div>}
         {list.length === 0 ? <div className="border border-border p-4 space-y-3">
-          <p>{search.trim() && !filters.active ? L('По вашему запросу ничего не найдено. Измените поиск.', 'No services match your search. Try another search.', 'ไม่พบบริการที่ตรงกับการค้นหา') : L('Нет подтверждённых предложений под эти фильтры. Измените условия или попросите консьержа помочь.', 'No confirmed offers match these filters. Adjust them or ask concierge for help.', 'ไม่มีข้อเสนอที่ยืนยันตรงกับตัวกรอง เปลี่ยนเงื่อนไขหรือขอความช่วยเหลือ')}</p>{fallback}
+          <p>{(hasMore || pageIndex > 0) ? L('На этой странице совпадений нет.', 'No matches on this page.', 'ไม่พบรายการในหน้านี้') : search.trim() && !filters.active ? L('По вашему запросу ничего не найдено. Измените поиск.', 'No services match your search. Try another search.', 'ไม่พบบริการที่ตรงกับการค้นหา') : L('Нет подтверждённых предложений под эти фильтры. Измените условия или попросите консьержа помочь.', 'No confirmed offers match these filters. Adjust them or ask concierge for help.', 'ไม่มีข้อเสนอที่ยืนยันตรงกับตัวกรอง เปลี่ยนเงื่อนไขหรือขอความช่วยเหลือ')}</p>{fallback}
         </div> : <>
           <p role="status" className="text-sm text-muted-foreground">{L(`Предложений: ${list.length}`, `Offers: ${list.length}`, `ข้อเสนอ: ${list.length}`)}</p>
           {popular.length > 0 && <section aria-labelledby="popular-provider-services" className="space-y-3">
@@ -108,6 +119,14 @@ export function MarketplaceServiceGrid({ search = '', returnTo = '/discover/serv
           {fallback && <div className="border border-border p-4 space-y-3"><p className="text-sm text-muted-foreground">{L('Нужна другая услуга или график не указан? Консьерж поможет уточнить запрос.', 'Need something else or a schedule is missing? Concierge can help clarify your request.', 'ต้องการบริการอื่นหรือยังไม่มีตารางเวลา? คอนเซียร์จช่วยได้')}</p>{fallback}</div>}
         </>}
       </>}
+    {(pageIndex > 0 || hasMore) && <nav className="flex flex-wrap gap-2" aria-label={L('Страницы предложений', 'Offer pages', 'หน้าข้อเสนอ')}>
+      {pageIndex > 0 && <Button variant="outline" disabled={isLoading} onClick={() => { setSelected(null); setExpanded(false); setPageState({ scope: pageScope, index: pageIndex - 1 }); }}>
+        {L('Предыдущие предложения', 'Previous offers', 'ข้อเสนอก่อนหน้า')}
+      </Button>}
+      {hasMore && <Button variant="outline" disabled={isLoading} onClick={() => { setSelected(null); setExpanded(false); setPageState({ scope: pageScope, index: pageIndex + 1 }); }}>
+        {L('Следующие предложения', 'Next offers', 'ข้อเสนอถัดไป')}
+      </Button>}
+    </nav>}
     <ServiceBookingSheet key={`${selected?.id ?? 'none'}:${filters.date}`} service={selected} initialDate={filters.date || undefined} open={!!selected} onOpenChange={open => !open && setSelected(null)} onConcierge={onConcierge ? () => { setSelected(null); onConcierge(); } : undefined} />
   </section>;
 }

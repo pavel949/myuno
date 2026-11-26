@@ -10,6 +10,7 @@ import { MemoryRouter, Route, Routes, useLocation } from "react-router-dom";
 import PropertyLanding from "../PropertyLanding";
 import { PropertyRentEntry } from "@/components/layout/routes/propertyHubRoutes";
 import GoalEntryPage from "@/pages/discover/GoalEntryPage";
+vi.mock('@/hooks/useUniversalLead', () => ({ useUniversalLead: () => ({ submitLead: { mutate: vi.fn() }, isSubmitting: false }) }));
 
 const state = vi.hoisted(() => ({
   language: "en",

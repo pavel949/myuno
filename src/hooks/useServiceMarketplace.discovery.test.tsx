@@ -9,18 +9,22 @@ const state = vi.hoisted(() => ({
   providerError: null as unknown,
   calls: [] as { table: string; select: string }[],
   excludedColumn: '' as string,
+  categoryScope: [] as string[],
+  range: [] as number[],
 }));
 vi.mock('@/integrations/supabase/client', () => ({ supabase: { from: (table: string) => {
   const chain: Record<string, unknown> = {};
-  for (const method of ['eq', 'order', 'in']) chain[method] = () => chain;
+  for (const method of ['eq', 'order']) chain[method] = () => chain;
+  chain.in = (column: string, values: string[]) => { if (column === 'category_slug') state.categoryScope = values; return chain; };
   chain.not = (column: string) => { state.excludedColumn = column; return chain; };
   chain.select = (select: string) => { state.calls.push({ table, select }); return chain; };
-  chain.limit = () => Promise.resolve(table === 'public_service_catalog' ? { data: state.rows, error: null } : { data: state.providers, error: state.providerError });
+  chain.range = (first: number, last: number) => { state.range = [first, last]; return Promise.resolve({ data: state.rows, error: null }); };
+  chain.limit = () => Promise.resolve({ data: state.providers, error: state.providerError });
   return chain;
 } } }));
-function mount() { const client = new QueryClient({ defaultOptions: { queries: { retry: false } } }); return renderHook(() => useMarketplaceServices(), { wrapper: ({ children }: { children: ReactNode }) => <QueryClientProvider client={client}>{children}</QueryClientProvider> }); }
+function mount(categorySlugs?: string[], pageIndex = 0) { const client = new QueryClient({ defaultOptions: { queries: { retry: false } } }); return renderHook(() => useMarketplaceServices(categorySlugs, true, pageIndex), { wrapper: ({ children }: { children: ReactNode }) => <QueryClientProvider client={client}>{children}</QueryClientProvider> }); }
 beforeEach(() => {
-  state.calls = []; state.providerError = null; state.excludedColumn = '';
+  state.calls = []; state.providerError = null; state.excludedColumn = ''; state.categoryScope = []; state.range = [];
   state.rows[0].provider = null;
   state.providers = [{ id: 'p', name: 'Public fixture provider', rating: 4.5, is_verified: true, review_count: 10, coverage_areas: ['Rawai'], is_demo: false }];
 });
@@ -33,6 +37,16 @@ describe('safe public service discovery reader', () => {
     expect(state.calls.map(call => call.table)).toEqual(['public_service_catalog', 'public_provider_catalog']);
     expect(state.calls[0].select).toContain('location:locations(district)');
     expect(state.calls.some(call => /commission|phone|email|earnings|user_id/.test(call.select))).toBe(false);
+  });
+  it('restricts the server query to the selected public taxonomy slugs before limiting results', async () => {
+    const { result } = mount(['plumbing', 'cat-home-services', 'plumbing'], 1);
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+    expect(state.categoryScope).toEqual(['cat-home-services', 'plumbing']);
+    expect(state.range).toEqual([60, 119]);
+  });
+  it('does not read an unverified empty scope as the global catalogue', () => {
+    mount([]);
+    expect(state.calls).toEqual([]);
   });
   it('enriches a service with no embedded provider from the public provider view', async () => {
     const { result } = mount();

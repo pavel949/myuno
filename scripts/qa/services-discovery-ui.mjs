@@ -31,7 +31,21 @@ const virtual = {
   './useSituationTracking': `export const useSituationTracking=()=>({containerRef:{current:null},onSituationClick:()=>{}});`,
   '@/hooks/useOrders': `export const useOrders=()=>({createOrder:()=>{throw Error('Order writes forbidden in navigation QA')},isCreating:false});`,
   '@/hooks/useGeolocation': `export const useGeolocation=()=>({hasLocation:false,getPosition:()=>{throw Error('Geolocation forbidden in navigation QA')},loading:false});`,
-  '@/hooks/useServiceMarketplace': `const providerPhase=new URLSearchParams(location.search).get('phase');export const useMarketplaceServices=()=>({data:providerPhase==='provider'?[{id:'offer-synthetic',provider_id:'provider-synthetic',name_en:'Synthetic AC service',name_ru:'Синтетическая услуга',description_en:'Synthetic fixture, not a real offer',price:950,currency:'THB',duration_minutes:60,lead_time_hours:2,images:[],provider:{id:'provider-synthetic',name:'Synthetic team',is_verified:false}}]:[],isLoading:false,isError:false,refetch:()=>{}});`,
+  '@/hooks/useServiceMarketplace': `
+    const providerPhase=new URLSearchParams(location.search).get('phase');
+    const provider={id:'provider-synthetic',name:'Synthetic team',is_verified:false};
+    const base={provider_id:provider.id,name_ru:'Синтетическая услуга',description_en:'Synthetic fixture, not a real offer',price:950,currency:'THB',duration_minutes:60,lead_time_hours:2,images:[],provider,is_active:true,approval_status:'approved'};
+    const offer={...base,id:'offer-synthetic',name_en:'Synthetic AC service',category_slug:'cat-home-services'};
+    const other={...base,id:'offer-other',name_en:'Synthetic legal service',category_slug:'cat-business-legal'};
+    const unpublished={...offer,id:'offer-unpublished',name_en:'Synthetic unpublished service',approval_status:'pending'};
+    const rows=providerPhase==='provider'?[offer,other,unpublished]:providerPhase==='provider-paged'?
+      [...Array.from({length:60},(_,i)=>({...other,id:'offer-new-'+i,name_en:'Recent fixture '+i,name_ru:'Недавняя услуга'})),
+       {...offer,id:'offer-older',name_en:'Older fixture',provider:{...provider,name:'Старинный Пхукет'}}]:[];
+    export const useMarketplaceServices=(categorySlugs,enabled=true,page=0)=>{
+      const scoped=enabled?rows.filter(row=>row.is_active&&row.approval_status==='approved'&&(!categorySlugs||categorySlugs.includes(row.category_slug))):[];
+      const data=scoped.slice(page*60,(page+1)*60);
+      return {data,hasMore:data.length===60,isLoading:false,isError:false,refetch:()=>{}};
+    };`,
   '@/components/services': `export {ServiceFunctionCard} from '${root}/src/components/services/ServiceFunctionCard.tsx';`,
   '@/hooks/useMarketplaceAvailability': `export const useMarketplaceAvailability=()=>({data:{},isFetching:false,refetch:()=>{}});`,
   './ServiceBookingSheet': `export const ServiceBookingSheet=()=>null;`,
@@ -59,7 +73,7 @@ const result = await build({
 });
 if(Object.keys(result.metafile.inputs).some(p=>!p.startsWith('fixture:')&&/integrations\/supabase\/client|hooks\/useServiceMarketplace\.ts$|lib\/catalog\/useCatalogFromDB\.ts$/.test(p))) throw Error('Production data module included');
 const css = await postcss([postcssImport(), tailwindcss(), autoprefixer()])
-  .process(['src/index.css','src/styles/public-commerce.css'].map(file=>'@import "./'+file+'";').join('\n'), { from: path.join(root, 'services-qa.css') });
+  .process(['src/index.css','src/styles/public-commerce.css','src/styles/marketplace-unity.css'].map(file=>'@import "./'+file+'";').join('\n'), { from: path.join(root, 'services-qa.css') });
 await writeFile(path.join(output,'fixture.css'),css.css);
 await writeFile(path.join(output,'fixture.html'),'<!doctype html><html><head><meta name="viewport" content="width=device-width, initial-scale=1"><link rel="stylesheet" href="/fixture.css"></head><body><script>const fp=new URLSearchParams(location.search);document.documentElement.lang=fp.get("lang")||"en";document.documentElement.classList.toggle("dark",fp.get("theme")==="dark");</script><div id="root"></div><script type="module" src="/fixture.js"></script></body></html>');
 if(process.argv.includes('--build-only')) process.exit(0);

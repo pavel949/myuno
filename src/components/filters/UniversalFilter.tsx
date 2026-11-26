@@ -66,7 +66,7 @@ function PriceLevelSelect({ value, onChange, descriptions }: { value: string | n
   ];
 
   return (
-    <div className="space-y-2"><div className="flex gap-2">
+    <div className="space-y-2"><div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
       {levels.map((level) => (
         <button
           key={level.id}
@@ -76,16 +76,16 @@ function PriceLevelSelect({ value, onChange, descriptions }: { value: string | n
           title={descriptions?.[level.id]}
           onClick={() => onChange(value === level.id ? null : level.id)}
           className={cn(
-            "flex-1 py-2 rounded-none text-sm font-medium border transition-colors",
+            "min-h-11 px-2 py-2 rounded-none text-sm font-medium border transition-colors",
             value === level.id
               ? "bg-primary text-primary-foreground border-primary"
               : "bg-card border-border text-muted-foreground hover:border-primary/50"
           )}
         >
-          {level.label}
+          {descriptions?.[level.id] ?? level.label}
         </button>
       ))}
-    </div>{value && descriptions?.[value] && <p className="text-sm text-muted-foreground" aria-live="polite">{descriptions[value]}</p>}</div>
+    </div><p className="sr-only" role="status" aria-live="polite">{value ? descriptions?.[value] : undefined}</p></div>
   );
 }
 
@@ -342,7 +342,8 @@ export function UniversalFilter({
         title={pickLang(language, { ru: 'Фильтры', en: 'Filters', th: 'ตัวกรอง' })}
         icon={<Filter className="w-5 h-5 text-primary" />}
         size="lg"
-        mobileHeight="max-h-[85vh]"
+        closeLabel={pickLang(language, { ru: 'Закрыть', en: 'Close', th: 'ปิด' })}
+        mobileHeight="max-h-[85dvh]"
         footer={
           <div className="flex items-center justify-between w-full gap-3">
             {localActiveCount > 0 && (

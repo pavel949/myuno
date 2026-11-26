@@ -69,13 +69,13 @@ export default function AdminOperations() {
     },
     { 
       id: 'leads', 
-      label: pickLang(language, { en: 'Supplier prospects', ru: 'Потенциальные поставщики', th: 'ผู้ให้บริการที่คาดหวัง' }),
+      label: pickLang(language, { en: 'Supplier prospects', ru: 'Новые поставщики', th: 'ผู้ให้บริการที่คาดหวัง' }),
       icon: Users,
       badge: overview?.newLeads,
     },
     { 
       id: 'inquiries', 
-      label: isRu ? 'Тикеты' : 'Tickets', 
+      label: isRu ? 'Обращения' : 'Tickets', 
       icon: MessageSquare,
       badge: overview?.openTickets,
     },
@@ -174,15 +174,15 @@ export default function AdminOperations() {
 
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={value => setSearchParams(previous => { const next = new URLSearchParams(previous); next.set('tab', value); return next; })} className="w-full min-w-0">
-        <TabsList className="grid h-auto w-full grid-cols-2 items-stretch gap-1 bg-muted/50 p-1 sm:grid-cols-3 xl:grid-cols-6">
+        <TabsList className="flex h-auto w-full flex-wrap items-stretch justify-start gap-1 bg-muted/50 p-1">
           {tabs.map((tab) => (
             <TabsTrigger
               key={tab.id}
               value={tab.id}
-              className="min-h-11 justify-start gap-1.5 overflow-visible whitespace-normal px-2 text-left data-[state=active]:bg-background"
+              className="min-h-11 flex-none justify-start gap-1.5 whitespace-nowrap px-3 text-left data-[state=active]:bg-background"
             >
               <tab.icon className="h-4 w-4 shrink-0" />
-              <span className="min-w-0 [overflow-wrap:anywhere]">{tab.label}</span>
+              <span>{tab.label}</span>
               {tab.badge != null && tab.badge > 0 && (
                 <Badge
                   variant="destructive"

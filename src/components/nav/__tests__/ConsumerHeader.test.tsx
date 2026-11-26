@@ -4,26 +4,29 @@ import { MemoryRouter } from 'react-router-dom';
 import { ConsumerHeader } from '../ConsumerHeader';
 vi.mock('@/contexts/AuthContext', () => ({ useAuth: () => ({ user: null }) }));
 const locale = vi.hoisted(() => ({ language: 'ru' }));
+const prefetch = vi.hoisted(() => vi.fn());
+vi.mock('@/lib/prefetchRoute', () => ({ prefetchRoute: prefetch }));
 vi.mock('@/contexts/LanguageContext', () => ({ useLanguage: () => locale }));
 vi.mock('@/components/uno/GlobalPreferencesControls', () => ({ GlobalPreferencesControls: () => null }));
 vi.mock('@/components/market/MiniCart', () => ({ MiniCart: () => null }));
 vi.mock('@/components/layout/UserAvatarMenu', () => ({ UserAvatarMenu: () => null }));
 vi.mock('@/hooks/useFeedbackSettings', () => ({ getFeedbackSettings: () => ({}) }));
-afterEach(() => { cleanup(); locale.language = 'ru'; });
+afterEach(() => { cleanup(); locale.language = 'ru'; prefetch.mockClear(); });
 it.each([
- ['/experiences', 'Впечатления'],
- ['/experiences/synthetic-tour', 'Впечатления'],
- ['/transport/transfer', 'Услуги'],
- ['/property/search?mode=buy', 'Жильё'],
-])('identifies one destination in desktop and mobile menus for %s', (path, label) => {
+ ['/experiences', 'Услуги', 'Впечатления'],
+ ['/experiences/synthetic-tour', 'Услуги', 'Впечатления'],
+ ['/transport/transfer', 'Услуги', 'Услуги'],
+ ['/property/search?mode=buy', 'Купить', 'Купить недвижимость'],
+ ['/property/search?mode=rent', 'Жильё', 'Жильё'],
+])('identifies one destination in desktop and mobile menus for %s', (path, desktopLabel, mobileLabel) => {
  render(<MemoryRouter initialEntries={[path]}><ConsumerHeader /></MemoryRouter>);
  const desktop = screen.getByRole('navigation', { name: 'Основные разделы' });
  expect(desktop.querySelectorAll('a[aria-current="page"]')).toHaveLength(1);
- expect(within(desktop).getByRole('link', { name: label })).toHaveAttribute('aria-current', 'page');
+ expect(within(desktop).getByRole('link', { name: desktopLabel })).toHaveAttribute('aria-current', 'page');
  fireEvent.click(screen.getByRole('button', { name: 'Открыть меню' }));
  const mobile = screen.getByRole('dialog');
  expect(mobile.querySelectorAll('a[aria-current="page"]')).toHaveLength(1);
- expect(within(mobile).getByRole('link', { name: label })).toHaveAttribute('aria-current', 'page');
+ expect(within(mobile).getByRole('link', { name: mobileLabel })).toHaveAttribute('aria-current', 'page');
 });
 it('provides a named modal menu with direct destinations, sign-in and Escape handling', async () => {
  render(<MemoryRouter><ConsumerHeader /></MemoryRouter>);
@@ -58,4 +61,14 @@ it.each([
  const dialog = screen.getByRole('dialog', { name: 'myUNO' });
  expect(within(dialog).getByRole('link', { name: services })).toHaveAttribute('aria-current', 'page');
  expect(within(dialog).getByRole('link', { name: signIn })).toHaveAttribute('href', '/auth?redirect=%2Ftransport%2Ftransfer');
+});
+
+it('warms only the destination indicated by pointer or keyboard intent', () => {
+ render(<MemoryRouter><ConsumerHeader /></MemoryRouter>);
+ const nav = screen.getByRole('navigation', { name: 'Основные разделы' });
+ expect(prefetch).not.toHaveBeenCalled();
+ fireEvent.pointerEnter(within(nav).getByRole('link', { name: 'Купить' }));
+ expect(prefetch.mock.calls).toEqual([['/property/buy']]);
+ fireEvent.focus(within(nav).getByRole('link', { name: 'Услуги' }));
+ expect(prefetch.mock.calls).toEqual([['/property/buy'], ['/discover/services']]);
 });

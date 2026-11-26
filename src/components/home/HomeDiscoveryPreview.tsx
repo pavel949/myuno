@@ -7,6 +7,9 @@ import { pickLang, type LangValues } from '@/lib/i18n/pickLang';
 import { APP_ROUTES as R } from '@/lib/config/routes';
 import { useProperties } from '@/hooks/useProperties';
 import { useOffplanProjects } from '@/hooks/useOffplanProjects';
+import { PropertyListingCard } from '@/components/property/PropertyListingCard';
+import { ContentSkeleton } from '@/components/ui/ContentSkeleton';
+import { DEFAULT_HOME_SALE_MAX_PRICE, propertySaleBudgetLabel, propertySearchHref } from '@/lib/propertySearchQuery';
 import { HomeGallery } from './HomeGallery';
 import { HomeDiscoveryPaths } from './HomeDiscoveryPaths';
 import { HomeListingCard } from './HomeListingCard';
@@ -28,12 +31,57 @@ export function HomeHousingPreview() {
   </HomeGallery>;
 }
 
+export function HomeSalePreview() {
+  const { language } = useLanguage();
+  const t = (v: LangValues) => pickLang(language, v);
+  const budget = DEFAULT_HOME_SALE_MAX_PRICE;
+  const sale = useProperties({ listingType: 'sale', minPrice: 0.01, maxPrice: budget }, 48);
+  const homes = selectHomeShowcase(sale.data ?? [], 4);
+  const browse = propertySearchHref('', { mode: 'buy', maxPrice: String(budget) });
+  let state;
+
+  if (sale.isLoading) {
+    state = (
+      <div role="status">
+        <span className="sr-only">{t({ ru: 'Загружаем предложения о продаже', en: 'Loading homes for sale', th: 'กำลังโหลดบ้านสำหรับขาย' })}</span>
+        <div aria-hidden="true"><ContentSkeleton variant="card" count={2} /></div>
+      </div>
+    );
+  } else if (sale.isError) {
+    state = (
+      <div className="home-catalog-state" role="alert">
+        <p>{t({ ru: 'Не удалось загрузить предложения о продаже.', en: 'Could not load homes for sale.', th: 'โหลดบ้านสำหรับขายไม่สำเร็จ' })}</p>
+        <button type="button" className="home-text-link" onClick={() => void sale.refetch()}>
+          {t({ ru: 'Повторить', en: 'Try again', th: 'ลองอีกครั้ง' })}
+        </button>
+      </div>
+    );
+  } else if (!homes.length) {
+    state = <p className="home-catalog-state">{t({ ru: 'Нет предложений с фото для этой подборки.', en: 'No homes with photos to preview at this budget.', th: 'ยังไม่มีบ้านพร้อมภาพตัวอย่างในงบประมาณนี้' })}</p>;
+  }
+
+  return (
+    <div className="home-sale-band">
+      <HomeGallery
+        id="home-sale-title"
+        title={t({ ru: 'Жильё на продажу', en: 'Homes for sale', th: 'บ้านสำหรับขาย' })}
+        description={propertySaleBudgetLabel(budget, language)}
+        href={browse}
+        linkLabel={t({ ru: 'Посмотреть предложения', en: 'See homes', th: 'ดูบ้าน' })}
+        state={state}
+      >
+        {homes.map(property => <PropertyListingCard key={property.id} property={property} mode="buy" focusedOffer />)}
+      </HomeGallery>
+    </div>
+  );
+}
+
 export function HomeNewbuildsPreview() {
   const { language } = useLanguage();
   const t = (v: LangValues) => pickLang(language, v);
   const projects = useOffplanProjects();
   const rows = (projects.data ?? []).slice(0, 6);
-  const title = t({ ru: 'Купить дом на Пхукете', en: 'Find your home to buy', th: 'ค้นหาบ้านสำหรับซื้อในภูเก็ต' });
+  const title = t({ ru: 'Новые жилые комплексы', en: 'New developments', th: 'โครงการที่พักใหม่' });
   const state = projects.isLoading ? <p role="status" className="home-catalog-state">{t({ ru: 'Загружаем проекты…', en: 'Loading projects…', th: 'กำลังโหลดโครงการ…' })}</p> : projects.isError ? <div role="alert" className="home-catalog-state"><p>{t({ ru: 'Не удалось загрузить проекты.', en: 'Could not load projects.', th: 'โหลดโครงการไม่สำเร็จ' })}</p><button className="home-text-link" onClick={() => projects.refetch()}>{t({ ru: 'Повторить', en: 'Try again', th: 'ลองอีกครั้ง' })}</button></div> : !rows.length ? <p className="home-catalog-state">{t({ ru: 'Опубликованные проекты появятся здесь. Каталог остаётся доступен.', en: 'Published projects will appear here. You can still explore the catalogue.', th: 'โครงการที่เผยแพร่จะแสดงที่นี่ คุณยังดูรายการได้' })}</p> : undefined;
   return <HomeGallery id="home-newbuilds-title" className="premium-newbuilds" title={title}
     description={t({ ru: 'Новостройки и проекты для покупки. Сравните планировки, цены и условия застройщиков.', en: 'New developments to buy. Compare layouts, prices and developer terms.', th: 'โครงการใหม่สำหรับซื้อ เปรียบเทียบแปลน ราคา และเงื่อนไขของผู้พัฒนา' })}

@@ -140,13 +140,21 @@ Deno.serve(async (req) => {
 
       // Add default values (table-specific)
       const processedBatch = batch.map((record: Record<string, any>) => {
+        // Never let imported rows choose identity, authorship or verification state.
+        const PROTECTED = ['id', 'created_by', 'created_by_uno_team', 'uno_team_creator_id', 'owner_id', 'user_id',
+          'linked_user_id', 'owner_user_id', 'is_verified', 'verified_at', 'verified_by', 'approved_at', 'approved_by',
+          'is_featured', 'deleted_at', 'deleted_by'];
+        // Money, payout, payment-provider, trust and moderation fields are never importable.
+        const PROTECTED_PATTERN = /^(stripe_|payout|pending_payout|total_earnings|balance|commission|platform_fee|vendor_payout|rating|review_count|reviews_count|moderation_|approval_|is_approved|is_published|published_at|trust_|role|roles)/i;
+        const clean = Object.fromEntries(Object.entries(record).filter(([k]) =>
+          /^[a-z][a-z0-9_]{0,62}$/.test(k) && !PROTECTED.includes(k) && !PROTECTED_PATTERN.test(k)));
         const base: Record<string, any> = {
-          ...record,
+          ...clean,
           created_at: record.created_at ?? new Date().toISOString(),
           updated_at: new Date().toISOString(),
         };
         if (table === 'crm_contacts') {
-          base.created_by = record.created_by ?? user.id;
+          base.created_by = user.id;
         } else {
           base.is_active = record.is_active ?? true;
           base.created_by_uno_team = true;
@@ -163,7 +171,7 @@ Deno.serve(async (req) => {
       if (error) {
         console.error(`Batch ${i / batchSize + 1} error:`, error);
         results.failed += batch.length;
-        results.errors.push(`Batch ${i / batchSize + 1}: ${error.message}`);
+        results.errors.push(`Batch ${i / batchSize + 1}: insert failed`);
       } else {
         results.inserted += data?.length || 0;
         if (Array.isArray(data)) {

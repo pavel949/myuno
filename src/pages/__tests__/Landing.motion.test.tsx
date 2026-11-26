@@ -1,6 +1,6 @@
 // Social persistence is verified separately; these tests retain synthetic public catalogue boundaries.
 vi.mock('@/hooks/usePlatformSocialLinks', () => ({ usePlatformSocialLinks: () => ({ data: {} }) }));
-import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import type { ReactNode } from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -16,7 +16,11 @@ vi.mock('@/components/concierge/ConciergeHelpSheet', () => ({ ConciergeHelpSheet
 vi.mock('@/components/home/HomeSearchEntry', () => ({ HomeSearchEntry: () => null, HomePlanLinks: () => null }));
 vi.mock('@/components/home/HomePopulatedProjects', () => ({ HomePopulatedProjects: () => null }));
 vi.mock('@/components/home/HomeCatalogGalleries', () => ({ HomeLocationGallery: () => null, HomeExperienceGallery: () => null, HomeServiceGallery: () => null }));
-vi.mock('@/components/home/HomeDiscoveryPreview', () => ({ HomeHousingPreview: () => null, HomeNewbuildsPreview: () => null }));
+vi.mock('@/components/home/HomeDiscoveryPreview', () => ({
+  HomeHousingPreview: () => null,
+  HomeNewbuildsPreview: () => null,
+  HomeSalePreview: () => null,
+}));
 vi.mock('@/hooks/useProperties', () => ({ useProperties: () => ({ data: [], isLoading: false, isError: false }) }));
 
 // Navigation composition is covered by Landing.anonymous-home.test.tsx.
@@ -29,7 +33,7 @@ describe('static public hero', () => {
   it.each(['en', 'ru', 'th'])('keeps %s hero photography still without a forced animation control', locale => {
     language.current = locale;
     const { container } = render(<MemoryRouter><Landing /></MemoryRouter>);
-    const image = container.querySelector('.home-hero-image')!;
+    const image = container.querySelector('.home-hero-banner-photo')!;
     fireEvent.load(image);
     expect(image).not.toHaveClass('is-motion-enabled', 'is-paused');
     expect(screen.queryByRole('button', { name: /Pause motion|Resume motion/ })).toBeNull();

@@ -177,10 +177,25 @@ async function resolveMapsCoords(url: string): Promise<{ lat: number; lng: numbe
   try {
     let finalUrl = url;
     // Follow redirects for short links
-    if (/maps\.app\.goo\.gl|goo\.gl\/maps/.test(url)) {
+    // Only real Google short links are resolved, with ONE manual redirect hop
+    // whose target must itself be a Google Maps host. No other URL is fetched.
+    let parsedShort: URL | null = null;
+    try { parsedShort = new URL(url); } catch { parsedShort = null; }
+    const isShort = !!parsedShort && parsedShort.protocol === "https:" &&
+      (parsedShort.hostname === "maps.app.goo.gl" ||
+        (parsedShort.hostname === "goo.gl" && parsedShort.pathname.startsWith("/maps")));
+    if (isShort) {
       try {
-        const resp = await fetch(url, { redirect: "follow" });
-        finalUrl = resp.url || url;
+        const resp = await fetch(parsedShort!.toString(), { redirect: "manual" });
+        await resp.body?.cancel();
+        const loc = resp.headers.get("location");
+        if (loc) {
+          const target = new URL(loc, parsedShort!);
+          const h = target.hostname.toLowerCase();
+          if (target.protocol === "https:" && (h === "maps.google.com" || h === "www.google.com" || h === "google.com" || /^(www\.)?google\.[a-z.]{2,6}$/.test(h))) {
+            finalUrl = target.toString();
+          }
+        }
       } catch (_e) {
         // ignore
       }
@@ -253,9 +268,9 @@ async function downloadDriveFile(fileId: string): Promise<{ bytes: Uint8Array; c
     try {
       const resp = await fetch(url, { redirect: "follow" });
       if (!resp.ok) continue;
-      const ct = resp.headers.get("content-type") || "image/jpeg";
-      // Skip HTML responses (Drive virus-scan interstitials, login pages)
-      if (ct.includes("text/html")) continue;
+      const ct = (resp.headers.get("content-type") || "").split(";")[0].trim().toLowerCase();
+      // Accept only real raster image types (rejects HTML, SVG, PDFs, binaries).
+      if (!/^image\/(jpeg|jpg|png|webp|gif|heic|heif)$/.test(ct)) { await resp.body?.cancel(); continue; }
       const bytes = new Uint8Array(await resp.arrayBuffer());
       if (bytes.byteLength < 1024) continue; // junk
       if (bytes.byteLength > DRIVE_IMAGE_MAX_BYTES) continue;

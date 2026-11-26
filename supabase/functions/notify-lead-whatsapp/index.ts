@@ -2,6 +2,11 @@
  import { createClient } from "../_shared/supabase.ts";
  import { getAdminWhatsApp } from "../_shared/admin-config.ts";
  import { NOTIFY_CORS as corsHeaders } from "../_shared/notify-utils.ts";
+ import { requireServiceCaller } from "../_shared/internal-secret.ts";
+
+ const FRESH_LEAD_MS = 10 * 60 * 1000;
+ const notified = new Set<string>();
+ const esc = (v: unknown) => String(v ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]!));
  
  interface LeadNotificationRequest {
    leadId: string;
@@ -35,13 +40,43 @@
        .single();
  
      if (leadError || !lead) {
-       console.error("Lead not found:", leadError);
+       console.error("Lead not found");
        return new Response(
          JSON.stringify({ error: "Lead not found" }),
          { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } }
        );
      }
  
+     // Browser callers may only trigger the one-time alert for a lead that was
+     // just created; replaying old lead IDs is refused. Recipients are fixed
+     // internal admin channels, never caller-chosen.
+     const isService = (await requireServiceCaller(req, corsHeaders)) === null;
+     if (!isService) {
+       const createdAt = Date.parse(String(lead.created_at ?? ""));
+       if (!Number.isFinite(createdAt) || Date.now() - createdAt > FRESH_LEAD_MS || notified.has(leadId)) {
+         return new Response(JSON.stringify({ error: "Forbidden" }), { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+       }
+     }
+     notified.add(leadId);
+
+     // Durable one-time guard (survives cold starts / multiple instances).
+     const { data: priorNotice } = await supabase
+       .from("booking_notifications_log")
+       .select("id")
+       .eq("notification_type", "lead_whatsapp_admin")
+       .contains("metadata", { lead_id: leadId })
+       .limit(1)
+       .maybeSingle();
+     if (priorNotice && !isService) {
+       return new Response(JSON.stringify({ error: "Forbidden" }), { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+     }
+     await supabase.from("booking_notifications_log").insert({
+       notification_type: "lead_whatsapp_admin",
+       channel: "whatsapp",
+       sent_at: new Date().toISOString(),
+       metadata: { lead_id: leadId },
+     });
+
      // Only process home_services leads for now
      if (lead.vertical_id !== "home_services") {
        return new Response(
@@ -108,13 +143,12 @@
          );
  
          const whatsappResult = await whatsappResponse.json();
-         console.info("WhatsApp API response:", whatsappResult);
+         console.info("WhatsApp API status:", whatsappResponse.status, Boolean(whatsappResult));
        } catch (waError) {
          console.error("WhatsApp API error:", waError);
        }
      } else {
-       console.info("WhatsApp credentials not configured. Message to send:");
-       console.info(message);
+       console.info("WhatsApp credentials not configured; message not sent.");
      }
  
      // Also send email notification via Resend as backup
@@ -134,15 +168,15 @@
              html: `
                <h2>Новая заявка на домашнюю услугу</h2>
                <table style="border-collapse: collapse; width: 100%;">
-                 <tr><td style="padding: 8px; border: 1px solid #ddd;"><strong>Услуга</strong></td><td style="padding: 8px; border: 1px solid #ddd;">${functionNameRu} / ${functionNameEn}</td></tr>
-                 <tr><td style="padding: 8px; border: 1px solid #ddd;"><strong>Цена от</strong></td><td style="padding: 8px; border: 1px solid #ddd;">${currency === "THB" ? "฿" : currency}${basePrice}</td></tr>
-                 <tr><td style="padding: 8px; border: 1px solid #ddd;"><strong>Время работы</strong></td><td style="padding: 8px; border: 1px solid #ddd;">${estimatedTime}</td></tr>
-                 <tr><td style="padding: 8px; border: 1px solid #ddd;"><strong>Клиент</strong></td><td style="padding: 8px; border: 1px solid #ddd;">${lead.name}</td></tr>
-                 <tr><td style="padding: 8px; border: 1px solid #ddd;"><strong>Телефон</strong></td><td style="padding: 8px; border: 1px solid #ddd;">${lead.phone}</td></tr>
-                 <tr><td style="padding: 8px; border: 1px solid #ddd;"><strong>Связь</strong></td><td style="padding: 8px; border: 1px solid #ddd;">${lead.preferred_contact_method || "WhatsApp"}</td></tr>
-                 <tr><td style="padding: 8px; border: 1px solid #ddd;"><strong>Адрес</strong></td><td style="padding: 8px; border: 1px solid #ddd;">${serviceAddress}</td></tr>
-                 <tr><td style="padding: 8px; border: 1px solid #ddd;"><strong>Дата</strong></td><td style="padding: 8px; border: 1px solid #ddd;">${preferredDate} / ${preferredTime}</td></tr>
-                 <tr><td style="padding: 8px; border: 1px solid #ddd;"><strong>Описание</strong></td><td style="padding: 8px; border: 1px solid #ddd;">${lead.notes || "Не указано"}</td></tr>
+                 <tr><td style="padding: 8px; border: 1px solid #ddd;"><strong>Услуга</strong></td><td style="padding: 8px; border: 1px solid #ddd;">${esc(functionNameRu)} / ${esc(functionNameEn)}</td></tr>
+                 <tr><td style="padding: 8px; border: 1px solid #ddd;"><strong>Цена от</strong></td><td style="padding: 8px; border: 1px solid #ddd;">${esc(currency === "THB" ? "฿" : currency)}${esc(basePrice)}</td></tr>
+                 <tr><td style="padding: 8px; border: 1px solid #ddd;"><strong>Время работы</strong></td><td style="padding: 8px; border: 1px solid #ddd;">${esc(estimatedTime)}</td></tr>
+                 <tr><td style="padding: 8px; border: 1px solid #ddd;"><strong>Клиент</strong></td><td style="padding: 8px; border: 1px solid #ddd;">${esc(lead.name)}</td></tr>
+                 <tr><td style="padding: 8px; border: 1px solid #ddd;"><strong>Телефон</strong></td><td style="padding: 8px; border: 1px solid #ddd;">${esc(lead.phone)}</td></tr>
+                 <tr><td style="padding: 8px; border: 1px solid #ddd;"><strong>Связь</strong></td><td style="padding: 8px; border: 1px solid #ddd;">${esc(lead.preferred_contact_method || "WhatsApp")}</td></tr>
+                 <tr><td style="padding: 8px; border: 1px solid #ddd;"><strong>Адрес</strong></td><td style="padding: 8px; border: 1px solid #ddd;">${esc(serviceAddress)}</td></tr>
+                 <tr><td style="padding: 8px; border: 1px solid #ddd;"><strong>Дата</strong></td><td style="padding: 8px; border: 1px solid #ddd;">${esc(preferredDate)} / ${esc(preferredTime)}</td></tr>
+                 <tr><td style="padding: 8px; border: 1px solid #ddd;"><strong>Описание</strong></td><td style="padding: 8px; border: 1px solid #ddd;">${esc(lead.notes || "Не указано")}</td></tr>
                </table>
                <p><a href="https://uno.ae/admin/consultations">Открыть в админке</a></p>
              `,
@@ -150,7 +184,7 @@
          });
  
          const emailResult = await emailResponse.json();
-         console.info("Email sent:", emailResult);
+         console.info("Email status:", emailResponse.status, Boolean(emailResult));
        } catch (emailError) {
          console.error("Email error:", emailError);
        }

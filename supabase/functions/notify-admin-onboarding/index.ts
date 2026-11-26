@@ -1,12 +1,13 @@
 /**
  * notify-admin-onboarding — admin alert when a guest completes /start.
  *
- * Sends via Lovable Emails (send-transactional-email) — one invocation per
+ * Sends via Lovable Emails (managed send helper) — one invocation per
  * recipient because the queue requires a single address per send. Also sends
  * a WhatsApp text via UltraMSG. Failures are logged but do not block UX.
  */
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { getAdminEmails, getAdminWhatsApp } from "../_shared/admin-config.ts";
+import { sendLoggedTemplateEmail } from "../_shared/transactional-email-templates/send-logged.ts";
 
 const NOTIFY_CORS = {
   "Access-Control-Allow-Origin": "*",
@@ -97,33 +98,19 @@ Deno.serve(async (req) => {
 
     const [emails, whatsapp] = await Promise.all([getAdminEmails(), getAdminWhatsApp()]);
 
-    const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
-    const SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 
     const results = await Promise.allSettled(
       emails.map(async (to) => {
-        const r = await fetch(`${SUPABASE_URL}/functions/v1/send-transactional-email`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${SERVICE_KEY}`,
-            "apikey": SERVICE_KEY,
-          },
-          body: JSON.stringify({
-            templateName: "admin-onboarding",
-            recipientEmail: to,
-            idempotencyKey: `onboarding-${p.session_id}-${to}`,
-            templateData,
-          }),
+        const result = await sendLoggedTemplateEmail("admin-onboarding", to, {
+          idempotencyKey: `onboarding-${p.session_id}-${to}`,
+          templateData,
         });
-        const body = await r.text();
-        if (!r.ok) throw new Error(`send-transactional-email ${r.status}: ${body}`);
-        console.info(`[notify-admin-onboarding] queued for ${to}: ${body}`);
-        return body;
+        console.info(`[notify-admin-onboarding] admin notice sent`);
+        return result;
       }),
     );
     results.forEach((r, i) => {
-      if (r.status === "rejected") console.error(`[notify-admin-onboarding] email failed for ${emails[i]}`, r.reason);
+      if (r.status === "rejected") console.error(`[notify-admin-onboarding] admin email #${i + 1} failed`);
     });
 
 

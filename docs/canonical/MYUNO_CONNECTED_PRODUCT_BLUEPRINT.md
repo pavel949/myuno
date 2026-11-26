@@ -103,6 +103,16 @@ identity migrations.
 Top level: **RENT | BUY** only. Never **Stay | Rent | Buy**.
 This is the target information architecture, not a new route tree in this tranche.
 
+**Catalogue controls.** Quick filters outside a panel apply immediately. A panel
+contains draft choices until Apply; closing it or pressing Escape discards the
+draft. Show committed criteria beside the results and encode public criteria in
+the URL without discarding unrelated parameters or route context. Keep the apply
+action reachable while the panel body scrolls. Keep legacy bookmarks readable.
+An unrestricted price search includes unknown rates; an explicit comparable
+price range does not, and an unknown price is never zero. Show a confirmed
+no-match separately from loading or failure. Internal contact searches do not
+belong in browser navigation URLs; they still use the existing authorized query.
+
 | Context | Primary questions | Secondary filters / shortcuts |
 |---|---|---|
 | RENT | Where / When / Who | Duration inferred from dates; short/monthly/long-term, amenities, budget and home type refine discovery or commercial eligibility |
@@ -203,3 +213,14 @@ are adaptation candidates, not ADOPTED code. Sequence small presentation-only
 tranches from the UX audit; each requires scope, regression evidence and explicit
 approval before implementation. Done means a verified real workflow, not a new
 screen, schema or API alone.
+
+## Marketplace service request handoff
+
+The existing admin Inbox Services source is a read-only projection of canonical
+`service_orders` with `service_type = 'marketplace'`. Its link carries both
+`source=service_orders` and the exact saved request UUID; opening it never
+depends on the current queue page. Both reads use the existing administrator
+admission and database RLS. The queue omits contact details; the exact record
+shows only what's needed for operator follow-up. It never creates an `orders`
+row, confirms a booking, records a payment or dispatches a message. Existing
+provider access is not changed by this internal projection.

@@ -5,6 +5,7 @@
  * Full 10-tab form for owner mode: Basic, Location, Photos, Pricing, Utilities, Services, Rules, Rooms, Calendar, Team
  * 4-tab form for vendor mode: Basic, Location, Photos, Pricing
  */
+import { AdminDraftPreview } from '@/components/admin/AdminDraftPreview';
 import React, { useState, useCallback, useMemo } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { PropertyFormData, OwnershipData } from '@/hooks/usePropertyWizard';
@@ -235,6 +236,7 @@ function mapFromOwnerFormat(
     description_ru: ownerData.description_ru,
     cover_image: ownerData.cover_image,
     images: ownerData.images,
+    highlights: ownerData.highlights,
     management_type: ownerData.management_type,
     is_rented: ownerData.is_rented,
     project_id: ownerData.project_id,
@@ -529,6 +531,15 @@ export function CanonicalPropertyForm({
         data-property-form-scroll=""
         className={cn("min-w-0", layout === 'contained' && "min-h-0 flex-1 overflow-y-auto overscroll-contain")}
       >
+      {mode === 'admin' && (
+        <div className="mb-4">
+          <AdminDraftPreview
+            language={language}
+            title={isRu ? formData.title_ru || formData.title : formData.title || formData.title_ru}
+            description={isRu ? formData.description_ru || formData.description : formData.description || formData.description_ru}
+          />
+        </div>
+      )}
       {/* Provider Selector for Admin */}
       {providerSelector && (
         <div className="p-4 bg-muted/50 rounded-none border-2 border-dashed mb-4">
@@ -538,8 +549,8 @@ export function CanonicalPropertyForm({
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="min-w-0">
         {/* Sticky tab bar — full width, bold labels */}
-        <div className="sticky top-0 z-20 bg-background border-b border-border mb-6">
-          <TabsList aria-label={isRu ? 'Разделы объекта' : 'Property sections'} className="flex h-auto justify-start gap-0 overflow-x-auto rounded-none border-0 bg-transparent p-0 shadow-none -mb-px">
+        <div className={cn("top-0 z-20 border-b border-border bg-background mb-6", mode === 'admin' ? "sm:sticky" : "sticky")}>
+          <TabsList aria-label={isRu ? 'Разделы объекта' : 'Property sections'} className={cn("flex h-auto justify-start gap-0 rounded-none border-0 bg-transparent p-0 shadow-none -mb-px", mode === 'admin' ? "flex-wrap" : "overflow-x-auto")}>
             {tabs.map((tab) => {
               const status = getTabStatus(tab.id);
               const isActive = activeTab === tab.id;
@@ -550,6 +561,7 @@ export function CanonicalPropertyForm({
                   aria-label={isRu ? tab.labelRu : tab.labelEn}
                   className={cn(
                     "relative flex flex-none items-center gap-2 overflow-visible px-3 py-3 text-sm font-medium whitespace-nowrap transition-colors border-b-2 -mb-px data-[state=active]:shadow-none",
+                    mode === 'admin' && "min-h-11 max-w-full whitespace-normal text-left [overflow-wrap:anywhere]",
                     isActive
                       ? "border-primary text-primary"
                       : "border-transparent text-muted-foreground hover:text-foreground hover:border-border"

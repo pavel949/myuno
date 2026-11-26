@@ -4,6 +4,18 @@ import { filterValuesToPropertyFilters, mergeSearchBarIntoFilterValues } from '.
 import { civilDateKey } from '../hotelDates';
 
 describe('unified residential query compatibility', () => {
+  it.each(['mode=rent&maxPrice=10000000', 'mode=all&maxPrice=10000000', 'mode=buy&maxPrice=-10', 'mode=buy&maxPrice=Infinity'])(
+    'keeps the purchase budget out of unsupported criteria %s', query => {
+      const input = new URLSearchParams(query);
+      expect(normalizePropertySearchQuery(input).has('maxPrice')).toBe(false);
+      expect(readPropertySearchQuery(input).saleMaxPrice).toBeUndefined();
+    },
+  );
+  it('hydrates an exact positive THB cap on sale bookmarks', () => {
+    const input = new URLSearchParams('f.listingType=sale&maxPrice=10000000');
+    expect(readPropertySearchQuery(input)).toMatchObject({ mode: 'buy', saleMaxPrice: 10_000_000 });
+  });
+
   it.each([['rent-month', 'medium'], ['rent-long', 'long']])('preserves legacy persona intent %s without dropping URL context', (intent, tenancy) => {
     const href = propertySearchHref(`?intent=${intent}&persona=P3&returnTo=%2Ffor%2Flong-stay&district=layan&checkIn=2027-01-20&checkOut=2027-02-20&guests=3`);
     const params = new URL(href, 'https://www.myuno.app').searchParams;

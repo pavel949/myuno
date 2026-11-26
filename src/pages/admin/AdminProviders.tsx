@@ -1,3 +1,5 @@
+import { neutralizeCsvRow } from '@/lib/export/csvSafe';
+import { AdminDraftPreview, ADMIN_EDITOR_HEADER, ADMIN_EDITOR_BODY, ADMIN_EDITOR_FOOTER } from '@/components/admin/AdminDraftPreview';
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { APP_ROUTES } from '@/lib/config/routes';
@@ -6,6 +8,7 @@ import { parseProviderFilter, parseQueuePage, type ProviderFilter } from '@/lib/
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAdminCheck, useAdminProviders, Provider } from '@/hooks/useAdmin';
+import { optionalAuthoringText, positiveAuthoringNumber } from '@/lib/services/adminAuthoring';
 
 import { PageContainer } from '@/components/uno/PageContainer';
 import { PageHeader } from '@/components/uno/PageHeader';
@@ -141,7 +144,7 @@ export default function AdminProviders() {
     email: '',
     website: '',
     address: '',
-    is_active: true,
+    is_active: false,
     is_verified: false,
     // New fields for data consistency with HomeServiceProviderCard
     provider_type: 'company' as 'individual' | 'company',
@@ -176,7 +179,7 @@ export default function AdminProviders() {
       email: '',
       website: '',
       address: '',
-      is_active: true,
+      is_active: false,
       is_verified: false,
       provider_type: 'company',
       response_time_minutes: '',
@@ -199,7 +202,7 @@ export default function AdminProviders() {
       email: provider.email || '',
       website: provider.website || '',
       address: provider.address || '',
-      is_active: provider.is_active ?? true,
+      is_active: provider.is_active === true,
       is_verified: provider.is_verified ?? false,
       // New fields
       provider_type: ((provider as any).provider_type as 'individual' | 'company') || 'company',
@@ -240,41 +243,46 @@ export default function AdminProviders() {
     }, { replace: true });
   }, [authLoading, adminLoading, user, isAdmin, providersLoading, providersFetching, providersError, providers, searchParams, isRussian, openEditDialog, resetForm, setSearchParams]);
 
-  const handleSubmit = async () => {
-    if (!formData.name || !formData.business_category) {
-      toast.error(isRussian ? 'Заполните обязательные поля' : 'Please fill required fields');
+  const handleSubmit = async (approveAndPublish = false) => {
+    if (!user || !isAdmin || adminLoading || authLoading || isSubmitting) return;
+    const name = formData.name.trim();
+    const category = formData.business_category.trim();
+    const responseTime = positiveAuthoringNumber(formData.response_time_minutes, true);
+    if (!name || !category || responseTime === undefined || (approveAndPublish && (!editingProvider || editingProvider.is_demo))) {
+      toast.error(isRussian ? 'Проверьте название, категорию и время отклика; демо нельзя публиковать' : 'Check the name, category and response time; demo providers cannot be published');
       return;
     }
 
     setIsSubmitting(true);
     try {
       const providerData = {
-        name: formData.name,
-        description_en: formData.description_en || undefined,
-        description_ru: formData.description_ru || undefined,
-        business_category: formData.business_category,
-        phone: formData.phone || undefined,
-        email: formData.email || undefined,
-        website: formData.website || undefined,
-        address: formData.address || undefined,
-        is_active: formData.is_active,
-        is_verified: formData.is_verified,
-        // New fields
+        name,
+        description_en: optionalAuthoringText(formData.description_en),
+        description_ru: optionalAuthoringText(formData.description_ru),
+        business_category: category,
+        phone: optionalAuthoringText(formData.phone),
+        email: optionalAuthoringText(formData.email),
+        website: optionalAuthoringText(formData.website),
+        address: optionalAuthoringText(formData.address),
+        is_active: approveAndPublish || (editingProvider?.approval_status === 'approved' && formData.is_active),
+        is_verified: !!editingProvider && formData.is_verified,
         provider_type: formData.provider_type,
-        response_time_minutes: formData.response_time_minutes ? parseInt(formData.response_time_minutes) : null,
+        response_time_minutes: responseTime,
         has_insurance: formData.has_insurance,
         has_guarantee: formData.has_guarantee,
         service_domains: formData.service_domains,
+        languages: formData.languages,
+        ...(approveAndPublish ? { approval_status: 'approved' } : {}),
       };
 
       if (editingProvider) {
         const { error } = await updateProvider(editingProvider.id, providerData);
         if (error) throw error;
-        toast.success(isRussian ? 'Провайдер обновлён' : 'Provider updated');
+        toast.success(approveAndPublish ? (isRussian ? 'Поставщик опубликован' : 'Provider published') : (isRussian ? 'Провайдер обновлён' : 'Provider updated'));
       } else {
         const { error } = await createProvider(providerData);
         if (error) throw error;
-        toast.success(isRussian ? 'Провайдер создан' : 'Provider created');
+        toast.success(isRussian ? 'Черновик поставщика сохранён' : 'Provider draft saved');
       }
 
       setIsDialogOpen(false);
@@ -322,7 +330,7 @@ export default function AdminProviders() {
       languages: Array.isArray(p.languages) ? p.languages.join(';') : '',
       created_at: p.created_at || '',
     }));
-    const csv = Papa.unparse(rows);
+    const csv = Papa.unparse(rows.map(neutralizeCsvRow));
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -559,8 +567,8 @@ export default function AdminProviders() {
 
         {/* Add/Edit Dialog */}
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-          <DialogContent className="max-h-[90vh] overflow-y-auto">
-            <DialogHeader>
+          <DialogContent className="flex max-h-[calc(100dvh-1rem)] flex-col gap-0 overflow-hidden p-0 sm:p-0 sm:max-w-[var(--layout-width-form)]">
+            <DialogHeader className={ADMIN_EDITOR_HEADER}>
               <DialogTitle>
                 {editingProvider 
                   ? (isRussian ? 'Редактировать провайдера' : 'Edit Provider')
@@ -568,8 +576,10 @@ export default function AdminProviders() {
               </DialogTitle>
             </DialogHeader>
 
-            <div className="space-y-4 py-4">
-              {/* Business Card Scanner Button - only for new providers */}
+            <div data-admin-editor-scroll="" className={ADMIN_EDITOR_BODY}>
+            <div className="space-y-4">
+              <div className="mb-4"><AdminDraftPreview language={language} title={formData.name} description={isRussian ? formData.description_ru || formData.description_en : formData.description_en || formData.description_ru} /></div>
+            {/* Business Card Scanner Button - only for new providers */}
               {!editingProvider && (
                 <BusinessCardScanButton
                   onDataExtracted={(data: ScannedProviderData) => {
@@ -628,7 +638,7 @@ export default function AdminProviders() {
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid min-w-0 gap-4 sm:grid-cols-2 [&>*]:min-w-0">
                 <div className="space-y-2">
                   <Label>{isRussian ? 'Телефон' : 'Phone'}</Label>
                   <Input
@@ -647,7 +657,7 @@ export default function AdminProviders() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid min-w-0 gap-4 sm:grid-cols-2 [&>*]:min-w-0">
                 <div className="space-y-2">
                   <Label>{isRussian ? 'Адрес' : 'Address'}</Label>
                   <Input
@@ -729,6 +739,20 @@ export default function AdminProviders() {
                 </div>
               </div>
 
+              <fieldset className="space-y-2">
+                <legend className="text-sm font-medium">{isRussian ? 'Языки' : 'Languages'}</legend>
+                <div className="flex flex-wrap gap-2">
+                  {LANGUAGE_OPTIONS.map(option => {
+                    const selected = formData.languages.includes(option.value);
+                    return <Button key={option.value} type="button" size="sm" variant={selected ? 'default' : 'outline'} aria-pressed={selected}
+                      onClick={() => setFormData(prev => ({ ...prev, languages: selected
+                        ? prev.languages.filter(value => value !== option.value) : [...prev.languages, option.value] }))}>
+                      {isRussian ? option.labelRu : option.labelEn}
+                    </Button>;
+                  })}
+                </div>
+              </fieldset>
+
               {/* Badges / Certifications */}
               <div className="space-y-3 border-t pt-4">
                 <Label className="flex items-center gap-2 text-muted-foreground">
@@ -740,6 +764,7 @@ export default function AdminProviders() {
                   <Label>{isRussian ? 'Активен' : 'Active'}</Label>
                   <Switch
                     checked={formData.is_active}
+                    disabled={editingProvider?.approval_status !== 'approved'}
                     onCheckedChange={(checked) => setFormData(prev => ({ ...prev, is_active: checked }))}
                   />
                 </div>
@@ -748,6 +773,7 @@ export default function AdminProviders() {
                   <Label>{isRussian ? 'Верифицирован' : 'Verified'}</Label>
                   <Switch
                     checked={formData.is_verified}
+                    disabled={!editingProvider}
                     onCheckedChange={(checked) => setFormData(prev => ({ ...prev, is_verified: checked }))}
                   />
                 </div>
@@ -770,11 +796,17 @@ export default function AdminProviders() {
               </div>
             </div>
 
-            <DialogFooter>
+            </div>
+            <DialogFooter className={ADMIN_EDITOR_FOOTER}>
               <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
                 {isRussian ? 'Отмена' : 'Cancel'}
               </Button>
-              <Button onClick={handleSubmit} disabled={isSubmitting}>
+              {editingProvider && editingProvider.approval_status !== 'approved' && !editingProvider.is_demo && (
+                <Button variant="outline" onClick={() => void handleSubmit(true)} disabled={isSubmitting}>
+                  {isRussian ? 'Одобрить и опубликовать' : 'Approve and publish'}
+                </Button>
+              )}
+              <Button onClick={() => void handleSubmit()} disabled={isSubmitting}>
                 {isSubmitting && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
                 {isRussian ? 'Сохранить' : 'Save'}
               </Button>

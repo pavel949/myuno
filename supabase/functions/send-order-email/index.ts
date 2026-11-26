@@ -34,7 +34,7 @@ interface SendOrderEmailPayload {
 }
 
 const logStep = (step: string, details?: unknown) => {
-  console.info(`[SEND-ORDER-EMAIL] ${step}`, details ? JSON.stringify(details) : '');
+  void details; console.info(`[SEND-ORDER-EMAIL] ${step}`);
 };
 
 Deno.serve(async (req) => {

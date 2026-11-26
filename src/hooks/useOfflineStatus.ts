@@ -1,21 +1,28 @@
 import { useState, useEffect } from 'react';
 
+export function useIsOffline() {
+  const [isOffline, setIsOffline] = useState(() => typeof navigator !== 'undefined' && !navigator.onLine);
+
+  useEffect(() => {
+    const handleOnline = () => setIsOffline(false);
+    const handleOffline = () => setIsOffline(true);
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, []);
+
+  return isOffline;
+}
+
 export function useOfflineStatus() {
-  const [isOffline, setIsOffline] = useState(!navigator.onLine);
+  const isOffline = useIsOffline();
   const [isSOSCached, setIsSOSCached] = useState(false);
 
   useEffect(() => {
     let isMounted = true;
-    
-    const handleOnline = () => {
-      if (isMounted) setIsOffline(false);
-    };
-    const handleOffline = () => {
-      if (isMounted) setIsOffline(true);
-    };
-
-    window.addEventListener('online', handleOnline);
-    window.addEventListener('offline', handleOffline);
 
     // Check if SOS page is cached
     if ('caches' in window) {
@@ -30,8 +37,6 @@ export function useOfflineStatus() {
 
     return () => {
       isMounted = false;
-      window.removeEventListener('online', handleOnline);
-      window.removeEventListener('offline', handleOffline);
     };
   }, []);
 

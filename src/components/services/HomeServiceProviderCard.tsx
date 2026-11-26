@@ -58,11 +58,9 @@ export const HomeServiceProviderCard = memo(function HomeServiceProviderCard({
     <button
       onClick={onClick}
       className={cn(
-        "w-full flex items-start gap-4 p-4",
-        "bg-card border border-border/50 rounded-none",
-        "hover:shadow-lg hover:border-primary/30",
-        "",
-        "transition-all duration-200",
+        "ds-focus w-full flex items-start gap-4 p-4",
+        "bg-card border border-[color:var(--bible-hairline)] rounded-[var(--bible-radius-card)]",
+        "transition-shadow hover:shadow-[var(--bible-shadow-hover)]",
         "text-left group"
       )}
     >

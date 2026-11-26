@@ -58,7 +58,13 @@ Deno.serve(async (req) => {
     if (fetchErr || !app) return json({ success: false, error: "Application not found" }, 404);
 
     // Caller must own the application (anti-spam: someone can't fan-out admin emails for someone else's apps).
-    if (app.user_id && app.user_id !== callerId) {
+    // Ownerless applications are refused too: nobody can prove they own them.
+    if (!app.user_id || app.user_id !== callerId) {
+      return json({ success: false, error: "Forbidden" }, 403);
+    }
+    // One-time alert window: only a just-submitted application may notify.
+    const ageMs = Date.now() - new Date(app.created_at).getTime();
+    if (!Number.isFinite(ageMs) || ageMs > 10 * 60 * 1000) {
       return json({ success: false, error: "Forbidden" }, 403);
     }
 

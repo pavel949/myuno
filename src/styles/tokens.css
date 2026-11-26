@@ -1,5 +1,6 @@
 /**
- * myUNO Design System — Canonical Tokens v2.0
+ * myUNO Design System — Canonical Tokens v4 (Design Bible v4, adopted 2026-11-25)
+ * Previous: DS 2.1 (Source Serif 4 + Geist, orange, 0px radii) — superseded.
  *
  * Source of truth: docs/canonical/05-visual-design-system.md
  * Philosophy: «Цифровая инфраструктура государственного класса»
@@ -11,11 +12,11 @@
 
 :root {
   /* Approved public-home editorial palette and type scale. Consolidated CSS. */
-  --home-ui-canvas: 36 33.3333% 97.0588%;
-  --home-ui-white: 0 0% 100%;
+  --home-ui-canvas: var(--brand-cream);
+  --home-ui-white: var(--surface-white);
   --home-ui-hero-navy: 210 73.1707% 16.0784%;
   --home-ui-overlay-ink: 212 84.9057% 10.3922%;
-  --home-ui-control-navy: 211 71.4286% 16.4706%;
+  --home-ui-control-navy: var(--brand-navy);
   --home-ui-shadow-ink: 0 0% 0%;
   --home-ui-direction-navy: 206.6667 65.4545% 21.5686%;
   --home-ui-card-overlay: 210 80% 11.7647%;
@@ -53,55 +54,93 @@
   --home-ui-title-medium: 19px;
   --home-ui-title-large: 21px;
 
+  /* Design Bible v4 shared component geometry. */
+  --bible-radius-control: var(--radius-sm);
+  --bible-state-figure-height: 4.5rem;
+  --bible-home-hero-height: 28.75rem;
+  --bible-home-hero-overlap: 6.75rem;
+  --bible-home-hero-caption-bottom: 8.25rem;
+  --bible-home-hero-mobile-height: 13rem;
+  --bible-home-hero-heading-size: 4rem;
+  --bible-radius-card: var(--radius-md);
+  --bible-radius-media: var(--radius-lg);
+  --bible-button-height: 3rem;
+  --bible-chrome-height: 4rem;
+  --bible-ivory: var(--brand-ivory);
+  --bible-navy-hover: var(--brand-navy-700);
+  --bible-navy-tint: var(--brand-navy-100);
+  --bible-gold: var(--brand-gold-500);
+  --bible-gold-hover: var(--brand-gold-600);
+  --bible-gold-ink: var(--brand-gold-ink);
+  --bible-focus-contrast: var(--ring);
+  --bible-status-done-bg: 128.5714 21.2121% 93.5294%;
+  --bible-status-done-fg: 135 31.8182% 17.2549%;
+  --bible-status-waiting-bg: 40 78.9474% 96.2745%;
+  --bible-status-waiting-fg: 34.6552 68.2353% 33.3333%;
+  --bible-status-blocked-bg: 0 60% 96.0784%;
+  --bible-status-blocked-fg: 15.283 74.6479% 27.8431%;
+  --bible-status-blocked-line: 17.4725 88.3495% 40.3922%;
+  --bible-status-neutral-fg: 215.2941 19.3182% 34.5098%;
+  --bible-hairline: hsl(var(--brand-navy) / 0.08);
+  --bible-shadow-hover: var(--shadow-elevation-2);
+  --bible-shadow-overlay: var(--shadow-elevation-4);
+
   color-scheme: light;
 
   /* ═══════════════════════════════════════════════════════════
      1 · BRAND COLOURS — three signature colours, used sparingly
      ═══════════════════════════════════════════════════════════ */
-  /* navy: #0A2240 · ≤10% of screen · authority, primary CTA, headers */
-  --brand-hue:         213;
-  --brand-navy:        var(--brand-hue) 73% 15%;
-  --brand-navy-900:    calc(var(--brand-hue) + 1) 78% 9%;   /* #051428 — pressed/hover */
+  /* v4 navy: #0D2230 · authority, primary CTA, HQ rail */
+  /* One-source brand hue: every navy step derives from --brand-hue. */
+  --brand-hue:         204;
+  --brand-navy:        var(--brand-hue) 57% 12%;               /* #0D2230 navy-800 */
+  --brand-navy-900:    calc(var(--brand-hue) - 1) 57% 9%;      /* #0A1A24 — pressed/hover */
   --brand-navy-800:    var(--brand-navy);   /* = brand-navy */
-  --brand-navy-700:    calc(var(--brand-hue) - 2) 67% 32%;   /* #1B4F8A — links, outline */
-  --brand-navy-500:    calc(var(--brand-hue) - 2) 60% 43%;   /* #2B6CB0 — info plates */
-  --brand-navy-100:    calc(var(--brand-hue) + 1) 88% 95%;   /* #EBF4FF — info backgrounds */
-  --brand-navy-50:     calc(var(--brand-hue) + 1) 71% 97%;   /* #F4F8FD */
+  --brand-navy-700:    calc(var(--brand-hue) + 1) 56% 16%;     /* #122D40 — raised navy surfaces */
+  --brand-navy-500:    calc(var(--brand-hue) + 4) 47% 35%;     /* #2F5B83 — links on light */
+  --brand-navy-100:    calc(var(--brand-hue) + 5) 74% 89%;     /* #D0E5F8 — navy-50 · active/info backgrounds */
+  --brand-navy-50:     calc(var(--brand-hue) + 5) 74% 95%;     /* #EAF3FC */
 
-  /* orange: #D96B1A · ≤3% of screen · humanity, single accents */
-  --brand-orange:      22 79% 47%;
-  --brand-orange-700:  22 80% 38%;    /* #AE5013 — hover */
-  --brand-orange-600:  var(--brand-orange);    /* = brand-orange */
-  --brand-orange-400:  25 89% 65%;    /* #F59E5A */
-  --brand-orange-100:  29 84% 95%;    /* #FEF3EA */
+  /* v4 gold: #C59A45 · singular accent (marks, eyebrows on navy, focus ring) */
+  --brand-gold-500:    40 53% 52%;    /* #C59A45 */
+  --brand-gold-600:    40 54% 46%;    /* #B48A36 — hover */
+  --brand-gold-ink:    38 59% 34%;    /* #8A6524 — gold text/surfaces on light (AA with white) */
+  --brand-gold-50:     42 77% 97%;    /* #FDF9F0 */
+  /* Legacy orange names now resolve to the v4 gold family (callers unchanged). */
+  --brand-orange:      var(--brand-gold-500);
+  --brand-orange-700:  var(--brand-gold-ink);
+  --brand-orange-600:  var(--brand-gold-600);
+  --brand-orange-400:  var(--brand-gold-500);
+  --brand-orange-100:  var(--brand-gold-50);
 
-  /* cream: #F7F5F1 · page background — NEVER pure white */
-  --brand-cream:       36 27% 96%;
+  /* paper: #FDFBF7 · page background; ivory #F4F1EA · quiet surfaces */
+  --brand-cream:       40 60% 98%;
+  --brand-ivory:       42 31% 94%;
 
   /* ═══════════════════════════════════════════════════════════
      2 · STONE NEUTRAL SCALE — all greys/blacks come from here
      ═══════════════════════════════════════════════════════════ */
-  --ink:               24  10% 10%;   /* #1C1917 — primary text, icons */
-  --text-primary:      24  10% 14%;   /* #292524 */
-  --text-body:         24  10% 25%;   /* #44403C — body, long reading */
-  --text-muted:        24   5% 46%;   /* #78716C — secondary, metadata */
-  --text-subtle:       24   6% 64%;   /* #A8A29E — placeholders, decorative icons */
-  --border-strong:     30   6% 90%;   /* #E7E5E4 — card/table borders */
-  --border-subtle:     30   8% 96%;   /* #F5F5F4 — inner table borders */
-  --surface-raised:    30  10% 98%;   /* #FAFAF9 — hover/selected blocks */
-  --surface-white:     0    0% 100%;  /* #FFFFFF — cards above cream */
+  --ink:               221 39% 11%;   /* #111827 — v4 text */
+  --text-primary:      221 39% 11%;   /* #111827 */
+  --text-body:         215 25% 27%;   /* #334155 — v4 text-2 */
+  --text-muted:        215 16% 47%;   /* #64748B — v4 text-3 */
+  --text-subtle:       215 20% 65%;   /* #94A3B8 — v4 text-4 */
+  --border-strong:     210 7% 93%;    /* line: rgba(13,34,48,.08) on paper */
+  --border-subtle:     42 31% 94%;    /* ivory — inner table rows, quiet fills */
+  --surface-raised:    42 31% 96%;    /* hover/selected blocks */
+  --surface-white:     0    0% 100%;  /* #FFFFFF — cards above paper */
 
   /* ═══════════════════════════════════════════════════════════
      3 · SEMANTIC COLOURS — status, never decoration
      ═══════════════════════════════════════════════════════════ */
-  --success:           143 64% 24%;   /* #166534 green-800 */
-  --success-bg:        141 84% 93%;   /* #DCFCE7 green-100 */
-  --warning:           28  93% 30%;   /* #92400E amber-800 */
-  --warning-bg:        49  98% 89%;   /* #FEF3C7 amber-100 */
-  --danger:            0   72% 35%;   /* #991B1B red-800 */
-  --danger-bg:         0   93% 94%;   /* #FEE2E2 red-100 */
-  --info:              211 67% 32%;   /* = navy-700 */
-  --info-bg:           214 88% 95%;   /* = navy-100 */
+  --success:           135 32% 17%;   /* #1E3A25 v4 done-fg */
+  --success-bg:        129 21% 94%;   /* #EBF2EC v4 done-bg */
+  --warning:           35 68% 33%;    /* #8F5E1B v4 waiting-fg */
+  --warning-bg:        40 79% 96%;    /* #FDF8EE v4 waiting-bg */
+  --danger:            15 75% 28%;    /* #7C2D12 v4 blocked-fg */
+  --danger-bg:         0 60% 96%;     /* #FBEFEF v4 blocked-bg */
+  --info:              204 57% 12%;   /* v4 active-fg #0D2230 — literal: statuses never follow brand hue */
+  --info-bg:           209 74% 89%;   /* v4 active-bg #D0E5F8 — literal */
 
   /* ═══════════════════════════════════════════════════════════
      4 · CATEGORY COLOURS — 16 fixed catalogue colours
@@ -132,20 +171,20 @@
   --foreground: var(--ink);       /* ink */
 
   --primary: var(--brand-navy);      /* navy */
-  --primary-hover: var(--brand-navy-900);      /* navy-900 */
-  --primary-foreground: var(--surface-white);      /* white text on navy */
+  --primary-hover: var(--bible-navy-hover);
+  --primary-foreground: var(--brand-cream);      /* paper text on navy */
 
   --secondary: var(--surface-raised);       /* surface-raised */
   --secondary-foreground: var(--ink);
 
-  --accent: var(--brand-orange-700);       /* accessible orange action surface with white text */
+  --accent: var(--brand-gold-ink);       /* v4 gold-ink: eyebrows, marks; AA with white text */
   --accent-foreground: var(--surface-white);
 
   --destructive: var(--danger);       /* danger */
   --destructive-foreground: var(--surface-white);
 
-  --muted: var(--border-subtle);       /* border-subtle as surface */
-  --muted-foreground:     24  8% 38%;       /* text-muted — WCAG AA on cream (≥4.5:1), tightened from 46% (2026-06-18 Lighthouse) */
+  --muted: var(--brand-ivory);       /* v4 ivory surface */
+  --muted-foreground:     215 19% 35%;      /* #475569 v4 neutral-fg — AA on paper and ivory */
 
   --card: var(--surface-white);      /* white card on cream page */
   --card-foreground: var(--ink);
@@ -156,8 +195,8 @@
   --popover-foreground: var(--ink);
 
   --border: var(--border-strong);       /* border-strong */
-  --input:                30  6% 52%;       /* control boundary: 3.37:1 against cream */
-  --ring: var(--brand-navy);      /* navy */
+  --input:                215 14% 55%;      /* control boundary ≥3:1 against paper */
+  --ring: var(--brand-gold-ink);      /* dark gold focus meets 3:1 on light surfaces */
 
   --success-foreground: var(--surface-white);
   --warning-foreground: var(--surface-white);
@@ -174,21 +213,23 @@
   --sidebar-ring: var(--ring);
 
   /* ═══════════════════════════════════════════════════════════
-     6 · RADII — canon §5: 0px is the default. 8-16px is forbidden.
+     6 · RADII — v4 control, card, media and pill
      ═══════════════════════════════════════════════════════════ */
-  --radius:                0px;
+  /* v4 radii: control 4 · card 8 · media 12 · pill */
+  --radius:                4px;        /* r-control — buttons, inputs, chips */
   --radius-none:           0px;
-  --radius-sm:             2px;        /* mini-badges, category chips */
-  --radius-full:           9999px;     /* avatars, status dots, pill toggles */
+  --radius-sm:             4px;        /* r-control */
+  --radius-full:           9999px;     /* r-pill — avatars, status dots, pill toggles */
 
-  /* Legacy aliases — kept while Phase 4 globally rewrites callers.
-     These CURRENTLY return 0 to enforce canon; before Phase 4 they
-     defaulted to 16px. If a screen looks wrong, that's expected — Phase 3/4
-     will rewrite radius classes (rounded-xl etc.) directly. */
-  --radius-md:             0px;
-  --radius-lg:             0px;
-  --card-radius:           0px;
-  --card-radius-compact:   0px;
+  /* Shared card and media scales; legacy class names map to these. */
+  --radius-md:             8px;        /* r-card — cards, panels, modals */
+  --radius-lg:             12px;       /* r-media — media, large surfaces */
+  --card-radius:           8px;
+  --card-radius-compact:   8px;
+
+  /* Shared measures (no local geometry in components). */
+  --measure-state:         24rem;      /* SystemState copy width */
+  --dialog-max-width:      32rem;      /* = former max-w-lg */
 
   /* ═══════════════════════════════════════════════════════════
      7 · SHADOWS — canon §6: borders separate blocks, not shadows.
@@ -196,9 +237,9 @@
   --shadow-none:        none;
   /* Retired neumorphic name: explicit no-shadow compatibility, not a new style. */
   --shadow-neu-inset:   var(--shadow-none);
-  --shadow-xs:          0 1px 2px rgba(28, 25, 23, 0.04);
-  --shadow-sm:          0 2px 6px rgba(28, 25, 23, 0.06);
-  --shadow-md:          0 8px 20px rgba(28, 25, 23, 0.08);
+  --shadow-xs:          0 4px 12px -4px rgba(13, 34, 48, 0.08);   /* v4 e1 */
+  --shadow-sm:          0 4px 12px -4px rgba(13, 34, 48, 0.08);   /* v4 e1 */
+  --shadow-md:          0 20px 40px -15px rgba(13, 34, 48, 0.12), 0 0 0 1px rgba(17, 24, 39, 0.05);   /* v4 e2 */
 
   /* Legacy aliases mapped onto the canonical scale */
   --shadow-elevation-0: none;
@@ -217,34 +258,32 @@
   --shadow-glow-accent: none;
 
   /* ═══════════════════════════════════════════════════════════
-     8 · TYPOGRAPHY — primary triad: Geist + Source Serif 4 + IBM Plex Mono
-     Source Serif 4 (variable, italic-rich) carries the editorial display voice;
-     Geist (Vercel, variable gothic) is the neutral infra-govt body sans;
+     8 · TYPOGRAPHY — v4: Outfit (display) + Manrope (UI) + IBM Plex Mono (data)
      IBM Plex Mono carries data, captions, and numerics.
      Locale-specific stacks (Unbounded/Golos for RU, Noto for EN) remain as
      fallbacks for any callers that still reference --font-heading-ru etc.
      ═══════════════════════════════════════════════════════════ */
   /* Existing named utility sizes and leading; numeric defaults unchanged. */
-  --type-display-size: 3rem;
-  --type-display-leading: 1.1;
-  --type-h1-size: 2.25rem;
-  --type-h1-leading: 1.2;
+  --type-display-size: clamp(2.25rem, 5.5vw, 4rem);
+  --type-display-leading: 1.0625;
+  --type-h1-size: clamp(1.75rem, 4vw, 2.5rem);
+  --type-h1-leading: 1.15;
   --type-h2-size: 1.75rem;
-  --type-h2-leading: 1.25;
-  --type-h3-size: 1.375rem;
-  --type-h3-leading: 1.3;
+  --type-h2-leading: 1.2857;
+  --type-h3-size: 1.25rem;
+  --type-h3-leading: 1.4;
   --type-h4-size: 1.125rem;
   --type-h4-leading: 1.4;
-  --type-body-lg-size: 1.0625rem;
-  --type-body-lg-leading: 1.6;
+  --type-body-lg-size: 1.125rem;
+  --type-body-lg-leading: 1.5556;
   --type-body-size: 0.9375rem;
-  --type-body-leading: 1.7;
+  --type-body-leading: 1.6;
   --type-body-sm-size: 0.8125rem;
-  --type-body-sm-leading: 1.6;
+  --type-body-sm-leading: 1.5385;
   --type-caption-size: 0.6875rem;
   --type-caption-leading: 1.5;
-  --type-label-size: 0.625rem;
-  --type-label-leading: 1.4;
+  --type-label-size: 0.6875rem;
+  --type-label-leading: 1.2727;
   --type-mono-size: 0.75rem;
   --type-mono-leading: 1.5;
   /* Existing global element roles intentionally differ from utility roles. */
@@ -257,28 +296,29 @@
   --type-page-h3-size: 1rem;
   --type-page-h3-leading: 1.25;
   /* Deliberate operator chrome: preserve current MC sidebar appearance. */
-  --operator-sidebar-background: calc(var(--brand-hue) - 2) 60% 17%;
-  --operator-sidebar-foreground: 40 25% 96%;
-  --operator-sidebar-accent: calc(var(--brand-hue) - 2) 35% 29%;
+  /* v4 HQ rail: navy-800, paper text, active item = paper at 10% */
+  --operator-sidebar-background: var(--brand-navy);
+  --operator-sidebar-foreground: 40 60% 98%;
+  --operator-sidebar-accent: var(--brand-navy-700);
   --operator-sidebar-accent-foreground: 0 0% 100%;
   --operator-sidebar-border: calc(var(--brand-hue) - 2) 28% 32%;
   --operator-sidebar-ring: 40 25% 85%;
 
-  --font-stylesheet-url: "https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700;800;900&family=Source+Serif+4:ital,opsz,wght@0,8..60,300..900;1,8..60,300..900&family=IBM+Plex+Mono:wght@400;500;600;700&family=Unbounded:wght@400;500;600&family=Golos+Text:wght@400;500;600&family=Noto+Serif:ital,wght@0,400;0,600;0,700;1,400&family=Noto+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Noto+Sans+Thai:wght@300;400;500;600;700&display=swap";
-  --font-family-display: 'Source Serif 4';
-  --font-family-body: 'Geist';
+  --font-stylesheet-url: "https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;700&family=Manrope:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600;700&family=Unbounded:wght@400;500;600&family=Golos+Text:wght@400;500;600&family=Noto+Serif:ital,wght@0,400;0,600;0,700;1,400&family=Noto+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Noto+Sans+Thai:wght@300;400;500;600;700&family=Noto+Sans+SC:wght@400;500;700&display=swap";
+  --font-family-display: 'Outfit';
+  --font-family-body: 'Manrope';
   --font-family-mono: 'IBM Plex Mono';
   --font-family-th: 'Noto Sans Thai';
-  --font-heading-ru: var(--font-family-display), 'Unbounded', 'Noto Serif', Georgia, var(--font-family-th), serif;
+  --font-heading-ru: var(--font-family-display), var(--font-family-body), 'Golos Text', 'Unbounded', 'Noto Serif', Georgia, var(--font-family-th), sans-serif;
   --font-body-ru:    var(--font-family-body), 'Golos Text', 'Noto Sans', var(--font-family-th), system-ui, sans-serif;
-  --font-heading-en: var(--font-family-display), 'Noto Serif', Georgia, var(--font-family-th), serif;
-  --font-body-en:    var(--font-family-body), 'Noto Sans', var(--font-family-th), system-ui, -apple-system, sans-serif;
+  --font-heading-en: var(--font-family-display), var(--font-family-body), 'Noto Serif', Georgia, var(--font-family-th), sans-serif;
+  --font-body-en:    var(--font-family-body), 'Noto Sans SC', 'Noto Sans', var(--font-family-th), system-ui, -apple-system, sans-serif;
   --font-heading-th: var(--font-family-display), var(--font-family-th), serif;
   --font-body-th: var(--font-family-body), var(--font-family-th), system-ui, sans-serif;
   --font-mono:       var(--font-family-mono), 'JetBrains Mono', 'SF Mono', Consolas, monospace;
 
   /* Active defaults — overridden per <html lang> below for legacy locale-aware callers.
-     Both languages now resolve to Geist/Source Serif 4 first. */
+     Resolve through Outfit and Manrope with locale fallbacks. */
   --font-display:    var(--font-heading-en);
   --font-body:       var(--font-body-en);
 
@@ -333,12 +373,12 @@
   --ease-standard:    cubic-bezier(0.2, 0.0, 0.2, 1);
   --ease-emphasized:  cubic-bezier(0.2, 0.0, 0, 1);
 
-  /* Radii aliases from prototype */
-  --r-xs: 4px;
-  --r-sm: 6px;
-  --r-md: 10px;
-  --r-lg: 14px;
-  --r-xl: 20px;
+  /* Compatibility aliases resolve to the v4 scale. */
+  --r-xs: var(--radius-sm);
+  --r-sm: var(--radius-sm);
+  --r-md: var(--radius-md);
+  --r-lg: var(--radius-lg);
+  --r-xl: var(--radius-lg);
 
   /* ═══════════════════════════════════════════════════════════
      9 · CHART PALETTE — canon-aligned (navy + orange + categories)
@@ -534,7 +574,7 @@
 
 /* ═══════════════════════════════════════════════════════════
    LANGUAGE-SCOPED FONT FAMILIES
-   RU / EN → Source Serif 4 + Geist (locale fallbacks retained)
+   RU / EN → Outfit + Manrope (locale fallbacks retained)
    TH → same Latin families + supplied Noto Sans Thai glyphs
    ═══════════════════════════════════════════════════════════ */
 html[lang='ru'] {
@@ -560,20 +600,22 @@ html:not([lang]) {
    ═══════════════════════════════════════════════════════════ */
 .dark {
   color-scheme: dark;
+  --bible-focus-contrast: var(--bible-gold);
+  --bible-hairline: hsl(var(--foreground) / 0.16);
   --background:           calc(var(--brand-hue) + 3) 28% 10%;     /* navy-900 */
   --foreground: var(--brand-cream);      /* cream */
 
   --primary:              36 27% 90%;      /* cream CTA, restrained emphasis */
   --primary-hover:        36 27% 98%;
-  --primary-foreground:   calc(var(--brand-hue) + 3) 28% 10%;      /* navy text on orange */
+  --primary-foreground:   calc(var(--brand-hue) + 3) 28% 10%;      /* navy text on paper */
 
   --secondary:            calc(var(--brand-hue) + 3) 22% 18%;     /* navy */
   --secondary-foreground: var(--foreground);
 
-  --accent: var(--brand-orange-400);     /* same warm brand accent */
+  --accent: var(--brand-gold-500);     /* same warm brand accent */
   --accent-foreground:    calc(var(--brand-hue) + 3) 28% 10%;
 
-  --destructive:          0 75% 55%;
+  --destructive:          0 75% 60%;
 
   --muted:                calc(var(--brand-hue) + 3) 22% 17%;
   --muted-foreground:     30 12% 75%;      /* cream-muted */
@@ -590,7 +632,7 @@ html:not([lang]) {
   --border-strong:        calc(var(--brand-hue) + 3) 18% 36%;
   --border-subtle:        calc(var(--brand-hue) + 3) 18% 21%;
   --input:                calc(var(--brand-hue) + 3) 18% 44%;      /* control boundary: 3.34:1 against navy */
-  --ring: var(--brand-orange);      /* orange ring for focus on dark */
+  --ring: var(--brand-gold-500);     /* gold focus on dark surfaces */
   --sidebar-ring: var(--ring);
 
   /* Backward-compat aliases for dark */

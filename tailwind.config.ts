@@ -225,16 +225,15 @@ export default {
         },
       },
       borderRadius: {
-        // Canon §5 — almost no rounding. 0 is the default.
-        // The `lg/md/sm` aliases used to be 8/4/2; they are now collapsed to 0
-        // (sm stays at 2px for chips). Phase 4 will remove `rounded-lg` callers.
+        // Design Bible v4 — control 4px · card 8px · media 12px · pill.
+        DEFAULT: "var(--radius)",       /* 4px control */
         none: "var(--radius-none)",
-        sm:   "var(--radius-sm)",   /* 2px */
-        md:   "var(--radius-none)",
-        lg:   "var(--radius-none)",
-        xl:   "var(--radius-none)",
-        "2xl": "var(--radius-none)",
-        "3xl": "var(--radius-none)",
+        sm:   "var(--radius-sm)",       /* 4px control */
+        md:   "var(--radius-md)",       /* 8px card */
+        lg:   "var(--radius-lg)",       /* 12px media */
+        xl:   "var(--radius-lg)",
+        "2xl": "var(--radius-lg)",
+        "3xl": "var(--radius-lg)",
         full: "var(--radius-full)",
       },
       boxShadow: {

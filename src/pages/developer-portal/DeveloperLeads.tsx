@@ -1,3 +1,4 @@
+import { csvCell } from '@/lib/export/csvSafe';
 /**
  * Developer Portal — Leads CRM
  */
@@ -30,7 +31,7 @@ export default function DeveloperLeads() {
   const exportCSV = () => {
     const header = 'Имя,Email,Телефон,WhatsApp,Бюджет мин,Бюджет макс,Статус,Источник,Баллы,Дата\n';
     const rows = filtered.map(l =>
-      [l.full_name, l.email, l.phone, l.whatsapp, l.budget_min, l.budget_max, l.status, l.source, l.score, l.created_at].join(',')
+      [l.full_name, l.email, l.phone, l.whatsapp, l.budget_min, l.budget_max, l.status, l.source, l.score, l.created_at].map(csvCell).join(',')
     ).join('\n');
     const blob = new Blob([header + rows], { type: 'text/csv' });
     const url = URL.createObjectURL(blob);

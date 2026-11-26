@@ -279,16 +279,13 @@ Deno.serve(async (req) => {
 
   // Auth: accept either internal-secret (cron) OR an authenticated user
   // (manual "Sync now" button — only syncs their own account).
-  const internalSecret = req.headers.get("X-Internal-Secret");
   let userScopeId: string | null = null;
-  if (!internalSecret) {
-    const auth = await optionalAuth(req);
-    if (!auth) {
-      const fail = requireInternalSecret(req, corsHeaders);
-      if (fail) return fail;
-    } else {
-      userScopeId = auth.id;
-    }
+  const auth = await optionalAuth(req);
+  if (auth) {
+    userScopeId = auth.id;
+  } else {
+    const fail = requireInternalSecret(req, corsHeaders);
+    if (fail) return fail;
   }
 
   // Fetch accounts to sync.

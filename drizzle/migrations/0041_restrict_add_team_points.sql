@@ -1,0 +1,2 @@
+REVOKE EXECUTE ON FUNCTION public.add_team_points(uuid, text, integer, text, text, jsonb) FROM PUBLIC, anon, authenticated;
+GRANT EXECUTE ON FUNCTION public.add_team_points(uuid, text, integer, text, text, jsonb) TO service_role;

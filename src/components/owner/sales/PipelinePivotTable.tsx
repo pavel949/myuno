@@ -1,3 +1,4 @@
+import { csvCell } from '@/lib/export/csvSafe';
 import { useMemo, useState } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { AgentDeal, formatValue } from '@/hooks/useAgentDeals';
@@ -113,7 +114,7 @@ export function PipelinePivotTable({ deals, pipelineData }: Props) {
   const exportCSV = () => {
     const { header, rows, totalRow } = getTableData();
     const allRows = [header, ...rows, totalRow];
-    const csv = allRows.map(r => r.map(c => typeof c === 'number' ? c : `"${c}"`).join(',')).join('\n');
+    const csv = allRows.map(r => r.map(c => typeof c === 'number' ? c : csvCell(c)).join(',')).join('\n');
     downloadBlob(csv, 'text/csv', `pipeline-pivot-${format(new Date(), 'yyyy-MM-dd')}.csv`);
   };
 
@@ -195,7 +196,7 @@ export function PipelinePivotTable({ deals, pipelineData }: Props) {
   const exportGoogleSheets = () => {
     const { header, rows, totalRow } = getTableData();
     const allRows = [header, ...rows, totalRow];
-    const csv = allRows.map(r => r.map(c => typeof c === 'number' ? c : `"${c}"`).join(',')).join('\n');
+    const csv = allRows.map(r => r.map(c => typeof c === 'number' ? c : csvCell(c)).join(',')).join('\n');
     const blob = new Blob([csv], { type: 'text/csv' });
     const url = URL.createObjectURL(blob);
 

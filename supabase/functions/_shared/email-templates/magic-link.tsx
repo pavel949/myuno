@@ -23,16 +23,18 @@ export const MagicLinkEmail = ({
   confirmationUrl,
 }: MagicLinkEmailProps) => (
   <Html lang="en" dir="ltr">
-    <Head />
-    <Preview>Your myUNO login link</Preview>
+    <Head>
+      <style>{darkModeCss}</style>
+    </Head>
+    <Preview>Your login link for {siteName}</Preview>
     <Body style={main}>
       <Container style={container}>
         <Heading style={h1}>Your login link</Heading>
         <Text style={text}>
-          Click the button below to log in to myUNO. This link will expire
+          Click the button below to log in to {siteName}. This link will expire
           shortly.
         </Text>
-        <Button style={button} href={confirmationUrl}>
+        <Button className="dm-btn" style={button} href={confirmationUrl}>
           Log In
         </Button>
         <Text style={footer}>
@@ -63,9 +65,17 @@ const button = {
   backgroundColor: 'hsl(224, 55%, 32%)',
   color: '#ffffff',
   fontSize: '15px',
+  border: '1px solid hsl(224, 55%, 32%)',
   borderRadius: '12px',
   padding: '14px 24px',
   textDecoration: 'none',
-  fontWeight: '600' as const,
 }
 const footer = { fontSize: '12px', color: '#999999', margin: '32px 0 0' }
+// Rendered as a text child, which React may HTML-escape: keep this CSS free of >, &, and quotes.
+const darkModeCss = `
+  @media (prefers-color-scheme: dark) {
+    .dm-btn { background-color: #ffffff !important; color: #000000 !important; }
+  }
+  [data-ogsc] .dm-btn { background-color: #ffffff !important; color: #000000 !important; }
+  [data-ogsb] .dm-btn { background-color: #ffffff !important; color: #000000 !important; }
+`

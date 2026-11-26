@@ -4,7 +4,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { MarketplaceServiceGrid } from './MarketplaceServiceGrid';
 import type { MarketplaceService } from '@/hooks/useServiceMarketplace';
 const state = vi.hoisted(() => ({ services: [] as MarketplaceService[], slots: {} as Record<string, { status: 'available' | 'unknown' | 'unavailable'; date: string; error?: 'schedule-read-failed' }>, checking: false }));
-vi.mock('./MarketplaceFilterSheet', () => ({ MarketplaceFilterSheet: ({ children }: { children: React.ReactNode }) => <>{children}</> }));
+vi.mock('./MarketplaceFilterSheet', () => ({ MarketplaceFilterSheet: ({ children, onApply }: { children: React.ReactNode; onApply: () => void }) => <>{children}<button onClick={onApply}>Apply fixture filters</button></> }));
 vi.mock('@/contexts/LanguageContext', () => ({ useLanguage: () => ({ language: 'en' }) }));
 vi.mock('@/hooks/useServiceMarketplace', () => ({ useMarketplaceServices: () => ({ data: state.services, isLoading: false, isError: false, refetch: vi.fn() }) }));
 vi.mock('@/hooks/useMarketplaceAvailability', () => ({ useMarketplaceAvailability: () => ({ data: state.slots, isFetching: state.checking, refetch: vi.fn() }) }));
@@ -29,12 +29,16 @@ describe('marketplace discovery integration', () => {
   it('filters price in one currency and preserves unrelated URL/context', () => {
     mount('?ref=trip');
     fireEvent.change(screen.getByRole('spinbutton', { name: 'Max price' }), { target: { value: '200' } });
+    expect(screen.getByText('Test b')).toBeVisible();
+    expect(screen.getByTestId('url')).not.toHaveTextContent('maxPrice=');
+    fireEvent.click(screen.getByRole('button', { name: 'Apply fixture filters' }));
     expect(screen.getByText('Test a')).toBeVisible();
     expect(screen.queryByText('Test b')).toBeNull();
     expect(screen.getByTestId('url')).toHaveTextContent('ref=trip');
     expect(screen.getByTestId('url')).toHaveTextContent('maxPrice=200');
     expect(screen.getByTestId('url')).toHaveTextContent('#offers|{"from":"trip"}');
     fireEvent.click(screen.getByRole('button', { name: 'Clear offer filters' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Apply fixture filters' }));
     expect(screen.getByText('Test b')).toBeVisible();
     expect(screen.getByTestId('url')).not.toHaveTextContent('maxPrice=');
   });

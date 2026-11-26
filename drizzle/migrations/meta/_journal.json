@@ -288,6 +288,27 @@
       "when": 1795426850387,
       "tag": "0040_restrict_thai_business_reviews_select",
       "breakpoints": true
+    },
+    {
+      "idx": 41,
+      "version": "7",
+      "when": 1795503259539,
+      "tag": "0041_restrict_add_team_points",
+      "breakpoints": true
+    },
+    {
+      "idx": 42,
+      "version": "7",
+      "when": 1795519536558,
+      "tag": "0042_enforce_mc_slot_limit_and_close_public_listing",
+      "breakpoints": true
+    },
+    {
+      "idx": 43,
+      "version": "7",
+      "when": 1795670083329,
+      "tag": "0043_bind_lead_score_and_referral_to_actor",
+      "breakpoints": true
     }
   ]
 }

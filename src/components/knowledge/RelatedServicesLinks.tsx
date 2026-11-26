@@ -1,5 +1,5 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { 
   CreditCard, 
@@ -46,7 +46,6 @@ interface RelatedServicesLinksProps {
 }
 
 export function RelatedServicesLinks({ section, showAll = false, className }: RelatedServicesLinksProps) {
-  const navigate = useNavigate();
   const { language } = useLanguage();
   
   const allLinks = serviceLinks[language as 'en' | 'ru'] || serviceLinks.en;
@@ -64,17 +63,19 @@ export function RelatedServicesLinks({ section, showAll = false, className }: Re
         {language === 'ru' ? 'Связанные сервисы UNO' : 'Related UNO Services'}
       </h4>
       <div className="flex flex-wrap gap-2">
-        {links.map((link, index) => (
+        {links.map(link => (
           <Button
-            key={index}
+            asChild
+            key={link.route}
             variant="outline"
             size="sm"
-            className="gap-2"
-            onClick={() => navigate(link.route)}
+            className="h-auto min-h-11 max-w-full justify-start gap-2 whitespace-normal text-start"
           >
-            <link.icon className="h-4 w-4" />
-            {link.label}
-            <ChevronRight className="h-3 w-3 opacity-50" />
+            <Link to={link.route}>
+              <link.icon className="h-4 w-4" aria-hidden="true" />
+              <span>{link.label}</span>
+              <ChevronRight className="h-3 w-3 opacity-50" aria-hidden="true" />
+            </Link>
           </Button>
         ))}
       </div>

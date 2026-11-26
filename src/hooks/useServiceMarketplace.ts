@@ -48,29 +48,38 @@ export interface ServiceOrderRow {
 const SERVICE_COLS =
   'id,provider_id,name_en,name_ru,description_en,description_ru,price,currency,duration_minutes,images,lead_time_hours,is_active,approval_status,unit,pricing_model';
 
-export function useMarketplaceServices() {
-  return useQuery({
-    queryKey: ['marketplace-services'],
-    queryFn: async (): Promise<MarketplaceService[]> => {
-      const { data, error } = await supabase
+const OFFER_PAGE_SIZE = 60;
+
+export function useMarketplaceServices(categorySlugs?: string[], enabled = true, pageIndex = 0) {
+  const scope = categorySlugs ? [...new Set(categorySlugs)].sort() : undefined;
+  const result = useQuery({
+    queryKey: ['marketplace-services', scope, pageIndex],
+    enabled: enabled && (scope === undefined || scope.length > 0),
+    queryFn: async (): Promise<{ offers: MarketplaceService[]; hasMore: boolean }> => {
+      let query = supabase
         .from('public_service_catalog')
         .select(`${SERVICE_COLS}, provider, location:locations(district)`)
         .eq('is_active', true)
         .eq('approval_status', 'approved')
-        .not('provider_id', 'is', null)
+        .not('provider_id', 'is', null);
+      // The catalogue's canonical slug is already in the safe service projection.
+      // Filter BEFORE the cap; an older offer can then be found in its own category.
+      if (scope?.length) query = query.in('category_slug', scope);
+      const { data, error } = await query
         .order('created_at', { ascending: false })
-        .limit(60);
+        .order('id', { ascending: false })
+        .range(pageIndex * OFFER_PAGE_SIZE, (pageIndex + 1) * OFFER_PAGE_SIZE - 1);
       if (error) throw error;
       const services = (data ?? []) as unknown as MarketplaceService[];
       const ids = [...new Set(services.map(service => service.provider_id))];
-      if (!ids.length) return services;
+      if (!ids.length) return { offers: [], hasMore: false };
       const publicProviders = await supabase.from('public_provider_catalog')
-        .select('id,name,rating,is_verified,review_count,coverage_areas,is_demo').in('id', ids).limit(60);
+        .select('id,name,rating,is_verified,review_count,coverage_areas,is_demo').in('id', ids).limit(OFFER_PAGE_SIZE);
       // Trust/demo visibility is part of the public supply boundary, not
       // optional decoration. Failed reads must not bypass that boundary.
       if (publicProviders.error) throw publicProviders.error;
       const providers = new Map((publicProviders.data ?? []).map(provider => [provider.id, provider]));
-      return services.filter(service => providers.has(service.provider_id) && providers.get(service.provider_id)?.is_demo !== true).map(service => {
+      const offers = services.filter(service => providers.has(service.provider_id) && providers.get(service.provider_id)?.is_demo !== true).map(service => {
         const provider = providers.get(service.provider_id);
         return { ...service, provider: {
           id: service.provider_id, name: provider?.name ?? '',
@@ -78,9 +87,13 @@ export function useMarketplaceServices() {
           review_count: provider?.review_count ?? null, coverage_areas: provider?.coverage_areas ?? null,
         } };
       });
+      return { offers, hasMore: services.length === OFFER_PAGE_SIZE };
     },
     staleTime: 60_000,
   });
+  // Use raw page size, not the number of eligible offers after safe provider
+  // enrichment: a full page of hidden/demo suppliers can still have a next page.
+  return { ...result, data: result.data?.offers, hasMore: result.data?.hasMore === true };
 }
 
 export function useProviderHours(providerId: string | null | undefined) {

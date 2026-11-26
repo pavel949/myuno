@@ -2,6 +2,7 @@
 // Accepts multipart/form-data with `file` (audio blob) and optional `language`.
 // Returns { text: string }.
 import { getCorsHeaders } from "../_shared/cors.ts";
+import { requireInternalOrUser } from "../_shared/authz.ts";
 
 const GATEWAY_URL = "https://ai.gateway.lovable.dev/v1/audio/transcriptions";
 const DEFAULT_MODEL = "openai/gpt-4o-mini-transcribe";
@@ -14,6 +15,7 @@ Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: cors });
   }
+  { const gate = await requireInternalOrUser(req, cors); if (gate instanceof Response) return gate; }
 
   if (req.method !== "POST") {
     return new Response(JSON.stringify({ error: "Method not allowed" }), {

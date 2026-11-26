@@ -19,6 +19,44 @@ Deno.serve(
 
       if (!amount || amount < 1) throw new Error("Amount must be greater than 0");
 
+      // Server-authoritative restaurant pricing inputs.
+      const { data: rest } = await supabaseAdmin
+        .from("restaurants")
+        .select("id, working_hours, delivery_fee, is_active")
+        .eq("id", restaurant_id)
+        .maybeSingle();
+      if (!rest || rest.is_active === false) throw new Error("Restaurant not available");
+      const wh = (rest.working_hours ?? {}) as Record<string, unknown>;
+
+      if (booking_type === "table_reservation") {
+        const configuredDeposit = Number(wh.deposit_amount);
+        if (!wh.deposit_required || !Number.isFinite(configuredDeposit) || configuredDeposit <= 0) {
+          throw new Error("This restaurant has no configured reservation deposit");
+        }
+        if (Number(amount) !== configuredDeposit || (items as unknown[]).length > 0) {
+          throw new Error("Deposit amount does not match the restaurant's configured deposit");
+        }
+      }
+
+      // Lines without a menu id may only be the restaurant's configured delivery fee.
+      if (booking_type !== "set_menu") {
+        const deliveryFee = Number(rest.delivery_fee) || 0;
+        for (const it of items as Array<{ id?: string; price: number; quantity: number }>) {
+          if (typeof it.id === "string" && it.id.length) continue;
+          if (Number(it.price) !== deliveryFee || Number(it.quantity) !== 1) {
+            throw new Error("Unrecognised price line");
+          }
+        }
+      }
+
+      if ((items as unknown[]).length > 0) {
+        const lineTotal = (items as Array<{ price: number; quantity: number }>)
+          .reduce((sum, it) => sum + Number(it.price) * Number(it.quantity), 0);
+        if (Math.abs(lineTotal - Number(amount)) > 0.009) {
+          throw new Error("Order total does not match its items");
+        }
+      }
+
       // Anti-tampering: validate any à-la-carte line that carries a menu-item
       // id against restaurant_menu_items. (Delivery-fee lines and set-menu /
       // reservation-deposit flows carry no menu id and are not validated here —

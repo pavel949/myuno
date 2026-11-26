@@ -47,9 +47,12 @@ export interface DueDiligenceReport {
   generated_at: string;
 }
 
-export function useDueDiligenceReport(projectId?: string, options: { publishedOnly?: boolean } = {}) {
+export function useDueDiligenceReport(
+  projectId?: string,
+  options: { publishedOnly?: boolean; viewerId?: string } = {},
+) {
   return useQuery({
-    queryKey: ['dd-report', projectId, options.publishedOnly ? 'published' : 'accessible'],
+    queryKey: ['dd-report', projectId, options.publishedOnly ? 'published' : 'accessible', options.viewerId],
     queryFn: async (): Promise<DueDiligenceReport | null> => {
       if (!projectId) return null;
       let query = supabase
