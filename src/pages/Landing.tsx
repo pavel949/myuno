@@ -5,6 +5,7 @@ import { ArrowRight, LifeBuoy, House, Building2, Sailboat, PlaneTakeoff } from '
 import { useLanguage } from '@/contexts/LanguageContext';
 import { pickLang, type LangValues } from '@/lib/i18n/pickLang';
 import { APP_ROUTES as R } from '@/lib/config/routes';
+import { prefetchRoute } from '@/lib/prefetchRoute';
 import { BottomBar } from '@/components/nav/BottomBar';
 import { ConsumerHeader } from '@/components/nav/ConsumerHeader';
 import { SEOHead } from '@/components/seo/SEOHead';
@@ -62,7 +63,7 @@ export default function Landing() {
           {href:R.GOAL_BUY, icon:Building2, image:propertyPhoto, title:{ru:'Купить недвижимость',en:'Buy property',th:'ซื้ออสังหาริมทรัพย์'}, subtitle:{ru:'Готовые объекты и новостройки',en:'Homes and new developments',th:'บ้านและโครงการใหม่'}},
           {href:R.EXPERIENCES, icon:Sailboat, image:'/yachts/catamaran-53-1.webp', title:{ru:'Впечатления',en:'Experiences',th:'ประสบการณ์'}, subtitle:{ru:'Яхты, экскурсии и активный отдых',en:'Yachts and island activities',th:'กิจกรรมบนเกาะ'}},
           {href:R.SERVICES, icon:PlaneTakeoff, image:transferPhoto, title:{ru:'Услуги',en:'Services',th:'บริการ'}, subtitle:{ru:'Трансфер, Fast Track и помощь',en:'Transfers and assistance',th:'รถรับส่งและความช่วยเหลือ'}},
-        ] as const).map(({href,icon:Icon,image,title,subtitle})=><Link key={href} to={href} className="home-reference-direction">
+        ] as const).map(({href,icon:Icon,image,title,subtitle})=><Link key={href} to={href} onPointerEnter={() => prefetchRoute(href)} onFocus={() => prefetchRoute(href)} className="home-reference-direction">
           <img src={image} alt="" loading="lazy" decoding="async" /><span className="home-reference-direction-shade" />
           <span className="home-reference-direction-content"><span className="home-reference-direction-icon"><Icon size={23} strokeWidth={1.8} aria-hidden="true" /></span><strong>{t(title)}</strong><small>{t(subtitle)}</small></span>
         </Link>)}

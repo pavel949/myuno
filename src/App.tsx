@@ -35,7 +35,6 @@ import { RouteTitleFallback } from "@/components/seo/RouteTitleFallback";
 import { CookieConsentBanner } from "@/components/legal/CookieConsentBanner";
 import { LegalComplianceModal } from "@/components/legal/LegalComplianceModal";
 import { ErrorBoundary, useGlobalErrorHandler } from "@/components/ErrorBoundary";
-import { PrefetchProvider } from "@/components/providers/PrefetchProvider";
 import { StorefrontProvider } from "@/contexts/StorefrontContext";
 import { GoogleMapsProvider } from "@/contexts/GoogleMapsContext";
 import { defaultQueryClientOptions } from "@/lib/queryConfig";
@@ -72,7 +71,6 @@ const QueryProviders = composeProviders([
   // calls usePWAInstallContext synchronously on mount.
   PWAInstallProvider,
   TooltipProvider,
-  PrefetchProvider,
   AuthSheetProvider,
 ]);
 

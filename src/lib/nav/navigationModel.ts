@@ -40,7 +40,7 @@ import {
   shouldShowAppsLauncher, type NavRoleKey, type NavItem,
 } from '@/lib/navConfig';
 
-export { GUEST_STAY_SIDEBAR_DRAFT } from './guestStayNavDraft';
+// In-stay screens use the mounted guest routes rather than a separate sidebar.
 export { FLOATING, FLOATING_OFFSET } from './floatingStack';
 /** @see src/lib/nav/roleIA.ts — role, URL, and shell boundaries */
 

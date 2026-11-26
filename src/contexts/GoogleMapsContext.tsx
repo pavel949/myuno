@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useMemo, useState, useEffect, useCallback, useRef } from 'react';
-import { Loader, type Libraries } from '@googlemaps/js-api-loader';
+import type { Libraries, Loader } from '@googlemaps/js-api-loader';
 import { fetchGoogleMapsKey, getGoogleMapsKey } from '@/lib/googleMaps';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { logger } from '@/lib/logger';
@@ -29,7 +29,10 @@ export interface GoogleMapsContextValue {
   language: string;
 }
 
-const GoogleMapsContext = createContext<GoogleMapsContextValue | null>(null);
+const GoogleMapsContext = createContext<{
+  value: GoogleMapsContextValue;
+  requestLoad: () => void;
+} | null>(null);
 
 /**
  * Fully tear down the previous Google Maps script so we can re-load it with
@@ -37,7 +40,7 @@ const GoogleMapsContext = createContext<GoogleMapsContextValue | null>(null);
  * and `@googlemaps/js-api-loader` enforces "Loader must not be called again with
  * different options" via a static singleton — we must reset both.
  */
-function teardownGoogleMaps() {
+function teardownGoogleMaps(Loaded: typeof Loader) {
   // 1. Remove every injected <script> that points at maps.googleapis.com.
   document
     .querySelectorAll('script[src*="maps.googleapis.com"], script[src*="maps.gstatic.com"]')
@@ -54,16 +57,16 @@ function teardownGoogleMaps() {
   delete w.__googleMapsCallback__;
 
   // 3. Reset the Loader singleton — private field, accessed via cast.
-  (Loader as unknown as { instance?: Loader }).instance = undefined;
+  (Loaded as unknown as { instance?: Loader }).instance = undefined;
 }
 
-function loadGoogleMaps(opts: {
+function loadGoogleMaps(Loaded: typeof Loader, opts: {
   apiKey: string;
   language: string;
   region: string;
 }): Promise<void> {
   const channel = import.meta.env.VITE_LOVABLE_CONNECTOR_GOOGLE_MAPS_TRACKING_ID as string | undefined;
-  const loader = new Loader({
+  const loader = new Loaded({
     apiKey: opts.apiKey,
     version: 'weekly',
     libraries: LIBRARIES,
@@ -97,11 +100,15 @@ export function GoogleMapsProvider({ children }: { children: React.ReactNode }) 
   const { language: appLang } = useLanguage();
   const requestedLanguage = resolveMapsLanguage(appLang);
 
+  // There is one stable provider, but public screens without a map should not
+  // request either the key or the Google Maps Places script.
+  const [loadRequested, setLoadRequested] = useState(false);
+  const requestLoad = useCallback(() => setLoadRequested(true), []);
   const [apiKey, setApiKey] = useState<string | null>(getGoogleMapsKey());
   const [fetched, setFetched] = useState(!!apiKey);
 
   useEffect(() => {
-    if (apiKey) return;
+    if (!loadRequested || apiKey) return;
     let cancelled = false;
     fetchGoogleMapsKey()
       .then((key) => {
@@ -115,7 +122,7 @@ export function GoogleMapsProvider({ children }: { children: React.ReactNode }) 
     return () => {
       cancelled = true;
     };
-  }, [apiKey]);
+  }, [apiKey, loadRequested]);
 
   // Active locale that Maps was last loaded with (drives re-init).
   const [activeLanguage, setActiveLanguage] = useState(requestedLanguage);
@@ -127,13 +134,14 @@ export function GoogleMapsProvider({ children }: { children: React.ReactNode }) 
 
   // Re-load the script whenever the requested language changes.
   useEffect(() => {
-    if (activeLanguage === requestedLanguage) return;
-    // Light reset: trigger the load effect below by switching activeLanguage.
+    triedFallbackRef.current = false;
+    // Only reset on a user/application locale change, not the English fallback.
     setActiveLanguage(requestedLanguage);
-  }, [requestedLanguage, activeLanguage]);
+  }, [requestedLanguage]);
 
   // Capture Google Maps auth failures (RefererNotAllowedMapError, InvalidKeyMapError, etc.)
   useEffect(() => {
+    if (!loadRequested) return;
     (window as unknown as Record<string, unknown>).gm_authFailure = () => {
       setAuthError(
         new Error(
@@ -144,11 +152,11 @@ export function GoogleMapsProvider({ children }: { children: React.ReactNode }) 
     return () => {
       delete (window as unknown as Record<string, unknown>).gm_authFailure;
     };
-  }, []);
+  }, [loadRequested]);
 
   // Main load / re-load effect.
   useEffect(() => {
-    if (!apiKey) return;
+    if (!loadRequested || !apiKey) return;
     let cancelled = false;
 
     // If google is already on window AND it's the same locale, nothing to do.
@@ -159,14 +167,18 @@ export function GoogleMapsProvider({ children }: { children: React.ReactNode }) 
       return;
     }
 
-    // Otherwise tear down any previous script before re-initialising.
-    if (w.google?.maps) {
-      teardownGoogleMaps();
-    }
     setIsLoaded(false);
     setLoadError(undefined);
+    let Loaded: typeof Loader | undefined;
 
-    loadGoogleMaps({ apiKey, language: activeLanguage, region: MAPS_REGION })
+    import('@googlemaps/js-api-loader')
+      .then(({ Loader: runtimeLoader }) => {
+        if (cancelled) return;
+        Loaded = runtimeLoader;
+        // Otherwise tear down any previous script before re-initialising.
+        if (w.google?.maps) teardownGoogleMaps(Loaded);
+        return loadGoogleMaps(Loaded, { apiKey, language: activeLanguage, region: MAPS_REGION });
+      })
       .then(() => {
         if (cancelled) return;
         // Stamp the locale on the namespace so we can detect drift.
@@ -177,9 +189,9 @@ export function GoogleMapsProvider({ children }: { children: React.ReactNode }) 
       .catch((err: Error) => {
         if (cancelled) return;
         logger.warn(`[GoogleMaps] Failed to load with language="${activeLanguage}"`, err);
-        if (!triedFallbackRef.current && activeLanguage !== 'en') {
+        if (Loaded && !triedFallbackRef.current && activeLanguage !== 'en') {
           triedFallbackRef.current = true;
-          teardownGoogleMaps();
+          teardownGoogleMaps(Loaded);
           setActiveLanguage('en');
           return;
         }
@@ -189,7 +201,7 @@ export function GoogleMapsProvider({ children }: { children: React.ReactNode }) 
     return () => {
       cancelled = true;
     };
-  }, [apiKey, activeLanguage]);
+  }, [apiKey, activeLanguage, loadRequested]);
 
   const effectiveError = loadError ?? authError;
 
@@ -205,24 +217,17 @@ export function GoogleMapsProvider({ children }: { children: React.ReactNode }) 
     [isLoaded, effectiveError, apiKey, activeLanguage],
   );
 
-  if (!fetched) {
-    return (
-      <GoogleMapsContext.Provider value={loadingValue}>{children}</GoogleMapsContext.Provider>
-    );
-  }
-  if (!apiKey) {
-    return <GoogleMapsContext.Provider value={noKeyValue}>{children}</GoogleMapsContext.Provider>;
-  }
+  const contextValue = useMemo(() => ({
+    value: !fetched ? loadingValue : !apiKey ? noKeyValue : value,
+    requestLoad,
+  }), [apiKey, fetched, requestLoad, value]);
 
-  return <GoogleMapsContext.Provider value={value}>{children}</GoogleMapsContext.Provider>;
+  return <GoogleMapsContext.Provider value={contextValue}>{children}</GoogleMapsContext.Provider>;
 }
 
-export function useGoogleMaps() {
+export function useGoogleMaps(): GoogleMapsContextValue {
   const ctx = useContext(GoogleMapsContext);
-  // GoogleMapsProvider lives in DeferredProviders (one paint after first
-  // render) so any component that calls this hook before the gate flips
-  // would otherwise crash its subtree. Return a stable "no key / not
-  // loaded" fallback instead — matches the contract in App.tsx that
-  // every deferred provider's hook handles the undefined-context case.
-  return ctx ?? noKeyValue;
+  const requestLoad = ctx?.requestLoad;
+  useEffect(() => { requestLoad?.(); }, [requestLoad]);
+  return ctx?.value ?? noKeyValue;
 }
