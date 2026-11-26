@@ -7,8 +7,8 @@
  *
  *   1. Подавляет glassmorphism (`backdrop-blur-*`) — на случай, если кто-то
  *      добавит inline style или забудет про правило ESLint (canon §6).
- *   2. Гарантирует 0px radii для любых остаточных `rounded-{sm,md,lg,xl,
- *      2xl,3xl}` (например, из shadcn-генератора или сторонних компонент).
+ *   2. Сохраняет fallback для встроенных pill и skeleton. Остальные радиусы
+ *      определяются токенами v4 и Tailwind, без глобального обнуления.
  *   3. Перехватывает gradient stops из node_modules / external libs.
  *
  * Все маппинги цветов (emerald/teal/cyan/purple/etc → semantic tokens)
@@ -37,27 +37,7 @@
   -webkit-backdrop-filter: none !important;
 }
 
-/* ════════════════════════════════════════════════════════════════
-   2 · CANON RADII ENFORCEMENT  (canon §5 — square corners only)
-   Phase 4 rule. Kept as safety net: collapses any residual
-   rounded-{sm,md,lg,xl,2xl,3xl} (and directional variants) to 0.
-   Exceptions: rounded-full (avatars, icon chips), shadcn skeleton.
-   ════════════════════════════════════════════════════════════════ */
-:where(
-  .rounded-sm, .rounded, .rounded-md, .rounded-lg,
-  .rounded-xl, .rounded-2xl, .rounded-3xl,
-  [class*="rounded-t-"]:not(.rounded-t-full),
-  [class*="rounded-b-"]:not(.rounded-b-full),
-  [class*="rounded-l-"]:not(.rounded-l-full),
-  [class*="rounded-r-"]:not(.rounded-r-full),
-  [class*="rounded-tl-"]:not(.rounded-tl-full),
-  [class*="rounded-tr-"]:not(.rounded-tr-full),
-  [class*="rounded-bl-"]:not(.rounded-bl-full),
-  [class*="rounded-br-"]:not(.rounded-br-full)
-) {
-  border-radius: 0 !important;
-}
-
+/* v4 radius classes, including directional utilities, use the token cascade. */
 :where(.rounded-full) {
   border-radius: 9999px !important;
 }
