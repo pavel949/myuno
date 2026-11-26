@@ -9,7 +9,14 @@ const result = await build({ entryPoints: ['supabase/functions/confirm-transfer-
  plugins: [{ name: 'no-network', setup(b) {
   b.onResolve({ filter: /notify-utils\.ts$/ }, () => ({ path: 'cors', namespace: 'stub' }));
   b.onLoad({ filter: /.*/, namespace: 'stub' }, () => ({ contents: 'export const NOTIFY_CORS={};' }));
-  b.onResolve({ filter: /^(npm:|https:)/ }, () => ({ path: 'sdk', namespace: 'sdk' }));
+  // The managed email adapter was introduced on main. These rejection/replay
+  // cases must not reach it; test that boundary without importing email SDKs.
+  b.onResolve({ filter: /transactional-email-templates\/send-logged\.ts$/ }, () => ({ path: 'transport', namespace: 'email-boundary' }));
+  b.onLoad({ filter: /^transport$/, namespace: 'email-boundary' }, () => ({ contents: 'export function sendLoggedTemplateEmail(){globalThis.__unexpectedEmail();}' }));
+  b.onResolve({ filter: /^(npm:|https:)/ }, a => {
+    if (a.path === 'npm:@supabase/supabase-js@2') return { path: 'sdk', namespace: 'sdk' };
+    return { errors: [{ text: 'Unexpected external dependency in the isolated operator check: ' + a.path }] };
+  });
   b.onLoad({ filter: /.*/, namespace: 'sdk' }, () => ({ contents: 'export function createClient(){return globalThis.__sdk()}' }));
  }}] });
 const file = '/tmp/order-audit/handlers/operator.cjs';
@@ -21,6 +28,8 @@ const secret = 'synthetic-test-secret-not-production';
 const exp = Math.floor(Date.now() / 1000) + 60;
 const token = `${exp}.${createHmac('sha256', secret).update(`${id}.${exp}`).digest('hex')}`;
 let status = 'pending', orderType = 'transfer', updates = [], writes = 0;
+let emailAttempts = 0;
+globalThis.__unexpectedEmail = () => { emailAttempts++; throw Error('Outbound email forbidden'); };
 globalThis.__sdk = () => ({ from(table) {
  const q = { filters: [], select() { return this; }, eq(k,v) { this.filters.push([k,v]); return this; }, in(k,v) { this.filters.push([k,v]); return this; }, update(v) { this.patch=v; return this; },
   async single() { return table==='system_settings' ? {data:{value:secret},error:null} : {data:{id,order_type:orderType,status,order_number:'TEST',metadata:{},order_participants:[]},error:null}; },
@@ -33,8 +42,8 @@ globalThis.__sdk = () => ({ from(table) {
 require(file);
 let cases = 0;
 async function call(action='confirm', t=token) {
- updates=[]; writes=0;
- const r=await globalThis.__handler(new Request('http://localhost',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id,t,action})}));await r.text();cases++;return r.status;
+ updates=[]; writes=0; emailAttempts=0;
+ const r=await globalThis.__handler(new Request('http://localhost',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id,t,action})}));await r.text();assert.equal(emailAttempts,0,'no notification attempts for rejected or replayed requests');cases++;return r.status;
 }
 assert.equal(await call('confirm','invalid'),403); assert.equal(writes,0);
 for (status of ['cancelled','refunded','completed','expired','checked_in','checked_out','disputed']) {

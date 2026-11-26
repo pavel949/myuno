@@ -470,7 +470,7 @@
     },
     {
       "file": "src/components/admin/CatalogExportButton.tsx",
-      "sha256": "0e0176a3eeb9dfd13ed12253e8019afb6ede9de9f9d6c26fe6c30cc04264858f",
+      "sha256": "accd82908df8302eb534a0f0b0e1aba7743c82bc38f0010255ae3cc6d5e8a674",
       "directRouteDeclarations": [],
       "runtime": "NOTTESTED",
       "visual": "NOTTESTED",
@@ -480,7 +480,7 @@
           "source": "@/components/ui/button",
           "instances": 1,
           "lines": [
-            157
+            158
           ]
         },
         {
@@ -488,7 +488,7 @@
           "source": "@/components/ui/dropdown-menu",
           "instances": 1,
           "lines": [
-            155
+            156
           ]
         }
       ]
@@ -1643,7 +1643,7 @@
     },
     {
       "file": "src/components/admin/dashboard/AdminOperationalAlerts.tsx",
-      "sha256": "eb91d77223449ec1fb2d80cf862ad7f2f1ce45cf4ad52439660dee60d2819119",
+      "sha256": "94bf9c21f91a4bf061db306b244b0956821b8601b0b59f239d882a948f3f69c8",
       "directRouteDeclarations": [],
       "runtime": "NOTTESTED",
       "visual": "NOTTESTED",
@@ -1653,7 +1653,7 @@
           "source": "@/components/ui/button",
           "instances": 1,
           "lines": [
-            41
+            44
           ]
         }
       ]
@@ -10194,7 +10194,7 @@
     },
     {
       "file": "src/components/owner/contacts/ContactExportButton.tsx",
-      "sha256": "eff060ff1adb9bb2c2d9e9ffabb2ed23816c633a5aeba872a17f041a926439d8",
+      "sha256": "41d73e96daba06fea5384fdd073cd495ac8a0c6106784596925324090c175579",
       "directRouteDeclarations": [],
       "runtime": "NOTTESTED",
       "visual": "NOTTESTED",
@@ -13984,7 +13984,7 @@
     },
     {
       "file": "src/components/owner/sales/PipelinePivotTable.tsx",
-      "sha256": "98276a1dd2deb41449ae3f76512709857139c2fc8a8086886e3c89290d50b9e8",
+      "sha256": "0119f3e23b266b4a15ade373cf86802dcca28dd681ca93e16142a8515887160a",
       "directRouteDeclarations": [],
       "runtime": "NOTTESTED",
       "visual": "NOTTESTED",
@@ -13994,8 +13994,8 @@
           "source": "@/components/ui/button",
           "instances": 2,
           "lines": [
-            239,
-            268
+            240,
+            269
           ]
         }
       ]
@@ -23219,7 +23219,7 @@
     },
     {
       "file": "src/pages/admin/AdminLegalDocuments.tsx",
-      "sha256": "fdd26c81ae36145dcefbb3bcc15f43417aeb19c39f0563fc1a289ef16e8c9686",
+      "sha256": "c783679c682bc6b2c34e4d2e7194020e005bfbcb5b3559a31bb13656df8581bf",
       "directRouteDeclarations": [
         {
           "id": "d66c85cd489d74a4",
@@ -23236,9 +23236,9 @@
           "source": "@/components/ui/button",
           "instances": 3,
           "lines": [
-            103,
-            252,
-            317
+            104,
+            253,
+            318
           ]
         },
         {
@@ -23246,8 +23246,8 @@
           "source": "@/components/ui/card",
           "instances": 2,
           "lines": [
-            97,
-            301
+            98,
+            302
           ]
         },
         {
@@ -23255,7 +23255,7 @@
           "source": "@/components/ui/dialog",
           "instances": 1,
           "lines": [
-            203
+            204
           ]
         },
         {
@@ -23263,10 +23263,10 @@
           "source": "@/components/ui/input",
           "instances": 4,
           "lines": [
-            223,
-            229,
-            233,
-            238
+            224,
+            230,
+            234,
+            239
           ]
         },
         {
@@ -23274,7 +23274,7 @@
           "source": "@/components/uno/PageContainer",
           "instances": 1,
           "lines": [
-            33
+            34
           ]
         },
         {
@@ -23282,7 +23282,7 @@
           "source": "@/components/uno/PageHeader",
           "instances": 1,
           "lines": [
-            34
+            35
           ]
         },
         {
@@ -23290,8 +23290,8 @@
           "source": "@/components/ui/select",
           "instances": 2,
           "lines": [
-            213,
-            309
+            214,
+            310
           ]
         },
         {
@@ -23299,8 +23299,8 @@
           "source": "@/components/ui/table",
           "instances": 2,
           "lines": [
-            112,
-            328
+            113,
+            329
           ]
         },
         {
@@ -23308,7 +23308,7 @@
           "source": "@/components/ui/tabs",
           "instances": 1,
           "lines": [
-            40
+            41
           ]
         },
         {
@@ -23316,7 +23316,7 @@
           "source": "@/components/ui/textarea",
           "instances": 1,
           "lines": [
-            242
+            243
           ]
         }
       ]
@@ -23854,7 +23854,7 @@
     },
     {
       "file": "src/pages/admin/AdminOperations.tsx",
-      "sha256": "47138db4dfaca0bb83acc0d45e94d1e9da616e79103e84a0b1b9876c00712a7a",
+      "sha256": "7533855d64d13b7f462cb9e25e9a022f52cec0e8c033e93b701fad562dd51f27",
       "directRouteDeclarations": [
         {
           "id": "d4671a45527bc768",
@@ -24469,7 +24469,7 @@
     },
     {
       "file": "src/pages/admin/AdminProviders.tsx",
-      "sha256": "aa4f6b821937c53e44ae3e3143e921e168e6facce4b230c74729acde22120e88",
+      "sha256": "f8ac60ad754edd230804123d15937082713c919c3b7797f4c7286ed3210ad9e6",
       "directRouteDeclarations": [
         {
           "id": "18b7b5f121800323",
@@ -24486,23 +24486,23 @@
           "source": "@/components/ui/button",
           "instances": 17,
           "lines": [
-            386,
-            395,
-            409,
-            426,
+            387,
+            396,
+            410,
             427,
-            435,
-            453,
-            525,
-            536,
-            685,
-            722,
-            746,
-            800,
-            804,
-            808,
-            826,
-            829
+            428,
+            436,
+            454,
+            526,
+            537,
+            686,
+            723,
+            747,
+            801,
+            805,
+            809,
+            827,
+            830
           ]
         },
         {
@@ -24510,8 +24510,8 @@
           "source": "@/components/ui/card",
           "instances": 2,
           "lines": [
-            444,
-            464
+            445,
+            465
           ]
         },
         {
@@ -24519,8 +24519,8 @@
           "source": "@/components/ui/dialog",
           "instances": 2,
           "lines": [
-            568,
-            817
+            569,
+            818
           ]
         },
         {
@@ -24528,7 +24528,7 @@
           "source": "@/components/ui/dropdown-menu",
           "instances": 1,
           "lines": [
-            534
+            535
           ]
         },
         {
@@ -24536,13 +24536,13 @@
           "source": "@/components/ui/input",
           "instances": 7,
           "lines": [
-            379,
-            603,
-            643,
-            651,
-            662,
-            669,
-            706
+            380,
+            604,
+            644,
+            652,
+            663,
+            670,
+            707
           ]
         },
         {
@@ -24550,8 +24550,8 @@
           "source": "@/components/uno/PageContainer",
           "instances": 2,
           "lines": [
-            353,
-            369
+            354,
+            370
           ]
         },
         {
@@ -24559,7 +24559,7 @@
           "source": "@/components/uno/PageHeader",
           "instances": 1,
           "lines": [
-            370
+            371
           ]
         },
         {
@@ -24567,8 +24567,8 @@
           "source": "@/components/ui/textarea",
           "instances": 2,
           "lines": [
-            624,
-            633
+            625,
+            634
           ]
         }
       ]
@@ -35503,7 +35503,7 @@
     },
     {
       "file": "src/pages/owner/MCBookingsPage.tsx",
-      "sha256": "cbbe55505bc1458a4131b9aaa56322b0bafa2986a0ee267fece474ada147f10c",
+      "sha256": "451086f35eac35b13ff90e9aecfa59421dfd97d715a6231bc565f1721e8a0e63",
       "directRouteDeclarations": [
         {
           "id": "b48c2afca8043fa0",
@@ -35520,17 +35520,17 @@
           "source": "@/components/ui/button",
           "instances": 11,
           "lines": [
-            274,
-            296,
-            310,
-            341,
-            353,
-            367,
-            402,
-            406,
-            410,
-            432,
-            441
+            275,
+            297,
+            311,
+            342,
+            354,
+            368,
+            403,
+            407,
+            411,
+            433,
+            442
           ]
         },
         {
@@ -35538,8 +35538,8 @@
           "source": "@/components/ui/card",
           "instances": 2,
           "lines": [
-            452,
-            476
+            453,
+            477
           ]
         },
         {
@@ -35547,7 +35547,7 @@
           "source": "@/components/ui/dropdown-menu",
           "instances": 1,
           "lines": [
-            339
+            340
           ]
         },
         {
@@ -35555,7 +35555,7 @@
           "source": "@/components/ui/input",
           "instances": 1,
           "lines": [
-            331
+            332
           ]
         },
         {
@@ -35563,9 +35563,9 @@
           "source": "@/components/uno/PageContainer",
           "instances": 3,
           "lines": [
-            270,
-            281,
-            291
+            271,
+            282,
+            292
           ]
         },
         {
@@ -35573,8 +35573,8 @@
           "source": "@/components/uno/PageHeader",
           "instances": 2,
           "lines": [
-            271,
-            282
+            272,
+            283
           ]
         }
       ]
@@ -36335,7 +36335,7 @@
     },
     {
       "file": "src/pages/owner/OwnerFinancials.tsx",
-      "sha256": "6f083a7a8cb9e843a5c64092625324a939065e2e025911b0d83249517d53620f",
+      "sha256": "f8227e7f78aea4c6e329b06ac59176f3f2fe27f6a055fa62d5caaffccca54621",
       "directRouteDeclarations": [
         {
           "id": "62f892cf82fe719b",
@@ -36352,18 +36352,18 @@
           "source": "@/components/ui/button",
           "instances": 12,
           "lines": [
-            147,
-            151,
-            177,
-            180,
-            183,
-            186,
-            199,
-            202,
-            209,
-            215,
-            218,
-            328
+            148,
+            152,
+            178,
+            181,
+            184,
+            187,
+            200,
+            203,
+            210,
+            216,
+            219,
+            329
           ]
         },
         {
@@ -36371,10 +36371,10 @@
           "source": "@/components/ui/card",
           "instances": 4,
           "lines": [
-            253,
-            259,
-            265,
-            306
+            254,
+            260,
+            266,
+            307
           ]
         },
         {
@@ -36382,7 +36382,7 @@
           "source": "@/components/uno/PageContainer",
           "instances": 1,
           "lines": [
-            139
+            140
           ]
         },
         {
@@ -36390,7 +36390,7 @@
           "source": "@/components/ui/select",
           "instances": 1,
           "lines": [
-            161
+            162
           ]
         },
         {
@@ -36398,7 +36398,7 @@
           "source": "@/components/ui/tabs",
           "instances": 1,
           "lines": [
-            291
+            292
           ]
         }
       ]

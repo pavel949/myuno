@@ -43,9 +43,14 @@ const CANONICAL_FAMILIES = new Set([
   // RU
   'Unbounded',
   'Golos Text',
+  // Design Bible v4 primary pair (adopted 2026-11-25)
+  'Outfit',
+  'Manrope',
+  'Noto Sans SC',
   // EN + universal fallbacks
-  'Source Serif 4',
+  // Transitional allowlist for the separately shipped standalone /bible guide.
   'Geist',
+  'Source Serif 4',
   'IBM Plex Mono',
   'Noto Serif',
   'Noto Sans',
@@ -111,7 +116,7 @@ function validateTokenDeclarations() {
   }
 
   // Required canonical fonts must all be present somewhere in tokens.
-  const REQUIRED = ['Unbounded', 'Golos Text', 'Noto Serif', 'Noto Sans', 'JetBrains Mono'];
+  const REQUIRED = ['Outfit', 'Manrope', 'IBM Plex Mono', 'Noto Sans Thai', 'Unbounded', 'Golos Text', 'Noto Serif', 'Noto Sans', 'JetBrains Mono'];
   for (const req of REQUIRED) {
     if (!usedInTokens.has(req)) {
       violations.push(

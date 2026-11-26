@@ -30,16 +30,26 @@ const run = (args, env = {}) => new Promise((resolve, reject) => {
   const child = spawn(process.execPath, args, { cwd: root, env: { ...process.env, ...env }, stdio: 'inherit' });
   child.on('error', reject); child.on('exit', code => code === 0 ? resolve() : reject(Error(`Fixture build failed ${code}`)));
 });
-const rebrand = originalTokens.replace(/--brand-hue:\s*213;/, '--brand-hue: 160;')
-  .replace(/--font-family-display:\s*'Source Serif 4';/, '--font-family-display: monospace;')
-  .replace(/--font-family-body:\s*'Geist';/, '--font-family-body: serif;')
-  .replace(/--layout-inset-scale:\s*1;/, '--layout-inset-scale: 1.5;')
-  .replace(/--section-space-scale:\s*1;/, '--section-space-scale: 1.75;')
-  .replace(/--card-padding:\s*1rem;/, '--card-padding: 1.5rem;')
-  .replace(/--layout-width-wide:\s*80rem;/, '--layout-width-wide: 72rem;');
-if (!baseline && rebrand === originalTokens) throw Error('Canonical rebrand tokens not found');
-const compact=originalTokens.replace(/--section-space-scale:\s*1;/, '--section-space-scale: 0.25;');
-if(!baseline&&compact===originalTokens)throw Error('Canonical spacing source not found');
+// Change the canonical declarations, not a specific historical brand's values.
+// Require every edit to take effect so a partial rebrand cannot mask a stale fixture.
+function replaceToken(css, name, value) {
+  const declaration = new RegExp(`^(\\s*--${name}:)[ \\t]*([^;\\r\\n]+);`, 'gm');
+  const matches = [...css.matchAll(declaration)];
+  if (matches.length !== 1 || matches[0][2].trim() === value) {
+    throw Error(`Expected one changed canonical declaration for --${name}`);
+  }
+  return css.replace(declaration, (_, prefix) => `${prefix} ${value};`);
+}
+const rebrand = baseline ? originalTokens : Object.entries({
+  'brand-hue': '160',
+  'font-family-display': 'monospace',
+  'font-family-body': 'serif',
+  'layout-inset-scale': '1.5',
+  'section-space-scale': '1.75',
+  'card-padding': '1.5rem',
+  'layout-width-wide': '72rem',
+}).reduce((css, [name, value]) => replaceToken(css, name, value), originalTokens);
+const compact = baseline ? originalTokens : replaceToken(originalTokens, 'section-space-scale', '0.25');
 const cssByVariant = {};
 for (const variant of variants) {
   const source = await readFile(path.join(root, 'src/index.css'), 'utf8');
