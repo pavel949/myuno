@@ -147,6 +147,10 @@
   outline-offset: 3px;
 }
 
+.home-hero-search .home-search-date-trigger[data-with-guests] {
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+
 .home-hero-search .home-search-modes[data-marketplaces] > a {
   display: inline-flex;
   align-items: center;
@@ -155,6 +159,7 @@
   padding-inline: var(--section-title-gap);
   border: 1px solid hsl(var(--border));
   text-align: center;
+  font-size: var(--home-ui-body-small);
 }
 
 @media (max-width: 767px) {
