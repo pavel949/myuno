@@ -225,8 +225,6 @@
   }
 
   .home-hero-search {
-    position: sticky;
-    top: var(--bible-chrome-height);
     margin-block-start: calc(-1 * var(--bible-home-hero-overlap));
   }
 
@@ -259,7 +257,7 @@
   .cinematic-home.home-refined .home-hero-search .home-search[data-home-discovery-mode] > .home-search-modes { grid-area: modes; }
   .cinematic-home.home-refined .home-hero-search .home-search[data-home-discovery-mode] > .home-search-duration { grid-area: duration; }
   .cinematic-home.home-refined .home-hero-search .home-search[data-home-discovery-mode] > .home-search-location { grid-area: area; }
-  .cinematic-home.home-refined .home-hero-search .home-search[data-home-discovery-mode] > .home-search-dates { grid-area: dates; }
+  .cinematic-home.home-refined .home-hero-search .home-search[data-home-discovery-mode] > .home-search-dates { grid-area: dates; padding: 0; border-inline: 0; align-self: end; }
   .cinematic-home.home-refined .home-hero-search .home-search[data-home-discovery-mode] > .home-search-type { grid-area: type; }
   .cinematic-home.home-refined .home-hero-search .home-search[data-home-discovery-mode] > .home-search-budget { grid-area: budget; }
   .cinematic-home.home-refined .home-hero-search .home-search[data-home-discovery-mode] > .home-search-bedrooms { grid-area: bedrooms; }
