@@ -106,24 +106,8 @@ Deno.serve(async (req) => {
       );
     }
 
-    // 3. Ensure user has property_manager role. Required for OwnerGuard-gated
-    // screens; treat failure as fatal and roll back so the write stays atomic.
-    const { error: roleError } = await supabase
-      .from("user_roles")
-      .upsert(
-        { user_id: userId, role: "property_manager" },
-        { onConflict: "user_id,role" }
-      );
-
-    if (roleError) {
-      console.error("Failed to upsert role:", roleError);
-      await supabase.from("management_company_members").delete().eq("company_id", company.id).eq("user_id", userId);
-      await supabase.from("management_companies").delete().eq("id", company.id);
-      return new Response(
-        JSON.stringify({ error: "Failed to grant role", detail: roleError.message }),
-        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
-    }
+    // 3. The property_manager role is granted only by an administrator after
+    // review; registration never self-assigns platform roles.
 
     return new Response(
       JSON.stringify({ company_id: company.id, slug: company.slug }),
