@@ -17,7 +17,7 @@ import { OffplanBuyerEnquiry } from '@/components/newbuilds/OffplanBuyerEnquiry'
  */
 
 import { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { Link, useParams, useNavigate } from 'react-router-dom';
 import { Building2, MapPin, CheckCircle2, MessageCircle, ExternalLink, FileSearch, FileText, Download } from 'lucide-react';
 import { BackButton } from '@/components/uno/BackButton';
 import { APP_ROUTES } from '@/lib/config/routes';
@@ -85,7 +85,7 @@ export default function OffplanDetail() {
     const frame = requestAnimationFrame(() => document.getElementById('project-units')?.scrollIntoView?.({ block: 'start' }));
     return () => cancelAnimationFrame(frame);
   }, [loadedProjectId, journeyLocation.hash]);
-  const { data: developer } = useDeveloper(project?.developerId || '');
+  const { data: developer, isLoading: developerLoading, isError: developerError, refetch: retryDeveloper } = useDeveloper(project?.developerId || '');
   const { data: nbProject } = useNewbuildProject(id);
   const showMaterials = activeTab === 'documents' || activeTab === 'units';
   const { data: allDocs = [], isLoading: docsLoading, isError: docsError, refetch: retryDocs } = useProjectDocuments(
@@ -394,7 +394,7 @@ export default function OffplanDetail() {
           </TabsContent>
 
           <TabsContent value="developer" className="pt-4">
-            {developer ? (
+            {developerLoading ? <Skeleton className="h-24" /> : developerError ? <QueryRecovery onRetry={retryDeveloper} /> : developer ? (
               <div className="space-y-4">
                 <div className="flex items-center gap-4">
                   {developer.logoUrl ? (
@@ -436,11 +436,24 @@ export default function OffplanDetail() {
               </div>
             ) : (
               <div className="text-center py-8 text-muted-foreground">
-                {pickLang(language, {"ru": "Информация о застройщике недоступна", "en": "Developer information not available", "th": "ยังไม่มีข้อมูลผู้พัฒนา"})}
+                {project.developerName && <p className="mb-2 font-semibold text-foreground">{project.developerName}</p>}
+                {pickLang(language, { ru: 'Публичный профиль застройщика недоступен', en: 'Public developer profile unavailable', th: 'ยังไม่มีโปรไฟล์สาธารณะของผู้พัฒนา' })}
               </div>
             )}
           </TabsContent>
         </Tabs>
+        <nav className="mt-6 flex flex-wrap gap-4" aria-label={pickLang(language, { ru: 'Предложения в комплексе', en: 'Listings in this complex', th: 'ประกาศในโครงการนี้' })}>
+          <Button asChild variant="outline">
+            <Link to={`${APP_ROUTES.COMPLEX_DETAIL(project.id)}?mode=buy`} state={publicJourneyState(journeyLocation)}>
+              {pickLang(language, { ru: 'Квартиры и дома на продажу', en: 'Homes for sale', th: 'ที่พักสำหรับขาย' })}
+            </Link>
+          </Button>
+          <Button asChild variant="outline">
+            <Link to={`${APP_ROUTES.COMPLEX_DETAIL(project.id)}?mode=rent`} state={publicJourneyState(journeyLocation)}>
+              {pickLang(language, { ru: 'Квартиры и дома в аренду', en: 'Homes to rent', th: 'ที่พักให้เช่า' })}
+            </Link>
+          </Button>
+        </nav>
       </div>
 
       {/* Lead Form — Sheet on mobile, Dialog on desktop */}
