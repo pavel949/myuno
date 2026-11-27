@@ -62,7 +62,7 @@ export default function Landing() {
           <HomeDiscoverySearch showGuestsInline progressive allowActivities />
         </div>
       </div>
-      <div className="home-container md:hidden">
+      {!homeV2 && <div className="home-container md:hidden">
         <Link
           to={propertySearchHref('', { mode: 'buy', maxPrice: String(DEFAULT_HOME_SALE_MAX_PRICE) })}
           onPointerEnter={() => prefetchRoute(R.PROPERTY_SEARCH)}
@@ -76,14 +76,8 @@ export default function Landing() {
           </span>
           <ArrowRight className="size-4 shrink-0" aria-hidden="true" />
         </Link>
-      </div>
-      <div className="home-container">
-        <a className="home-text-link ds-focus min-h-11" href="#home-partners">
-          {t({ ru: 'Разместить жильё, услугу или впечатление', en: 'List a property, service or experience', th: 'ลงประกาศที่พัก บริการ หรือกิจกรรม' })}
-          <ArrowRight size={16} aria-hidden="true" />
-        </a>
-        {!homeV2 && <RentalCommunities />}
-      </div>
+      </div>}
+      {!homeV2 && <div className="home-container"><a className="home-text-link ds-focus min-h-11" href="#home-partners">{t({ ru: 'Разместить жильё, услугу или впечатление', en: 'List a property, service or experience', th: 'ลงประกาศที่พัก บริการ หรือกิจกรรม' })}<ArrowRight size={16} aria-hidden="true" /></a><RentalCommunities /></div>}
       {homeV2 && <HomeV2Paths />}
       <HomeHousingPreview />
       <HomeSalePreview />
@@ -92,8 +86,8 @@ export default function Landing() {
         <HomeExperienceGallery />
         <HomeServiceGallery />
       </div>
-      <HomeLocationGallery />
       {homeV2 && <HomeV2Steps />}
+      <HomeLocationGallery />
       <section id="home-partners" className="home-partners-group scroll-mt-24" aria-labelledby="home-partners-title">
         <div className="home-container home-group-heading">
           <h2 id="home-partners-title">{t({ ru: 'Собственникам и партнёрам', en: 'For owners and partners', th: 'สำหรับเจ้าของและพาร์ทเนอร์' })}</h2>

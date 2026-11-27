@@ -446,3 +446,29 @@
     justify-self: start;
   }
 }
+
+/* Home V2 search polish: one segmented control style for modes and rental duration. */
+.cinematic-home.home-refined .home-hero-search .home-search-modes,
+.cinematic-home.home-refined .home-hero-search .home-search-duration { display: flex; gap: 0; }
+.cinematic-home.home-refined .home-hero-search .home-search-modes :is(button, a),
+.cinematic-home.home-refined .home-hero-search .home-search-duration button {
+  display: inline-flex; align-items: center; justify-content: center; flex: 0 0 auto;
+  min-block-size: var(--touch-target); padding-inline: 1rem; margin: 0;
+  border: 1px solid hsl(var(--border)); border-radius: 0; font-size: var(--home-ui-body-small);
+  background: hsl(var(--card)); color: hsl(var(--foreground));
+}
+.cinematic-home.home-refined .home-hero-search .home-search-modes :is(button, a) + :is(button, a),
+.cinematic-home.home-refined .home-hero-search .home-search-duration button + button { margin-inline-start: -1px; }
+.cinematic-home.home-refined .home-hero-search .home-search-modes > :first-child,
+.cinematic-home.home-refined .home-hero-search .home-search-duration > :first-child { border-start-start-radius: var(--bible-radius-control); border-end-start-radius: var(--bible-radius-control); }
+.cinematic-home.home-refined .home-hero-search .home-search-modes > :last-child,
+.cinematic-home.home-refined .home-hero-search .home-search-duration > :last-child { border-start-end-radius: var(--bible-radius-control); border-end-end-radius: var(--bible-radius-control); }
+.cinematic-home.home-refined .home-hero-search .home-search-duration button[aria-pressed=true] { background: hsl(var(--home-ui-control-navy)); color: hsl(var(--home-ui-white)); }
+@media (min-width: 768px) {
+  .cinematic-home.home-refined .home-hero-search .home-search[data-home-discovery-mode] > .home-search-duration { justify-content: flex-end; }
+}
+@media (max-width: 767px) {
+  .cinematic-home.home-refined .home-hero-search .home-search-modes { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .5rem; }
+  .cinematic-home.home-refined .home-hero-search .home-search-modes :is(button, a) { margin: 0 !important; border-radius: var(--bible-radius-control) !important; }
+  .cinematic-home.home-refined .home-hero-search .home-search-duration button { flex: 1 1 0; }
+}
