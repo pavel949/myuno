@@ -83,7 +83,7 @@ const TABS: TabConfig[] = [
     labelRu: 'Новостройки',
     labelTh: 'โครงการใหม่',
     icon: Building2,
-    path: APP_ROUTES.OFFPLAN,
+    path: APP_ROUTES.OFFPLAN_SEARCH,
   },
   {
     id: 'resale',
