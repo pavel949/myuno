@@ -63,6 +63,8 @@ interface UseEventsOptions {
   category?: string;
   featured?: boolean;
   limit?: number;
+  fromDate?: string;
+  beforeDate?: string;
 }
 
 const transformEvent = (event: unknown): Event => {
@@ -87,8 +89,10 @@ export const useEvents = (options: UseEventsOptions = {}) => {
     if (options.featured) {
       result.push({ column: 'is_featured', value: true });
     }
+    if (options.fromDate) result.push({ column: 'event_date', operator: 'gte', value: options.fromDate });
+    if (options.beforeDate) result.push({ column: 'event_date', operator: 'lt', value: options.beforeDate });
     return result;
-  }, [options.category, options.featured]);
+  }, [options.category, options.featured, options.fromDate, options.beforeDate]);
 
   const transform = useCallback((data: unknown[]) => data.map(transformEvent), []);
 

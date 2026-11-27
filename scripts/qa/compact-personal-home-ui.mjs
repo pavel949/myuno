@@ -144,6 +144,7 @@ const virtual = {
   '@/hooks/useFeedbackSettings': `export const getFeedbackSettings=()=>({hapticEnabled:false,soundEnabled:false});`,
   '@/hooks/useProperties': `export const useProperties=()=>({data:[],isLoading:false,isError:false,refetch:()=>{}});`,
   '@/hooks/useOffplanProjects': `export const useOffplanProjects=()=>({data:[],isLoading:false,isError:false,refetch:()=>{}});`,
+  '@/hooks/useEvents': `export const useEvents=()=>({events:[],isLoading:false});`,
   '@/hooks/useExperiences': `export const useExperiences=()=>({experiences:[],isLoading:false,error:null,refetch:()=>{}});`,
   '@/lib/catalog/useCatalogFromDB': `export const useCatalogFromDB=()=>({categories:[],isFromDB:true,isLoading:false,error:null,refetch:()=>{}});`,
   '@/contexts/CurrencyContext': `export const useCurrency=()=>({currency:'THB',formatPrice:n=>'THB '+n});`,

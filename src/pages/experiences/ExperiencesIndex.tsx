@@ -6,7 +6,7 @@ import { EXPERIENCE_DISCOVERY_GROUPS, experienceGroup, isFixedVenue, experienceC
 import { PUBLIC_CATALOG_GRID } from '@/design-system/ecosystemLayout';
 import '@/styles/public-commerce.css';
 import { useEffect, useMemo, useRef } from 'react';
-import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
+import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { Compass, X } from 'lucide-react';
 import { SEOHead } from '@/components/seo';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -207,6 +207,9 @@ export default function ExperiencesIndex() {
     <SEOHead title={t('Впечатления на Пхукете', 'Experiences in Phuket', 'ประสบการณ์ในภูเก็ต')}
       description={t('Экскурсии, острова и активный отдых: выберите тему и изучите предложения.', 'Tours, islands and activities: choose a category and explore the offers.', 'ทัวร์ เกาะ และกิจกรรม: เลือกหมวดหมู่และสำรวจข้อเสนอ')} />
     {categoriesQuery.isError && <div role="alert" className="space-y-3 border border-border p-4"><p>{t('Не удалось загрузить темы. Каталог и поиск остаются доступны.', 'Categories could not be loaded. You can still browse and search the catalogue.', 'โหลดหมวดหมู่ไม่สำเร็จ คุณยังสามารถดูและค้นหาในรายการได้')}</p><Button variant="outline" onClick={() => categoriesQuery.refetch()}>{t('Повторить загрузку тем', 'Retry categories', 'ลองโหลดหมวดหมู่อีกครั้ง')}</Button></div>}
+    <nav aria-label={t('Форматы отдыха', 'Ways to explore', 'รูปแบบกิจกรรม')}>
+      <Button asChild variant="outline"><Link to="/events">{t('Афиша мероприятий', 'Event calendar', 'ปฏิทินกิจกรรม')}</Link></Button>
+    </nav>
     {overview && !categoriesQuery.isError && <ExperienceCategoryMenu categories={availableCategories} offers={experiences} onGroupSelect={group => { focusResults.current = true; update('group', group); }} selected={selectedCategory} images={categoryImages} onSelect={slug => { focusResults.current = true; update('category', slug); }} />}
     {groupRecord && <nav className="flex flex-wrap gap-2" aria-label={t('Темы раздела', 'Section topics', 'หัวข้อในหมวด')}>
       {availableCategories.map(category => <Button key={category.id} variant={selectedCategory === category.slug ? 'secondary' : 'outline'} size="sm" aria-pressed={selectedCategory === category.slug} onClick={() => update('category', category.slug)}>{experienceCategoryLabel(category, language)}</Button>)}

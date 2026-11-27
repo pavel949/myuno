@@ -385,10 +385,6 @@
     font-size: var(--home-ui-caption-small);
     line-height: 1.3;
   }
-  /* Category tiles already link to Flowers / Yachts. Remove redundant mobile links. */
-  .cinematic-home.home-refined .home-life-group:has(.home-service-category-card) .home-category-navigation {
-    display: none;
-  }
 
   /* District guides: clean editorial navigation instead of four identical fake photos. */
   .cinematic-home.home-refined .home-locations .home-rail-viewport {
@@ -465,4 +461,69 @@
 }
 @media (prefers-reduced-motion: reduce) {
   .cinematic-home.home-refined .home-reference-direction { transition: none; }
+}
+
+/* Give stored catalogue photos room without clipping the underlying image. */
+.cinematic-home.home-refined .home-catalog-card,
+.cinematic-home.home-refined .home-services .home-service-category-card {
+  border-radius: var(--radius);
+}
+:is(.cinematic-home.home-refined .home-experiences .home-catalog-photo, .cinematic-home.home-refined .home-gallery .home-listing-photo, .cinematic-home.home-refined .home-gallery .premium-project-photo) {
+  aspect-ratio: 3 / 2;
+  height: auto;
+  border-radius: var(--radius);
+  overflow: hidden;
+  background: hsl(var(--muted));
+}
+:is(.cinematic-home.home-refined .home-experiences .home-catalog-photo, .cinematic-home.home-refined .home-gallery .home-listing-photo, .cinematic-home.home-refined .home-gallery .premium-project-photo) img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.cinematic-home.home-refined .home-rail--loop .home-rail-viewport {
+  display: flex;
+  grid-template-columns: none;
+  gap: var(--public-card-gap);
+  overflow-x: auto;
+  scroll-behavior: auto;
+}
+.cinematic-home.home-refined .home-rail--loop .home-rail-viewport > * {
+  flex: 0 0 min(78%, 19rem);
+}
+.cinematic-home.home-refined .home-rail--running .home-rail-viewport {
+  scroll-snap-type: none;
+}
+.cinematic-home.home-refined .home-rail--loop .home-rail-controls:not([hidden]) {
+  display: flex;
+}
+
+/* Preserve a visible next card on phones and keep property cards compact on desktop. */
+@media (min-width: 768px) {
+  .cinematic-home.home-refined .home-rail--loop .home-rail-viewport > * {
+    flex-basis: min(31%, 18rem);
+  }
+}
+.cinematic-home.home-refined .home-locations .home-guide-card {
+  color: hsl(var(--card-foreground));
+  border-radius: var(--radius);
+}
+.cinematic-home.home-refined .home-locations .home-guide-copy {
+  display: grid;
+  gap: var(--section-control-gap);
+  align-content: start;
+}
+.cinematic-home.home-refined .home-locations .home-guide-card h3 {
+  color: hsl(var(--card-foreground));
+}
+.cinematic-home.home-refined .home-locations .home-guide-pin {
+  display: block;
+  color: hsl(var(--primary));
+}
+.cinematic-home.home-refined .home-locations .home-guide-copy > span {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--section-control-gap);
+  color: hsl(var(--foreground));
 }

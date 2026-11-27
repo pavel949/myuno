@@ -90,7 +90,7 @@ export default function ServicesIndex({ embedded = false }: { embedded?: boolean
   const knownCategory = !category || (child ? Boolean(home) : categories.some(item => item.id === category));
   // Home functions remain request templates with indicative prices, not live supply.
   // A catalogue sibling tag is not a per-function LifeOS association. Templates remain browsable without the situation filter.
-  const showRequests = Boolean((category === home?.id || filters.query.trim()) && (!category || category === home?.id) && home && !filters.situation && knownSituation);
+  const showRequests = Boolean(home && (!category || category === home.id) && !filters.situation && knownSituation);
   const requests = showRequests ? functions.filter(fn => (!child || fn.category === child.id) && matchesServiceQuery(filters.query, [fn.raw.nameRu, fn.raw.nameEn, fn.raw.descriptionRu, fn.raw.descriptionEn, homeServiceCategoryLabel(fn.category, language)])) : [];
   const requestPreviews = SERVICE_CATEGORIES.flatMap(item => {
     const matches = requests.filter(fn => fn.category === item.id);
@@ -199,10 +199,20 @@ export default function ServicesIndex({ embedded = false }: { embedded?: boolean
     {ready && !noResults && !overview && rows.length > 0 && <section aria-labelledby="service-results-title" className="space-y-4">
       <div data-testid="service-results-heading-row" className="flex flex-col items-start gap-2 sm:flex-row sm:items-baseline sm:justify-between"><h2 id="service-results-title" tabIndex={-1} className="font-display text-h3">{filters.category ? categoryLabel : t('Направления услуг', 'Service catalogue', 'รายการบริการ')}</h2><p role="status" className="text-sm text-muted-foreground">{t('Направлений', 'Service types', 'ประเภทบริการ')}: {rows.length}</p></div>
       <p className="text-sm text-muted-foreground">{t('Условия, цена и способ заказа — на странице услуги.', 'See conditions, prices and how to order on the service page.', 'ดูเงื่อนไข ราคา และวิธีสั่งบริการในหน้าบริการ')}</p>
-      <div className={PUBLIC_CATALOG_COMPACT_GRID} data-testid="service-catalogue-results">
-        {rows.slice(0, limit).map(({ service, category: parent }) => <Link key={service.id} to={service.path} state={{ returnTo }} className="group flex min-w-0 items-center gap-3 border border-border bg-card p-4 hover:border-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
-          <service.icon className="size-5 shrink-0 text-muted-foreground" aria-hidden="true" /><div className="min-w-0 flex-1"><p className="text-sm text-muted-foreground">{label(parent)}</p><h3 className="font-medium">{label(service)}</h3></div><ArrowRight className="size-4 shrink-0" aria-hidden="true" />
+      <div data-testid="service-catalogue-results" className="space-y-6">
+        {(filters.situation ? categories.map(parent => ({
+          parent,
+          entries: rows.slice(0, limit).filter(row => row.category.id === parent.id),
+        })).filter(group => group.entries.length > 0) : [{ parent: undefined, entries: rows.slice(0, limit) }]).map(group => (
+          <div key={group.parent?.id ?? 'results'} className="space-y-3">
+            {group.parent && <h3 className="font-medium">{label(group.parent)}</h3>}
+            <div className={PUBLIC_CATALOG_COMPACT_GRID}>
+              {group.entries.map(({ service, category: parent }) => <Link key={service.id} to={service.path} state={{ returnTo }} className="group flex min-w-0 items-center gap-3 border border-border bg-card p-4 hover:border-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+          <service.icon className="size-5 shrink-0 text-muted-foreground" aria-hidden="true" /><div className="min-w-0 flex-1">{!filters.situation && <p className="text-sm text-muted-foreground">{label(parent)}</p>}{filters.situation ? <span className="block font-medium">{label(service)}</span> : <h3 className="font-medium">{label(service)}</h3>}</div><ArrowRight className="size-4 shrink-0" aria-hidden="true" />
         </Link>)}
+            </div>
+          </div>
+        ))}
       </div>
       {rows.length > limit && <Button variant="outline" onClick={() => setLimit(value => value + 12)}>{t('Показать ещё', 'Show more', 'แสดงเพิ่มเติม')}</Button>}
     </section>}
@@ -215,7 +225,8 @@ export default function ServicesIndex({ embedded = false }: { embedded?: boolean
     {ready && requests.length > 0 && <section aria-labelledby="service-requests" className="space-y-4">
       <header className="space-y-2"><h2 id="service-requests" className="font-display text-h3">{t('Услуги для дома по запросу', 'Home service requests', 'คำขอบริการสำหรับบ้าน')}</h2><p className="text-sm text-muted-foreground">{t('Цены ориентировочные. Исполнитель, время и итоговая стоимость подтверждаются после заявки.', 'Prices are estimates. The provider, time and final price are confirmed after your request.', 'ราคาเป็นเพียงประมาณการ ผู้ให้บริการ เวลา และราคาสุดท้ายจะได้รับการยืนยันหลังจากส่งคำขอ')}</p></header>
       <div className={PUBLIC_CATALOG_GRID} data-testid="service-request-grid">{visibleRequests.map(fn => <div key={fn.id} data-service-category={fn.category} className="min-w-0"><ServiceFunctionCard fn={fn} catalogue onClick={() => navigate(`/services/order/${fn.id}?returnTo=${encodeURIComponent(returnTo)}`, { state: { returnTo, catalogueState: location.state, catalogueHash: location.hash } })} /></div>)}</div>
-      {visibleRequests.length < requests.length && <Button variant="outline" onClick={() => setShowAllRequests(true)}>{t(`Все услуги для дома (${requests.length})`, `All home services (${requests.length})`, `บริการสำหรับบ้านทั้งหมด (${requests.length})`)}</Button>}
+      {overview && home && <Button variant="outline" onClick={() => update('category', home.id)}>{t('Все категории услуг для дома', 'All home service categories', 'หมวดหมู่บริการสำหรับบ้านทั้งหมด')}</Button>}
+      {!overview && visibleRequests.length < requests.length && <Button variant="outline" onClick={() => setShowAllRequests(true)}>{t(`Все услуги для дома (${requests.length})`, `All home services (${requests.length})`, `บริการสำหรับบ้านทั้งหมด (${requests.length})`)}</Button>}
     </section>}
     {ready && !showOffers && (['district', 'date', 'minPrice', 'maxPrice', 'currency', 'today'].some(key => params.has(key)) || (!offers.isLoading && !offers.isError && Boolean(offers.data?.length))) && <section className="space-y-2 border-t border-border pt-4" aria-labelledby="provider-filter-note">
       <h2 id="provider-filter-note" className="font-display text-h3">{t('Предложения специалистов', 'Provider offers', 'ข้อเสนอจากผู้ให้บริการ')}</h2>

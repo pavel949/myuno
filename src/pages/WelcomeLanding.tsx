@@ -20,6 +20,8 @@
  *   11. Sticky mobile bar — переключается между signup и partner по скроллу
  */
 import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { BottomBar } from '@/components/nav/BottomBar';
+import { HomeV2Paths } from '@/components/home/HomeV2Sections';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
@@ -264,7 +266,7 @@ const PARTNER_CATEGORIES: Bi = {
 
 /* ------------------------------------------------------------------ */
 
-export default function WelcomeLanding() {
+export default function WelcomeLanding({ compact = false }: { compact?: boolean }) {
   const { language } = useLanguage();
   const isRu = language === 'ru';
   const navigate = useNavigate();
@@ -321,6 +323,49 @@ export default function WelcomeLanding() {
     en: `The myUNO ecosystem brings together ${totalEligibleServices} vetted services for foreigners and the local businesses that serve them — in one account, in Russian, English and Thai.`,
     th: `ระบบนิเวศ myUNO รวบรวม ${totalEligibleServices} บริการที่ได้รับการตรวจสอบสำหรับชาวต่างชาติ และธุรกิจท้องถิ่นที่พร้อมให้บริการ — ในบัญชีเดียว ทั้งภาษารัสเซีย อังกฤษ และไทย`,
   };
+
+  if (compact) {
+    return (
+      <div className="min-h-screen bg-background pb-24 text-foreground">
+        <LandingChrome isRu={isRu} />
+        <main>
+          <LandingContainer className="space-y-4 py-6">
+            <nav className="flex flex-wrap items-center gap-4 text-body-sm" aria-label={tx(language, { ru: 'Вид myUNO', en: 'myUNO view', th: 'มุมมอง myUNO' })}>
+              <Link className="ds-focus inline-flex min-h-11 items-center underline" to={APP_ROUTES.HOME}>{tx(language, { ru: 'Главная', en: 'Home', th: 'หน้าหลัก' })}</Link>
+              <span aria-current="page">{tx(language, { ru: 'Все разделы', en: 'All sections', th: 'ทุกหมวดหมู่' })}</span>
+            </nav>
+            <h1 className="font-display text-h2">{tx(language, { ru: 'Все разделы myUNO', en: 'Explore myUNO', th: 'สำรวจ myUNO' })}</h1>
+            <div className="flex flex-wrap gap-3">
+              <Link className="ds-focus inline-flex min-h-11 items-center rounded-[var(--bible-radius-control)] bg-primary px-4 text-primary-foreground" to={APP_ROUTES.SEARCH}>{tx(language, { ru: 'Поиск по myUNO', en: 'Search myUNO', th: 'ค้นหาใน myUNO' })}</Link>
+              <Link className="ds-focus inline-flex min-h-11 items-center rounded-[var(--bible-radius-control)] border border-border px-4" to={APP_ROUTES.BOOKINGS}>{tx(language, { ru: 'Мои заявки и бронирования', en: 'My requests and bookings', th: 'คำขอและการจองของฉัน' })}</Link>
+            </div>
+          </LandingContainer>
+          <HomeV2Paths />
+          <LandingContainer className="py-4">
+            <Link className="ds-focus inline-flex min-h-11 items-center gap-2 rounded-[var(--bible-radius-card)] border border-border bg-card px-4 text-card-foreground hover:border-primary" to={APP_ROUTES.EVENTS}>
+              {tx(language, { ru: 'Афиша Пхукета', en: 'Phuket event calendar', th: 'ปฏิทินกิจกรรมภูเก็ต' })}
+              <ArrowRight className="size-4" aria-hidden="true" />
+            </Link>
+          </LandingContainer>
+          {visibleClusters.length > 0 && <LandingContainer className="space-y-4 py-6">
+            <h2 className="font-display text-h3">{tx(language, { ru: 'По направлениям', en: 'Browse by topic', th: 'เลือกตามหัวข้อ' })}</h2>
+            <ul className="grid grid-cols-2 gap-3 md:grid-cols-3">
+              {visibleClusters.map(cluster => {
+                const Icon = cluster.icon;
+                return <li key={cluster.id}>
+                  <Link to={cluster.homeRoute} className="ds-focus flex h-full flex-col gap-3 rounded-[var(--bible-radius-card)] border border-border bg-card p-4 text-card-foreground hover:border-primary">
+                    <Icon className="size-5 text-primary" aria-hidden="true" />
+                    <span className="font-medium">{isRu ? cluster.labelRu : cluster.labelEn}</span>
+                  </Link>
+                </li>;
+              })}
+            </ul>
+          </LandingContainer>}
+        </main>
+        <BottomBar role="guest" />
+      </div>
+    );
+  }
 
   return (
     <div

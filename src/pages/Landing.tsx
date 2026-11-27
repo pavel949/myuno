@@ -1,3 +1,4 @@
+import { HomeDiscoveryPaths } from '@/components/home/HomeDiscoveryPaths';
 /** Cinematic public front door. Existing authenticated workspace stays in HomeRouter. */
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
@@ -21,7 +22,7 @@ import { HomeAudienceGrid, HomeTrustBar } from '@/components/home/HomeAudienceGr
 import { HomeDiscoverySearch } from '@/components/home/HomeDiscoverySearch';
 import { HomeUrgentHelp } from '@/components/home/HomeUrgentHelp';
 import { RentalCommunities } from '@/components/property/RentalCommunities';
-import { HomeV2Paths, HomeV2Steps } from '@/components/home/HomeV2Sections';
+import { HomeIslandLife, HomeV2Paths, HomeV2Steps } from '@/components/home/HomeV2Sections';
 import { useFeatureFlag } from '@/hooks/useFeatureFlag';
 import { homeCopy as copy } from '@/content/home/cinematicHome';
 import hero from '@/assets/hero-phuket-coast-editorial.webp';
@@ -77,20 +78,26 @@ export default function Landing() {
           <ArrowRight className="size-4 shrink-0" aria-hidden="true" />
         </Link>
       </div>}
-      {!homeV2 && <div className="home-container"><a className="home-text-link ds-focus min-h-11" href="#home-partners">{t({ ru: 'Разместить жильё, услугу или впечатление', en: 'List a property, service or experience', th: 'ลงประกาศที่พัก บริการ หรือกิจกรรม' })}<ArrowRight size={16} aria-hidden="true" /></a><RentalCommunities /></div>}
-      {homeV2 && <HomeV2Paths />}
+      <nav className="home-container home-category-navigation" aria-label={t({ ru: 'Вид myUNO', en: 'myUNO view', th: 'มุมมอง myUNO' })}>
+        <span aria-current="page">{t({ ru: 'Главная', en: 'Home', th: 'หน้าหลัก' })}</span>
+        <Link className="home-text-link ds-focus min-h-11" to={R.ECOSYSTEM}>{t({ ru: 'Все разделы', en: 'All sections', th: 'ทุกหมวดหมู่' })}<ArrowRight size={16} aria-hidden="true" /></Link>
+      </nav>
+      <HomeV2Paths />
       <HomeHousingPreview />
-      <HomeSalePreview />
-      <HomeNewbuildsPreview />
       <div className="home-life-group">
         <HomeExperienceGallery />
         <HomeServiceGallery />
+        <HomeIslandLife />
       </div>
+      <nav className="home-container home-category-navigation" aria-label={t({ ru: 'Каталоги недвижимости', en: 'Property catalogues', th: 'รายการอสังหาริมทรัพย์' })}><HomeDiscoveryPaths kind="homes" /></nav>
+      <HomeSalePreview />
+      <HomeNewbuildsPreview />
+      <div className="home-container"><RentalCommunities carousel /></div>
       {homeV2 && <HomeV2Steps />}
       <HomeLocationGallery />
       <section id="home-partners" className="home-partners-group scroll-mt-24" aria-labelledby="home-partners-title">
         <div className="home-container home-group-heading">
-          <h2 id="home-partners-title">{t({ ru: 'Собственникам и партнёрам', en: 'For owners and partners', th: 'สำหรับเจ้าของและพาร์ทเนอร์' })}</h2>
+          <h2 id="home-partners-title">{t({ ru: 'Застройщикам, собственникам и поставщикам', en: 'For developers, property owners and providers', th: 'สำหรับผู้พัฒนา เจ้าของอสังหาริมทรัพย์ และผู้ให้บริการ' })}</h2>
         </div>
         <HomeAudienceGrid />
         <HomeTrustBar />

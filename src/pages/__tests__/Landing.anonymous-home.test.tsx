@@ -96,13 +96,13 @@ it('reserves the shared mobile bar height and safe area below the footer, with n
  expect(tokens).toMatch(/@media \(min-width: 768px\)[\s\S]*--bottom-nav-h:\s*0px/);
 });
 
-it('uses one choice layer, groups property before island services and keeps consumer out of partner block', () => {
+it('surfaces island services before secondary property galleries and keeps consumer out of partner block', () => {
  show();
  const main = screen.getByRole('main');
  expect(within(main).getByRole('link', { name: /Homes for sale.*10,000,000/ })).toHaveAttribute('href', '/property/search?mode=buy&maxPrice=10000000');
  expect(main.textContent!.indexOf('Published housing')).toBeLessThan(main.textContent!.indexOf('Published sale homes'));
- expect(main.textContent!.indexOf('Published new developments')).toBeLessThan(main.textContent!.indexOf('Service categories'));
- expect(main.textContent!.indexOf('Published new developments')).toBeLessThan(main.textContent!.indexOf('Published experiences'));
+ expect(main.textContent!.indexOf('Service categories')).toBeLessThan(main.textContent!.indexOf('Published new developments'));
+ expect(main.textContent!.indexOf('Published experiences')).toBeLessThan(main.textContent!.indexOf('Published new developments'));
  const partners = screen.getByRole('region', { name: 'For owners and partners' });
  expect(within(partners).queryByText('I need a home or service')).toBeNull();
  expect(within(partners).getByRole('link', { name: /I own property/ })).toHaveAttribute('href', '/owner/onboarding');
@@ -119,3 +119,5 @@ it('shows configured social profiles in the anonymous homepage footer', () => {
  expect(within(panel).getByRole('link', { name: 'YouTube' })).toHaveAttribute('href', 'https://youtube.com/@synthetic');
  expect(within(panel).queryByRole('link', { name: 'Facebook' })).toBeNull();
 });
+
+vi.mock('@/lib/catalog/useCatalogFromDB', () => ({ useCatalogFromDB: () => ({ categories: [], lifeSituations: [], isFromDB: true, isLoading: false }) }));

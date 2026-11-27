@@ -225,3 +225,5 @@ it('selects a usable experience beyond the original eight candidates without inv
   expect(screen.getByRole('link', { name: /Later published experience/ })).toHaveAttribute('href', '/experiences/later-photo');
   expect(screen.queryByRole('link', { name: 'Tours' })).toBeNull();
 });
+
+vi.mock('@/hooks/useEvents', () => ({ useEvents: () => ({ events: [], isLoading: false }) }));

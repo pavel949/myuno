@@ -121,7 +121,7 @@ export function LifeOSStructureTab() {
         ))}
       </div>
       <div className="flex flex-wrap items-center gap-4">
-        <Input className="max-w-xs" value={q} onChange={(e) => setQ(e.target.value)} placeholder={ru ? 'Поиск' : 'Search'} aria-label={ru ? 'Поиск' : 'Search'} />
+        <Input className="flex-1" value={q} onChange={(e) => setQ(e.target.value)} placeholder={ru ? 'Поиск' : 'Search'} aria-label={ru ? 'Поиск' : 'Search'} />
         <div className="flex items-center gap-2">
           <Switch id="gaps-only" checked={gapsOnly} onCheckedChange={setGapsOnly} />
           <Label htmlFor="gaps-only">{ru ? 'Только с пробелами' : 'Gaps only'}</Label>

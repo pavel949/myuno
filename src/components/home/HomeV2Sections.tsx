@@ -1,42 +1,42 @@
 import { Link } from 'react-router-dom';
-import { ArrowRight, BedDouble, Building2, Compass, HardHat, Handshake, Sparkles, Wrench } from 'lucide-react';
+import { ArrowRight, BedDouble, Building2, Compass, Sparkles, Wrench } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { pickLang, type LangValues } from '@/lib/i18n/pickLang';
 import { APP_ROUTES as R } from '@/lib/config/routes';
-import { useLifeSituations } from '@/hooks/useLifeOS';
-import { buildSituationListUrl } from '@/lib/navigation/situationUrls';
+import { useCatalogFromDB } from '@/lib/catalog/useCatalogFromDB';
+import { serviceDiscoveryCategories, serviceDiscoverySituations } from '@/lib/services/serviceDiscoveryProjection';
 import { Skeleton } from '@/components/ui/skeleton';
 
 type Path = { key: string; to: string; icon: LucideIcon; title: LangValues; text: LangValues };
 
-/** Six primary choices; navigation only, never evidence of supply or availability. */
+/** Four primary choices; navigation only, never evidence of supply or availability. */
 export const HOME_V2_PATHS: readonly Path[] = [
   { key: 'rent', to: R.PROPERTY_RENT, icon: BedDouble, title: { ru: 'Аренда', en: 'Rent', th: 'เช่า' }, text: { ru: 'Посуточно и помесячно', en: 'Nightly and monthly', th: 'รายวันและรายเดือน' } },
-  { key: 'buy', to: R.PROPERTY_BUY, icon: Building2, title: { ru: 'Покупка', en: 'Buy', th: 'ซื้อ' }, text: { ru: 'Готовое жильё', en: 'Ready homes', th: 'บ้านพร้อมอยู่' } },
-  { key: 'offplan', to: R.OFFPLAN, icon: HardHat, title: { ru: 'Новостройки', en: 'New developments', th: 'โครงการใหม่' }, text: { ru: 'Проекты и условия', en: 'Projects and terms', th: 'โครงการและเงื่อนไข' } },
-  { key: 'experiences', to: R.EXPERIENCES, icon: Compass, title: { ru: 'Впечатления', en: 'Experiences', th: 'ประสบการณ์' }, text: { ru: 'Отдых на острове', en: 'Time on the island', th: 'กิจกรรมบนเกาะ' } },
-  { key: 'services', to: R.GOAL_SERVICES, icon: Wrench, title: { ru: 'Сервисы', en: 'Services', th: 'บริการ' }, text: { ru: 'Помощь в быту', en: 'Everyday help', th: 'ความช่วยเหลือในชีวิตประจำวัน' } },
-  { key: 'partners', to: R.LIST_WITH_US, icon: Handshake, title: { ru: 'Партнёрам', en: 'Partners', th: 'พาร์ทเนอร์' }, text: { ru: 'Разместить объявление', en: 'Post a listing', th: 'ลงประกาศ' } },
+  { key: 'buy', to: R.PROPERTY_BUY, icon: Building2, title: { ru: 'Покупка', en: 'Buy', th: 'ซื้อ' }, text: { ru: 'Новостройки и вторичка', en: 'New builds and resale', th: 'บ้านพร้อมอยู่' } },
+  { key: 'experiences', to: R.EXPERIENCES, icon: Compass, title: { ru: 'Впечатления', en: 'Experiences', th: 'ประสบการณ์' }, text: { ru: 'Экскурсии, яхты и активный отдых', en: 'Tours, yachts and outdoor activities', th: 'กิจกรรมบนเกาะ' } },
+  { key: 'services', to: R.GOAL_SERVICES, icon: Wrench, title: { ru: 'Услуги', en: 'Services', th: 'บริการ' }, text: { ru: 'Дом, транспорт, визы и другое', en: 'Home, transport, visas and more', th: 'ความช่วยเหลือในชีวิตประจำวัน' } },
 ];
 
 /** Island life panel: live active situations from Life OS; falls back to the navigator link only. */
-function HomeIslandLife() {
+export function HomeIslandLife() {
   const { language } = useLanguage();
   const t = (v: LangValues) => pickLang(language, v);
-  const { data, isLoading, isError } = useLifeSituations();
-  const items = (data ?? []).slice(0, 4);
-  return <div className="flex h-full flex-col rounded-[var(--bible-radius-card)] bg-primary p-5 text-primary-foreground md:p-6">
+  const catalog = useCatalogFromDB();
+  const items = catalog.isFromDB
+    ? serviceDiscoverySituations(serviceDiscoveryCategories(catalog.categories), catalog.lifeSituations ?? []).slice(0, 4)
+    : [];
+  return <section aria-labelledby="home-life-situations-title" className="home-container flex flex-col rounded-[var(--bible-radius-card)] bg-primary p-5 text-primary-foreground md:p-6">
     <Sparkles className="size-5" aria-hidden="true" />
-    <h3 className="mt-3 text-xl font-semibold">{t({ ru: 'Жизнь на острове', en: 'Island life', th: 'ชีวิตบนเกาะ' })}</h3>
+    <h2 id="home-life-situations-title" className="mt-3 text-xl font-semibold">{t({ ru: 'Жизненные ситуации', en: 'Life situations', th: 'สถานการณ์ชีวิต' })}</h2>
     <p className="mt-1 text-sm opacity-80">{t({ ru: 'Выберите вашу ситуацию — подскажем, что сделать и кто поможет.', en: 'Pick your situation and see what to do and who can help.', th: 'เลือกสถานการณ์ของคุณ แล้วดูว่าต้องทำอะไรและใครช่วยได้' })}</p>
-    {isLoading && <div className="mt-4 grid gap-2">{[0, 1, 2, 3].map(i => <Skeleton key={i} className="h-11 bg-primary-foreground/15" />)}</div>}
-    {!isLoading && !isError && items.length > 0 && <ul className="mt-4 grid gap-2">{items.map(s => <li key={s.id}>
-      <Link className="ds-focus flex min-h-11 items-center justify-between gap-3 rounded-[var(--bible-radius-control)] border border-primary-foreground/20 px-3 py-2 text-sm transition-colors hover:bg-primary-foreground/10" to={buildSituationListUrl(s.code)}>
-        <span className="min-w-0 truncate">{language === 'ru' ? s.title_ru : s.title_en}</span><ArrowRight className="size-4 shrink-0" aria-hidden="true" />
+    {catalog.isLoading && <div className="mt-4 grid gap-2">{[0, 1, 2, 3].map(i => <Skeleton key={i} className="h-11 bg-primary-foreground/15" />)}</div>}
+    {!catalog.isLoading && !catalog.error && items.length > 0 && <ul className="mt-4 grid gap-2">{items.map(s => <li key={s.code}>
+      <Link className="ds-focus flex min-h-11 items-center justify-between gap-3 rounded-[var(--bible-radius-control)] border border-primary-foreground/20 px-3 py-2 text-sm transition-colors hover:bg-primary-foreground/10" to={`${R.GOAL_SERVICES}?${new URLSearchParams({ browse: "situations", situation: s.code })}`}>
+        <span className="min-w-0 break-words">{language === 'ru' ? s.titleRu : s.titleEn}</span><ArrowRight className="size-4 shrink-0" aria-hidden="true" />
       </Link></li>)}</ul>}
-    <Link className="ds-focus mt-auto inline-flex min-h-11 items-center gap-1 pt-4 text-sm font-medium underline underline-offset-4" to={R.DISCOVER_SITUATIONS}>{t({ ru: 'Все жизненные ситуации', en: 'All life situations', th: 'สถานการณ์ทั้งหมด' })}<ArrowRight size={16} aria-hidden="true" /></Link>
-  </div>;
+    <Link className="ds-focus mt-auto inline-flex min-h-11 items-center gap-1 pt-4 text-sm font-medium underline underline-offset-4" to={`${R.GOAL_SERVICES}?browse=situations`}>{t({ ru: 'Все жизненные ситуации', en: 'All life situations', th: 'สถานการณ์ทั้งหมด' })}<ArrowRight size={16} aria-hidden="true" /></Link>
+  </section>;
 }
 
 export function HomeV2Paths() {
@@ -44,14 +44,11 @@ export function HomeV2Paths() {
   const t = (v: LangValues) => pickLang(language, v);
   return <section className="home-container py-8" aria-labelledby="home-v2-paths-title">
     <h2 id="home-v2-paths-title" className="mb-4 !text-2xl md:!text-3xl">{t({ ru: 'С чего начать', en: 'Where to start', th: 'เริ่มต้นจากตรงไหน' })}</h2>
-    <div className="grid gap-3 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)]">
-      <HomeIslandLife />
-      <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3">{HOME_V2_PATHS.map(p => { const Icon = p.icon; return <li key={p.key}>
+      <ul className="grid grid-cols-2 gap-3 lg:grid-cols-4">{HOME_V2_PATHS.map(p => { const Icon = p.icon; return <li key={p.key}>
         <Link className="ds-focus flex h-full min-h-24 flex-col justify-between gap-3 rounded-[var(--bible-radius-card)] border border-border bg-card p-4 text-foreground transition-colors hover:border-primary" to={p.to}>
           <Icon className="size-5 shrink-0 text-primary" aria-hidden="true" />
           <span className="min-w-0"><span className="block font-medium leading-snug">{t(p.title)}</span><span className="mt-1 block text-sm text-muted-foreground">{t(p.text)}</span></span>
         </Link></li>; })}</ul>
-    </div>
   </section>;
 }
 

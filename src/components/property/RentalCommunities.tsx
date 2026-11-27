@@ -1,3 +1,4 @@
+import { HorizontalRail } from "@/components/home/HorizontalRail";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { ArrowRight, ArrowUpRight, Building2 } from "lucide-react";
@@ -69,7 +70,7 @@ function Community({ project }: { project: PropertyProject }) {
     </Link>
   );
 }
-export function RentalCommunities() {
+export function RentalCommunities({ carousel = false }: { carousel?: boolean }) {
   const { language } = useLanguage();
   const t = (value: LangValues) => pickLang(language, value);
   const homes = useProperties({ listingType: "rent", rentTenancy: "short", districts: phuketDistricts }, 60);
@@ -89,6 +90,7 @@ export function RentalCommunities() {
   const loading = homes.isLoading || (ids.length > 0 && projects.isLoading);
   const error = homes.isError || (ids.length > 0 && projects.isError);
   const rows = ids.flatMap(id => (projects.data ?? []).filter(project => project.id === id));
+  const cards = rows.map(project => <Community key={project.id} project={project} />);
   return (
     <section
       className="rental-section"
@@ -149,11 +151,8 @@ export function RentalCommunities() {
           </Button>
         </div>
       ) : rows.length ? (
-        <div className="rental-community-grid">
-          {rows.map((project) => (
-            <Community key={project.id} project={project} />
-          ))}
-        </div>
+        carousel ? <HorizontalRail label={t({ ru: "Жилые комплексы", en: "Residential communities", th: "โครงการที่พัก" })} autoLoop>{cards}</HorizontalRail>
+          : <div className="rental-community-grid">{cards}</div>
       ) : (
         <p className="rental-data-state">
           {t({

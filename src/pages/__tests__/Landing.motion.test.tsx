@@ -42,3 +42,5 @@ describe('static public hero', () => {
     expect(screen.queryByRole('button', { name: /Pause motion|Resume motion/ })).toBeNull();
   });
 });
+
+vi.mock('@/lib/catalog/useCatalogFromDB', () => ({ useCatalogFromDB: () => ({ categories: [], lifeSituations: [], isFromDB: true, isLoading: false }) }));
