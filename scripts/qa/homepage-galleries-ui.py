@@ -17,19 +17,19 @@ LANGUAGES=[SHARD] if SHARD else ['en','ru','th']
 
 HOME_COPY = {
     'en': {
-        'form': 'Search myUNO', 'rent': 'Rent', 'activity': 'Experiences & services', 'buy': 'Buy',
+        'form': 'Search myUNO', 'rent': 'Rent', 'activity': 'Experiences', 'buy': 'Buy',
         'guests': 'Number of guests', 'filters': 'Filters', 'area_label': 'Choose an area', 'area': 'Rawai',
-        'done': 'Done', 'market': 'Choose a catalogue', 'services': 'Services', 'activity_query': 'What are you looking for?',
+        'done': 'Done', 'services': 'Services',
     },
     'ru': {
-        'form': 'Поиск на myUNO', 'rent': 'Аренда', 'activity': 'Экскурсии и услуги', 'buy': 'Покупка',
+        'form': 'Поиск на myUNO', 'rent': 'Аренда', 'activity': 'Впечатления', 'buy': 'Покупка',
         'guests': 'Количество гостей', 'filters': 'Фильтры', 'area_label': 'Выберите район', 'area': 'Равай',
-        'done': 'Готово', 'market': 'Раздел каталога', 'services': 'Услуги', 'activity_query': 'Что ищете?',
+        'done': 'Готово', 'services': 'Услуги',
     },
     'th': {
-        'form': 'ค้นหาใน myUNO', 'rent': 'เช่า', 'activity': 'ประสบการณ์และบริการ', 'buy': 'ซื้อ',
+        'form': 'ค้นหาใน myUNO', 'rent': 'เช่า', 'activity': 'ประสบการณ์', 'buy': 'ซื้อ',
         'guests': 'จำนวนผู้เข้าพัก', 'filters': 'ตัวกรอง', 'area_label': 'เลือกย่าน', 'area': 'Rawai',
-        'done': 'เสร็จสิ้น', 'market': 'เลือกแคตตาล็อก', 'services': 'บริการ', 'activity_query': 'คุณกำลังมองหาอะไร?',
+        'done': 'เสร็จสิ้น', 'services': 'บริการ',
     },
 }
 
@@ -41,9 +41,10 @@ async def check_home_entry(page, lang, width):
     await expect(panel.get_by_role('form', name=copy['form'], exact=True)).to_have_count(1)
     await expect(page.locator('form.home-search')).to_have_count(1)
     modes = search.locator('.home-search-modes')
-    await expect(modes.get_by_role('button')).to_have_count(3)
+    await expect(modes.get_by_role('button')).to_have_count(2)
+    await expect(modes.get_by_role('link')).to_have_count(2)
     rent = modes.get_by_role('button', name=copy['rent'], exact=True)
-    activity = modes.get_by_role('button', name=copy['activity'], exact=True)
+    activity = modes.get_by_role('link', name=copy['activity'], exact=True)
     buy = modes.get_by_role('button', name=copy['buy'], exact=True)
     await expect(rent).to_have_attribute('aria-pressed', 'true')
     await expect(activity).to_be_visible()
@@ -157,13 +158,13 @@ async def check_home_entry(page, lang, width):
         'checkIn': '2027-05-12', 'checkOut': '2027-05-15', 'guests': '3',
     }, rental
 
+    await expect(activity).to_have_attribute('href', '/experiences')
     await activity.press('Enter')
-    await expect(search).to_have_attribute('data-home-discovery-mode', 'activities')
-    await search.get_by_role('combobox', name=copy['market'], exact=True).press('Enter')
-    await page.get_by_role('option', name=copy['services'], exact=True).click()
-    await search.get_by_role('searchbox', name=copy['activity_query'], exact=True).fill('airport transfer')
-    await submit.press('Enter')
-    await expect(destination).to_have_text('/discover/services?q=airport+transfer')
+    await expect(destination).to_have_text('/experiences')
+    services = search.get_by_role('link', name=copy['services'], exact=True)
+    await expect(services).to_have_attribute('href', '/discover/services')
+    await services.press('Enter')
+    await expect(destination).to_have_text('/discover/services')
 
     await buy.press('Enter')
     await expect(search).to_have_attribute('data-home-discovery-mode', 'buy')
@@ -357,7 +358,7 @@ async def main():
                                              ('.home-service-category-card a[href="/transport/airport-transfer"]', '/transport/airport-transfer'),
                                              ('.home-service-category-card a[href="/transport/fast-track"]', '/transport/fast-track'),
                                              ('.home-service-category-card a[href="/discover/services?category=cat-home-services"]', '/discover/services?category=cat-home-services'),
-                                             ('.home-audience-card[href="/for-owners"]', '/for-owners')]:
+                                             ('.home-audience-card[href="/owner/onboarding"]', '/owner/onboarding')]:
                         link = page.locator(selector).first
                         href = await link.get_attribute('href')
                         assert href.startswith(prefix), href
@@ -368,7 +369,7 @@ async def main():
                     await page.locator('.home-hero-banner').scroll_into_view_if_needed()
                     await page.screenshot(path=str(OUTPUT/f'{lang}-{width}-homepage.png'), full_page=True)
                     assert not errors, errors
-                    results.append({'language':lang,'width':width,'state':'data','pageOverflow':False,'sections':6,'gridSections':grid_sections,'keyboardControlledRails':tested_controls,'swipe':width<768,'nativeMobileTap':width<768,'verifiedSearchModes':3,'errors':errors})
+                    results.append({'language':lang,'width':width,'state':'data','pageOverflow':False,'sections':6,'gridSections':grid_sections,'keyboardControlledRails':tested_controls,'swipe':width<768,'nativeMobileTap':width<768,'verifiedMarketplaceEntries':4,'errors':errors})
                     print(json.dumps({'completed':len(results),'language':lang,'width':width,'seconds':round(time.monotonic()-case_started,2)}),flush=True)
                 except Exception:
                     await page.screenshot(path=str(OUTPUT/f"failure-{lang}-{width}.png"),full_page=True)

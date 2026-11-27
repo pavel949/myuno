@@ -60,7 +60,7 @@
     },
     "SelectTrigger": {
       "directConsumerFiles": 233,
-      "sourceInstances": 462
+      "sourceInstances": 461
     },
     "Sheet": {
       "directConsumerFiles": 75,
@@ -6323,7 +6323,7 @@
     },
     {
       "file": "src/components/home/HomeDiscoverySearch.tsx",
-      "sha256": "5cd502a01ef5dc941e6df0ad0e3d61b0e8bd03f1369ece56d856238de85eda06",
+      "sha256": "7151b54e563b22dbd904e13db136cf6cbd02c8c7e4436475bd759a7f69e79895",
       "directRouteDeclarations": [],
       "runtime": "NOTTESTED",
       "visual": "NOTTESTED",
@@ -6333,19 +6333,18 @@
           "source": "@/components/ui/input",
           "instances": 1,
           "lines": [
-            173
+            145
           ]
         },
         {
           "name": "SelectTrigger",
           "source": "@/components/ui/select",
-          "instances": 5,
+          "instances": 4,
           "lines": [
-            126,
-            153,
-            190,
-            202,
-            215
+            125,
+            162,
+            174,
+            187
           ]
         }
       ]
@@ -6815,7 +6814,7 @@
     },
     {
       "file": "src/components/landing/MarketplaceEntry.tsx",
-      "sha256": "56c65a82951c019586e84ffeaf3519a68c932bfe9e32d8d531d87bdffc8e4005",
+      "sha256": "4e30a13f6cbe4b85ab04a3cbb7bd0b1f816eb76017bf772ab50e9f7901c95a2e",
       "directRouteDeclarations": [],
       "runtime": "NOTTESTED",
       "visual": "NOTTESTED",
@@ -6825,7 +6824,7 @@
           "source": "@/components/ui/button",
           "instances": 1,
           "lines": [
-            54
+            80
           ]
         }
       ]
@@ -6945,7 +6944,7 @@
     },
     {
       "file": "src/components/layout/FeatureLayout.tsx",
-      "sha256": "c76e8d7fd3ec16dd59c4ada8eb21c99dcb12f89bf0d89bbdccfdc8883fc48fb0",
+      "sha256": "b7f8a363a053356ed6471376da213bece9859397e514ed14bb5bbcf17ed45daf",
       "directRouteDeclarations": [],
       "runtime": "NOTTESTED",
       "visual": "NOTTESTED",
@@ -6961,10 +6960,10 @@
             284,
             299,
             325,
-            479,
-            525,
-            590,
-            605
+            483,
+            529,
+            594,
+            609
           ]
         },
         {
@@ -6972,8 +6971,8 @@
           "source": "@/components/page/EmptyState",
           "instances": 2,
           "lines": [
-            521,
-            531
+            525,
+            535
           ]
         },
         {
@@ -6981,7 +6980,7 @@
           "source": "@/components/uno/LoadingSpinner",
           "instances": 1,
           "lines": [
-            529
+            533
           ]
         }
       ]
@@ -8503,7 +8502,7 @@
     },
     {
       "file": "src/components/nav/ConsumerHeader.tsx",
-      "sha256": "ea4e0f3331631b46879a00cba4672a39c48b76601363c92399258ac49a11afc6",
+      "sha256": "199f9db3d1215be1a614ad49008c3a4d46f8b3802291ebd02e8c172328b90437",
       "directRouteDeclarations": [],
       "runtime": "NOTTESTED",
       "visual": "NOTTESTED",
@@ -8513,7 +8512,7 @@
           "source": "@/components/ui/button",
           "instances": 1,
           "lines": [
-            114
+            113
           ]
         },
         {
@@ -8521,7 +8520,7 @@
           "source": "@/components/ui/sheet",
           "instances": 1,
           "lines": [
-            96
+            95
           ]
         }
       ]
@@ -16153,6 +16152,23 @@
           "instances": 1,
           "lines": [
             192
+          ]
+        }
+      ]
+    },
+    {
+      "file": "src/components/property/RentalCommunities.tsx",
+      "sha256": "d6f118ed293c933e8cd993c64fc4713fafedc4a3111b84a6e356a7c2666018d8",
+      "directRouteDeclarations": [],
+      "runtime": "NOTTESTED",
+      "visual": "NOTTESTED",
+      "primitiveImports": [
+        {
+          "name": "Button",
+          "source": "@/components/ui/button",
+          "instances": 1,
+          "lines": [
+            141
           ]
         }
       ]
@@ -29635,7 +29651,7 @@
     },
     {
       "file": "src/pages/info/BecomePartnerPage.tsx",
-      "sha256": "c572231cf0fd195660d705e5672cb54c1c606090449e4518a985400a12eecf61",
+      "sha256": "a324b1990c039e921e48d1337e55613c9eebd209a15b7065584ad7f38d295b05",
       "directRouteDeclarations": [
         {
           "id": "2cdf42b824459183",
@@ -29652,11 +29668,11 @@
           "source": "@/components/ui/input",
           "instances": 5,
           "lines": [
-            314,
-            325,
-            339,
-            351,
-            365
+            324,
+            335,
+            349,
+            361,
+            375
           ]
         },
         {
@@ -29664,8 +29680,8 @@
           "source": "@/components/uno/PageContainer",
           "instances": 2,
           "lines": [
-            198,
-            228
+            206,
+            236
           ]
         },
         {
@@ -29673,7 +29689,7 @@
           "source": "@/components/uno/PageHeader",
           "instances": 1,
           "lines": [
-            229
+            237
           ]
         },
         {
@@ -29681,8 +29697,8 @@
           "source": "@/components/uno/SectionCard",
           "instances": 2,
           "lines": [
-            274,
-            304
+            284,
+            314
           ]
         },
         {
@@ -29690,8 +29706,8 @@
           "source": "@/components/uno/SectionCard",
           "instances": 2,
           "lines": [
-            275,
-            305
+            285,
+            315
           ]
         },
         {
@@ -29699,7 +29715,7 @@
           "source": "@/components/ui/textarea",
           "instances": 1,
           "lines": [
-            377
+            387
           ]
         }
       ]
@@ -40438,30 +40454,6 @@
           "instances": 1,
           "lines": [
             656
-          ]
-        }
-      ]
-    },
-    {
-      "file": "src/pages/property/PropertyLanding.tsx",
-      "sha256": "befdd44f26f1f66789cc56b458f3988fe9aa6ec111e8b25438ab4eb8b3f22131",
-      "directRouteDeclarations": [
-        {
-          "id": "2492a5f81192388c",
-          "path": "/property/rent",
-          "actor": "public-or-page-gated",
-          "kind": "rendered-template"
-        }
-      ],
-      "runtime": "NOTTESTED",
-      "visual": "NOTTESTED",
-      "primitiveImports": [
-        {
-          "name": "Button",
-          "source": "@/components/ui/button",
-          "instances": 1,
-          "lines": [
-            166
           ]
         }
       ]

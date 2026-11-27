@@ -342,8 +342,9 @@ describe('public business entry', () => {
   it('keeps the business destination out of the consumer top menu and bottom tabs', () => {
     expect(GUEST_TOP_NAV.map(item => item.path)).toEqual([
       APP_ROUTES.PROPERTY_RENT,
-      APP_ROUTES.GOAL_SERVICES,
       APP_ROUTES.PROPERTY_BUY,
+      APP_ROUTES.EXPERIENCES,
+      APP_ROUTES.GOAL_SERVICES,
       APP_ROUTES.RELOCATE,
       APP_ROUTES.AREA_INDEX,
     ]);

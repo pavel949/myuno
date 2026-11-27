@@ -1,6 +1,6 @@
 import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Menu, Search, Building2, Compass, ChevronRight, CalendarDays, ShoppingBag, HelpCircle, LogIn } from 'lucide-react';
+import { Menu, Search, Building2, ChevronRight, CalendarDays, ShoppingBag, HelpCircle, LogIn } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { pickLang } from '@/lib/i18n/pickLang';
@@ -54,8 +54,7 @@ export function ConsumerHeader({ overlay = false, onSearch, headerActions }: { o
   const frame = publicContentFrame(pathname);
   const signInPath = buildAuthPath({ from: `${pathname}${search}${hash}` });
   const activeDestination = getActiveGuestTopNavItem(pathname, search);
-  const experiencePath = pathname === R.EXPERIENCES || pathname.startsWith(`${R.EXPERIENCES}/`);
-  const activeMenuPath = experiencePath ? R.EXPERIENCES : activeDestination?.path;
+  const activeMenuPath = activeDestination?.path;
   const links = GUEST_TOP_NAV.map(item => ({
     to: item.path,
     Icon: item.icon,
@@ -166,16 +165,6 @@ export function ConsumerHeader({ overlay = false, onSearch, headerActions }: { o
                         <Icon aria-hidden="true" /><span>{label}</span><ChevronRight aria-hidden="true" />
                       </Link>
                     ))}
-                    <Link
-                      to={R.EXPERIENCES}
-                      onPointerEnter={() => prefetchRoute(R.EXPERIENCES)}
-                      onFocus={() => prefetchRoute(R.EXPERIENCES)}
-                      onClick={() => setOpen(false)}
-                      className="consumer-task-row"
-                      aria-current={activeMenuPath === R.EXPERIENCES ? 'page' : undefined}
-                    >
-                      <Compass aria-hidden="true" /><span>{t('Экскурсии и досуг', 'Experiences', 'ประสบการณ์')}</span><ChevronRight aria-hidden="true" />
-                    </Link>
                   </section>
                   <section className="consumer-task-section" aria-labelledby="consumer-personal-heading">
                     <h2 id="consumer-personal-heading">{t('Личный кабинет', 'Your plans', 'แผนของคุณ')}</h2>

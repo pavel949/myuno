@@ -21,6 +21,7 @@ vi.mock('@/components/home/HomeDiscoveryPreview', () => ({
   HomeSalePreview: () => <section>Published sale homes</section>,
 }));
 vi.mock('@/components/home/HomePopulatedProjects', () => ({ HomePopulatedProjects: () => <section aria-label="Project gallery">Populated public projects</section> }));
+vi.mock('@/components/property/RentalCommunities', () => ({ RentalCommunities: () => <section>Vacation rental communities</section> }));
 vi.mock('@/components/home/HomeCatalogGalleries', () => ({ HomeLocationGallery: () => null, HomeExperienceGallery: () => <section>Published experiences</section>, HomeServiceGallery: () => <section>Service categories</section> }));
 vi.mock('@/hooks/useProperties', () => ({ useProperties: () => ({ data: [], isLoading: false, isError: false }) }));
 vi.mock('@/components/property/PropertyListingCard', () => ({ PropertyListingCard: () => null }));
@@ -103,7 +104,9 @@ it('uses one choice layer, groups property before island services and keeps cons
  expect(main.textContent!.indexOf('Published new developments')).toBeLessThan(main.textContent!.indexOf('Published experiences'));
  const partners = screen.getByRole('region', { name: 'For owners and partners' });
  expect(within(partners).queryByText('I need a home or service')).toBeNull();
- expect(within(partners).getByRole('link', { name: /I own property/ })).toHaveAttribute('href', '/for-owners');
+ expect(within(partners).getByRole('link', { name: /I own property/ })).toHaveAttribute('href', '/owner/onboarding');
+ expect(within(partners).getByRole('link', { name: /I provide local services/ })).toHaveAttribute('href', '/become-partner?offer=services');
+ expect(within(partners).getByRole('link', { name: /I organise experiences/ })).toHaveAttribute('href', '/become-partner?offer=experiences');
  expect(document.querySelector('.home-owner-prompt')).toBeNull();
 });
 

@@ -13,8 +13,8 @@ vi.mock('@/components/layout/UserAvatarMenu', () => ({ UserAvatarMenu: () => nul
 vi.mock('@/hooks/useFeedbackSettings', () => ({ getFeedbackSettings: () => ({}) }));
 afterEach(() => { cleanup(); locale.language = 'ru'; prefetch.mockClear(); });
 it.each([
- ['/experiences', 'Услуги', 'Экскурсии и досуг'],
- ['/experiences/synthetic-tour', 'Услуги', 'Экскурсии и досуг'],
+ ['/experiences', 'Впечатления', 'Впечатления'],
+ ['/experiences/synthetic-tour', 'Впечатления', 'Впечатления'],
  ['/transport/transfer', 'Услуги', 'Услуги'],
  ['/property/search?mode=buy', 'Купить', 'Купить жильё'],
  ['/property/search?mode=rent', 'Жильё', 'Жильё'],

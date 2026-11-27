@@ -77,6 +77,7 @@ export const APP_ROUTES = {
 
   // ── B2B landing pages (public marketing) ──
   FOR_OWNERS: '/for-owners',
+  OWNER_ONBOARDING: '/owner/onboarding',
   FOR_MANAGEMENT_COMPANIES: '/for-management-companies',
   FOR_REAL_ESTATE_DEVELOPERS: '/for-developers',
   FOR_LOCAL_SERVICE_PROVIDERS: '/for-local-services',
@@ -745,4 +746,8 @@ export function canonicalRedirectHref(target: string, search = '', hash = ''): s
 export function getPasswordResetRedirectUrl(): string {
   if (typeof window === 'undefined') return '';
   return `${window.location.origin}${APP_ROUTES.AUTH_RESET_PASSWORD}`;
+}
+
+export function partnerOfferHref(offer: 'services' | 'experiences') {
+  return `${APP_ROUTES.BECOME_PARTNER}?offer=${offer}`;
 }
