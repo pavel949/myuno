@@ -4,7 +4,8 @@ import type { LucideIcon } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { pickLang, type LangValues } from '@/lib/i18n/pickLang';
 import { APP_ROUTES as R } from '@/lib/config/routes';
-import { useLifeSituations } from '@/hooks/useLifeOS';
+import { useCatalogFromDB } from '@/lib/catalog/useCatalogFromDB';
+import { serviceDiscoveryCategories, serviceDiscoverySituations } from '@/lib/services/serviceDiscoveryProjection';
 import { Skeleton } from '@/components/ui/skeleton';
 
 type Path = { key: string; to: string; icon: LucideIcon; title: LangValues; text: LangValues };
@@ -23,16 +24,18 @@ export const HOME_V2_PATHS: readonly Path[] = [
 export function HomeIslandLife() {
   const { language } = useLanguage();
   const t = (v: LangValues) => pickLang(language, v);
-  const { data, isLoading, isError } = useLifeSituations();
-  const items = (data ?? []).slice(0, 4);
+  const catalog = useCatalogFromDB();
+  const items = catalog.isFromDB
+    ? serviceDiscoverySituations(serviceDiscoveryCategories(catalog.categories), catalog.lifeSituations ?? []).slice(0, 4)
+    : [];
   return <section aria-labelledby="home-life-situations-title" className="home-container flex flex-col rounded-[var(--bible-radius-card)] bg-primary p-5 text-primary-foreground md:p-6">
     <Sparkles className="size-5" aria-hidden="true" />
     <h2 id="home-life-situations-title" className="mt-3 text-xl font-semibold">{t({ ru: 'Жизненные ситуации', en: 'Life situations', th: 'สถานการณ์ชีวิต' })}</h2>
     <p className="mt-1 text-sm opacity-80">{t({ ru: 'Выберите вашу ситуацию — подскажем, что сделать и кто поможет.', en: 'Pick your situation and see what to do and who can help.', th: 'เลือกสถานการณ์ของคุณ แล้วดูว่าต้องทำอะไรและใครช่วยได้' })}</p>
-    {isLoading && <div className="mt-4 grid gap-2">{[0, 1, 2, 3].map(i => <Skeleton key={i} className="h-11 bg-primary-foreground/15" />)}</div>}
-    {!isLoading && !isError && items.length > 0 && <ul className="mt-4 grid gap-2">{items.map(s => <li key={s.id}>
+    {catalog.isLoading && <div className="mt-4 grid gap-2">{[0, 1, 2, 3].map(i => <Skeleton key={i} className="h-11 bg-primary-foreground/15" />)}</div>}
+    {!catalog.isLoading && !catalog.error && items.length > 0 && <ul className="mt-4 grid gap-2">{items.map(s => <li key={s.code}>
       <Link className="ds-focus flex min-h-11 items-center justify-between gap-3 rounded-[var(--bible-radius-control)] border border-primary-foreground/20 px-3 py-2 text-sm transition-colors hover:bg-primary-foreground/10" to={`${R.GOAL_SERVICES}?${new URLSearchParams({ browse: "situations", situation: s.code })}`}>
-        <span className="min-w-0 break-words">{language === 'ru' ? s.title_ru : s.title_en}</span><ArrowRight className="size-4 shrink-0" aria-hidden="true" />
+        <span className="min-w-0 break-words">{language === 'ru' ? s.titleRu : s.titleEn}</span><ArrowRight className="size-4 shrink-0" aria-hidden="true" />
       </Link></li>)}</ul>}
     <Link className="ds-focus mt-auto inline-flex min-h-11 items-center gap-1 pt-4 text-sm font-medium underline underline-offset-4" to={`${R.GOAL_SERVICES}?browse=situations`}>{t({ ru: 'Все жизненные ситуации', en: 'All life situations', th: 'สถานการณ์ทั้งหมด' })}<ArrowRight size={16} aria-hidden="true" /></Link>
   </section>;
