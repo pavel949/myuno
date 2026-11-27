@@ -82,17 +82,17 @@ export function HomeSearchDateRange({ checkIn, checkOut, onChange, guests }: Pro
     : pickLang(language, { ru: 'Любые даты', en: 'Any dates', th: 'ทุกวันที่' });
   const guestSummary = guests?.count
     ? pickLang(language, { ru: 'Гости: ' + guests.count, en: 'Guests: ' + guests.count, th: 'ผู้เข้าพัก ' + guests.count })
-    : pickLang(language, { ru: 'Любое число гостей', en: 'Any number of guests', th: 'ไม่จำกัดจำนวนผู้เข้าพัก' });
+    : '';
   const changeOpen = (value: boolean) => {
     setOpen(value);
     if (value) setSelectingEnd(!!checkIn && !checkOut);
   };
   const trigger = (
-    <button ref={triggerRef} type="button" className="home-search-date-trigger" aria-label={title} aria-describedby={guests ? summaryId : undefined}>
+    <button ref={triggerRef} type="button" className="home-search-date-trigger" data-with-guests={guests ? true : undefined} aria-label={title} aria-describedby={guests ? summaryId : undefined}>
       {guests ? (
         <span className="min-w-0">
           <span className="home-field-label">{title}</span>
-          <span id={summaryId} className="block truncate">{datesSummary} · {guestSummary}</span>
+          <span id={summaryId} className="block truncate">{datesSummary}{guestSummary && ` · ${guestSummary}`}</span>
         </span>
       ) : (
         <>

@@ -20,6 +20,7 @@ import { HomeExperienceGallery, HomeLocationGallery, HomeServiceGallery } from '
 import { HomeAudienceGrid, HomeTrustBar } from '@/components/home/HomeAudienceGrid';
 import { HomeDiscoverySearch } from '@/components/home/HomeDiscoverySearch';
 import { HomeUrgentHelp } from '@/components/home/HomeUrgentHelp';
+import { RentalCommunities } from '@/components/property/RentalCommunities';
 import { homeCopy as copy } from '@/content/home/cinematicHome';
 import hero from '@/assets/hero-phuket-coast-editorial.webp';
 import '@/styles/cinematic-home.css';
@@ -72,6 +73,13 @@ export default function Landing() {
           <ArrowRight className="size-4 shrink-0" aria-hidden="true" />
         </Link>
       </div>
+      <div className="home-container">
+        <a className="home-text-link ds-focus min-h-11" href="#home-partners">
+          {t({ ru: 'Разместить жильё, услугу или впечатление', en: 'List a property, service or experience', th: 'ลงประกาศที่พัก บริการ หรือกิจกรรม' })}
+          <ArrowRight size={16} aria-hidden="true" />
+        </a>
+        <RentalCommunities />
+      </div>
       <HomeHousingPreview />
       <HomeSalePreview />
       <HomeNewbuildsPreview />
@@ -80,7 +88,7 @@ export default function Landing() {
         <HomeServiceGallery />
       </div>
       <HomeLocationGallery />
-      <section className="home-partners-group" aria-labelledby="home-partners-title">
+      <section id="home-partners" className="home-partners-group scroll-mt-24" aria-labelledby="home-partners-title">
         <div className="home-container home-group-heading">
           <h2 id="home-partners-title">{t({ ru: 'Собственникам и партнёрам', en: 'For owners and partners', th: 'สำหรับเจ้าของและพาร์ทเนอร์' })}</h2>
         </div>

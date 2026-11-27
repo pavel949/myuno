@@ -165,7 +165,7 @@ if (
   throw Error('Production client included');
 // Compile the same stylesheet stack as the actual app entry and Landing.
 const styleSources = ['src/index.css', 'src/styles/cinematic-home.css', 'src/styles/premium-public.css',
-  'src/styles/homepage-refinement.css', 'src/styles/home-reference.css', 'src/styles/home-mobile-polish.css', 'src/styles/marketplace-unity.css'];
+  'src/styles/homepage-refinement.css', 'src/styles/home-reference.css', 'src/styles/home-mobile-polish.css', 'src/styles/marketplace-unity.css', 'src/styles/rental-landing.css'];
 const compiledIndex = process.env.HOME_GALLERY_INDEX_CSS;
 const css = await Promise.all(styleSources.map(async (file, index) => {
   if (compiledIndex) return readFile(index === 0 ? compiledIndex : path.join(root, file), 'utf8');
@@ -174,7 +174,7 @@ const css = await Promise.all(styleSources.map(async (file, index) => {
   return response.text();
 }));
 await writeFile(path.join(output, 'fixture.css'), css.join('\n'));
-await writeFile(path.join(output,'source-receipt.json'),JSON.stringify({mode:'Synthetic public data; actual homepage components; no production mutations; local fallback fonts',sources:await Promise.all(['src/pages/Landing.tsx','src/components/home/HomeGallery.tsx','src/components/home/HomeCatalogGalleries.tsx','src/components/home/HomeDiscoveryPreview.tsx','src/components/home/HomeDiscoverySearch.tsx','src/components/home/HomeSearchDateRange.tsx','src/lib/propertySearchQuery.ts','src/lib/services/publicServiceCategories.ts',...styleSources].map(async file=>({file,sha256:(await import('node:crypto')).createHash('sha256').update(await readFile(path.join(root,file))).digest('hex')})))},null,2));
+await writeFile(path.join(output,'source-receipt.json'),JSON.stringify({mode:'Synthetic public data; actual homepage components; no production mutations; local fallback fonts',sources:await Promise.all(['src/pages/Landing.tsx','src/components/home/HomeGallery.tsx','src/components/home/HomeCatalogGalleries.tsx','src/components/home/HomeDiscoveryPreview.tsx','src/components/property/RentalCommunities.tsx','src/components/home/HomeDiscoverySearch.tsx','src/components/home/HomeSearchDateRange.tsx','src/lib/propertySearchQuery.ts','src/lib/services/publicServiceCategories.ts',...styleSources].map(async file=>({file,sha256:(await import('node:crypto')).createHash('sha256').update(await readFile(path.join(root,file))).digest('hex')})))},null,2));
 await writeFile(
   path.join(output, 'fixture.html'),
   '<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><link rel="stylesheet" href="/fixture.css"></head><body><div id="root"></div><script type="module" src="/fixture.js"></script></body></html>',

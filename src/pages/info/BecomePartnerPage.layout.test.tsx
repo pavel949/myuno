@@ -81,3 +81,16 @@ it.each([{}, {id:''}])('retains the draft and form without success for an unconf
  expect(fields[0]).toHaveValue('Synthetic business');expect(form.querySelector('textarea')).toHaveValue('Synthetic retained draft');
  expect(localStorage.getItem('become_partner_draft_v1')).toBe(draft);
 });
+
+it('opens the experience application with the existing service category and its own draft', async () => {
+ const { container } = render(<MemoryRouter initialEntries={['/become-partner?offer=experiences']}><BecomePartnerPage /></MemoryRouter>);
+ expect(screen.getByRole('heading', { name: 'Offer an experience on myUNO' })).toBeInTheDocument();
+ const form = container.querySelector('form')!;
+ const fields = form.querySelectorAll('input[required]');
+ ['Synthetic tours', 'Synthetic organiser', 'organiser@example.invalid', '123456789'].forEach((value, index) => fireEvent.change(fields[index], { target: { value } }));
+ fireEvent.change(form.querySelector('textarea')!, { target: { value: 'Synthetic programme only' } });
+ expect(localStorage.getItem('become_partner_draft_v1:experiences')).toContain('Synthetic programme only');
+ expect(localStorage.getItem('become_partner_draft_v1:services')).toBeNull();
+ fireEvent.submit(form);
+ await waitFor(() => expect(fixture.insert).toHaveBeenCalledWith(expect.objectContaining({ business_category: 'services' })));
+});

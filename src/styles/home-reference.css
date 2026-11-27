@@ -147,6 +147,21 @@
   outline-offset: 3px;
 }
 
+.home-hero-search .home-search-date-trigger[data-with-guests] {
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+
+.home-hero-search .home-search-modes[data-marketplaces] > a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-block-size: var(--touch-target);
+  padding-inline: var(--section-title-gap);
+  border: 1px solid hsl(var(--border));
+  text-align: center;
+  font-size: var(--home-ui-body-small);
+}
+
 @media (max-width: 767px) {
   .cinematic-home.home-refined .home-hero-search .home-search[data-home-discovery-mode="rent"][data-home-filters-expanded="false"] {
     display: grid;
@@ -229,12 +244,6 @@
     grid-template-areas:
       "modes modes modes modes modes modes"
       "area type budget bedrooms filters submit";
-  }
-
-  .cinematic-home.home-refined .home-hero-search .home-search[data-home-discovery-mode="activities"] {
-    grid-template-areas:
-      "modes modes modes modes modes modes"
-      "type query query query query submit";
   }
 
   .cinematic-home.home-refined .home-hero-search .home-search[data-home-discovery-mode] > * {

@@ -12,18 +12,10 @@ import {
 import { SEOHead } from "@/components/seo";
 import { HomeDiscoverySearch } from "@/components/home/HomeDiscoverySearch";
 import { SearchLeadRequest } from "@/components/search/SearchLeadRequest";
-import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { useProperties } from "@/hooks/useProperties";
-import {
-  usePublicPropertyProjects,
-  type PropertyProject,
-} from "@/hooks/usePropertyProjects";
+import { RentalCommunities } from "@/components/property/RentalCommunities";
 import { pickLang, type LangValues } from "@/lib/i18n/pickLang";
 import { APP_ROUTES as R } from "@/lib/config/routes";
-import { complexDetailHref } from "@/lib/real-estate/propertyDetailIntent";
-import { complexMediaUrl } from "@/lib/real-estate/complexMedia";
-import { getDistrictLabel } from "@/lib/taxonomies";
 import {
   rentalAreas,
   rentalDurations,
@@ -34,172 +26,15 @@ import "@/styles/cinematic-home.css";
 import "@/styles/rental-landing.css";
 
 const rentSearch = `${R.PROPERTY_SEARCH}?mode=rent`;
-function Community({ project }: { project: PropertyProject }) {
-  const { language } = useLanguage();
-  const [failed, setFailed] = useState<Set<string>>(() => new Set());
-  const image = [project.cover_image, ...(project.images ?? [])]
-    .map(complexMediaUrl)
-    .find((url): url is string => Boolean(url && !failed.has(url)));
-  const name =
-    (language === "ru" ? project.name_ru : project.name_en) ||
-    project.name_en ||
-    project.name_ru;
-  return (
-    <Link
-      className="rental-community"
-      to={complexDetailHref(project.id, "rent")}
-    >
-      <div className="rental-community-image">
-        {image ? (
-          <img
-            src={image}
-            alt=""
-            width="640"
-            height="480"
-            loading="lazy"
-            decoding="async"
-            onError={() =>
-              setFailed((previous) => new Set(previous).add(image))
-            }
-          />
-        ) : (
-          <Building2 aria-hidden="true" />
-        )}
-      </div>
-      <div className="rental-community-copy">
-        <h3>{name}</h3>
-        {project.district && (
-          <p>
-            {getDistrictLabel(
-              project.district,
-              language === "ru" ? "ru" : "en",
-            )}
-          </p>
-        )}
-        <span>
-          {pickLang(language, {
-            ru: "Изучить комплекс",
-            en: "Explore the community",
-            th: "ดูรายละเอียดโครงการ",
-          })}
-          <ArrowUpRight size={18} aria-hidden="true" />
-        </span>
-      </div>
-    </Link>
-  );
-}
-function RentalCommunities() {
-  const { language } = useLanguage();
-  const t = (value: LangValues) => pickLang(language, value);
-  // A bounded public sample proves linkage, never island-wide inventory or availability.
-  const homes = useProperties({ listingType: "rent" }, 60);
-  const ids = [
-    ...new Set(
-      (homes.data ?? [])
-        .map((home) => home.project_id)
-        .filter((id): id is string => Boolean(id)),
-    ),
-  ];
-  const projects = usePublicPropertyProjects(6, undefined, ids);
-  const loading = homes.isLoading || (ids.length > 0 && projects.isLoading);
-  const error = homes.isError || (ids.length > 0 && projects.isError);
-  const rows = (projects.data ?? []).filter((project) =>
-    ids.includes(project.id),
-  );
-  return (
-    <section
-      className="rental-section"
-      id="rental-communities"
-      aria-labelledby="rental-communities-title"
-    >
-      <div className="rental-section-heading">
-        <div>
-          <p className="rental-eyebrow">
-            02 /{" "}
-            {t({
-              ru: "Место, где жить",
-              en: "A place to belong",
-              th: "สถานที่ที่เป็นบ้าน",
-            })}
-          </p>
-          <h2 id="rental-communities-title">
-            {t({
-              ru: "Начните с комплекса",
-              en: "Start with a community",
-              th: "เริ่มจากโครงการที่พัก",
-            })}
-          </h2>
-          <p>
-            {t({
-              ru: "Уже знаете название? Откройте комплекс, изучите его расположение и связанные предложения аренды.",
-              en: "Already have a name in mind? Explore the community, its location and linked rental listings.",
-              th: "มีชื่อโครงการในใจแล้วหรือยัง? ดูทำเล รายละเอียด และรายการเช่าที่เกี่ยวข้อง",
-            })}
-          </p>
-        </div>
-        <Link className="rental-text-link" to={rentSearch}>
-          {t({
-            ru: "Все варианты аренды",
-            en: "All rental listings",
-            th: "รายการเช่าทั้งหมด",
-          })}
-          <ArrowRight size={18} aria-hidden="true" />
-        </Link>
-      </div>
-      {loading ? (
-        <p role="status" className="rental-data-state">
-          {t({
-            ru: "Загружаем комплексы…",
-            en: "Loading communities…",
-            th: "กำลังโหลดโครงการ…",
-          })}
-        </p>
-      ) : error ? (
-        <div role="alert" className="rental-data-state">
-          <p>
-            {t({
-              ru: "Комплексы сейчас не загрузились. Попробуйте ещё раз.",
-              en: "Communities could not be loaded. Please try again.",
-              th: "โหลดโครงการไม่สำเร็จ โปรดลองอีกครั้ง",
-            })}
-          </p>
-          <Button
-            variant="outline"
-            onClick={() => {
-              void homes.refetch();
-              if (ids.length) void projects.refetch();
-            }}
-          >
-            {t({ ru: "Повторить", en: "Try again", th: "ลองอีกครั้ง" })}
-          </Button>
-        </div>
-      ) : rows.length ? (
-        <div className="rental-community-grid">
-          {rows.map((project) => (
-            <Community key={project.id} project={project} />
-          ))}
-        </div>
-      ) : (
-        <p className="rental-data-state">
-          {t({
-            ru: "В этой подборке пока нет комплексов со связанными предложениями аренды. Продолжите выбор в каталоге.",
-            en: "This selection has no communities with linked rental listings yet. Continue browsing the catalogue.",
-            th: "ยังไม่มีโครงการพร้อมรายการเช่าในชุดนี้ เลือกดูต่อในรายการที่พัก",
-          })}
-        </p>
-      )}
-    </section>
-  );
-}
 export default function PropertyLanding() {
   const { language } = useLanguage();
   const t = (value: LangValues) => pickLang(language, value);
   const chapters = [
-    ["rental-areas", { ru: "Районы", en: "Areas", th: "ย่าน" }],
     [
       "rental-communities",
-      { ru: "Комплексы", en: "Communities", th: "โครงการ" },
+      { ru: "Для отпуска", en: "Vacation rentals", th: "ที่พักสำหรับวันหยุด" },
     ],
+    ["rental-areas", { ru: "Районы", en: "Areas", th: "ย่าน" }],
     [
       "rental-guide",
       { ru: "Как выбрать", en: "How to choose", th: "วิธีเลือก" },
@@ -226,7 +61,7 @@ export default function PropertyLanding() {
       />
       <MarketplaceEntry kind="rent" headingId="rental-title" />
       <section
-        className="rental-section rental-search-section"
+        className="rental-section rental-search-section scroll-mt-24"
         id="rental-search"
         aria-labelledby="rental-search-title"
       >
@@ -243,6 +78,7 @@ export default function PropertyLanding() {
           <ArrowRight size={18} aria-hidden="true" />
         </Link>
       </section>
+      <RentalCommunities />
       <section className="rental-section" id="rental-request">
         <SearchLeadRequest kind="rent" params={new URLSearchParams("mode=rent")} />
       </section>
@@ -344,7 +180,6 @@ export default function PropertyLanding() {
           ))}
         </div>
       </section>
-      <RentalCommunities />
       <section
         className="rental-section"
         id="rental-guide"

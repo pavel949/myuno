@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { 
   Store, 
@@ -29,6 +29,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { cn } from '@/lib/utils';
+import { APP_ROUTES } from '@/lib/config/routes';
 
 import { toast } from 'sonner';
 const businessCategories = [
@@ -43,8 +44,8 @@ const businessCategories = [
 ];
 
 const benefits = [
-  { icon: Users, labelRu: 'Доступ к миллионам клиентов', labelEn: 'Access to millions of customers' },
-  { icon: Shield, labelRu: 'Защита платежей', labelEn: 'Payment protection' },
+  { icon: Users, labelRu: 'Знакомство с клиентами myUNO', labelEn: 'Reach myUNO customers' },
+  { icon: Shield, labelRu: 'Понятные условия сотрудничества', labelEn: 'Clear partnership terms' },
   { icon: TrendingUp, labelRu: 'Аналитика и статистика', labelEn: 'Analytics & insights' },
   { icon: Clock, labelRu: 'Удобное управление заказами', labelEn: 'Easy order management' },
 ];
@@ -52,11 +53,18 @@ const benefits = [
 const DRAFT_STORAGE_KEY = 'become_partner_draft_v1';
 
 export default function BecomePartnerPage() {
+  const { pathname, search } = useLocation();
+  const requestedOffer = new URLSearchParams(search).get('offer');
+  const offer = requestedOffer === 'services' || requestedOffer === 'experiences' ? requestedOffer : null;
+  return <PartnerApplication key={offer ?? 'general'} offer={offer} returnPath={pathname + search} />;
+}
+
+function PartnerApplication({ offer, returnPath }: { offer: 'services' | 'experiences' | null; returnPath: string }) {
   const { language } = useLanguage();
   const { user } = useAuth();
-const navigate = useNavigate();
-  
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const navigate = useNavigate();
+  const storageKey = offer ? DRAFT_STORAGE_KEY + ':' + offer : DRAFT_STORAGE_KEY;
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(offer ? 'services' : null);
   const [formData, setFormData] = useState({
     businessName: '',
     contactName: '',
@@ -71,7 +79,7 @@ const navigate = useNavigate();
   // Restore draft after returning from /auth
   React.useEffect(() => {
     try {
-      const raw = localStorage.getItem(DRAFT_STORAGE_KEY);
+      const raw = localStorage.getItem(storageKey);
       if (!raw) return;
       const draft = JSON.parse(raw) as { selectedCategory?: string | null; formData?: typeof formData };
       if (draft.selectedCategory) setSelectedCategory(draft.selectedCategory);
@@ -79,20 +87,20 @@ const navigate = useNavigate();
     } catch {
       // ignore
     }
-  }, []);
+  }, [storageKey]);
 
   // Persist draft as the user types (so /auth round-trip doesn't lose work)
   React.useEffect(() => {
     if (isSubmitted) return;
     try {
       localStorage.setItem(
-        DRAFT_STORAGE_KEY,
+        storageKey,
         JSON.stringify({ selectedCategory, formData }),
       );
     } catch {
       // ignore quota errors
     }
-  }, [selectedCategory, formData, isSubmitted]);
+  }, [selectedCategory, formData, isSubmitted, storageKey]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -118,7 +126,7 @@ const navigate = useNavigate();
           ? 'Мы сохранили вашу заявку и вернём вас сюда после входа.'
           : 'We saved your draft and will bring you back here after sign-in.',
       });
-      navigate('/auth?redirect=' + encodeURIComponent('/become-partner'));
+      navigate(APP_ROUTES.AUTH + '?redirect=' + encodeURIComponent(returnPath));
       return;
     }
 
@@ -172,7 +180,7 @@ const navigate = useNavigate();
         body: { application_id: inserted.id },
       }).catch(() => {});
 
-      try { localStorage.removeItem(DRAFT_STORAGE_KEY); } catch { /* noop */ }
+      try { localStorage.removeItem(storageKey); } catch { /* noop */ }
       setIsSubmitted(true);
       toast(isRu ? 'Заявка отправлена!' : 'Application submitted!', {
         description: isRu
@@ -240,14 +248,16 @@ const navigate = useNavigate();
         <div className="absolute inset-0 bg-primary/10" />
         <div className="relative">
           <h1 className="text-2xl sm:text-3xl font-bold mb-4">
-            {language === 'ru' 
-              ? 'Развивайте бизнес вместе с myUNO' 
-              : 'Grow Your Business with myUNO'}
+            {offer === 'experiences'
+              ? (language === 'ru' ? 'Предложите впечатление на myUNO' : 'Offer an experience on myUNO')
+              : offer === 'services'
+                ? (language === 'ru' ? 'Предложите услугу на myUNO' : 'Offer a service on myUNO')
+                : (language === 'ru' ? 'Стать партнёром myUNO' : 'Become a myUNO partner')}
           </h1>
           <p className="text-muted-foreground max-w-2xl mb-6">
-            {language === 'ru' 
-              ? 'Присоединяйтесь к экосистеме myUNO и получите доступ к миллионам активных пользователей. Мы поможем вам увеличить продажи и расширить клиентскую базу.' 
-              : 'Join the myUNO ecosystem and get access to millions of active users. We will help you increase sales and expand your customer base.'}
+            {language === 'ru'
+              ? 'Расскажите, что вы предлагаете. Команда myUNO проверит заявку и подскажет, как добавить предложения в каталог.'
+              : 'Tell us what you offer. The myUNO team will review your application and explain how to add your offers to the catalogue.'}
           </p>
 
           {/* Benefits */}
@@ -379,7 +389,9 @@ const navigate = useNavigate();
                 rows={4}
                 value={formData.description}
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                placeholder={language === 'ru' 
+                placeholder={offer === 'experiences'
+                  ? (language === 'ru' ? 'Расскажите, что входит в программу, для кого она и где проходит.' : 'Tell us what you offer, who it is for and where it takes place.')
+                  : language === 'ru'
                   ? 'Опишите ваши услуги или товары, опыт работы, преимущества...' 
                   : 'Describe your services or products, experience, advantages...'}
               />
