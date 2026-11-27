@@ -214,6 +214,7 @@ export const AnimatedRoutes: React.FC = () => {
         ))}
         <Route path={APP_ROUTES.DISCOVER_SITUATIONS} element={<LazyPage><Pages.SituationNavigator /></LazyPage>} />
         <Route path={`${APP_ROUTES.DISCOVER}/:code`} element={<LazyPage><Pages.SituationDetail /></LazyPage>} />
+        <Route path={`${APP_ROUTES.DISCOVER}/:code/:scenario`} element={<LazyPage><Pages.LifeScenario /></LazyPage>} />
         <Route path={APP_ROUTES.NAVIGATOR} element={<CanonicalPublicRedirect to={APP_ROUTES.DISCOVER} />} />
         <Route path="/catalog" element={<CanonicalPublicRedirect to={APP_ROUTES.DISCOVER} />} />
         <Route path="/categories" element={<CanonicalPublicRedirect to={APP_ROUTES.DISCOVER} />} />

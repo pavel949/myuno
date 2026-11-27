@@ -13,6 +13,8 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import {
   useLifeSituations,
   useResolveLifeOSContext,
+  useLifeScenarios,
+  scenarioSlug,
   type LifeOSCatalogItem,
   type LifeSituation,
 } from '@/hooks/useLifeOS';
@@ -152,6 +154,8 @@ function pickRelatedSituations(
 export default function SituationDetailPage() {
   const { code } = useParams<{ code: string }>();
   const [helpOpen, setHelpOpen] = useState(false);
+  const { data: lifeSituationsAll } = useLifeSituations();
+  const scenarioQuery = useLifeScenarios(lifeSituationsAll?.find(s => s.code === code)?.id);
   const { language } = useLanguage();
   const isRu = language === 'ru';
 
@@ -217,7 +221,23 @@ export default function SituationDetailPage() {
               </div>}
             />
 
-            <section>
+            {(scenarioQuery.data ?? []).length > 0 && (
+              <section className="mb-10" aria-labelledby="situation-scenarios-title">
+                <h2 id="situation-scenarios-title" className={cn(LIFE_OS_SECTION_TITLE, 'mb-4 pb-2 border-b border-border')}>{isRu ? 'С чего начать' : 'Where to start'}</h2>
+                <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                  {(scenarioQuery.data ?? []).map((sc) => (
+                    <li key={sc.id}>
+                      <Link to={`/discover/${code}/${scenarioSlug(sc.code)}`} className="ds-focus flex h-full min-h-11 items-start justify-between gap-3 rounded-[var(--bible-radius-card)] border border-border bg-card p-4 text-foreground transition-colors hover:border-primary">
+                        <span className="min-w-0"><span className="block font-medium">{isRu ? sc.title_ru : sc.title_en}</span>{(isRu ? sc.description_ru : sc.description_en) && <span className="mt-1 block text-sm text-muted-foreground line-clamp-2">{isRu ? sc.description_ru : sc.description_en}</span>}</span>
+                        <ArrowUpRight aria-hidden="true" className="size-4 shrink-0 text-muted-foreground" />
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            )}
+
+            <section id="situation-services" className="scroll-mt-24">
               <div className="flex items-baseline justify-between mb-4 pb-2 border-b border-border">
                 <h2 className={LIFE_OS_SECTION_TITLE}>
                   {isRu ? 'Сервисы' : 'Services'}
