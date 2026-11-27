@@ -98,6 +98,9 @@ it.each(["en", "ru", "th"])(
     state.language = language;
     const { container } = mountLanding();
     expect(container.querySelectorAll("h1")).toHaveLength(1);
+    if (language === "ru") {
+      expect(screen.getByRole("heading", { name: "Лучшие комплексы для отдыха на Пхукете" })).toBeVisible();
+    }
     for (const id of [
       "rental-areas",
       "rental-communities",
@@ -132,14 +135,14 @@ it("only renders stored communities linked to the loaded rental sample and retai
   expect(state.projectRead).toHaveBeenCalledWith(6, undefined, ["community"]);
   expect(
     screen.getByRole("link", { name: /Stored community/ }),
-  ).toHaveAttribute("href", "/property/complex/community?mode=rent");
+  ).toHaveAttribute("href", "/property/search?mode=rent&tenancy=short&project=community");
   expect(screen.queryByText("Unlinked sales project")).not.toBeInTheDocument();
 });
 it("keeps guidance useful with empty supply and does not invent availability", () => {
   state.homes = [];
   state.projects = [];
   mountLanding();
-  expect(screen.getByText(/This selection has no communities/)).toBeVisible();
+  expect(screen.getByText(/There are no featured communities with short-stay listings yet/)).toBeVisible();
   expect(screen.getByRole("link", { name: "All area guides" })).toHaveAttribute(
     "href",
     "/area",
@@ -153,7 +156,7 @@ it("separates loading and read rejection from empty supply, retries the existing
     "Communities could not be loaded",
   );
   expect(
-    screen.queryByText(/This selection has no communities/),
+    screen.queryByText(/There are no featured communities with short-stay listings yet/),
   ).not.toBeInTheDocument();
   fireEvent.click(screen.getByRole("button", { name: "Try again" }));
   expect(state.homesRetry).toHaveBeenCalledOnce();
@@ -164,7 +167,7 @@ it("shows a loading state rather than a false empty result", () => {
   mountLanding();
   expect(screen.getByRole("status")).toHaveTextContent("Loading communities");
   expect(
-    screen.queryByText(/This selection has no communities/),
+    screen.queryByText(/There are no featured communities with short-stay listings yet/),
   ).not.toBeInTheDocument();
 });
 it("falls back to a neutral symbol when stored media fails without inventing a photo", () => {
