@@ -1,5 +1,7 @@
 # Roadmap
 
+- [ ] Contain the selected exposed test administrator: isolated tests, forward role restriction, existing suspend action, read-only verification.
+
 - [x] Save Life OS continuation instructions for another AI (`docs/qa/LIFE_OS_AI_HANDOFF_2026_11_27.md`).
 - [x] Open Life OS draft handoff PR #376: https://github.com/pavel949/myuno/pull/376 (documentation only; existing code already on main).
 
