@@ -39,5 +39,5 @@ it('uses the same native rail contract for purchase projects with a visible cata
   const section = document.querySelector('.premium-newbuilds')!;
   expect(section.querySelector('.premium-project-grid')).toBeNull();
   expect(section.querySelectorAll('.home-rail article')).toHaveLength(6);
-  expect(screen.getByRole('link', { name: 'All new developments' })).toHaveAttribute('href', '/property/offplan');
+  expect(screen.getByRole('link', { name: 'All new developments' })).toHaveAttribute('href', '/property/offplan/search');
 });
