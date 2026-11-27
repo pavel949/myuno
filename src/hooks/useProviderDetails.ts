@@ -1,5 +1,6 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
 
 export interface ProviderDetails {
   id: string;
@@ -46,7 +47,7 @@ export interface ProviderProduct {
   name_ru: string;
   price: number;
   currency: string;
-  stock_quantity: number;
+  in_stock: boolean | null;
   is_active: boolean;
   category_name?: string;
   created_at: string;
@@ -73,149 +74,111 @@ export interface ProviderBooking {
   service_name?: string;
 }
 
+interface ProviderDetailState {
+  context: string;
+  provider: ProviderDetails | null;
+  services: ProviderService[];
+  products: ProviderProduct[];
+  contracts: ProviderContract[];
+  bookings: ProviderBooking[];
+  isLoading: boolean;
+  error: string | null;
+}
+
+function emptyProviderState(context: string, isLoading = false, error: string | null = null): ProviderDetailState {
+  return { context, provider: null, services: [], products: [], contracts: [], bookings: [], isLoading, error };
+}
+
 export function useProviderDetails(providerId: string | null, visibility: 'private' | 'public' = 'private') {
-  const [provider, setProvider] = useState<ProviderDetails | null>(null);
-  const [services, setServices] = useState<ProviderService[]>([]);
-  const [products, setProducts] = useState<ProviderProduct[]>([]);
-  const [contracts, setContracts] = useState<ProviderContract[]>([]);
-  const [bookings, setBookings] = useState<ProviderBooking[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const { user } = useAuth();
+  const actor = visibility === 'public' ? 'public' : user?.id ?? '';
+  const context = JSON.stringify([visibility, actor, providerId]);
+  const generation = useRef(0);
+  const controllerRef = useRef<AbortController | null>(null);
+  const [state, setState] = useState<ProviderDetailState>(() => emptyProviderState(context, !!providerId));
 
   const fetchProviderDetails = useCallback(async () => {
-    if (!providerId) {
-      setProvider(null);
-      setServices([]);
-      setProducts([]);
-      setContracts([]);
-      setBookings([]);
-      setIsLoading(false);
+    const request = ++generation.current;
+    controllerRef.current?.abort();
+    const controller = new AbortController();
+    controllerRef.current = controller;
+    const current = () => request === generation.current && !controller.signal.aborted;
+
+    if (!providerId || (visibility === 'private' && !actor)) {
+      setState(emptyProviderState(context, false, providerId ? 'Authentication required' : null));
       return;
     }
-
-    setIsLoading(true);
-    setError(null);
-
+    setState(emptyProviderState(context, true));
     try {
-      // Fetch provider details
-      const providerQuery = visibility === 'public' ? supabase.from('public_provider_catalog') : supabase.from('providers');
-      const { data: providerData, error: providerError } = await providerQuery
-        .select('*')
-        .eq('id', providerId)
-        .maybeSingle();
-
+      const { data: providerData, error: providerError } = await (visibility === 'public'
+        ? supabase.from('public_provider_catalog').select('*')
+          .eq('id', providerId).abortSignal(controller.signal).maybeSingle()
+        : supabase.from('providers').select('*')
+          .eq('id', providerId).abortSignal(controller.signal).maybeSingle());
       if (providerError) throw providerError;
-      
+      if (!current()) return;
       if (!providerData) {
-        setProvider(null);
-        setServices([]);
-        setProducts([]);
-        setContracts([]);
-        setBookings([]);
-        setIsLoading(false);
+        setState(emptyProviderState(context));
         return;
       }
-      
-      setProvider(providerData as unknown as ProviderDetails);
+      const serviceColumns = 'id, name_en, name_ru, price, currency, is_active, category_id, created_at, duration_minutes, lead_time_hours';
+      const { data: servicesData, error: servicesError } = await (visibility === 'public'
+        ? supabase.from('public_service_catalog').select(serviceColumns)
+          .eq('provider_id', providerId).order('created_at', { ascending: false }).abortSignal(controller.signal)
+        : supabase.from('services').select(serviceColumns)
+          .eq('provider_id', providerId).order('created_at', { ascending: false }).abortSignal(controller.signal));
+      if (servicesError) throw servicesError;
+      if (!current()) return;
 
-      // Fetch services
-      const serviceQuery = visibility === 'public' ? supabase.from('public_service_catalog') : supabase.from('services');
-      const { data: servicesData, error: servicesError } = await serviceQuery
-        .select('id, name_en, name_ru, price, currency, is_active, category_id, created_at, duration_minutes, lead_time_hours')
-        .eq('provider_id', providerId)
-        .order('created_at', { ascending: false });
-
-      // A failed public service read is not evidence that the provider has no services.
-      if (servicesError && visibility === 'public') throw servicesError;
-      if (!servicesError) {
-        setServices((servicesData || []).map((s) => ({ ...s, is_featured: false, rating: null, review_count: null })));
-      }
-
-      if (visibility === 'public') {
-        setProducts([]);
-        setContracts([]);
-        setBookings([]);
-        return;
-      }
-
-      // Fetch products (if provider is linked to marketplace vendor)
-      // Use the already-fetched providerData instead of a redundant query
-      if ('marketplace_vendor_id' in providerData && typeof providerData.marketplace_vendor_id === 'string') {
-        const { data: productsData, error: productsError } = await supabase
-          .from('marketplace_products')
-          .select('id, name_en, name_ru, price, currency, is_active, created_at')
-          .eq('vendor_id', providerData.marketplace_vendor_id)
-          .order('created_at', { ascending: false })
-          .limit(50);
-
-        if (!productsError) {
-          setProducts((productsData || []).map((p) => ({ ...p, stock_quantity: 0 })));
+      const next: ProviderDetailState = {
+        ...emptyProviderState(context),
+        provider: providerData as unknown as ProviderDetails,
+        services: servicesData ?? [],
+      };
+      if (visibility === 'private') {
+        if ('marketplace_vendor_id' in providerData && typeof providerData.marketplace_vendor_id === 'string') {
+          const { data, error } = await supabase.from('marketplace_products')
+            .select('id, name_en, name_ru, price, currency, in_stock, is_active, created_at')
+            .eq('vendor_id', providerData.marketplace_vendor_id)
+            .order('created_at', { ascending: false }).limit(50).abortSignal(controller.signal);
+          if (error) throw error;
+          if (!current()) return;
+          next.products = data ?? [];
         }
-      } else {
-        setProducts([]);
+        const { data: contracts, error: contractsError } = await supabase.from('provider_contracts')
+          .select('id, contract_type, status, commission_rate, valid_from, valid_until, auto_renew, created_at')
+          .eq('entity_type', 'provider').eq('entity_id', providerId)
+          .order('created_at', { ascending: false }).abortSignal(controller.signal);
+        if (contractsError) throw contractsError;
+        if (!current()) return;
+        next.contracts = (contracts ?? []) as ProviderContract[];
+
+        const { data: bookings, error: bookingsError } = await supabase.from('bookings')
+          .select('id, status, total_amount, currency, scheduled_at, created_at, services:service_id (name_en, name_ru)')
+          .eq('provider_id', providerId).order('created_at', { ascending: false }).limit(20).abortSignal(controller.signal);
+        if (bookingsError) throw bookingsError;
+        if (!current()) return;
+        next.bookings = (bookings ?? []).map(booking => ({
+          id: booking.id, status: booking.status, total_amount: booking.total_amount,
+          currency: booking.currency, scheduled_at: booking.scheduled_at, created_at: booking.created_at,
+          service_name: booking.services?.name_en || booking.services?.name_ru,
+        }));
       }
-
-      // Fetch contracts
-      const { data: contractsData, error: contractsError } = await supabase
-        .from('provider_contracts')
-        .select('id, contract_type, status, commission_rate, valid_from, valid_until, auto_renew, created_at')
-        .eq('entity_type', 'provider')
-        .eq('entity_id', providerId)
-        .order('created_at', { ascending: false });
-
-      if (!contractsError) {
-        setContracts((contractsData || []) as ProviderContract[]);
-      }
-
-      // Fetch recent bookings
-      const { data: bookingsData, error: bookingsError } = await supabase
-        .from('bookings')
-        .select(`
-          id, 
-          status, 
-          total_amount, 
-          currency, 
-          scheduled_at, 
-          created_at,
-          services:service_id (name_en, name_ru)
-        `)
-        .eq('provider_id', providerId)
-        .order('created_at', { ascending: false })
-        .limit(20);
-
-      if (!bookingsError) {
-        setBookings(
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          (bookingsData || []).map((b: Record<string, any>) => ({
-            id: b.id,
-            status: b.status,
-            total_amount: b.total_amount,
-            currency: b.currency,
-            scheduled_at: b.scheduled_at,
-            created_at: b.created_at,
-            service_name: b.services?.name_en || b.services?.name_ru,
-          }))
-        );
-      }
-    } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Failed to fetch provider details');
-    } finally {
-      setIsLoading(false);
+      if (current()) setState(next);
+    } catch {
+      if (current()) setState(emptyProviderState(context, false, 'Unable to load provider details'));
     }
-  }, [providerId, visibility]);
+  }, [providerId, visibility, actor, context]);
 
   useEffect(() => {
-    fetchProviderDetails();
+    void fetchProviderDetails();
+    return () => {
+      generation.current++;
+      controllerRef.current?.abort();
+    };
   }, [fetchProviderDetails]);
 
-  return {
-    provider,
-    services,
-    products,
-    contracts,
-    bookings,
-    isLoading,
-    error,
-    refetch: fetchProviderDetails,
-  };
+  // Hide data synchronously when identity/provider/visibility changes, before effects run.
+  const visible = state.context === context ? state : emptyProviderState(context, !!providerId);
+  return { ...visible, refetch: fetchProviderDetails };
 }

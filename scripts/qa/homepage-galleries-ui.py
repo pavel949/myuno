@@ -17,19 +17,19 @@ LANGUAGES=[SHARD] if SHARD else ['en','ru','th']
 
 HOME_COPY = {
     'en': {
-        'form': 'Search myUNO', 'rent': 'Rent', 'activity': 'Experiences & services', 'buy': 'Buy',
+        'form': 'Search myUNO', 'rent': 'Rent', 'activity': 'Experiences', 'buy': 'Buy',
         'guests': 'Number of guests', 'filters': 'Filters', 'area_label': 'Choose an area', 'area': 'Rawai',
-        'done': 'Done', 'market': 'Choose a catalogue', 'services': 'Services', 'activity_query': 'What are you looking for?',
+        'done': 'Done', 'services': 'Services',
     },
     'ru': {
-        'form': 'Поиск на myUNO', 'rent': 'Аренда', 'activity': 'Впечатления и услуги', 'buy': 'Покупка',
+        'form': 'Поиск на myUNO', 'rent': 'Аренда', 'activity': 'Впечатления', 'buy': 'Покупка',
         'guests': 'Количество гостей', 'filters': 'Фильтры', 'area_label': 'Выберите район', 'area': 'Равай',
-        'done': 'Готово', 'market': 'Выберите каталог', 'services': 'Услуги', 'activity_query': 'Что ищете?',
+        'done': 'Готово', 'services': 'Услуги',
     },
     'th': {
-        'form': 'ค้นหาใน myUNO', 'rent': 'เช่า', 'activity': 'ประสบการณ์และบริการ', 'buy': 'ซื้อ',
+        'form': 'ค้นหาใน myUNO', 'rent': 'เช่า', 'activity': 'ประสบการณ์', 'buy': 'ซื้อ',
         'guests': 'จำนวนผู้เข้าพัก', 'filters': 'ตัวกรอง', 'area_label': 'เลือกย่าน', 'area': 'Rawai',
-        'done': 'เสร็จสิ้น', 'market': 'เลือกแคตตาล็อก', 'services': 'บริการ', 'activity_query': 'คุณกำลังมองหาอะไร?',
+        'done': 'เสร็จสิ้น', 'services': 'บริการ',
     },
 }
 
@@ -41,9 +41,10 @@ async def check_home_entry(page, lang, width):
     await expect(panel.get_by_role('form', name=copy['form'], exact=True)).to_have_count(1)
     await expect(page.locator('form.home-search')).to_have_count(1)
     modes = search.locator('.home-search-modes')
-    await expect(modes.get_by_role('button')).to_have_count(3)
+    await expect(modes.get_by_role('button')).to_have_count(2)
+    await expect(modes.get_by_role('link')).to_have_count(2)
     rent = modes.get_by_role('button', name=copy['rent'], exact=True)
-    activity = modes.get_by_role('button', name=copy['activity'], exact=True)
+    activity = modes.get_by_role('link', name=copy['activity'], exact=True)
     buy = modes.get_by_role('button', name=copy['buy'], exact=True)
     await expect(rent).to_have_attribute('aria-pressed', 'true')
     await expect(activity).to_be_visible()
@@ -88,8 +89,52 @@ async def check_home_entry(page, lang, width):
         assert sticky['scroll'] > 0 and abs(sticky['headerBottom'] - sticky['panelTop']) <= 2, sticky
         await page.evaluate("window.scrollTo({top: 0, behavior: 'instant'})")
 
+    emergency = page.locator('.home-hero-banner').get_by_role('button', name={
+        'ru': 'Срочная помощь', 'en': 'Urgent help', 'th': 'ความช่วยเหลือฉุกเฉิน',
+    }[lang], exact=True)
+    await expect(emergency).to_be_visible()
+    await expect(emergency).to_be_in_viewport(ratio=1)
+    if width < 768:
+        await page.set_viewport_size({'width': width, 'height': 780})
+        submit = search.locator('.home-search-submit')
+        await expect(submit).to_be_in_viewport(ratio=1)
+        hit = await submit.evaluate('''button => {
+            const rect = button.getBoundingClientRect()
+            const hit = document.elementFromPoint(rect.x + rect.width / 2, rect.bottom - 2)
+            return { visible: button.contains(hit), bottom: rect.bottom, coveringClass: hit?.className }
+        }''')
+        assert hit['visible'], f'Sticky navigation covers the search button: {lang}, {width}, {hit}'
+        await page.set_viewport_size({'width': width, 'height': 900})
+    assert (await emergency.bounding_box())['height'] >= 44
+    contrast = await emergency.evaluate('''button => {
+        const style = getComputedStyle(button)
+        const luminance = color => color.match(/[0-9.]+/g).slice(0, 3).reduce((sum, channel, index) => {
+            const value = Number(channel) / 255
+            return sum + [0.2126, 0.7152, 0.0722][index] *
+                (value <= 0.04045 ? value / 12.92 : ((value + 0.055) / 1.055) ** 2.4)
+        }, 0)
+        const levels = [luminance(style.color), luminance(style.backgroundColor)].sort((a, b) => a - b)
+        return (levels[1] + 0.05) / (levels[0] + 0.05)
+    }''')
+    assert contrast >= 4.5, f'Urgent help contrast: {contrast}'
+    await page.evaluate('document.fonts.ready')
+    await page.locator('.home-hero-banner-photo').evaluate('image => image.decode()')
+    await page.screenshot(path=str(OUTPUT / f"{lang}-{page.viewport_size['width']}-hero.png"))
+
+    await emergency.press('Enter')
+    emergency_dialog = page.get_by_role('dialog')
+    await expect(emergency_dialog).to_be_visible()
+    assert await emergency_dialog.locator('a[href^="tel:"]').evaluate_all(
+        '(links) => links.map(link => link.getAttribute("href"))'
+    ) == ['tel:1669', 'tel:191', 'tel:1155']
+    await emergency_dialog.get_by_role('button', name={'ru': 'Закрыть', 'en': 'Close', 'th': 'ปิด'}[lang]).press('Escape')
+    await expect(emergency_dialog).to_have_count(0)
+    await expect(emergency).to_be_focused()
+
     await filters.press('Enter')
     await expect(search.locator('.home-search-refine')).to_have_attribute('aria-expanded', 'true')
+    await expect(search.locator('.home-search-type')).to_be_visible()
+    await expect(search.locator('.home-search-bedrooms')).to_be_visible()
     area = search.get_by_role('combobox', name=copy['area_label'], exact=True)
     await area.press('Enter')
     await page.get_by_role('option', name=copy['area'], exact=True).click()
@@ -113,13 +158,13 @@ async def check_home_entry(page, lang, width):
         'checkIn': '2027-05-12', 'checkOut': '2027-05-15', 'guests': '3',
     }, rental
 
+    await expect(activity).to_have_attribute('href', '/experiences')
     await activity.press('Enter')
-    await expect(search).to_have_attribute('data-home-discovery-mode', 'activities')
-    await search.get_by_role('combobox', name=copy['market'], exact=True).press('Enter')
-    await page.get_by_role('option', name=copy['services'], exact=True).click()
-    await search.get_by_role('searchbox', name=copy['activity_query'], exact=True).fill('airport transfer')
-    await submit.press('Enter')
-    await expect(destination).to_have_text('/discover/services?q=airport+transfer')
+    await expect(destination).to_have_text('/experiences')
+    services = search.get_by_role('link', name=copy['services'], exact=True)
+    await expect(services).to_have_attribute('href', '/discover/services')
+    await services.press('Enter')
+    await expect(destination).to_have_text('/discover/services')
 
     await buy.press('Enter')
     await expect(search).to_have_attribute('data-home-discovery-mode', 'buy')
@@ -313,7 +358,7 @@ async def main():
                                              ('.home-service-category-card a[href="/transport/airport-transfer"]', '/transport/airport-transfer'),
                                              ('.home-service-category-card a[href="/transport/fast-track"]', '/transport/fast-track'),
                                              ('.home-service-category-card a[href="/discover/services?category=cat-home-services"]', '/discover/services?category=cat-home-services'),
-                                             ('.home-audience-card[href="/for-owners"]', '/for-owners')]:
+                                             ('.home-audience-card[href="/owner/onboarding"]', '/owner/onboarding')]:
                         link = page.locator(selector).first
                         href = await link.get_attribute('href')
                         assert href.startswith(prefix), href
@@ -324,7 +369,7 @@ async def main():
                     await page.locator('.home-hero-banner').scroll_into_view_if_needed()
                     await page.screenshot(path=str(OUTPUT/f'{lang}-{width}-homepage.png'), full_page=True)
                     assert not errors, errors
-                    results.append({'language':lang,'width':width,'state':'data','pageOverflow':False,'sections':6,'gridSections':grid_sections,'keyboardControlledRails':tested_controls,'swipe':width<768,'nativeMobileTap':width<768,'verifiedSearchModes':3,'errors':errors})
+                    results.append({'language':lang,'width':width,'state':'data','pageOverflow':False,'sections':6,'gridSections':grid_sections,'keyboardControlledRails':tested_controls,'swipe':width<768,'nativeMobileTap':width<768,'verifiedMarketplaceEntries':4,'errors':errors})
                     print(json.dumps({'completed':len(results),'language':lang,'width':width,'seconds':round(time.monotonic()-case_started,2)}),flush=True)
                 except Exception:
                     await page.screenshot(path=str(OUTPUT/f"failure-{lang}-{width}.png"),full_page=True)
@@ -343,8 +388,11 @@ async def main():
             if state=='loading': await expect(page.locator('.home-properties [role=status]')).to_be_visible()
             assert await page.evaluate('document.documentElement.scrollWidth<=innerWidth')
             if state=='error':
-                await expect(page.get_by_role('alert')).to_have_count(5)
-                await page.get_by_role('button',name='Try again').first.click()
+                await expect(page.get_by_role('alert')).to_have_count(6)
+                communities = page.locator('#rental-communities')
+                await expect(communities.get_by_role('alert')).to_contain_text('Communities could not be loaded')
+                await expect(communities.get_by_role('button',name='Try again')).to_be_visible()
+                await page.locator('.home-properties').get_by_role('button',name='Try again').click()
                 assert await page.evaluate('window.fixtureRetries') == 1
                 assert 'No published' not in await page.locator('body').inner_text()
             if state=='empty':

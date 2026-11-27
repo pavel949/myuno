@@ -27,21 +27,18 @@ import {
 import TaxonomyValueEditor from '@/components/admin/taxonomy/TaxonomyValueEditor';
 import TaxonomyBulkActions from '@/components/admin/taxonomy/TaxonomyBulkActions';
 import TaxonomySchemaEditor from '@/components/admin/taxonomy/TaxonomySchemaEditor';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Label } from '@/components/ui/label';
+import TaxonomyCreateDialog from '@/components/admin/taxonomy/TaxonomyCreateDialog';
 
 export default function AdminTaxonomyManager() {
   const { language } = useLanguage();
   const t = (en: string, ru: string) => language === 'ru' ? ru : en;
   
-  const { definitions, groupedByVertical, isLoading, isError, refetch, create, isCreating } = useTaxonomyDefinitions();
-  const [creating, setCreating] = useState(false);
-  const [draft, setDraft] = useState({ type_key: '', name_en: '', name_ru: '', vertical: 'general' });
-  const [createError, setCreateError] = useState('');
+  const { definitions, groupedByVertical, isLoading, isError, refetch } = useTaxonomyDefinitions();
+  const [createOpen, setCreateOpen] = useState(false);
   
   const [selectedType, setSelectedType] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
-  const [activeTab, setActiveTab] = useState<'browse' | 'values'>('browse');
+  const [activeTab, setActiveTab] = useState('values');
 
   const selectedDefinition = definitions.find(d => d.type_key === selectedType);
 
@@ -63,46 +60,13 @@ export default function AdminTaxonomyManager() {
 
   const navigate = useNavigate();
 
-  const createType = async (event: React.FormEvent) => {
-    event.preventDefault();
-    const key = draft.type_key.trim();
-    if (!/^[a-z][a-z0-9_]*$/.test(key) || definitions.some(item => item.type_key === key)) {
-      setCreateError(t('Use a unique key containing lowercase Latin letters, numbers and underscores.', 'Укажите уникальный ключ: латинские буквы в нижнем регистре, цифры и подчёркивания.'));
-      return;
-    }
-    setCreateError('');
-    try {
-      await create({ ...draft, type_key: key, name_en: draft.name_en.trim(), name_ru: draft.name_ru.trim(),
-        icon: '', supports_hierarchy: false, metadata_schema: {}, is_system: false, sort_order: 0, is_active: true });
-      setSelectedType(key);
-      setActiveTab('values');
-      setCreating(false);
-      setDraft({ type_key: '', name_en: '', name_ru: '', vertical: 'general' });
-    } catch {
-      setCreateError(t('Could not create the type. Your entries have been preserved; refresh the list before retrying.', 'Не удалось создать тип. Введённые данные сохранены; обновите список перед повторной попыткой.'));
-    }
-  };
+  if (isError) return <div role="alert" className="space-y-3 p-6">
+    <p>{t('Could not load reference lists. Their contents are unknown.', 'Не удалось загрузить справочники. Их содержимое неизвестно.')}</p>
+    <Button onClick={() => void refetch()}>{t('Retry', 'Повторить')}</Button>
+  </div>;
 
   return (
     <div className="p-6 space-y-6">
-      <Dialog open={creating} onOpenChange={open => { if (!isCreating) setCreating(open); }}>
-        <DialogContent><DialogHeader><DialogTitle>{t('New taxonomy type', 'Новый тип справочника')}</DialogTitle></DialogHeader>
-          <form onSubmit={createType} className="space-y-4">
-            {(['type_key', 'name_en', 'name_ru'] as const).map((field, index) => <div key={field} className="space-y-2">
-              <Label htmlFor={`taxonomy-${field}`}>{[t('Key', 'Ключ'), t('English name', 'Название на английском'), t('Russian name', 'Название на русском')][index]}</Label>
-              <Input id={`taxonomy-${field}`} required maxLength={120} disabled={isCreating} value={draft[field]} onChange={event => setDraft(previous => ({ ...previous, [field]: event.target.value }))} />
-            </div>)}
-            <div className="space-y-2"><Label htmlFor="taxonomy-vertical">{t('Vertical', 'Направление')}</Label>
-              <select id="taxonomy-vertical" className="min-h-11 w-full border border-input bg-background px-3" disabled={isCreating} value={draft.vertical} onChange={event => setDraft(previous => ({ ...previous, vertical: event.target.value }))}>
-                {Object.entries(VERTICAL_CONFIG).map(([key, config]) => <option key={key} value={key}>{language === 'ru' ? config.labelRu : config.labelEn}</option>)}
-              </select>
-            </div>
-            {createError && <p role="alert" className="text-sm text-destructive">{createError}</p>}
-            <Button type="submit" className="min-h-11" disabled={isCreating}>{isCreating ? t('Saving…', 'Сохранение…') : t('Create type', 'Создать тип')}</Button>
-          </form>
-        </DialogContent>
-      </Dialog>
-      {isError && <div role="alert" className="space-y-2"><p>{t('Could not load taxonomy definitions.', 'Не удалось загрузить справочники.')}</p><Button variant="outline" onClick={() => refetch()}>{t('Retry', 'Повторить')}</Button></div>}
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
@@ -184,7 +148,7 @@ export default function AdminTaxonomyManager() {
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between">
               <CardTitle className="text-lg">{t('Taxonomy Types', 'Типы справочников')}</CardTitle>
-              <Button size="sm" variant="outline" className="min-h-11" disabled={isLoading || isError} onClick={() => { setCreateError(''); setCreating(true); }}>
+              <Button size="sm" variant="outline" disabled={isLoading} onClick={() => setCreateOpen(true)}>
                 <Plus className="h-4 w-4 mr-1" />
                 {t('Add', 'Добавить')}
               </Button>
@@ -289,7 +253,7 @@ export default function AdminTaxonomyManager() {
           </CardHeader>
           <CardContent>
             {selectedType ? (
-              <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as any)}>
+              <Tabs value={activeTab} onValueChange={setActiveTab}>
                 <TabsList className="mb-4">
                   <TabsTrigger value="values">{t('Values', 'Значения')}</TabsTrigger>
                   <TabsTrigger value="settings">{t('Settings', 'Настройки')}</TabsTrigger>
@@ -315,6 +279,7 @@ export default function AdminTaxonomyManager() {
           </CardContent>
         </Card>
       </div>
+      {createOpen && <TaxonomyCreateDialog open={createOpen} onOpenChange={setCreateOpen} onCreated={key => { setSelectedType(key); setActiveTab('values'); }} />}
     </div>
   );
 }

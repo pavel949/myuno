@@ -111,10 +111,11 @@ export function useTaxonomyDefinitions() {
         .single();
 
       if (error) throw error;
+      if (!data?.id || data.type_key !== definition.type_key) throw new Error('Reference list creation was not confirmed');
       return data;
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['taxonomy-definitions'] });
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ['taxonomy-definitions'] });
     },
   });
 

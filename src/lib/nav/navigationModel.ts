@@ -55,8 +55,9 @@ export type { NavRoleKey, NavItem };
 /** Public header destinations reuse the existing rental, sale, and local guides. */
 export const GUEST_TOP_NAV: NavItem[] = [
   { path: APP_ROUTES.PROPERTY_RENT, icon: Building2, labelEn: 'Stays', labelRu: 'Жильё', labelTh: 'ที่พัก' },
-  { path: APP_ROUTES.GOAL_SERVICES, icon: Wrench, labelEn: 'Services', labelRu: 'Услуги', labelTh: 'บริการ' },
   { path: APP_ROUTES.PROPERTY_BUY, icon: Building2, labelEn: 'Homes for sale', labelRu: 'Купить', labelTh: 'ซื้อที่อยู่อาศัย' },
+  { path: APP_ROUTES.EXPERIENCES, icon: Sparkles, labelEn: 'Experiences', labelRu: 'Впечатления', labelTh: 'ประสบการณ์' },
+  { path: APP_ROUTES.GOAL_SERVICES, icon: Wrench, labelEn: 'Services', labelRu: 'Услуги', labelTh: 'บริการ' },
   { path: APP_ROUTES.RELOCATE, icon: Compass, labelEn: 'Living', labelRu: 'Жизнь', labelTh: 'ใช้ชีวิต' },
   { path: APP_ROUTES.AREA_INDEX, icon: MapPin, labelEn: 'Areas', labelRu: 'Районы', labelTh: 'ย่านต่าง ๆ' },
 ];

@@ -192,6 +192,7 @@ export default defineConfig(({ mode, command }) => {
           // stays light — the 557-route JS graph is cached at runtime on demand
           // (see runtimeCaching) instead of force-downloading every chunk up front.
           globPatterns: ['**/*.{css,html,ico,svg,webmanifest}', 'icons/**/*.png'],
+          globIgnores: ['**/vendor-maplibre-*.css', '**/MapLibreMap-*.css'],
           // Old precache revisions are content-hashed; remove them on activate so
           // a stale shell can never be served after a deploy.
           cleanupOutdatedCaches: true,
@@ -260,6 +261,8 @@ export default defineConfig(({ mode, command }) => {
       alias: {
         ...radixOverlayAliases,
         "@": path.resolve(__dirname, "./src"),
+        // Modern Vite targets already provide the language features bundled in ExcelJS polyfills.
+        exceljs: "exceljs/dist/exceljs.bare.min.js",
       },
       dedupe: ['react', 'react-dom', 'react/jsx-runtime'],
     },
@@ -369,6 +372,7 @@ export default defineConfig(({ mode, command }) => {
             if (id.includes('exceljs')) return 'vendor-excel';
             if (id.includes('recharts') || id.includes('d3-')) return 'vendor-charts';
             if (id.includes('@react-google-maps')) return 'vendor-map';
+            if (id.includes('/maplibre-gl/')) return 'vendor-maplibre';
             if (id.includes('@sentry')) return 'vendor-sentry';
             if (id.includes('dompurify')) return 'vendor-sanitize';
 

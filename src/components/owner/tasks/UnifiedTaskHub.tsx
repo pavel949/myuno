@@ -6,6 +6,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useMyCompanyId, useCompanyMembers } from '@/hooks/useAgentDeals';
 import { useCrmTasks, useCreateCrmTask, useUpdateCrmTask, useDeleteCrmTask, CrmTask } from '@/hooks/useCrmTasks';
 import { useOperationalTasks, OperationalTask } from '@/hooks/useOperationalTasks';
+import { usePmsQueuedCompletion } from '@/hooks/usePmsQueuedCompletion';
 import { useMyProperties } from '@/hooks/useMyProperties';
 import { PageContainer } from '@/components/uno/PageContainer';
 import { PageHeader } from '@/components/uno/PageHeader';
@@ -194,6 +195,11 @@ export function UnifiedTaskHub() {
   const detailLoading = companyLoading || propertiesLoading || (detailSource === 'crm' ? crmLoading : opsLoading);
   const detailScopeValid = validDetail && !boundScope.invalidated && !scopeChanged && !!user &&
     (!detailCompany || !companyId || detailCompany === companyId);
+  const pmsQueue = usePmsQueuedCompletion(
+    location.pathname === '/mc/tasks' && contextReady ? user?.id : undefined,
+    companyId ?? undefined,
+    propertyIds,
+  );
   const detailTask = detailScopeValid && contextReady && !detailLoading && !detailError
     ? allUnified.find(task => task.source === detailSource && task.id === detailId) || null
     : null;
@@ -310,10 +316,23 @@ export function UnifiedTaskHub() {
     }
   };
 
-  const handleQuickComplete = (task: UnifiedTask) => {
-    handleUpdate(task.id, task.source, { status: 'completed', completed_at: new Date().toISOString() });
-    logActivity('task_completed', task.source === 'crm' ? 'crm_task' : 'ops_task', task.id, { title: task.title });
-    toast.success(t('Done', 'Выполнено'));
+  const handleQuickComplete = async (task: UnifiedTask) => {
+    if (task.source === 'ops' && location.pathname === '/mc/tasks') {
+      const current = scopedOpsTasks.find(row => row.id === task.id);
+      if (!current || !pmsQueue.save(current)) {
+        toast.error(t('Could not queue the task. Refresh it and try again.', 'Не удалось поставить задачу в очередь. Обновите список и попробуйте снова.'));
+      } else {
+        toast(t('Saved on this device for syncing', 'Задача сохранена на устройстве и ждёт отправки'));
+      }
+      return;
+    }
+    try {
+      await handleUpdate(task.id, task.source, { status: 'completed', completed_at: new Date().toISOString() });
+      void logActivity('task_completed', task.source === 'crm' ? 'crm_task' : 'ops_task', task.id, { title: task.title });
+      toast.success(t('Done', 'Выполнено'));
+    } catch {
+      toast.error(t('Could not complete the task. Try again.', 'Не удалось завершить задачу. Попробуйте ещё раз.'));
+    }
   };
 
   const handleUpdate = async (id: string, source: 'crm' | 'ops', updates: Record<string, any>) => {
@@ -322,7 +341,7 @@ export function UnifiedTaskHub() {
       if (next.status && next.status !== 'completed' && next.completed_at === undefined) {
         next.completed_at = null;
       }
-      updateCrmTask.mutate({ id, ...next });
+      await updateCrmTask.mutateAsync({ id, ...next });
     } else {
       const next = { ...updates };
       if (next.status === 'completed' && next.completed_by === undefined) {
@@ -332,7 +351,8 @@ export function UnifiedTaskHub() {
         if (next.completed_at === undefined) next.completed_at = null;
         if (next.completed_by === undefined) next.completed_by = null;
       }
-      await supabase.from('property_operational_tasks').update(next as any).eq('id', id);
+      const { data, error } = await supabase.from('property_operational_tasks').update(next as any).eq('id', id).select('id').maybeSingle();
+      if (error || !data) throw new Error('Task update unavailable');
       invalidateOverviewQueries();
     }
     queryClient.invalidateQueries({ queryKey: ['day-briefing'] });
@@ -365,6 +385,17 @@ export function UnifiedTaskHub() {
         <Button asChild variant="outline" size="sm" className="mb-4">
           <Link to={returnTo}>{t('Back to Today', 'Вернуться к обзору дня', 'กลับไปวันนี้')}</Link>
         </Button>
+      )}
+
+      {(pmsQueue.pending > 0 || pmsQueue.conflicts > 0) && (
+        <section aria-label={t('Task sync', 'Синхронизация задач')} className="space-y-2 rounded-md border border-border bg-muted p-3">
+          <p role="status" className="text-sm">
+            {pmsQueue.pending > 0 && t(`Waiting to sync: ${pmsQueue.pending}. We’ll try again when you reconnect.`, `Ожидают отправки: ${pmsQueue.pending}. Повторим отправку, когда появится связь.`)}
+            {pmsQueue.conflicts > 0 && t(` Review needed: ${pmsQueue.conflicts}.`, ` Нужно проверить: ${pmsQueue.conflicts}.`)}
+          </p>
+          {pmsQueue.pending > 0 && <Button type="button" size="sm" variant="outline" onClick={() => void pmsQueue.sync()}>{t('Try syncing', 'Отправить снова')}</Button>}
+          {pmsQueue.conflicts > 0 && <Button type="button" size="sm" variant="ghost" onClick={pmsQueue.discardConflicts}>{t('Remove conflicting local updates', 'Снять спорные изменения с отправки')}</Button>}
+        </section>
       )}
 
       {!isLoading && !loadError && <TaskSummaryKPIs crmTasks={scopedCrmTasks} opsTasks={scopedOpsTasks} />}
@@ -631,6 +662,10 @@ export function UnifiedTaskHub() {
         <TaskDetailSheet
           key={`${boundScope.actorId}:${boundScope.companyId}:${propertyScopeKey}:${detailTask.source}:${detailTask.id}`}
           task={detailTask}
+          queueProof={import.meta.env.VITE_PMS_TASK_PHOTOS_ENABLED === 'true' && location.pathname === '/mc/tasks' && detailTask?.source === 'ops' && detailTask.assigned_to === user?.id
+            && ['pending', 'in_progress'].includes(detailTask.status)
+            ? (file) => pmsQueue.saveWithPhoto(detailTask.raw as OperationalTask, file)
+            : undefined}
           open
           onOpenChange={open => { if (!open) closeDetail(); }}
           members={members}

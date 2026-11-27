@@ -101,18 +101,22 @@
     padding: 0;
     border: 0;
   }
-  .cinematic-home.home-refined .home-reference-search .home-search-modes button {
+  .cinematic-home.home-refined .home-reference-search .home-search-modes :is(button, a) {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     min-height: 44px;
     padding: 8px 10px;
     border: 1px solid hsl(var(--home-ui-input-border));
+    text-align: center;
     border-radius: 9px;
     background: transparent;
     color: hsl(var(--home-ui-control-navy));
     font-size: var(--home-ui-body-small);
     font-weight: 600;
   }
-  .cinematic-home.home-refined .home-reference-search .home-search-modes[data-activities] {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+  .cinematic-home.home-refined .home-reference-search .home-search-modes[data-marketplaces] {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
   .cinematic-home.home-refined .home-reference-search .home-search-modes button[aria-pressed=true] {
     border-color: hsl(var(--home-ui-control-navy));

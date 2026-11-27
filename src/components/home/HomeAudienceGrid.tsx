@@ -2,7 +2,7 @@ import { ArrowRight, BriefcaseBusiness, Building2, Home, Sparkles } from 'lucide
 import { Link } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { pickLang, type LangValues } from '@/lib/i18n/pickLang';
-import { APP_ROUTES as R } from '@/lib/config/routes';
+import { APP_ROUTES as R, partnerOfferHref } from '@/lib/config/routes';
 
 type AudienceCard = {
   icon: typeof Home;
@@ -15,10 +15,24 @@ type AudienceCard = {
 const audiences: AudienceCard[] = [
   {
     icon: Building2,
-    href: R.FOR_OWNERS,
+    href: R.OWNER_ONBOARDING,
     title: { ru: 'У меня есть недвижимость', en: 'I own property', th: 'มีอสังหาริมทรัพย์' },
-    description: { ru: 'Сдача, обслуживание и управление объектом с прозрачной отчётностью.', en: 'Rent, maintain, and manage your property with transparent reporting.', th: 'ปล่อยเช่า ดูแล และจัดการทรัพย์สินพร้อมรายงานที่โปร่งใส' },
-    action: { ru: 'Решения для собственников', en: 'For property owners', th: 'สำหรับเจ้าของ' },
+    description: { ru: 'Добавьте виллу, квартиру или дом, который хотите предложить гостям.', en: 'Add the villa, apartment or home you would like to list for guests.', th: 'เพิ่มวิลล่า อพาร์ตเมนต์ หรือบ้านที่ต้องการเสนอให้ผู้เข้าพัก' },
+    action: { ru: 'Разместить жильё', en: 'List a property', th: 'ลงประกาศที่พัก' },
+  },
+  {
+    icon: Sparkles,
+    href: partnerOfferHref('services'),
+    title: { ru: 'Предлагаю услуги', en: 'I provide local services', th: 'ให้บริการท้องถิ่น' },
+    description: { ru: 'Получайте заявки от гостей, собственников и управляющих компаний.', en: 'Receive relevant requests from guests, owners, and property managers.', th: 'รับคำขอจากแขก เจ้าของ และผู้จัดการอสังหาริมทรัพย์' },
+    action: { ru: 'Предложить услугу', en: 'Offer a service', th: 'เสนอบริการ' },
+  },
+  {
+    icon: Sparkles,
+    href: partnerOfferHref('experiences'),
+    title: { ru: 'Провожу экскурсии и мероприятия', en: 'I organise experiences', th: 'จัดกิจกรรมและทัวร์' },
+    description: { ru: 'Расскажите о маршруте, мастер-классе или другом занятии для гостей.', en: 'Tell us about a tour, workshop or other activity you offer to guests.', th: 'แนะนำทัวร์ เวิร์กช็อป หรือกิจกรรมสำหรับผู้เข้าพัก' },
+    action: { ru: 'Предложить впечатление', en: 'Offer an experience', th: 'เสนอกิจกรรม' },
   },
   {
     icon: BriefcaseBusiness,
@@ -30,17 +44,11 @@ const audiences: AudienceCard[] = [
   {
     icon: Building2,
     href: R.FOR_REAL_ESTATE_DEVELOPERS,
-    title: { ru: 'Я застройщик или девелопер', en: 'I am a developer', th: 'เป็นผู้พัฒนาโครงการ' },
-    description: { ru: 'Размещайте проекты, принимайте обращения покупателей и управляйте лидами.', en: 'List projects, capture buyer enquiries, and manage your development leads.', th: 'ลงประกาศโครงการ รับคำถามผู้ซื้อ และจัดการลีดของโครงการ' },
+    title: { ru: 'Я застройщик', en: 'I am a developer', th: 'เป็นผู้พัฒนาโครงการ' },
+    description: { ru: 'Размещайте проекты и отвечайте на обращения покупателей.', en: 'List projects, capture buyer enquiries, and manage your development leads.', th: 'ลงประกาศโครงการ รับคำถามผู้ซื้อ และจัดการลีดของโครงการ' },
     action: { ru: 'Для застройщиков', en: 'For developers', th: 'สำหรับผู้พัฒนา' },
   },
-  {
-    icon: Sparkles,
-    href: R.FOR_LOCAL_SERVICE_PROVIDERS,
-    title: { ru: 'Предлагаю услуги', en: 'I provide local services', th: 'ให้บริการท้องถิ่น' },
-    description: { ru: 'Получайте заявки от гостей, собственников и управляющих компаний.', en: 'Receive relevant requests from guests, owners, and property managers.', th: 'รับคำขอจากแขก เจ้าของ และผู้จัดการอสังหาริมทรัพย์' },
-    action: { ru: 'Стать партнёром', en: 'Become a partner', th: 'ร่วมเป็นพาร์ทเนอร์' },
-  },
+
 ];
 
 const trustSignals: LangValues[] = [

@@ -365,7 +365,11 @@ function MiniappMode({
       )}
       {/* Keep catalog controls in normal flow: the shared consumer header owns sticky navigation. */}
       {marketplaceIntro && <div className={pageWidth === 'default' ? ECOSYSTEM_PAGE_CONTAINER : PUBLIC_CONTENT_LAYOUT[pageWidth]}>{marketplaceIntro}</div>}
-      <div className="relative">
+      <div
+        id={marketplaceIntro ? 'marketplace-controls' : undefined}
+        tabIndex={marketplaceIntro ? -1 : undefined}
+        className="relative scroll-mt-24"
+      >
         <UnifiedHeader
           className={pageWidth === 'catalogue' ? 'marketplace-catalogue-toolbar' : undefined}
           compactOverview={Boolean(marketplaceIntro)}

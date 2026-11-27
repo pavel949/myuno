@@ -17,26 +17,28 @@ afterEach(cleanup);
 function mount() { render(<MemoryRouter><AdminTaxonomyManager /></MemoryRouter>); }
 function fill() {
   fireEvent.click(screen.getByRole('button', { name: 'Add' }));
-  fireEvent.change(screen.getByLabelText('Key'), { target: { value: 'qa_type' } });
+  fireEvent.change(screen.getByLabelText('Code'), { target: { value: 'qa_type' } });
   fireEvent.change(screen.getByLabelText('English name'), { target: { value: 'QA type' } });
   fireEvent.change(screen.getByLabelText('Russian name'), { target: { value: 'Тип QA' } });
 }
 describe('taxonomy creation through the existing writer', () => {
   it('creates only after submission and opens the existing values editor', async () => {
     mount(); fill(); expect(state.create).not.toHaveBeenCalled();
-    fireEvent.click(screen.getByRole('button', { name: 'Create type' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Create reference list' }));
     await waitFor(() => expect(state.create).toHaveBeenCalledWith(expect.objectContaining({ type_key: 'qa_type', vertical: 'general', is_system: false })));
     await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
+    expect(screen.getByText('Existing value editor')).toBeInTheDocument();
   });
   it('preserves entered values after a rejected save', async () => {
     state.create.mockRejectedValue(new Error('Synthetic failure')); mount(); fill();
-    fireEvent.click(screen.getByRole('button', { name: 'Create type' }));
-    expect(await screen.findByRole('alert')).toHaveTextContent('Could not create');
-    expect(screen.getByLabelText('Key')).toHaveValue('qa_type');
+    fireEvent.click(screen.getByRole('button', { name: 'Create reference list' }));
+    expect(await screen.findByRole('alert')).toHaveTextContent('not saved');
+    expect(screen.getByLabelText('Code')).toHaveValue('qa_type');
     expect(screen.getByRole('dialog')).toBeVisible();
   });
   it('does not create while the source list is unavailable', () => {
     state.error = true; mount(); expect(screen.getByRole('alert')).toHaveTextContent('Could not load');
-    expect(screen.getByRole('button', { name: 'Add' })).toBeDisabled();
+    expect(screen.queryByRole('button', { name: 'Add' })).not.toBeInTheDocument();
+    expect(state.create).not.toHaveBeenCalled();
   });
 });

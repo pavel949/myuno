@@ -5,7 +5,7 @@ Branch: `codex/admin-live-dashboard`.
 
 ## Implemented source behavior
 
-The existing Today dashboard and DS 2.1 shell are retained. Its attention list
+The existing Today dashboard and shared token-driven shell are retained. Its attention list
 reads existing support, manual-payment-review and open-dispute queues. Each
 source contributes at most five records; this is a preview, not a total task
 count. Support assignment filters execute before the limit. Support SLA and payment-request deadlines are distinct. Missing assignee names do not imply unassigned.
@@ -86,8 +86,33 @@ history. AI acknowledgement share is labelled as a recorded admin decision ratio
 not model accuracy; analysis rows are not claimed to be unique listings.
 
 Production publication is not certified by source tests. No live financial or
-inventory transaction was performed. Reverting the frontend commit restores prior
-screens without changing operational records or weakening backend authorization.
+inventory transaction was performed. A visual rollback uses a forward UI patch. Preserve actor-bound cache keys,
+admin admission, safe failure masking and truthful metric labels while restoring
+prior presentation. Regenerate source inventories for the resulting source;
+no production-record rollback is needed.
 An unrelated working-copy change to supabase/functions/mcp/index.ts is excluded.
 
-Final local production build: npm run build exited 0 (7,237 modules; Vite and PWA generation complete). Prebuild design audit: zero new/structural findings. Shared CSV safety tests: 2 passed. This identifies a local source check, not a production deployment. CI on the PR head remains a separate gate.
+Earlier local production build: npm run build exited 0 (7,237 modules; Vite and PWA generation complete). Prebuild design audit: zero new/structural findings. Shared CSV safety tests: 2 passed. This identifies a local source check, not a production deployment. CI on the PR head remains a separate gate.
+
+The complete dashboard integration also checks real pointer hits. The nested
+decision card sizes to its content; cases and decision summaries share their
+area, and work queues occupy their own row. This prevents the queue links from
+being covered by adjacent status/revenue panels. Local Edge verification passed
+18/18 combinations (RU/EN/TH at 320, 375, 768, 1280, 1920 and 2560px), checking
+vertical containment and ordinary provider-queue link clicks without force.
+The existing 60-case browser matrix now asserts containment of decision/queue
+children as a permanent regression check.
+
+Both dashboard fixture bundles replace case reads with synthetic QueryClient
+responses and continue to reject production transports. Home smoke expectations
+use /admin for an administrator's default while retaining explicit saved /mc,
+invalid-preference and actor/role-change checks. No browser time budget was
+increased and no gate was skipped to accommodate the layout defect.
+
+Final local production build after the queue-layout correction: npm run build exited 0; 7,237 modules; Vite build 4m13s and PWA generation complete. Font, service-tag and design prebuild checks passed (zero new/structural design findings). The final committed head still requires the full CI release gates.
+
+
+Merge validation base: af134ed46117c3dc6899ba37d36e636cb9417217. Creation uses its shared TaxonomyCreateDialog; no parallel inline creator is retained. Six focused merged-source suites passed 119 tests, including navigation, command destinations, Today, shared creator behavior and host integration. Full npm run typecheck passed on the merged source. Final committed-head CI remains a release gate.
+
+
+Merged-source production build completed successfully: 7,242 modules, Vite 8m36s, PWA generated (79 precache entries). The merged build uses isolated configuration and is not a deploy artifact. Edge pointer/vertical-containment verification on this build passed all 18 language/viewport combinations. Full committed-head CI is still required before release.

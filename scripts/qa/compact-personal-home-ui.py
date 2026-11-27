@@ -36,7 +36,7 @@ WIDTHS = [375, 430, 1280]
 ROLES = ['guest', 'resident', 'admin', 'owner', 'vendor', 'employee']
 STATES = ['loading', 'empty', 'partial-error', 'live']
 SMOKE_STATES = ['loading', 'empty', 'error', 'partial-error', 'live']
-WORK = {'admin': '/mc', 'owner': '/my-property', 'vendor': '/vendor', 'employee': '/team', 'property_manager': '/mc', 'investor': '/invest/dashboard'}
+WORK = {'admin': '/admin', 'owner': '/my-property', 'vendor': '/vendor', 'employee': '/team', 'property_manager': '/mc', 'investor': '/invest/dashboard'}
 COPY = {
     'en': {
         'open': 'Customize home', 'done': 'Done', 'retry': 'Retry', 'close': 'Close',
@@ -437,6 +437,8 @@ async def main():
 
                         # Saved workspace links must remain exact members of the current allowlist.
                         storage_key = 'myuno:home-workspace:synthetic-a'
+                        await navigate('admin', seed=json.dumps({storage_key: '/mc'}))
+                        await expect(work_link()).to_have_attribute('href', '/mc')
                         await navigate('admin', seed=json.dumps({storage_key: '/admin'}))
                         await expect(work_link()).to_have_attribute('href', '/admin')
                         await expect(page.get_by_test_id('location')).to_have_text('/')
@@ -450,7 +452,7 @@ async def main():
                         await expect(work_link()).to_have_attribute('href', '/vendor')
                         for invalid in ['/missing-workspace', '/admin?escalate=1', '/admin#fragment', '/vendor/../../admin', ' /admin', 'https://example.invalid/private', '//example.invalid/private', 'javascript:window.fixtureInjected=true']:
                             await navigate('admin', seed=json.dumps({storage_key: invalid}))
-                            await expect(work_link()).to_have_attribute('href', '/mc')
+                            await expect(work_link()).to_have_attribute('href', '/admin')
                             await expect(page.get_by_test_id('location')).to_have_text('/')
                             assert await page.evaluate('window.fixtureInjected === undefined')
                             await assert_safe()
@@ -459,7 +461,7 @@ async def main():
                         await navigate('admin', seed=json.dumps({storage_key: '/admin'}))
                         await page.evaluate('window.fixture.setState({account:"b"})')
                         await expect(page.get_by_test_id('actor')).to_have_text('synthetic-b')
-                        await expect(work_link()).to_have_attribute('href', '/mc')
+                        await expect(work_link()).to_have_attribute('href', '/admin')
                         await page.evaluate('window.fixture.setState({account:"a"})')
                         await expect(work_link()).to_have_attribute('href', '/admin')
                         await page.evaluate('window.fixture.setState({role:"vendor"})')
