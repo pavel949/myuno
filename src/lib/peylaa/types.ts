@@ -19,7 +19,7 @@ export interface PeylaaUnit {
   price_per_sqm: number | null;
   asking_price_thb: number | null;
   asking_price_usd: number | null;
-  status: 'available' | 'reserved' | 'sold' | 'holding';
+  status: 'available' | 'reserved' | 'sold' | 'holding' | 'unavailable' | 'unknown';
   reservation_fee_thb: number | null;
   floor_plan_url: string | null;
   gallery_urls: string[] | null;
