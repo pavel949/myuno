@@ -25,7 +25,7 @@ const virtual = {
   '@/components/seo': `export const SEOHead=()=>null;`,
   '@/components/crosssell/CrossSellSection': `export const CrossSellSection=()=>null;`,
   '@/components/map/UnifiedCatalogMap': `export const UnifiedCatalogMap=()=>null;`,
-  '@/hooks/useLifeOS': `export const useLifeSituations=()=>({data:[{id:'synthetic-arrival',code:'arrival',title_en:'Arrival',title_ru:'Приезд',is_active:true}]});export const useResolveLifeOSContext=()=>({data:${JSON.stringify(['transfer','yacht','unknown-service'].map(slug=>({entity_type:'service',entity_id:lifeId(slug),title:slug,title_localized:slug,price:null})))}});`,
+  '@/hooks/useLifeOS': `export const useLifeScenarios=()=>({data:[]});export const scenarioSlug=value=>String(value?.slug??value?.id??value);export const useLifeSituations=()=>({data:[{id:'synthetic-arrival',code:'arrival',title_en:'Arrival',title_ru:'Приезд',is_active:true}]});export const useResolveLifeOSContext=()=>({data:${JSON.stringify(['transfer','yacht','unknown-service'].map(slug=>({entity_type:'service',entity_id:lifeId(slug),title:slug,title_localized:slug,price:null})))}});`,
   '@/hooks/useUserPersonas': `export const useUserPersonas=()=>({effectivePersonas:[]});`,
   '@/hooks/useSituationServiceCounts': `export const useSituationServiceCounts=()=>({data:{}});`,
   './useSituationTracking': `export const useSituationTracking=()=>({containerRef:{current:null},onSituationClick:()=>{}});`,
