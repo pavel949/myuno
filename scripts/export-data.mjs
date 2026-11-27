@@ -11,7 +11,7 @@
  */
 
 import { createClient } from '@supabase/supabase-js';
-import { writeFileSync, mkdirSync, existsSync } from 'fs';
+import { writeFileSync, mkdirSync, existsSync, rmSync } from 'fs';
 import { join } from 'path';
 
 // ── Lovable (source) credentials ──
@@ -147,6 +147,9 @@ async function exportTable(table) {
 
 async function main() {
   mkdirSync(OUT_DIR, { recursive: true });
+  // A failed/empty current read must never leave the prior table's bytes behind.
+  rmSync(join(OUT_DIR, '_summary.json'), { force: true });
+  for (const table of TABLES) rmSync(join(OUT_DIR, `${table}.json`), { force: true });
 
   console.log(`\n📦 Exporting ${TABLES.length} tables from Lovable Supabase...\n`);
 
@@ -171,6 +174,10 @@ async function main() {
 
   // Write summary
   const summary = {
+    snapshotKind: 'public-rest-partial',
+    sourceVisibility: 'rls-filtered',
+    importReady: false,
+    limitations: ['No schema, Auth users or Storage objects', 'Empty results may be hidden by RLS', 'Not a disaster-recovery backup'],
     timestamp: new Date().toISOString(),
     source: SOURCE_URL,
     tablesExported: results.exported.length,
@@ -187,6 +194,8 @@ async function main() {
   console.log(`  Empty:    ${results.empty.length} tables`);
   console.log(`  Errors:   ${results.errors.length} tables`);
   console.log(`  Output:   ${OUT_DIR}/\n`);
+  console.warn('Partial public archive only; completeness and restore readiness are unverified.');
+  if (results.errors.length) process.exitCode = 1;
 }
 
-main().catch(console.error);
+main().catch(error => { console.error(error.message); process.exitCode = 1; });

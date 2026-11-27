@@ -1,3 +1,5 @@
+> **2026-11-27: import is blocked for the current public REST archives.** They are RLS-filtered and omit schema/Auth/Storage. Artifacts can support partial recovery, but are not a complete replica or disaster-recovery proof. See [containment and acceptance gates](hardening/2026-11-27-snapshot-containment.md). Do not relabel an archive or clear a target to bypass this check.
+
 # DB Mirror Snapshot — Setup Checklist
 
 Зеркалирование БД **Lovable Cloud (`kakkwibljrjsawxgnupk`) → собственный Supabase (`erfwtoavipwjqmylpizt`)** через GitHub Actions cron каждые 6 часов.
@@ -53,7 +55,7 @@ supabase db push
 > ⚠️ Этот workflow переносит **только данные таблиц**, не файлы Storage. Для Storage нужен отдельный скрипт (Вариант B).
 
 ### 3. Проверить что target БД пустая (или готова к перезаписи)
-Скрипт `import-data.mjs` использует `upsert` с `ignoreDuplicates: true` — старые строки не перезаписываются, новые добавляются. Если хотите **чистый snapshot**, перед первым запуском очистите целевые таблицы вручную.
+Текущие публичные выгрузки не допускаются к импорту. Для отдельно проверенного полного табличного архива импортёр использует upsert с обновлением конфликтующих ID, останавливается на первой ошибке и не повторяет пакет с неизвестным результатом. Отсутствующие в архиве строки целевой базы не удаляются; это не чистый snapshot и не подтверждение восстановления.
 
 ---
 
@@ -68,7 +70,7 @@ Cron сработает каждые 6 часов в `:17` минут (00:17, 06
 
 ### Просмотр результата
 - **Actions → последний run → Summary** — общий отчёт
-- **Artifacts** (внизу страницы run) — `db-snapshot-<run_id>.zip` с JSON всех таблиц (хранится 7 дней)
+- **Artifacts** (внизу страницы run) — `db-snapshot-<run_id>.zip` с JSON доступных публичному экспорту таблиц (хранится 7 дней)
 - **Logs** — построчный лог по каждой таблице (`✅ table: N rows` / `⚠️ error`)
 
 ---
@@ -93,8 +95,8 @@ Cron сработает каждые 6 часов в `:17` минут (00:17, 06
 - ✅ Source anon key публичный — безопасно в коде
 - ✅ Workflow запускается только из вашего репо, секрет не доступен в PR от форков
 - ✅ Export artifacts хранятся 7 дней — после автоудаление
-- ⚠️ **НЕ** включайте target БД в production trafffic, пока не верифицируете 1-2 успешных snapshot
-- ⚠️ Не пишите в target БД параллельно — следующий snapshot затрёт изменения
+- ⚠️ **НЕ** включайте target БД в production trafffic, пока не проверены полнота источника и восстановление в изолированном окружении
+- ⚠️ Не пишите в target БД параллельно — импорт не является точной репликацией и может обновлять совпадающие ID
 
 ---
 
