@@ -90,7 +90,7 @@ export default function ServicesIndex({ embedded = false }: { embedded?: boolean
   const knownCategory = !category || (child ? Boolean(home) : categories.some(item => item.id === category));
   // Home functions remain request templates with indicative prices, not live supply.
   // A catalogue sibling tag is not a per-function LifeOS association. Templates remain browsable without the situation filter.
-  const showRequests = Boolean((category === home?.id || filters.query.trim()) && (!category || category === home?.id) && home && !filters.situation && knownSituation);
+  const showRequests = Boolean(home && (!category || category === home.id) && !filters.situation && knownSituation);
   const requests = showRequests ? functions.filter(fn => (!child || fn.category === child.id) && matchesServiceQuery(filters.query, [fn.raw.nameRu, fn.raw.nameEn, fn.raw.descriptionRu, fn.raw.descriptionEn, homeServiceCategoryLabel(fn.category, language)])) : [];
   const requestPreviews = SERVICE_CATEGORIES.flatMap(item => {
     const matches = requests.filter(fn => fn.category === item.id);
