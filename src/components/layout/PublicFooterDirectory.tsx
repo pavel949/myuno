@@ -30,7 +30,7 @@ const sections = [
   {
     title: { en: 'Island life', ru: 'Жизнь на острове', th: 'ชีวิตบนเกาะ' },
     links: [
-      { path: R.DISCOVER, en: 'Life situations', ru: 'Жизненные ситуации', th: 'สถานการณ์ในชีวิต' },
+      { path: R.DISCOVER_SITUATIONS, en: 'Life situations', ru: 'Жизненные ситуации', th: 'สถานการณ์ในชีวิต' },
       { path: R.RELOCATE, en: 'Relocation', ru: 'Переезд', th: 'การย้ายถิ่นฐาน' },
     ],
   },

@@ -35,7 +35,7 @@ function HomeIslandLife() {
       <Link className="ds-focus flex min-h-11 items-center justify-between gap-3 rounded-[var(--bible-radius-control)] border border-primary-foreground/20 px-3 py-2 text-sm transition-colors hover:bg-primary-foreground/10" to={buildSituationListUrl(s.code)}>
         <span className="min-w-0 truncate">{language === 'ru' ? s.title_ru : s.title_en}</span><ArrowRight className="size-4 shrink-0" aria-hidden="true" />
       </Link></li>)}</ul>}
-    <Link className="ds-focus mt-auto inline-flex min-h-11 items-center gap-1 pt-4 text-sm font-medium underline underline-offset-4" to={R.DISCOVER}>{t({ ru: 'Все жизненные ситуации', en: 'All life situations', th: 'สถานการณ์ทั้งหมด' })}<ArrowRight size={16} aria-hidden="true" /></Link>
+    <Link className="ds-focus mt-auto inline-flex min-h-11 items-center gap-1 pt-4 text-sm font-medium underline underline-offset-4" to={R.DISCOVER_SITUATIONS}>{t({ ru: 'Все жизненные ситуации', en: 'All life situations', th: 'สถานการณ์ทั้งหมด' })}<ArrowRight size={16} aria-hidden="true" /></Link>
   </div>;
 }
 

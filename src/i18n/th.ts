@@ -14,10 +14,10 @@ export const th: Record<string, string> = {
   'nav.profile': 'โปรไฟล์',
 
   // Discover
-  'discover.navigator': 'ตัวนำทาง',
+  'discover.navigator': 'ชีวิตบนเกาะ',
   'discover.title': 'คุณต้องการอะไรในตอนนี้?',
   'discover.subtitle': 'เลือกสถานการณ์ — เราจะแสดงบริการ รายชื่อติดต่อ และขั้นตอนที่ชัดเจน จัดกลุ่มตามด้านชีวิตและปรับให้เหมาะกับบทบาทของคุณ',
-  'discover.role': 'บทบาท',
+  'discover.role': 'ฉันคือ',
   'discover.roleEmpty': 'ยังไม่ได้เลือก',
   'discover.editRole': 'แก้ไข',
   'discover.search.placeholder': 'ค้นหาตามสถานการณ์…',

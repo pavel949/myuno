@@ -16,6 +16,8 @@ import { useLifeSituations, useLifeOSRole, type LifeOSRole } from '@/hooks/useLi
 import { useSituationServiceCounts } from '@/hooks/useSituationServiceCounts';
 import { useUserPersonas } from '@/hooks/useUserPersonas';
 import { rankSituationsByPersonas } from '@/lib/situationBlend';
+import { LifeOsPageHeader, LIFE_OS_CONTAINER, LIFE_OS_SECTION_TITLE } from './LifeOsPageHeader';
+import { APP_ROUTES } from '@/lib/config/routes';
 import { ROLE_META } from '@/lib/roleBlend';
 import { RoleSheet } from '@/components/home/RoleSheet';
 
@@ -176,19 +178,8 @@ export default function NavigatorPageV3() {
 
   return (
     <AppLayout>
-      <div className="px-4 pt-6 pb-24 md:px-6 md:pt-10 max-w-3xl mx-auto">
-        {/* Header */}
-        <header className="mb-8 md:mb-10">
-          <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground mb-3">
-            {t('discover.navigator')}
-          </p>
-          <h1 className="text-[28px] sm:text-[34px] font-serif font-semibold leading-[1.1] tracking-[-0.02em] text-foreground">
-            {t('discover.title')}
-          </h1>
-          <p className="mt-3 text-[14px] sm:text-[15px] text-muted-foreground leading-[1.5] max-w-2xl">
-            {t('discover.subtitle')}
-          </p>
-
+      <div className={LIFE_OS_CONTAINER}>
+        <LifeOsPageHeader title={t('discover.title')} lead={t('discover.subtitle')}>
           {/* Role + search single row */}
           <div className="mt-6 flex items-center gap-3">
             <button
@@ -197,7 +188,7 @@ export default function NavigatorPageV3() {
               className="inline-flex items-center gap-2 px-3 py-2.5 text-[13px] font-medium border border-border text-foreground hover:border-primary/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary transition-colors shrink-0 min-h-[44px]"
               aria-label={t('discover.editRole')}
             >
-              <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
+              <span className="text-muted-foreground">
                 {t('discover.role')}
               </span>
               <span className="inline-flex items-center px-2 py-0.5 bg-muted border-l-2 border-primary">
@@ -238,16 +229,22 @@ export default function NavigatorPageV3() {
           </div>
 
           {/* Map link */}
-          <div className="mt-4 flex justify-end">
+          <div className="mt-4 flex flex-wrap justify-end gap-2">
+            <Link
+              to={APP_ROUTES.RELOCATE}
+              className="inline-flex min-h-11 items-center gap-1.5 px-3 py-2 text-sm font-medium border border-border text-muted-foreground hover:text-foreground hover:border-primary/40 transition-colors"
+            >
+              {isRu ? 'План переезда за 9 шагов' : 'Relocation plan in 9 steps'}
+            </Link>
             <Link
               to={mapUrl}
-              className="inline-flex items-center gap-1.5 px-3 py-2 text-[12px] font-medium border border-border text-muted-foreground hover:text-foreground hover:border-primary/40 transition-colors"
+              className="inline-flex min-h-11 items-center gap-1.5 px-3 py-2 text-sm font-medium border border-border text-muted-foreground hover:text-foreground hover:border-primary/40 transition-colors"
             >
               <MapPin aria-hidden="true" className="w-3.5 h-3.5" strokeWidth={1.75} />
               {t('discover.map')}
             </Link>
           </div>
-        </header>
+        </LifeOsPageHeader>
 
         {/* Unified loading / error surface — same component that renders the rows,
             so a failure never leaves sections in different states. */}
@@ -275,10 +272,10 @@ export default function NavigatorPageV3() {
         {/* "For you" situations */}
         {!isLoading && !query && forYou.length > 0 && (
           <section className="mb-10" aria-labelledby="for-you-title">
-            <header className="flex items-baseline justify-between gap-3 pb-3 mb-1 border-b-2 border-primary">
+            <header className="flex items-baseline justify-between gap-3 pb-3 mb-1 border-b border-border">
               <h2
                 id="for-you-title"
-                className="font-mono text-[11px] uppercase tracking-[0.18em] text-primary"
+                className={LIFE_OS_SECTION_TITLE}
               >
                 {t('discover.forYou')}
               </h2>

@@ -58,7 +58,7 @@ export const GUEST_TOP_NAV: NavItem[] = [
   { path: APP_ROUTES.PROPERTY_BUY, icon: Building2, labelEn: 'Buy', labelRu: 'Покупка', labelTh: 'ซื้อ' },
   { path: APP_ROUTES.EXPERIENCES, icon: Sparkles, labelEn: 'Experiences', labelRu: 'Впечатления', labelTh: 'ประสบการณ์' },
   { path: APP_ROUTES.GOAL_SERVICES, icon: Wrench, labelEn: 'Services', labelRu: 'Сервисы', labelTh: 'บริการ' },
-  { path: APP_ROUTES.DISCOVER, exact: true, icon: Compass, labelEn: 'Island life', labelRu: 'Жизнь на острове', labelTh: 'ชีวิตบนเกาะ' },
+  { path: APP_ROUTES.DISCOVER_SITUATIONS, icon: Compass, labelEn: 'Island life', labelRu: 'Жизнь на острове', labelTh: 'ชีวิตบนเกาะ' },
 ];
 
 const matchesPath = (path: string, prefix: string) => path === prefix || path.startsWith(`${prefix}/`);
@@ -149,7 +149,7 @@ const PATH_ALIASES: Record<string, string[]> = {
   '/account':     ['/account', '/profile', '/me'],
   '/bookings': ['/bookings', '/me/bookings', '/me/requests', '/my-stay', '/trip'],
   '/discover/stay': ['/discover/stay', '/discover/buy', '/property'],
-  '/discover/services': ['/trip-planner', '/me/services', '/discover/services', '/discover/situations', '/services', '/transport', '/experiences', '/insurance', '/beauty', '/restaurants', '/fitness', '/medical', '/events', '/education', '/flowers', '/legal', '/banking', '/veterinary', '/pharmacy', '/pets', '/yachts', '/cleaning', '/babysitter', '/delivery', '/sim', '/exchange', '/school-finder'],
+  '/discover/services': ['/trip-planner', '/me/services', '/discover/services', '/services', '/transport', '/experiences', '/insurance', '/beauty', '/restaurants', '/fitness', '/medical', '/events', '/education', '/flowers', '/legal', '/banking', '/veterinary', '/pharmacy', '/pets', '/yachts', '/cleaning', '/babysitter', '/delivery', '/sim', '/exchange', '/school-finder'],
   '/me':          ['/me', '/account', '/profile'],
   '/profile':     ['/profile', '/account'],
   '/market':      ['/market'],

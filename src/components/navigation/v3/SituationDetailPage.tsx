@@ -5,7 +5,7 @@
  * Role-aware (uses `useLifeOSRole` automatically). Each service card links to
  * the entity-type-specific detail page resolved from `ENTITY_TYPES`.
  */
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { ArrowLeft, ArrowUpRight, ShieldCheck, MapPin } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
@@ -28,6 +28,10 @@ import { DynamicIcon } from '@/components/ui/dynamic-icon';
 import { Skeleton } from '@/components/ui/skeleton';
 import { getEntityType, getEntityTypeLabel, resolveEntityDestination } from '@/lib/config/entityTypes';
 import { cn } from '@/lib/utils';
+import { Button } from '@/components/ui/button';
+import { ConciergeHelpSheet } from '@/components/concierge/ConciergeHelpSheet';
+import { APP_ROUTES } from '@/lib/config/routes';
+import { LifeOsPageHeader, LIFE_OS_CONTAINER, LIFE_OS_SECTION_TITLE } from './LifeOsPageHeader';
 
 function formatPrice(item: LifeOSCatalogItem, isRu: boolean): string | null {
   if (item.price == null) return null;
@@ -147,6 +151,7 @@ function pickRelatedSituations(
 
 export default function SituationDetailPage() {
   const { code } = useParams<{ code: string }>();
+  const [helpOpen, setHelpOpen] = useState(false);
   const { language } = useLanguage();
   const isRu = language === 'ru';
 
@@ -182,15 +187,8 @@ export default function SituationDetailPage() {
 
   return (
     <AppLayout>
-      <div className="px-4 pt-6 pb-24 md:px-6 md:pt-8 max-w-6xl mx-auto">
-        <Link
-          to="/discover"
-          className="inline-flex items-center gap-1.5 text-[13px] text-muted-foreground hover:text-foreground transition-colors mb-6"
-        >
-          <ArrowLeft aria-hidden="true" className="w-4 h-4" strokeWidth={1.75} />
-          {isRu ? 'Все ситуации' : 'All situations'}
-        </Link>
-
+      <div className={LIFE_OS_CONTAINER}>
+        {!situation && <LifeOsPageHeader current={isRu ? "Ситуация" : "Situation"} title={situationsLoading ? "" : (isRu ? "Ситуация не найдена" : "Situation not found")} />}
         {situationsLoading && (
           <div className="space-y-4 mb-8">
             <Skeleton className="h-16 w-16 rounded-none" />
@@ -201,43 +199,27 @@ export default function SituationDetailPage() {
 
         {!situationsLoading && !situation && (
           <div className="py-16 text-center">
-            <p className="text-foreground text-lg mb-2">
-              {isRu ? 'Ситуация не найдена' : 'Situation not found'}
-            </p>
+            <Link className="ds-focus inline-flex min-h-11 items-center underline underline-offset-4" to={APP_ROUTES.DISCOVER_SITUATIONS}>{isRu ? 'Все жизненные ситуации' : 'All life situations'}</Link>
             <p className="text-muted-foreground text-sm">
-              {isRu ? `Код: ${code}` : `Code: ${code}`}
+              {null}
             </p>
           </div>
         )}
 
         {situation && (
           <>
-            <header className="mb-8 md:mb-10">
-              <div
-                className="w-16 h-16 flex items-center justify-center mb-5"
-                style={{ backgroundColor: sTint }}
-              >
-                <DynamicIcon
-                  name={situation.icon || 'Compass'}
-                  aria-hidden="true"
-                  className="w-8 h-8"
-                  style={{ color: sIconColor }}
-                  strokeWidth={1.5}
-                />
-              </div>
-              <h1 className="text-[28px] sm:text-[36px] font-serif font-semibold leading-[1.1] tracking-[-0.02em] text-foreground">
-                {sTitle}
-              </h1>
-              {sDesc && (
-                <p className="mt-3 text-[14px] sm:text-[15px] text-muted-foreground max-w-2xl leading-[1.5]">
-                  {sDesc}
-                </p>
-              )}
-            </header>
+            <LifeOsPageHeader
+              current={sTitle}
+              title={sTitle}
+              lead={sDesc}
+              icon={<div className="flex size-14 shrink-0 items-center justify-center rounded-[var(--bible-radius-card)]" style={{ backgroundColor: sTint }}>
+                <DynamicIcon name={situation.icon || 'Compass'} aria-hidden="true" className="size-7" style={{ color: sIconColor }} strokeWidth={1.5} />
+              </div>}
+            />
 
             <section>
               <div className="flex items-baseline justify-between mb-4 pb-2 border-b border-border">
-                <h2 className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
+                <h2 className={LIFE_OS_SECTION_TITLE}>
                   {isRu ? 'Сервисы' : 'Services'}
                 </h2>
                 {items && items.length > 0 && (
@@ -274,10 +256,10 @@ export default function SituationDetailPage() {
               )}
 
               {!itemsLoading && items && items.length === 0 && (
-                <div className="border border-dashed border-border p-10 text-center text-muted-foreground text-sm">
-                  {isRu
-                    ? 'Сервисы для этой ситуации пока не настроены.'
-                    : 'No services mapped to this situation yet.'}
+                <div className="rounded-[var(--bible-radius-card)] border border-border bg-card p-6 md:p-8">
+                  <p className="font-medium text-foreground">{isRu ? 'Подборка для этой ситуации ещё готовится' : 'This situation is still being prepared'}</p>
+                  <p className="mt-1 text-sm text-muted-foreground">{isRu ? 'Опишите задачу — команда myUNO подскажет, с чего начать, и предложит проверенных специалистов.' : 'Describe your task and the myUNO team will suggest where to start and who can help.'}</p>
+                  <Button className="mt-4 min-h-11" onClick={() => setHelpOpen(true)}>{isRu ? 'Оставить заявку команде' : 'Ask the team'}</Button>
                 </div>
               )}
             </section>
@@ -285,7 +267,7 @@ export default function SituationDetailPage() {
             {relatedSituations.length > 0 && (
               <section className="mt-10 md:mt-14">
                 <div className="flex items-baseline justify-between mb-4 pb-2 border-b border-border">
-                  <h2 className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
+                  <h2 className={LIFE_OS_SECTION_TITLE}>
                     {isRu ? 'Похожие ситуации' : 'Related situations'}
                   </h2>
                 </div>
@@ -346,6 +328,7 @@ export default function SituationDetailPage() {
           </>
         )}
       </div>
+      {situation && helpOpen && <ConciergeHelpSheet open={helpOpen} onOpenChange={setHelpOpen} topic={code === 'relocation' || code === 'relocate' ? 'relocation' : 'general'} initialSubject={sTitle} sourceData={{ source: 'life_os_situation', situation_code: code }} />}
     </AppLayout>
   );
 }

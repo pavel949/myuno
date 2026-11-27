@@ -188,6 +188,13 @@ export default function RelocateLandingPage() {
       whatsappUrl={whatsappUrl}
       whatsappLabel={t ? 'Написать в WhatsApp' : 'Chat on WhatsApp'}
     >
+      <nav aria-label={t ? 'Навигационная цепочка' : 'Breadcrumb'} className="mb-4">
+        <ol className="flex flex-wrap items-center gap-1 text-sm text-muted-foreground">
+          <li><Link className="ds-focus inline-flex min-h-11 items-center hover:text-foreground" to={APP_ROUTES.DISCOVER_SITUATIONS}>{t ? 'Жизнь на острове' : 'Island life'}</Link></li>
+          <li aria-hidden="true">/</li>
+          <li aria-current="page" className="text-foreground">{t ? 'Переезд' : 'Relocation'}</li>
+        </ol>
+      </nav>
       {/* GOV.UK-style start page */}
       <StartPageLayout
         cluster={t ? 'Релокация · 9 шагов' : 'Relocation · 9 steps'}

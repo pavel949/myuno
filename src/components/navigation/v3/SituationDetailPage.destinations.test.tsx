@@ -30,3 +30,10 @@ it('renders genuine seeded LifeOS transfer and yacht links while unknown service
   expect(screen.queryByRole('link', { name: /unknown-service/ })).not.toBeInTheDocument();
   expect(screen.getByText('This offering is not available to open yet.')).toBeVisible();
 });
+
+it('offers a team request instead of an empty block when a situation has no services', () => {
+  fixture.items = [];
+  render(<MemoryRouter initialEntries={['/discover/arrival']}><Routes><Route path="/discover/:code" element={<SituationDetailPage />} /></Routes></MemoryRouter>);
+  expect(screen.getByRole('button', { name: 'Ask the team' })).toBeVisible();
+  expect(screen.getByRole('link', { name: 'Island life' })).toHaveAttribute('href', '/discover/situations');
+});

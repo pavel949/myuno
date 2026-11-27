@@ -14,11 +14,11 @@ export const ru: Record<string, string> = {
   'nav.profile': 'Профиль',
 
   // Discover
-  'discover.navigator': 'Навигатор',
+  'discover.navigator': 'Жизнь на острове',
   'discover.title': 'С чем вам помочь?',
   'discover.subtitle': 'Выберите свою ситуацию — мы покажем нужные сервисы, проверенные контакты и понятные шаги.',
-  'discover.role': 'Роль',
-  'discover.roleEmpty': 'не выбрана',
+  'discover.role': 'Я',
+  'discover.roleEmpty': 'не указано',
   'discover.editRole': 'Изменить',
   'discover.search.placeholder': 'Например: продлить визу',
   'discover.search.label': 'Поиск по ситуациям',
