@@ -15,6 +15,7 @@ import { Helmet } from 'react-helmet-async';
 import { ChevronLeft, MapPin, Building2, Calendar, Layers, ExternalLink } from 'lucide-react';
 import { useNewbuildProject } from '@/hooks/useNewbuildProjects';
 import { useProjectUnits } from '@/hooks/useProjectUnits';
+import { QueryRecovery } from '@/components/shared/QueryRecovery';
 import { LoadingState } from '@/components/uno/LoadingSpinner';
 import { NbProjectStatusBadge } from '@/components/newbuilds/NbProjectStatusBadge';
 import { NbConstructionProgress } from '@/components/newbuilds/NbConstructionProgress';
@@ -26,22 +27,23 @@ import '@/styles/newbuilds-theme.css';
 
 export default function ProjectMicrosite() {
   const { slug } = useParams<{ slug: string }>();
-  const { data: sourceProject, isLoading } = useNewbuildProject(slug);
+  const { data: sourceProject, isLoading, isError, refetch } = useNewbuildProject(slug);
   const project = sourceProject ? publicNewbuildPresentation(sourceProject) : null;
   const { data: units = [] } = useProjectUnits(project?.id);
 
   // Track view in analytics_events (microsite source)
   useEffect(() => {
-    if (!project?.id) return;
+    if (!project?.id || !project.landing_enabled) return;
     supabase.from('analytics_events').insert({
       event_name: 'microsite_view',
       page_path: `/p/${slug}`,
       event_data: { project_id: project.id, slug },
     });
-  }, [project?.id, slug]);
+  }, [project?.id, project?.landing_enabled, slug]);
 
   if (isLoading) return <LoadingState />;
-  if (!project) return <Navigate to={APP_ROUTES.OFFPLAN} replace />;
+  if (isError) return <div className="mx-auto max-w-3xl p-6"><QueryRecovery onRetry={refetch} /></div>;
+  if (!project) return <Navigate to={APP_ROUTES.OFFPLAN_SEARCH} replace />;
 
   // Microsite must be explicitly enabled
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
