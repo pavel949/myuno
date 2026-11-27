@@ -42,7 +42,7 @@ export default function ProjectMicrosite() {
   }, [project?.id, project?.landing_enabled, slug]);
 
   if (isLoading) return <LoadingState />;
-  if (isError) return <div className="mx-auto max-w-3xl p-6"><QueryRecovery onRetry={refetch} /></div>;
+  if (isError) return <div className="mx-auto max-w-6xl px-4 py-6"><QueryRecovery onRetry={refetch} /></div>;
   if (!project) return <Navigate to={APP_ROUTES.OFFPLAN_SEARCH} replace />;
 
   // Microsite must be explicitly enabled
