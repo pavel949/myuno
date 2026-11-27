@@ -13,5 +13,5 @@ import React from 'react';
 import WelcomeLanding from './WelcomeLanding';
 
 export default function EcosystemPage() {
-  return <WelcomeLanding />;
+  return <WelcomeLanding compact />;
 }
