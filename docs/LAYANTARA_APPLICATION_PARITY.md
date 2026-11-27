@@ -8,7 +8,7 @@ This decision supersedes older wording that treats Final only as a disposable do
 
 | Application | Repository | Data project |
 | --- | --- | --- |
-| myUNO App (React/Vite) | pavel949/myuno | erfwtoavipwjqmylpizt; Lovable dcc2b024-7627-4ad9-a915-a3df3dd839f0 |
+| myUNO App (React/Vite) | pavel949/myuno | kakkwibljrjsawxgnupk (Lovable Cloud, production; erfwtoavipwjqmylpizt is only the optional mirror); Lovable dcc2b024-7627-4ad9-a915-a3df3dd839f0 |
 | myUNO Final (Next.js/Prisma) | pavel949/myUNO-final | burcnghheyzbzffzgmjz |
 | Resort source | Layantara OS | omwoglpcwaiflaprgrne |
 
