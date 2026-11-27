@@ -10,6 +10,9 @@ import { useParams, Link } from 'react-router-dom';
 import { ArrowLeft, ArrowUpRight, ShieldCheck, MapPin } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { useLanguage } from '@/contexts/LanguageContext';
+import type { Language } from '@/i18n';
+import { pickLang, type LangValues } from '@/lib/i18n/pickLang';
+import { lifeOSLabel } from '@/lib/lifeOsStructure';
 import {
   useLifeSituations,
   useResolveLifeOSContext,
@@ -35,10 +38,10 @@ import { ConciergeHelpSheet } from '@/components/concierge/ConciergeHelpSheet';
 import { APP_ROUTES } from '@/lib/config/routes';
 import { LifeOsPageHeader, LIFE_OS_CONTAINER, LIFE_OS_SECTION_TITLE } from './LifeOsPageHeader';
 
-function formatPrice(item: LifeOSCatalogItem, isRu: boolean): string | null {
+function formatPrice(item: LifeOSCatalogItem, language: Language): string | null {
   if (item.price == null) return null;
   try {
-    return new Intl.NumberFormat(isRu ? 'ru-RU' : 'en-US', {
+    return new Intl.NumberFormat(pickLang(language, { ru: 'ru-RU', en: 'en-US', th: 'th-TH' }), {
       style: 'currency',
       currency: item.currency || 'THB',
       maximumFractionDigits: 0,
@@ -48,11 +51,11 @@ function formatPrice(item: LifeOSCatalogItem, isRu: boolean): string | null {
   }
 }
 
-function ServiceCard({ item, isRu }: { item: LifeOSCatalogItem; isRu: boolean }) {
+function ServiceCard({ item, language }: { item: LifeOSCatalogItem; language: Language }) {
   const def = getEntityType(item.entity_type);
   const TypeIcon = def.icon;
-  const typeLabel = getEntityTypeLabel(item.entity_type, isRu ? 'ru' : 'en');
-  const price = formatPrice(item, isRu);
+  const typeLabel = getEntityTypeLabel(item.entity_type, language === 'ru' ? 'ru' : 'en');
+  const price = formatPrice(item, language);
   const isVerified = item.trust_level === 'verified';
   const destination = resolveEntityDestination(item.entity_type, item.entity_id);
   const href = destination.status === 'resolved' ? destination.href : null;
@@ -63,7 +66,7 @@ function ServiceCard({ item, isRu }: { item: LifeOSCatalogItem; isRu: boolean })
     <article className="flex flex-col gap-3 p-4 min-h-[140px] border border-border bg-card text-card-foreground">
       <h3 className="text-body font-semibold">{title}</h3>
       <p className="text-sm text-muted-foreground">
-        {isRu ? 'Переход к этому предложению пока недоступен.' : 'This offering is not available to open yet.'}
+        {pickLang(language, { ru: 'Переход к этому предложению пока недоступен.', en: 'This offering is not available to open yet.', th: 'ยังเปิดข้อเสนอนี้ไม่ได้' })}
       </p>
     </article>
   );
@@ -88,7 +91,7 @@ function ServiceCard({ item, isRu }: { item: LifeOSCatalogItem; isRu: boolean })
           <ShieldCheck
             className="w-3.5 h-3.5 text-accent ml-auto"
             strokeWidth={1.75}
-            aria-label={isRu ? 'Проверено' : 'Verified'}
+            aria-label={pickLang(language, { ru: 'Проверено', en: 'Verified', th: 'ตรวจสอบแล้ว' })}
           />
         )}
       </div>
@@ -153,22 +156,23 @@ function pickRelatedSituations(
 
 export default function SituationDetailPage() {
   const { code } = useParams<{ code: string }>();
-  const [helpOpen, setHelpOpen] = useState(false);
-  const { data: lifeSituationsAll } = useLifeSituations();
-  const scenarioQuery = useLifeScenarios(lifeSituationsAll?.find(s => s.code === code)?.id);
+  const [helpSituation, setHelpSituation] = useState<string | null>(null);
   const { language } = useLanguage();
-  const isRu = language === 'ru';
+  const t = (copy: LangValues) => pickLang(language, copy);
 
-  const { data: situations, isLoading: situationsLoading } = useLifeSituations();
-  const { data: items, isLoading: itemsLoading, isError } = useResolveLifeOSContext(code ?? null);
+  const situationQuery = useLifeSituations();
+  const { data: situations, isLoading: situationsLoading } = situationQuery;
+  const situation = situationQuery.isError ? undefined : situations?.find(row => row.code === code);
+  const scenarioQuery = useLifeScenarios(situation?.id);
+  const itemsQuery = useResolveLifeOSContext(situation?.code ?? null);
+  const { data: items, isLoading: itemsLoading, isError } = itemsQuery;
   const { data: counts } = useSituationServiceCounts();
   const { effectivePersonas } = useUserPersonas();
 
-  const situation = situations?.find((s) => s.code === code);
-
   // Situation-derived view values (computed once; avoids in-JSX IIFE/double-eval)
-  const sTitle = situation ? (isRu ? situation.title_ru : situation.title_en) : '';
-  const sDesc = situation ? (isRu ? situation.description_ru : situation.description_en) : null;
+  const sTitle = situation ? lifeOSLabel(situation, language) ?? situation.code : '';
+  const sDesc = situation ? lifeOSLabel(situation, language, 'description') : null;
+  const retryLabel = t({ ru: 'Попробовать ещё раз', en: 'Try again', th: 'ลองอีกครั้ง' });
   const sTint = hexTint(situation?.color, 0.125);
   const sIconColor = accentColor(situation?.color);
 
@@ -192,7 +196,10 @@ export default function SituationDetailPage() {
   return (
     <AppLayout>
       <div className={LIFE_OS_CONTAINER}>
-        {!situation && <LifeOsPageHeader current={isRu ? "Ситуация" : "Situation"} title={situationsLoading ? "" : (isRu ? "Ситуация не найдена" : "Situation not found")} />}
+        {!situationsLoading && situationQuery.isError && <div role="alert" className="space-y-2">
+          <p className="text-destructive">{t({ ru: 'Не удалось загрузить ситуацию.', en: 'Could not load this situation.', th: 'โหลดสถานการณ์นี้ไม่สำเร็จ' })}</p>
+          <Button variant="outline" onClick={() => void situationQuery.refetch()}>{retryLabel}</Button>
+        </div>}
         {situationsLoading && (
           <div className="space-y-4 mb-8">
             <Skeleton className="h-16 w-16 rounded-none" />
@@ -201,14 +208,13 @@ export default function SituationDetailPage() {
           </div>
         )}
 
-        {!situationsLoading && !situation && (
-          <div className="py-16 text-center">
-            <Link className="ds-focus inline-flex min-h-11 items-center underline underline-offset-4" to={APP_ROUTES.DISCOVER_SITUATIONS}>{isRu ? 'Все жизненные ситуации' : 'All life situations'}</Link>
-            <p className="text-muted-foreground text-sm">
-              {null}
-            </p>
-          </div>
-        )}
+        {!situationsLoading && !situationQuery.isError && !situation && <>
+          <LifeOsPageHeader current={t({ ru: 'Ситуация', en: 'Situation', th: 'สถานการณ์' })}
+            title={t({ ru: 'Ситуация не найдена', en: 'Situation not found', th: 'ไม่พบสถานการณ์นี้' })} />
+          <Link className="ds-focus inline-flex min-h-11 items-center underline underline-offset-4" to={APP_ROUTES.DISCOVER_SITUATIONS}>
+            {t({ ru: 'Все жизненные ситуации', en: 'All life situations', th: 'สถานการณ์ทั้งหมด' })}
+          </Link>
+        </>}
 
         {situation && (
           <>
@@ -221,18 +227,27 @@ export default function SituationDetailPage() {
               </div>}
             />
 
-            {(scenarioQuery.data ?? []).length > 0 && (
+            {scenarioQuery.isLoading && <Skeleton className="mb-6 h-16 w-full" />}
+            {scenarioQuery.isError && <div role="alert" className="mb-6 space-y-2">
+              <p className="text-destructive">{t({ ru: 'Не удалось загрузить сценарии.', en: 'Could not load scenarios.', th: 'โหลดแผนไม่สำเร็จ' })}</p>
+              <Button variant="outline" onClick={() => void scenarioQuery.refetch()}>{retryLabel}</Button>
+            </div>}
+            {!scenarioQuery.isError && (scenarioQuery.data ?? []).length > 0 && (
               <section className="mb-10" aria-labelledby="situation-scenarios-title">
-                <h2 id="situation-scenarios-title" className={cn(LIFE_OS_SECTION_TITLE, 'mb-4 pb-2 border-b border-border')}>{isRu ? 'С чего начать' : 'Where to start'}</h2>
+                <h2 id="situation-scenarios-title" className={cn(LIFE_OS_SECTION_TITLE, 'mb-4 pb-2 border-b border-border')}>{t({ ru: 'С чего начать', en: 'Where to start', th: 'เริ่มต้นอย่างไร' })}</h2>
                 <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                  {(scenarioQuery.data ?? []).map((sc) => (
-                    <li key={sc.id}>
+                  {(scenarioQuery.data ?? []).map(sc => {
+                    const description = lifeOSLabel(sc, language, 'description');
+                    return <li key={sc.id}>
                       <Link to={`/discover/${code}/${scenarioSlug(sc.code)}`} className="ds-focus flex h-full min-h-11 items-start justify-between gap-3 rounded-[var(--bible-radius-card)] border border-border bg-card p-4 text-foreground transition-colors hover:border-primary">
-                        <span className="min-w-0"><span className="block font-medium">{isRu ? sc.title_ru : sc.title_en}</span>{(isRu ? sc.description_ru : sc.description_en) && <span className="mt-1 block text-sm text-muted-foreground line-clamp-2">{isRu ? sc.description_ru : sc.description_en}</span>}</span>
+                        <span className="min-w-0">
+                          <span className="block break-words font-medium">{lifeOSLabel(sc, language) ?? sc.code}</span>
+                          {description && <span className="mt-1 block text-sm text-muted-foreground line-clamp-2">{description}</span>}
+                        </span>
                         <ArrowUpRight aria-hidden="true" className="size-4 shrink-0 text-muted-foreground" />
                       </Link>
-                    </li>
-                  ))}
+                    </li>;
+                  })}
                 </ul>
               </section>
             )}
@@ -240,9 +255,9 @@ export default function SituationDetailPage() {
             <section id="situation-services" className="scroll-mt-24">
               <div className="flex items-baseline justify-between mb-4 pb-2 border-b border-border">
                 <h2 className={LIFE_OS_SECTION_TITLE}>
-                  {isRu ? 'Сервисы' : 'Services'}
+                  {t({ ru: 'Сервисы', en: 'Services', th: 'บริการ' })}
                 </h2>
-                {items && items.length > 0 && (
+                {!isError && items && items.length > 0 && (
                   <span className="font-mono text-[10px] text-muted-foreground">
                     {items.length}
                   </span>
@@ -250,8 +265,9 @@ export default function SituationDetailPage() {
               </div>
 
               {isError && (
-                <div className="border border-destructive/40 bg-destructive/5 text-destructive p-4 text-sm">
-                  {isRu ? 'Не удалось загрузить сервисы.' : 'Failed to load services.'}
+                <div role="alert" className="space-y-2 border border-destructive/40 bg-destructive/5 p-4 text-sm text-destructive">
+                  <p>{t({ ru: 'Не удалось загрузить предложения.', en: 'Failed to load services.', th: 'โหลดข้อเสนอไม่สำเร็จ' })}</p>
+                  <Button variant="outline" onClick={() => void itemsQuery.refetch()}>{retryLabel}</Button>
                 </div>
               )}
 
@@ -263,23 +279,23 @@ export default function SituationDetailPage() {
                 </div>
               )}
 
-              {!itemsLoading && items && items.length > 0 && (
+              {!itemsLoading && !isError && items && items.length > 0 && (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                   {items.map((item) => (
                     <ServiceCard
                       key={`${item.entity_type}:${item.entity_id}`}
                       item={item}
-                      isRu={isRu}
+                      language={language}
                     />
                   ))}
                 </div>
               )}
 
-              {!itemsLoading && items && items.length === 0 && (
+              {!itemsLoading && !isError && items && items.length === 0 && (
                 <div className="rounded-[var(--bible-radius-card)] border border-border bg-card p-6 md:p-8">
-                  <p className="font-medium text-foreground">{isRu ? 'Подборка для этой ситуации ещё готовится' : 'This situation is still being prepared'}</p>
-                  <p className="mt-1 text-sm text-muted-foreground">{isRu ? 'Опишите задачу — команда myUNO подскажет, с чего начать, и предложит проверенных специалистов.' : 'Describe your task and the myUNO team will suggest where to start and who can help.'}</p>
-                  <Button className="mt-4 min-h-11" onClick={() => setHelpOpen(true)}>{isRu ? 'Оставить заявку команде' : 'Ask the team'}</Button>
+                  <p className="font-medium text-foreground">{t({ ru: 'Для этой ситуации пока нет предложений', en: 'There are no offers for this situation yet', th: 'ยังไม่มีข้อเสนอสำหรับสถานการณ์นี้' })}</p>
+                  <p className="mt-1 text-sm text-muted-foreground">{t({ ru: 'Опишите задачу. Команда myUNO подскажет, с чего начать.', en: 'Tell the myUNO team what you need and we can help you get started.', th: 'บอกทีม myUNO ว่าคุณต้องการอะไร เราจะช่วยแนะนำจุดเริ่มต้น' })}</p>
+                  <Button className="mt-4 min-h-11" onClick={() => setHelpSituation(situation.code)}>{t({ ru: 'Попросить помощи команды', en: 'Ask the team', th: 'ขอความช่วยเหลือจากทีม' })}</Button>
                 </div>
               )}
             </section>
@@ -288,7 +304,7 @@ export default function SituationDetailPage() {
               <section className="mt-10 md:mt-14">
                 <div className="flex items-baseline justify-between mb-4 pb-2 border-b border-border">
                   <h2 className={LIFE_OS_SECTION_TITLE}>
-                    {isRu ? 'Похожие ситуации' : 'Related situations'}
+                    {t({ ru: 'Похожие ситуации', en: 'Related situations', th: 'สถานการณ์ที่เกี่ยวข้อง' })}
                   </h2>
                 </div>
                 <div ref={relatedRef} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
@@ -325,7 +341,7 @@ export default function SituationDetailPage() {
                         <div className="flex-1 min-w-0">
                           <div className="flex items-start justify-between gap-2">
                             <span className="text-[14px] font-semibold leading-snug tracking-[-0.005em] text-foreground line-clamp-2">
-                              {isRu ? rel.title_ru : rel.title_en}
+                              {lifeOSLabel(rel, language) ?? rel.code}
                             </span>
                             <ArrowUpRight
                               aria-hidden="true"
@@ -348,7 +364,7 @@ export default function SituationDetailPage() {
           </>
         )}
       </div>
-      {situation && helpOpen && <ConciergeHelpSheet open={helpOpen} onOpenChange={setHelpOpen} topic={code === 'relocation' || code === 'relocate' ? 'relocation' : 'general'} initialSubject={sTitle} sourceData={{ source: 'life_os_situation', situation_code: code }} />}
+      {situation && helpSituation === situation.code && <ConciergeHelpSheet open onOpenChange={open => { if (!open) setHelpSituation(null); }} topic={code === 'relocation' || code === 'relocate' ? 'relocation' : 'general'} initialSubject={sTitle} sourceData={{ source: 'life_os_situation', situation_code: code }} />}
     </AppLayout>
   );
 }

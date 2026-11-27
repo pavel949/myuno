@@ -19,6 +19,7 @@ for (const asset of ['yachts/catamaran-53-1.webp', 'catalog/flowers/pink-garden-
 }
 await rm(path.join(output, 'results.json'), { force: true });
 const virtual = {
+  '@/hooks/useLifeOS': `export const useLifeSituations=()=>({data:[],isLoading:false,isError:false});`,
   '@/hooks/usePlatformSocialLinks': `export const usePlatformSocialLinks=()=>({data:{}});`,
   'home-fixture': `
     const params=new URLSearchParams(location.search);export const lang=params.get('lang')||'en';export const state=params.get('state')||'data';
@@ -111,7 +112,7 @@ if (snapshotArg) {
 if(snapshotArg) virtual['@/lib/catalog/useCatalogFromDB'] = `import{catalog}from'home-fixture';export const useCatalogFromDB=()=>({categories:catalog.categories||[],isFromDB:true,isLoading:false,error:null,refetch:()=>{}});`;
 const result = await build({
   stdin: {
-    contents: `import React from'react';import{createRoot}from'react-dom/client';import{MemoryRouter,useLocation}from'react-router-dom';import Landing from'@/pages/Landing';import{UnifiedChatFAB}from'@/components/chat/UnifiedChatFAB';function Fixture(){const loc=useLocation();return <><Landing/><UnifiedChatFAB/><output hidden data-testid="location">{loc.pathname+loc.search}</output></>;}createRoot(document.getElementById('root')).render(<MemoryRouter future={{v7_startTransition:true,v7_relativeSplatPath:true}}><Fixture/></MemoryRouter>);`,
+    contents: `import React from'react';import{createRoot}from'react-dom/client';import{MemoryRouter,useLocation}from'react-router-dom';import{QueryClient,QueryClientProvider}from'@tanstack/react-query';import Landing from'@/pages/Landing';import{UnifiedChatFAB}from'@/components/chat/UnifiedChatFAB';function Fixture(){const loc=useLocation();return <><Landing/><UnifiedChatFAB/><output hidden data-testid="location">{loc.pathname+loc.search}</output></>;}const queryClient=new QueryClient({defaultOptions:{queries:{retry:false}}});createRoot(document.getElementById('root')).render(<QueryClientProvider client={queryClient}><MemoryRouter future={{v7_startTransition:true,v7_relativeSplatPath:true}}><Fixture/></MemoryRouter></QueryClientProvider>);`,
     loader: 'tsx',
     resolveDir: root,
   },

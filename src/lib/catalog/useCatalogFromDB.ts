@@ -16,12 +16,9 @@
  * Static `taxonomy.ts` is now treated as a frozen fallback: it must not be
  * imported directly by UI components anymore — go through this hook.
  *
- * LifeOS scope: this hook currently hydrates only LifeOS **level 1**
- * (`life_situations` via the `cluster_life_situations` bridge). Levels 2–4
- * (`life_scenarios`, `life_tasks`, `task_entity_map`) exist in the schema
- * but are not yet read here — consume them through `useLifeOS` hooks
- * (`useResolveLifeOSContext`) and `life_os_catalog` VIEW until this hook
- * is extended.
+ * Life OS scope: this hook hydrates situations through cluster_life_situations.
+ * useLifeOS reads scenarios and steps. Catalogue mappings and the resolver
+ * operate at the situation level.
  */
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
