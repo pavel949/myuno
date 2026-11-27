@@ -54,12 +54,11 @@ export type { NavRoleKey, NavItem };
 
 /** Public header destinations reuse the existing rental, sale, and local guides. */
 export const GUEST_TOP_NAV: NavItem[] = [
-  { path: APP_ROUTES.PROPERTY_RENT, icon: Building2, labelEn: 'Stays', labelRu: 'Жильё', labelTh: 'ที่พัก' },
-  { path: APP_ROUTES.PROPERTY_BUY, icon: Building2, labelEn: 'Homes for sale', labelRu: 'Купить', labelTh: 'ซื้อที่อยู่อาศัย' },
+  { path: APP_ROUTES.PROPERTY_RENT, icon: Building2, labelEn: 'Rent', labelRu: 'Аренда', labelTh: 'เช่า' },
+  { path: APP_ROUTES.PROPERTY_BUY, icon: Building2, labelEn: 'Buy', labelRu: 'Покупка', labelTh: 'ซื้อ' },
   { path: APP_ROUTES.EXPERIENCES, icon: Sparkles, labelEn: 'Experiences', labelRu: 'Впечатления', labelTh: 'ประสบการณ์' },
-  { path: APP_ROUTES.GOAL_SERVICES, icon: Wrench, labelEn: 'Services', labelRu: 'Услуги', labelTh: 'บริการ' },
-  { path: APP_ROUTES.RELOCATE, icon: Compass, labelEn: 'Living', labelRu: 'Жизнь', labelTh: 'ใช้ชีวิต' },
-  { path: APP_ROUTES.AREA_INDEX, icon: MapPin, labelEn: 'Areas', labelRu: 'Районы', labelTh: 'ย่านต่าง ๆ' },
+  { path: APP_ROUTES.GOAL_SERVICES, icon: Wrench, labelEn: 'Services', labelRu: 'Сервисы', labelTh: 'บริการ' },
+  { path: APP_ROUTES.DISCOVER_SITUATIONS, icon: Compass, labelEn: 'Island life', labelRu: 'Жизнь на острове', labelTh: 'ชีวิตบนเกาะ' },
 ];
 
 const matchesPath = (path: string, prefix: string) => path === prefix || path.startsWith(`${prefix}/`);
@@ -75,7 +74,7 @@ function guestPropertyIntent(pathname: string, search: string): 'rent' | 'buy' |
 
 export function getActiveGuestTopNavItem(pathname: string, search = ''): NavItem | null {
   if (matchesPath(pathname, APP_ROUTES.NEWBUILDS_AREAS)) {
-    return GUEST_TOP_NAV.find(item => item.path === APP_ROUTES.AREA_INDEX) ?? null;
+    return null;
   }
   const intent = guestPropertyIntent(pathname, search);
   if (intent) {
@@ -150,7 +149,7 @@ const PATH_ALIASES: Record<string, string[]> = {
   '/account':     ['/account', '/profile', '/me'],
   '/bookings': ['/bookings', '/me/bookings', '/me/requests', '/my-stay', '/trip'],
   '/discover/stay': ['/discover/stay', '/discover/buy', '/property'],
-  '/discover/services': ['/trip-planner', '/me/services', '/discover/services', '/discover/situations', '/services', '/transport', '/experiences', '/insurance', '/beauty', '/restaurants', '/fitness', '/medical', '/events', '/education', '/flowers', '/legal', '/banking', '/veterinary', '/pharmacy', '/pets', '/yachts', '/cleaning', '/babysitter', '/delivery', '/sim', '/exchange', '/school-finder'],
+  '/discover/services': ['/trip-planner', '/me/services', '/discover/services', '/services', '/transport', '/experiences', '/insurance', '/beauty', '/restaurants', '/fitness', '/medical', '/events', '/education', '/flowers', '/legal', '/banking', '/veterinary', '/pharmacy', '/pets', '/yachts', '/cleaning', '/babysitter', '/delivery', '/sim', '/exchange', '/school-finder'],
   '/me':          ['/me', '/account', '/profile'],
   '/profile':     ['/profile', '/account'],
   '/market':      ['/market'],
@@ -186,7 +185,6 @@ export function isBottomBarItemActive(item: NavItem, pathname: string): boolean 
   if (item.exact) return pathname === item.path;
   if (item.path === '/mc/modules' && pathname === APP_ROUTES.MC) return true;
   if (item.path === '/account' && ['/me/bookings', '/me/requests', '/me/services'].some(path => pathname === path || pathname.startsWith(path + '/'))) return false;
-  if (item.path === APP_ROUTES.GOAL_SERVICES && pathname === APP_ROUTES.DISCOVER) return true;
 
   const aliases = PATH_ALIASES[item.path];
   if (aliases) {

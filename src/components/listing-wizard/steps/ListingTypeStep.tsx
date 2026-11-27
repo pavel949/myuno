@@ -47,7 +47,7 @@ export function ListingTypeStep({ value, onChange, onNext }: ListingTypeStepProp
     <div className="space-y-6">
       <p className="text-muted-foreground">
         {isRu 
-          ? 'Выберите тип листинга, который хотите создать'
+          ? 'Выберите, что хотите разместить'
           : 'Choose the type of listing you want to create'}
       </p>
       

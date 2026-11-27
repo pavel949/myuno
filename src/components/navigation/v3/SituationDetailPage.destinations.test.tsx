@@ -11,6 +11,8 @@ vi.mock('@/contexts/LanguageContext', () => ({ useLanguage: () => ({ language: '
 vi.mock('@/hooks/useLifeOS', () => ({
   useLifeSituations: () => ({ data: [{ id: 'synthetic-arrival', code: 'arrival', title_en: 'Arrival', title_ru: 'Приезд', is_active: true }] }),
   useResolveLifeOSContext: () => ({ data: fixture.items }),
+  useLifeScenarios: () => ({ data: [{ id: 'sc1', life_situation_id: 'synthetic-arrival', code: 'arrival.first_day', title_en: 'First day', title_ru: 'Первый день', description_en: null, description_ru: null, icon: null, priority: 1 }] }),
+  scenarioSlug: (c: string) => c.split('.').pop(),
 }));
 vi.mock('@/hooks/useUserPersonas', () => ({ useUserPersonas: () => ({ effectivePersonas: [] }) }));
 vi.mock('@/hooks/useSituationServiceCounts', () => ({ useSituationServiceCounts: () => ({ data: {} }) }));
@@ -29,4 +31,17 @@ it('renders genuine seeded LifeOS transfer and yacht links while unknown service
   }
   expect(screen.queryByRole('link', { name: /unknown-service/ })).not.toBeInTheDocument();
   expect(screen.getByText('This offering is not available to open yet.')).toBeVisible();
+});
+
+it('offers a team request instead of an empty block when a situation has no services', () => {
+  fixture.items = [];
+  render(<MemoryRouter initialEntries={['/discover/arrival']}><Routes><Route path="/discover/:code" element={<SituationDetailPage />} /></Routes></MemoryRouter>);
+  expect(screen.getByRole('button', { name: 'Ask the team' })).toBeVisible();
+  expect(screen.getByRole('link', { name: 'Island life' })).toHaveAttribute('href', '/discover/situations');
+});
+
+it('links each backend scenario to its own page under the situation', () => {
+  fixture.items = [];
+  render(<MemoryRouter initialEntries={['/discover/arrival']}><Routes><Route path="/discover/:code" element={<SituationDetailPage />} /></Routes></MemoryRouter>);
+  expect(screen.getByRole('link', { name: /First day/ })).toHaveAttribute('href', '/discover/arrival/first_day');
 });

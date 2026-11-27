@@ -47,15 +47,22 @@ describe('admin command destinations', () => {
     expect(screen.getByTestId('location')).toHaveTextContent(path);
   });
 
-  it('retains creation commands and legacy deep-tool links', () => {
-    setup();
-    fireEvent.click(screen.getByRole('button', { name: 'Add New Provider' }));
-    expect(screen.getByTestId('location')).toHaveTextContent('/admin/providers?action=new');
-    fireEvent.click(screen.getByRole('button', { name: 'Add Service to Catalog' }));
-    expect(screen.getByTestId('location')).toHaveTextContent('/admin/catalog?tab=services&action=new');
+  it.each([
+    ['Add New Provider', '/admin/providers?action=new'],
+    ['Add Service to Catalog', '/admin/catalog?tab=services&action=new'],
+  ])('opens the existing creation workflow %s', (label, path) => {
+    const close = setup();
+    fireEvent.click(screen.getByRole('button', { name: label }));
+    expect(screen.getByTestId('location')).toHaveTextContent(path);
+    expect(close).toHaveBeenCalledWith(false);
+  });
+
+  it('retains the legacy taxonomy tool destination', () => {
+    const close = setup();
     const legacy = screen.getAllByRole('button').find(button => button.textContent?.endsWith('/admin/taxonomy'));
     expect(legacy).toBeDefined();
     fireEvent.click(legacy!);
     expect(screen.getByTestId('location')).toHaveTextContent('/admin/taxonomy');
+    expect(close).toHaveBeenCalledWith(false);
   });
 });

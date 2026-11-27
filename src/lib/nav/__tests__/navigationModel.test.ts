@@ -345,8 +345,7 @@ describe('public business entry', () => {
       APP_ROUTES.PROPERTY_BUY,
       APP_ROUTES.EXPERIENCES,
       APP_ROUTES.GOAL_SERVICES,
-      APP_ROUTES.RELOCATE,
-      APP_ROUTES.AREA_INDEX,
+      APP_ROUTES.DISCOVER_SITUATIONS,
     ]);
     expect(PRIMARY_NAV.guest).toHaveLength(5);
     expect(PRIMARY_NAV.guest.some(item => item.path === APP_ROUTES.FOR_BUSINESS)).toBe(false);
@@ -356,16 +355,16 @@ describe('public business entry', () => {
 
 describe('public rental and sale intent', () => {
   it.each([
-    ['?mode=rent&tenancy=short', 'Stays', 'Explore'],
-    ['?mode=buy', 'Homes for sale', 'Homes'],
-    ['?f.listingType=sale', 'Homes for sale', 'Homes'],
+    ['?mode=rent&tenancy=short', 'Rent', 'Explore'],
+    ['?mode=buy', 'Buy', 'Homes'],
+    ['?f.listingType=sale', 'Buy', 'Homes'],
   ])('keeps both bars on the right destination after the catalogue redirect %s', (search, desktop, mobile) => {
     expect(getActiveGuestTopNavItem(APP_ROUTES.PROPERTY_SEARCH, search)?.labelEn).toBe(desktop);
     expect(getActiveBottomBarItem('guest', APP_ROUTES.PROPERTY_SEARCH, search)?.labelEn).toBe(mobile);
   });
 
   it('keeps area guides and relocating within discovery', () => {
-    expect(getActiveGuestTopNavItem('/area/bang-tao')?.labelEn).toBe('Areas');
+    expect(getActiveGuestTopNavItem('/area/bang-tao')).toBeNull();
     expect(getActiveBottomBarItem('guest', '/relocate/guides')?.labelEn).toBe('Explore');
   });
 });

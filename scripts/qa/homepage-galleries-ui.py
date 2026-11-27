@@ -24,7 +24,7 @@ HOME_COPY = {
     'ru': {
         'form': 'Поиск на myUNO', 'rent': 'Аренда', 'activity': 'Впечатления', 'buy': 'Покупка',
         'guests': 'Количество гостей', 'filters': 'Фильтры', 'area_label': 'Выберите район', 'area': 'Равай',
-        'done': 'Готово', 'services': 'Услуги',
+        'done': 'Готово', 'services': 'Сервисы',
     },
     'th': {
         'form': 'ค้นหาใน myUNO', 'rent': 'เช่า', 'activity': 'ประสบการณ์', 'buy': 'ซื้อ',

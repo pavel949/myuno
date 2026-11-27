@@ -21,6 +21,8 @@ import { HomeAudienceGrid, HomeTrustBar } from '@/components/home/HomeAudienceGr
 import { HomeDiscoverySearch } from '@/components/home/HomeDiscoverySearch';
 import { HomeUrgentHelp } from '@/components/home/HomeUrgentHelp';
 import { RentalCommunities } from '@/components/property/RentalCommunities';
+import { HomeV2Paths, HomeV2Steps } from '@/components/home/HomeV2Sections';
+import { useFeatureFlag } from '@/hooks/useFeatureFlag';
 import { homeCopy as copy } from '@/content/home/cinematicHome';
 import hero from '@/assets/hero-phuket-coast-editorial.webp';
 import '@/styles/cinematic-home.css';
@@ -36,9 +38,11 @@ export default function Landing() {
   const { language } = useLanguage();
   const t = (v: LangValues) => pickLang(language, v);
   const [requestOpen, setRequestOpen] = useState(false);
+  // feature_flag:home_v2 also gates the signed-in dashboard in Index; guests read only this exact key.
+  const homeV2 = useFeatureFlag('home_v2', false);
 
   return (
-    <div className="cinematic-home premium-home home-refined" data-testid="cinematic-home" data-home-visual="mobile-grid-20261122">
+    <div className="cinematic-home premium-home home-refined" data-testid="cinematic-home" data-home-variant={homeV2 ? 'v2' : 'classic'} data-home-visual="mobile-grid-20261122">
       <SEOHead title={t({ ru: 'Жильё и услуги на Пхукете — myUNO', en: 'Your home and life in Phuket — myUNO', th: 'บ้านและชีวิตของคุณในภูเก็ต — myUNO' })} description={t(copy.lead)} />
       <a href="#home-main" className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[170] focus:bg-background focus:px-4 focus:py-3 focus:text-foreground focus:ring-2 focus:ring-ring" onClick={(event) => { event.preventDefault(); document.getElementById('home-main')?.focus(); }}>{t({ ru: 'Перейти к содержимому', en: 'Skip to content', th: 'ข้ามไปยังเนื้อหา' })}</a>
       <ConsumerTopBar />
@@ -58,7 +62,7 @@ export default function Landing() {
           <HomeDiscoverySearch showGuestsInline progressive allowActivities />
         </div>
       </div>
-      <div className="home-container md:hidden">
+      {!homeV2 && <div className="home-container md:hidden">
         <Link
           to={propertySearchHref('', { mode: 'buy', maxPrice: String(DEFAULT_HOME_SALE_MAX_PRICE) })}
           onPointerEnter={() => prefetchRoute(R.PROPERTY_SEARCH)}
@@ -72,14 +76,9 @@ export default function Landing() {
           </span>
           <ArrowRight className="size-4 shrink-0" aria-hidden="true" />
         </Link>
-      </div>
-      <div className="home-container">
-        <a className="home-text-link ds-focus min-h-11" href="#home-partners">
-          {t({ ru: 'Разместить жильё, услугу или впечатление', en: 'List a property, service or experience', th: 'ลงประกาศที่พัก บริการ หรือกิจกรรม' })}
-          <ArrowRight size={16} aria-hidden="true" />
-        </a>
-        <RentalCommunities />
-      </div>
+      </div>}
+      {!homeV2 && <div className="home-container"><a className="home-text-link ds-focus min-h-11" href="#home-partners">{t({ ru: 'Разместить жильё, услугу или впечатление', en: 'List a property, service or experience', th: 'ลงประกาศที่พัก บริการ หรือกิจกรรม' })}<ArrowRight size={16} aria-hidden="true" /></a><RentalCommunities /></div>}
+      {homeV2 && <HomeV2Paths />}
       <HomeHousingPreview />
       <HomeSalePreview />
       <HomeNewbuildsPreview />
@@ -87,6 +86,7 @@ export default function Landing() {
         <HomeExperienceGallery />
         <HomeServiceGallery />
       </div>
+      {homeV2 && <HomeV2Steps />}
       <HomeLocationGallery />
       <section id="home-partners" className="home-partners-group scroll-mt-24" aria-labelledby="home-partners-title">
         <div className="home-container home-group-heading">

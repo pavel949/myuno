@@ -255,3 +255,69 @@ export function getLifeOSAIContext(
     recommended_blocks: recommendedBlocks,
   };
 }
+
+export interface LifeScenario {
+  id: string;
+  life_situation_id: string;
+  code: string;
+  title_en: string;
+  title_ru: string;
+  description_en: string | null;
+  description_ru: string | null;
+  icon: string | null;
+  priority: number | null;
+}
+
+export interface LifeTask {
+  id: string;
+  life_scenario_id: string;
+  code: string;
+  title_en: string;
+  title_ru: string;
+  task_type: string | null;
+  priority: number | null;
+}
+
+/** Level 2 of the Life OS taxonomy: scenarios of one situation (public read). */
+export function useLifeScenarios(situationId: string | undefined) {
+  return useQuery({
+    queryKey: ['life-scenarios', situationId],
+    enabled: Boolean(situationId),
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('life_scenarios')
+        .select('id, life_situation_id, code, title_en, title_ru, description_en, description_ru, icon, priority')
+        .eq('life_situation_id', situationId as string)
+        .eq('is_active', true)
+        .order('priority', { ascending: true });
+      if (error) throw error;
+      return (data ?? []) as LifeScenario[];
+    },
+    staleTime: 5 * 60 * 1000,
+  });
+}
+
+/** Level 3: tasks of one scenario (public read). */
+export function useLifeTasks(scenarioId: string | undefined) {
+  return useQuery({
+    queryKey: ['life-tasks', scenarioId],
+    enabled: Boolean(scenarioId),
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('life_tasks')
+        .select('id, life_scenario_id, code, title_en, title_ru, task_type, priority')
+        .eq('life_scenario_id', scenarioId as string)
+        .eq('is_active', true)
+        .order('priority', { ascending: true });
+      if (error) throw error;
+      return (data ?? []) as LifeTask[];
+    },
+    staleTime: 5 * 60 * 1000,
+  });
+}
+
+/** URL slug of a scenario inside its situation: `leisure.celebration` → `celebration`. */
+export function scenarioSlug(code: string): string {
+  const i = code.lastIndexOf('.');
+  return i >= 0 ? code.slice(i + 1) : code;
+}

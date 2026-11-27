@@ -12,9 +12,9 @@ afterEach(cleanup);
 beforeEach(() => { locale.language = 'en'; });
 
 it.each([
- ['ru', 'Поездки'],
- ['en', 'Trips'],
- ['th', 'ทริป'],
+ ['ru', 'Заявки'],
+ ['en', 'Requests'],
+ ['th', 'คำขอ'],
 ])('labels the %s trips tab and preserves the booking destination', (language, name) => {
  locale.language = language;
  render(<MemoryRouter initialEntries={['/bookings']}><BottomBar {...{ role: 'guest' as const }} /></MemoryRouter>);
@@ -33,9 +33,9 @@ it.each([
  ['/transport/transfer', 'Services'],
  ['/discover/services', 'Services'],
  ['/trip-planner', 'Services'],
- ['/bookings', 'Trips'],
- ['/me/requests', 'Trips'],
- ['/my-stay', 'Trips'],
+ ['/bookings', 'Requests'],
+ ['/me/requests', 'Requests'],
+ ['/my-stay', 'Requests'],
  ['/profile', 'Me'],
  ['/', 'Explore'],
 ])('announces the same active tab it highlights on %s', (path, label) => {

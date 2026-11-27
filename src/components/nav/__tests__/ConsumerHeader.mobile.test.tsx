@@ -49,7 +49,7 @@ it('puts tasks before preferences and groups partner paths without dropping them
  expect(nav.compareDocumentPosition(within(menu).getByTestId('preferences')) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
  const partners = menu.querySelector('details')!;
  expect(partners).not.toHaveAttribute('open');
- expect(partners.querySelectorAll('a')).toHaveLength(5);
+ expect(partners.querySelectorAll('a')).toHaveLength(6);
  expect(within(menu).queryByText('Main destinations')).not.toBeInTheDocument();
 });
 it('closes the sheet before invoking the existing search', () => {

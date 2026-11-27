@@ -116,3 +116,10 @@ Merge validation base: af134ed46117c3dc6899ba37d36e636cb9417217. Creation uses i
 
 
 Merged-source production build completed successfully: 7,242 modules, Vite 8m36s, PWA generated (79 precache entries). The merged build uses isolated configuration and is not a deploy artifact. Edge pointer/vertical-containment verification on this build passed all 18 language/viewport combinations. Full committed-head CI is still required before release.
+
+
+### Integration verification against main ba60b58
+
+Navigation is merged with the current public Life OS routes and labels. Both source registers were regenerated from those exact merged files, preserving SOURCE_ONLY_NOTTESTED. The classic homepage gallery fixture explicitly stubs only home_v2=false and retains production-client rejection and network denial. Its Russian search-label assertion follows the current canonical copy. The new Life OS structure search uses shared flex sizing instead of a local max-width override.
+
+Validation: 136 targeted navigation, Today and personal-home tests; 36 source-audit tests; route/adoption freshness checks; design audit 3806 findings, zero new or structural, 475 resolved baseline entries. Six local Edge classic-home smoke cases passed for EN/RU/TH at 375 and 1440 px, including native catalogue clicks and no runtime errors. CI acceptance remains tied to the final PR head; no production deployment or business-record mutation is claimed.

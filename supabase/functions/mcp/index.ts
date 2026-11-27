@@ -101,7 +101,7 @@ var whoami_default = defineTool3({
 });
 
 // src/lib/mcp/index.ts
-var projectRef = "";
+var projectRef = "kakkwibljrjsawxgnupk";
 var mcp_default = defineMcp({
   name: "myuno-mcp",
   title: "myUNO",

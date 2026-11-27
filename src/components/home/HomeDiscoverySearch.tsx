@@ -110,7 +110,7 @@ export function HomeDiscoverySearch({ rentalOnly = false, hideModeSwitch = false
         {allowActivities && (
           <>
             <Link className="ds-focus" to={APP_ROUTES.EXPERIENCES}>{t({ ru: 'Впечатления', en: 'Experiences', th: 'ประสบการณ์' })}</Link>
-            <Link className="ds-focus" to={APP_ROUTES.GOAL_SERVICES}>{t({ ru: 'Услуги', en: 'Services', th: 'บริการ' })}</Link>
+            <Link className="ds-focus" to={APP_ROUTES.GOAL_SERVICES}>{t({ ru: 'Сервисы', en: 'Services', th: 'บริการ' })}</Link>
           </>
         )}
       </div>}
