@@ -1,0 +1,1 @@
+DROP POLICY IF EXISTS system_settings_public_home_v2_flag_read ON public.system_settings;
