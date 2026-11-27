@@ -99,7 +99,7 @@ export function RentalCommunities() {
         <div>
           <h2 id="rental-communities-title">
             {t({
-              ru: "Проекты для отдыха на Пхукете",
+              ru: "Лучшие комплексы для отдыха на Пхукете",
               en: "Phuket communities for a holiday",
               th: "โครงการที่พักสำหรับวันหยุดในภูเก็ต",
             })}
