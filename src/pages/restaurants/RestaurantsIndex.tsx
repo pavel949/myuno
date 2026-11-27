@@ -2,8 +2,8 @@
  * RestaurantsIndex — Canonical consumer app: MiniAppLayout + CatalogCard
  * Search, filters, sort, map, results count all wired.
  */
-import { useState, useMemo, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useMemo } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { UtensilsCrossed, MapPin, ArrowUpDown } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { MiniAppLayout, CatalogCard } from '@/components/miniapp';
@@ -13,9 +13,7 @@ import { useRestaurants } from '@/hooks/useRestaurants';
 import { CrossSellSection } from '@/components/crosssell';
 import { mapRestaurantToCatalogCard } from '@/lib/adapters/catalogCardAdapters';
 import { restaurantFilterConfig } from '@/lib/filterRegistry';
-import { withGeoSection } from '@/components/filters';
 import { vertRowsToMarkers } from '@/lib/adapters/vertRowToMarker';
-import { APP_ROUTES } from '@/lib/config/routes';
 import type { FilterValues } from '@/components/filters/UniversalFilter';
 import { Button } from '@/components/ui/button';
 import { pickLang } from '@/lib/i18n/pickLang';
@@ -33,6 +31,11 @@ const CUISINES = [
   { id: 'steak', labelEn: 'Steak', labelRu: 'Стейк' },
   { id: 'international', labelEn: 'International', labelRu: 'Международная' },
 ];
+
+const filterConfig = {
+  ...restaurantFilterConfig,
+  sections: restaurantFilterConfig.sections.filter(section => ['cuisine', 'dietary'].includes(section.id)),
+};
 
 const AREAS = [
   { id: 'Patong', label: 'Patong' },
@@ -54,11 +57,36 @@ export default function RestaurantsIndex() {
   const navigate = useNavigate();
   const isRu = language === 'ru';
 
-  const [selectedCuisine, setSelectedCuisine] = useState('all');
-  const [selectedArea, setSelectedArea] = useState<string | null>(null);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [filterValues, setFilterValues] = useState<FilterValues>({});
-  const [sortBy, setSortBy] = useState('recommended');
+  const [params, setParams] = useSearchParams();
+  const selectedCuisine = params.get('category') || 'all';
+  const selectedArea = params.get('district');
+  const searchQuery = params.get('q') || '';
+  const sortBy = params.get('sort') || 'recommended';
+  const filterValues: FilterValues = useMemo(() => ({
+    cuisine: params.getAll('cuisine'),
+    dietary: params.getAll('dietary'),
+  }), [params]);
+
+  const updateQuery = (key: string, value: string, replace = false) => {
+    setParams(previous => {
+      const next = new URLSearchParams(previous);
+      if (value) next.set(key, value);
+      else next.delete(key);
+      return next;
+    }, { replace, preventScrollReset: true });
+  };
+
+  const handleFilterChange = (values: FilterValues) => {
+    setParams(previous => {
+      const next = new URLSearchParams(previous);
+      for (const key of ['cuisine', 'dietary']) {
+        next.delete(key);
+        const value = values[key];
+        if (Array.isArray(value)) for (const option of value) next.append(key, option);
+      }
+      return next;
+    }, { preventScrollReset: true });
+  };
 
   const { applyFilter: applyPersonaFilter, personaTags, clearPersona } = usePersonaFilter();
 
@@ -133,9 +161,6 @@ export default function RestaurantsIndex() {
     return result;
   }, [restaurants, searchQuery, filterValues, sortBy, applyPersonaFilter]);
 
-  const handleFilterChange = useCallback((values: FilterValues) => {
-    setFilterValues(values);
-  }, []);
 
   return (
     <MiniAppLayout
@@ -144,13 +169,13 @@ export default function RestaurantsIndex() {
       fallbackPath="/"
       showSearch
       searchValue={searchQuery}
-      onSearchChange={setSearchQuery}
+      onSearchChange={value => updateQuery('q', value, true)}
       searchPlaceholder={isRu ? 'Поиск ресторанов...' : 'Search restaurants...'}
       showHero={false}
       categories={CUISINES}
       selectedCategory={selectedCuisine}
-      onCategoryChange={setSelectedCuisine}
-      filterConfig={withGeoSection(restaurantFilterConfig)}
+      onCategoryChange={value => updateQuery('category', value === 'all' ? '' : value)}
+      filterConfig={filterConfig}
       filterValues={filterValues}
       onFilterChange={handleFilterChange}
       filterActiveCount={filterActiveCount}
@@ -164,7 +189,7 @@ export default function RestaurantsIndex() {
           {AREAS.map(a => (
             <button
               key={a.id}
-              onClick={() => setSelectedArea(selectedArea === a.id ? null : a.id)}
+              onClick={() => updateQuery('district', selectedArea === a.id ? '' : a.id)}
               className={cn(
                 "flex-shrink-0 flex items-center gap-1 px-2.5 py-1.5 rounded-full text-[11px] font-medium border transition-colors whitespace-nowrap",
                 selectedArea === a.id
@@ -179,7 +204,7 @@ export default function RestaurantsIndex() {
           <div className="w-px h-5 bg-border/60 flex-shrink-0 mx-1" />
           <select
             value={sortBy}
-            onChange={e => setSortBy(e.target.value)}
+            onChange={e => updateQuery('sort', e.target.value === 'recommended' ? '' : e.target.value)}
             className="flex-shrink-0 text-[11px] font-medium bg-secondary border border-border rounded-full px-2.5 py-1.5 outline-none cursor-pointer"
           >
             {SORT_OPTIONS.map(opt => (
@@ -219,7 +244,7 @@ export default function RestaurantsIndex() {
       ) : (
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-5">
           {filteredAndSorted.map(restaurant => (
-            <CatalogCard key={restaurant.id} {...mapRestaurantToCatalogCard(restaurant, language, navigate)} />
+            <CatalogCard key={restaurant.id} {...mapRestaurantToCatalogCard(restaurant, language, navigate)} onClick={undefined} href={`/restaurants/${restaurant.id}`} />
           ))}
         </div>
       )}
