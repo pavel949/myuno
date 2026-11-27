@@ -1,0 +1,11 @@
+import { render, screen } from '@testing-library/react';
+import { MemoryRouter } from 'react-router-dom';
+import { expect, it, vi } from 'vitest';
+vi.mock('@/contexts/LanguageContext', () => ({ useLanguage: () => ({ language: 'en' }) }));
+vi.mock('./HomeCatalogGalleries', () => ({ CatalogState: ({ loading, error }: { loading: boolean; error: boolean }) => <p>{loading ? 'loading' : error ? 'failed' : 'empty'}</p> }));
+import { HomeCarousel } from './HomeCarousel';
+const base = { id: 'c', title: 'Picks', href: '/x', linkLabel: 'All', getKey: (s: string) => s, renderItem: (s: string) => <article>{s}</article>, empty: { ru: 'Пусто', en: 'Empty' } };
+const mount = (p: Partial<Parameters<typeof HomeCarousel<string>>[0]>) => render(<MemoryRouter><HomeCarousel<string> {...base} items={[]} {...p} /></MemoryRouter>);
+it('renders every item when loaded', () => { mount({ items: ['a', 'b'] }); expect(screen.getByText('a')).toBeInTheDocument(); expect(screen.getByText('b')).toBeInTheDocument(); });
+it('shows failure instead of empty when the read fails', () => { mount({ isError: true }); expect(screen.getByText('failed')).toBeInTheDocument(); expect(screen.queryByText('empty')).toBeNull(); });
+it('shows loading rather than empty while loading', () => { mount({ isLoading: true }); expect(screen.getByText('loading')).toBeInTheDocument(); });

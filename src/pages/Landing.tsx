@@ -21,6 +21,8 @@ import { HomeAudienceGrid, HomeTrustBar } from '@/components/home/HomeAudienceGr
 import { HomeDiscoverySearch } from '@/components/home/HomeDiscoverySearch';
 import { HomeUrgentHelp } from '@/components/home/HomeUrgentHelp';
 import { RentalCommunities } from '@/components/property/RentalCommunities';
+import { HomeV2Paths, HomeV2Steps } from '@/components/home/HomeV2Sections';
+import { useFeatureFlag } from '@/hooks/useFeatureFlag';
 import { homeCopy as copy } from '@/content/home/cinematicHome';
 import hero from '@/assets/hero-phuket-coast-editorial.webp';
 import '@/styles/cinematic-home.css';
@@ -36,9 +38,11 @@ export default function Landing() {
   const { language } = useLanguage();
   const t = (v: LangValues) => pickLang(language, v);
   const [requestOpen, setRequestOpen] = useState(false);
+  // feature_flag:home_v2 also gates the signed-in dashboard in Index; guests read only this exact key.
+  const homeV2 = useFeatureFlag('home_v2', false);
 
   return (
-    <div className="cinematic-home premium-home home-refined" data-testid="cinematic-home" data-home-visual="mobile-grid-20261122">
+    <div className="cinematic-home premium-home home-refined" data-testid="cinematic-home" data-home-variant={homeV2 ? 'v2' : 'classic'} data-home-visual="mobile-grid-20261122">
       <SEOHead title={t({ ru: 'Жильё и услуги на Пхукете — myUNO', en: 'Your home and life in Phuket — myUNO', th: 'บ้านและชีวิตของคุณในภูเก็ต — myUNO' })} description={t(copy.lead)} />
       <a href="#home-main" className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[170] focus:bg-background focus:px-4 focus:py-3 focus:text-foreground focus:ring-2 focus:ring-ring" onClick={(event) => { event.preventDefault(); document.getElementById('home-main')?.focus(); }}>{t({ ru: 'Перейти к содержимому', en: 'Skip to content', th: 'ข้ามไปยังเนื้อหา' })}</a>
       <ConsumerTopBar />
@@ -78,8 +82,9 @@ export default function Landing() {
           {t({ ru: 'Разместить жильё, услугу или впечатление', en: 'List a property, service or experience', th: 'ลงประกาศที่พัก บริการ หรือกิจกรรม' })}
           <ArrowRight size={16} aria-hidden="true" />
         </a>
-        <RentalCommunities />
+        {!homeV2 && <RentalCommunities />}
       </div>
+      {homeV2 && <HomeV2Paths />}
       <HomeHousingPreview />
       <HomeSalePreview />
       <HomeNewbuildsPreview />
@@ -88,6 +93,7 @@ export default function Landing() {
         <HomeServiceGallery />
       </div>
       <HomeLocationGallery />
+      {homeV2 && <HomeV2Steps />}
       <section id="home-partners" className="home-partners-group scroll-mt-24" aria-labelledby="home-partners-title">
         <div className="home-container home-group-heading">
           <h2 id="home-partners-title">{t({ ru: 'Собственникам и партнёрам', en: 'For owners and partners', th: 'สำหรับเจ้าของและพาร์ทเนอร์' })}</h2>

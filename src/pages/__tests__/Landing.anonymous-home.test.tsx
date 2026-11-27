@@ -1,4 +1,5 @@
 // Social persistence is verified separately; these tests retain synthetic public catalogue boundaries.
+vi.mock('@/hooks/useFeatureFlag', () => ({ useFeatureFlag: () => false }));
 vi.mock('@/hooks/usePlatformSocialLinks', () => ({ usePlatformSocialLinks: () => ({ data: state.social }) }));
 import React from 'react';
 import { readFileSync } from 'node:fs';
