@@ -208,7 +208,7 @@ export default function ServicesIndex({ embedded = false }: { embedded?: boolean
             {group.parent && <h3 className="font-medium">{label(group.parent)}</h3>}
             <div className={PUBLIC_CATALOG_COMPACT_GRID}>
               {group.entries.map(({ service, category: parent }) => <Link key={service.id} to={service.path} state={{ returnTo }} className="group flex min-w-0 items-center gap-3 border border-border bg-card p-4 hover:border-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
-          <service.icon className="size-5 shrink-0 text-muted-foreground" aria-hidden="true" /><div className="min-w-0 flex-1">{!filters.situation && <p className="text-sm text-muted-foreground">{label(parent)}</p>}<span className="block font-medium">{label(service)}</span></div><ArrowRight className="size-4 shrink-0" aria-hidden="true" />
+          <service.icon className="size-5 shrink-0 text-muted-foreground" aria-hidden="true" /><div className="min-w-0 flex-1">{!filters.situation && <p className="text-sm text-muted-foreground">{label(parent)}</p>}{filters.situation ? <span className="block font-medium">{label(service)}</span> : <h3 className="font-medium">{label(service)}</h3>}</div><ArrowRight className="size-4 shrink-0" aria-hidden="true" />
         </Link>)}
             </div>
           </div>
