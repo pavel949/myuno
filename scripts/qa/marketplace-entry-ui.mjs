@@ -88,7 +88,7 @@ try {
       if (width >= 768) await intro.locator('img').evaluate(async image => { await image.decode(); });
       if (kind === 'buy') {
         const menu = page.getByTestId('buy-discovery-menu');
-        const primary = ['/property/resale','/property/offplan','/property/search?mode=buy'];
+        const primary = ['/property/resale','/property/offplan/search','/property/search?mode=buy'];
         const routes = await menu.getByRole('link').evaluateAll(links => links.map(link => link.getAttribute('href')));
         if (JSON.stringify(routes) !== JSON.stringify(primary)) throw Error('Buy primary routes changed: ' + JSON.stringify(routes));
         for (const target of await menu.getByRole('link').all()) {
