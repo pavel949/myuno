@@ -37,6 +37,19 @@ async def main():
     assert await page.evaluate('window.fixtureRentRead.filters.listingType')=='rent'
     assert await page.evaluate('window.fixtureProjectRead.ids')==['synthetic-community']
     await page.screenshot(path=str(out/f'{lang}-{width}.png'),full_page=True)
+    # Exercise the actual enquiry form with a synthetic writer, never a live CRM.
+    request=page.locator('#rental-request')
+    await expect(request.locator('form')).to_be_visible()
+    await request.locator('input[autocomplete="name"]').fill('Synthetic guest')
+    await request.locator('input[type="tel"]').fill('000----')
+    await request.locator('button[type="submit"]').click()
+    await expect(request.get_by_role('alert')).to_be_visible()
+    assert await page.evaluate('window.fixtureLeadRequests.length')==0
+    await request.locator('input[type="tel"]').fill('+66812345678')
+    await request.locator('button[type="submit"]').click()
+    await expect(request.get_by_role('status')).to_contain_text('11111111-2222-4333-8444-555555555555')
+    assert await page.evaluate('window.fixtureLeadRequests.length')==1
+    assert await page.evaluate('window.fixtureLeadRequests[0].request_type')=='property_consultation'
     # Native controls use the existing canonical search; optional dates stay absent.
     await page.locator('#rental-search input[type="search"]').fill('Synthetic home')
     await page.locator('#rental-search button[type="submit"]').click()
@@ -44,7 +57,7 @@ async def main():
     await expect(page.get_by_test_id('location')).to_contain_text('q=Synthetic+home')
     assert not blocked,blocked
     assert not errors,errors
-    rows.append({'language':lang,'width':width,'status':'PASS','noExternalRequests':True,'sharedSearch':'PASS'})
+    rows.append({'language':lang,'width':width,'status':'PASS','noExternalRequests':True,'sharedSearch':'PASS','syntheticEnquiryReceipt':'PASS'})
     await context.close()
   for theme in ['light','dark']:
    for width in [375,430,1440]:

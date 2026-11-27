@@ -1,10 +1,10 @@
 #!/usr/bin/env node
 /**
- * Import exported data into the new Supabase project.
+ * Import a separately verified complete table export into the configured target.
  *
  * Prerequisites:
  *   1. Schema already applied via `supabase db push`
- *   2. Data exported via `node scripts/export-data.mjs`
+ *   2. A verified complete table archive; the public export-data.mjs archive is NOT eligible
  *   3. SERVICE_ROLE_KEY set (get from Supabase Dashboard → Settings → API → service_role)
  *
  * Usage:
@@ -18,6 +18,7 @@
 import { createClient } from '@supabase/supabase-js';
 import { readFileSync, readdirSync, existsSync } from 'fs';
 import { join } from 'path';
+import { assertImportableSummary, importRows } from './snapshot-import-core.mjs';
 
 // ── Target (new) Supabase ──
 const TARGET_URL = 'https://erfwtoavipwjqmylpizt.supabase.co';
@@ -28,9 +29,6 @@ if (!TARGET_KEY) {
   process.exit(1);
 }
 
-const supabase = createClient(TARGET_URL, TARGET_KEY, {
-  auth: { autoRefreshToken: false, persistSession: false },
-});
 
 const EXPORT_DIR = join(process.cwd(), 'tmp', 'export');
 
@@ -50,49 +48,37 @@ const SKIP_TABLES = [
   '_summary', // our summary file
 ];
 
-async function importTable(table, rows) {
-  if (rows.length === 0) return { table, inserted: 0 };
-
-  const BATCH = 500;
-  let inserted = 0;
-
-  for (let i = 0; i < rows.length; i += BATCH) {
-    const batch = rows.slice(i, i + BATCH);
-
-    const { error } = await supabase
-      .from(table)
-      .upsert(batch, {
-        onConflict: 'id',
-        ignoreDuplicates: true,
-      });
-
-    if (error) {
-      // Try insert instead of upsert (some tables don't have id as PK)
-      const { error: insertError } = await supabase
-        .from(table)
-        .insert(batch);
-
-      if (insertError) {
-        return { table, inserted, error: insertError.message, failedAt: i };
-      }
-    }
-
-    inserted += batch.length;
-  }
-
-  return { table, inserted };
-}
 
 async function main() {
   if (!existsSync(EXPORT_DIR)) {
     console.error(`❌ Export directory not found: ${EXPORT_DIR}`);
-    console.error('   Run "node scripts/export-data.mjs" first.');
+    console.error('   Supply a separately verified complete archive; public REST exports are not eligible.');
     process.exit(1);
   }
+
+  const summaryPath = join(EXPORT_DIR, '_summary.json');
+  assertImportableSummary(existsSync(summaryPath) ? JSON.parse(readFileSync(summaryPath, 'utf-8')) : null);
 
   const files = readdirSync(EXPORT_DIR)
     .filter(f => f.endsWith('.json') && !f.startsWith('_'))
     .map(f => f.replace('.json', ''));
+  const summary = JSON.parse(readFileSync(summaryPath, 'utf-8'));
+  const expected = summary.details.exported.map(entry => entry.table);
+  if (new Set(expected).size !== expected.length || expected.some(table => !/^[a-z][a-z0-9_]*$/.test(table))
+    || files.length !== expected.length || files.some(table => !expected.includes(table))) {
+    throw new Error('Import refused: files do not match the export manifest.');
+  }
+  // Validate every local file before creating a client or writing the first table.
+  const tables = new Map(expected.map(table => {
+    const rows = JSON.parse(readFileSync(join(EXPORT_DIR, `${table}.json`), 'utf-8'));
+    const count = summary.details.exported.find(entry => entry.table === table).count;
+    if (!Array.isArray(rows) || rows.some(row => !row || typeof row !== 'object' || Array.isArray(row))
+      || !Number.isSafeInteger(count) || count < 0 || rows.length !== count) throw new Error(`Invalid archive table: ${table}`);
+    return [table, rows];
+  }));
+  const supabase = createClient(TARGET_URL, TARGET_KEY, {
+    auth: { autoRefreshToken: false, persistSession: false },
+  });
 
   console.log(`\n📥 Importing ${files.length} tables into ${TARGET_URL}...\n`);
 
@@ -105,30 +91,19 @@ async function main() {
   const results = { imported: [], skipped: [], errors: [] };
 
   for (const table of ordered) {
-    const filePath = join(EXPORT_DIR, `${table}.json`);
-    if (!existsSync(filePath)) continue;
-
     try {
-      const rows = JSON.parse(readFileSync(filePath, 'utf-8'));
-
-      if (!Array.isArray(rows) || rows.length === 0) {
+      const rows = tables.get(table);
+      if (rows.length === 0) {
         results.skipped.push(table);
-        console.log(`  ⬜ ${table}: 0 rows, skipping`);
         continue;
       }
-
-      const result = await importTable(table, rows);
-
-      if (result.error) {
-        results.errors.push({ table, error: result.error, inserted: result.inserted });
-        console.log(`  ⚠️  ${table}: ${result.inserted}/${rows.length} rows (error: ${result.error})`);
-      } else {
-        results.imported.push({ table, count: result.inserted });
-        console.log(`  ✅ ${table}: ${result.inserted} rows`);
-      }
+      const result = await importRows(supabase, table, rows);
+      results.imported.push({ table, count: result.applied });
+      console.log(`  ✅ ${table}: ${result.applied} rows acknowledged`);
     } catch (err) {
       results.errors.push({ table, error: err.message });
-      console.log(`  ❌ ${table}: ${err.message}`);
+      console.error(`  ❌ ${table}: ${err.message}`);
+      throw err;
     }
   }
 
@@ -142,7 +117,7 @@ async function main() {
     results.errors.forEach(e => console.log(`  ${e.table}: ${e.error}`));
   }
 
-  console.log('');
+  console.log('Table upserts acknowledged; stale target rows are retained. This is not a verified full restore.');
 }
 
-main().catch(console.error);
+main().catch(error => { console.error(error.message); process.exitCode = 1; });

@@ -1,13 +1,9 @@
 name: DB Mirror Snapshot (Lovable Cloud → Own Supabase)
 
-# Snapshots all data from Lovable Cloud Supabase (kakkwibljrjsawxgnupk)
-# into the user's own Supabase project (erfwtoavipwjqmylpizt) every 6 hours.
-#
-# Strategy: REST-based dump via @supabase/supabase-js (bypasses need for direct
-# Postgres replication access, which Lovable Cloud does not provide).
-#
-# IMPORTANT: This is a snapshot mirror — the target DB is overwritten on each
-# run. Do NOT write directly to the target DB; treat it as read-only replica.
+# Public REST archive only: source RLS can hide rows. Not a complete DB backup.
+# Export artifacts omit schema/Auth/Storage. Partial exports are retained for audit.
+# Import preflight refuses archives whose completeness is unverified; no stale-row
+# deletion or disaster-recovery guarantee is provided by this workflow.
 
 on:
   schedule:

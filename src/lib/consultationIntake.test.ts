@@ -2,8 +2,16 @@ import { describe, it, expect, vi } from 'vitest';
 import { webcrypto } from 'node:crypto';
 import { createConsultationIntakeAttempt } from './consultationIntake';
 const body={name:'Synthetic Buyer',phone:'+66000000000',request_type:'property_consultation',entry_point:'synthetic-fixture'};
-function fixture(){const records=new Map<string,string>();const storage={getItem:(k:string)=>records.get(k)||null,setItem:(k:string,v:string)=>{records.set(k,v);},removeItem:(k:string)=>{records.delete(k);}};return {records,storage,make:()=>createConsultationIntakeAttempt({storage,crypto:webcrypto as unknown as Crypto})};}
+function fixture(){const records=new Map<string,string>();const storage={getItem:(k:string)=>records.get(k)||null,setItem:(k:string,v:string)=>{records.set(k,v);},removeItem:(k:string)=>{records.delete(k);}};return {records,storage,make:()=>createConsultationIntakeAttempt({storage,crypto:webcrypto as unknown as Crypto,allowUncertainRetry:true})};}
 describe('pending consultation nonce recovery',()=>{
+ it.each([undefined,false])('fails closed on uncertain legacy replay (opt-in %s), including after remount',async allowUncertainRetry=>{
+   const f=fixture();const rpc=vi.fn().mockRejectedValueOnce(new Error('lost response')).mockResolvedValue({data:'unexpected-second-insert',error:null});
+   const make=()=>createConsultationIntakeAttempt({storage:f.storage,crypto:webcrypto as unknown as Crypto,allowUncertainRetry});
+   await expect(make().submit({rpc},body)).rejects.toThrow('lost response');
+   await expect(make().submit({rpc},body)).rejects.toThrow('outcome is uncertain');
+   await expect(make().submit({rpc},{...body,name:'Changed buyer'})).rejects.toThrow('outcome is uncertain');
+   expect(rpc).toHaveBeenCalledOnce();expect(f.records.size).toBe(1);
+ });
  it.each(['name_required','phone_required','request_type_required'])('allows edited details after legacy P0001 %s rejection across remount',async message=>{
    const f=fixture();const rpc=vi.fn().mockResolvedValueOnce({data:null,error:{code:'P0001',message}}).mockResolvedValue({data:'corrected-receipt',error:null});
    await expect(f.make().submit({rpc},body)).rejects.toMatchObject({code:'P0001',message});

@@ -53,6 +53,7 @@ jobs:
           npm test -- --maxWorkers=2
           node --test scripts/qa/lighthouse-evidence.test.mjs
           node --test scripts/stage-web-artifact.test.mjs
+          node scripts/snapshot-import-core.test.mjs
         env:
           E28_JIT_PROFILE: "1"
           NODE_OPTIONS: --require ./scripts/qa/local-network-only.cjs
