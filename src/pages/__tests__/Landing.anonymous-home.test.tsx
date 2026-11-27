@@ -119,3 +119,5 @@ it('shows configured social profiles in the anonymous homepage footer', () => {
  expect(within(panel).getByRole('link', { name: 'YouTube' })).toHaveAttribute('href', 'https://youtube.com/@synthetic');
  expect(within(panel).queryByRole('link', { name: 'Facebook' })).toBeNull();
 });
+
+vi.mock('@/lib/catalog/useCatalogFromDB', () => ({ useCatalogFromDB: () => ({ categories: [], lifeSituations: [], isFromDB: true, isLoading: false }) }));
