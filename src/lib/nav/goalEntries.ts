@@ -103,7 +103,7 @@ export const GOAL_ENTRIES: Record<GoalId, GoalEntry> = {
     primary: [
       L(APP_ROUTES.RESALE, Home, 'Resale & assignments', 'Вторичная недвижимость', 'อสังหาริมทรัพย์มือสอง',
         'Ready homes and assignment listings', 'Готовые объекты и переуступки', 'บ้านพร้อมอยู่และประกาศขายต่อ'),
-      L(APP_ROUTES.OFFPLAN, Hammer, 'New projects', 'Новостройки', 'โครงการใหม่',
+      L(APP_ROUTES.OFFPLAN_SEARCH, Hammer, 'New projects', 'Новостройки', 'โครงการใหม่',
         'Project catalogue and terms on request', 'Каталог проектов и условия по запросу', 'ดูโครงการและสอบถามเงื่อนไข'),
       L(`${APP_ROUTES.PROPERTY_SEARCH}?mode=buy`, Building2, 'Direct sale listings', 'Прямые предложения продажи', 'ประกาศขายโดยตรง',
         'Search direct listings by area and home type', 'Поиск прямых объявлений по району и типу жилья', 'ค้นหาประกาศขายโดยตรงตามย่านและประเภทที่พัก'),
