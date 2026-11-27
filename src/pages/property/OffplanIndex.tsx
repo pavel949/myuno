@@ -1,4 +1,5 @@
 import { PublicAssetFilterNotice } from '@/components/property/commercial/PublicAssetFilterNotice';
+import { APP_ROUTES } from '@/lib/config/routes';
 import { pickLang } from '@/lib/i18n/pickLang';
 import { publicNewbuildPresentation } from '@/lib/real-estate/publicNewbuildPresentation';
 import '@/styles/public-commerce.css';
@@ -8,7 +9,7 @@ import '@/styles/public-commerce.css';
  */
 
 import React, { lazy, Suspense, useMemo, useEffect } from 'react';
-import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
+import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import {
   Building2,
   List,
@@ -299,6 +300,11 @@ export default function OffplanIndex() {
             </div>
           </div>
         )}
+
+        <nav aria-label={pickLang(language, { ru: 'Помощь покупателю', en: 'Buyer resources', th: 'ข้อมูลสำหรับผู้ซื้อ' })} className="mt-6 flex flex-wrap gap-4 text-sm">
+          <Link className="text-primary underline" to={APP_ROUTES.KNOWLEDGE}>{pickLang(language, { ru: 'Знания о покупке недвижимости', en: 'Property buyer knowledge hub', th: 'การซื้ออสังหาริมทรัพย์ในไทย' })}</Link>
+          <Link className="text-primary underline" to={APP_ROUTES.OFFPLAN}>{pickLang(language, { ru: 'Обзор новостроек Пхукета', en: 'Phuket new developments guide', th: 'คู่มือโครงการใหม่ในภูเก็ต' })}</Link>
+        </nav>
 
         <div className="rounded-none bg-gradient-to-br from-primary/10 to-primary/5 p-4 border border-primary/20 mt-6">
           <h3 className="font-semibold mb-2">{pickLang(language, {"ru": "Разместить проект на myUNO?", "en": "List your project with myUNO?", "th": "ต้องการนำเสนอโครงการบน myUNO?"})}</h3>
