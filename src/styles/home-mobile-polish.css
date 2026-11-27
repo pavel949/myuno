@@ -466,3 +466,22 @@
 @media (prefers-reduced-motion: reduce) {
   .cinematic-home.home-refined .home-reference-direction { transition: none; }
 }
+
+/* Give stored catalogue photos room without clipping the underlying image. */
+.cinematic-home.home-refined .home-catalog-card,
+.cinematic-home.home-refined .home-services .home-service-category-card {
+  border-radius: var(--radius);
+}
+.cinematic-home.home-refined .home-experiences .home-catalog-photo {
+  aspect-ratio: 3 / 2;
+  height: auto;
+  border-radius: var(--radius);
+  overflow: hidden;
+  background: hsl(var(--muted));
+}
+.cinematic-home.home-refined .home-experiences .home-catalog-photo img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
