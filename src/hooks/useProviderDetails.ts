@@ -47,7 +47,7 @@ export interface ProviderProduct {
   name_ru: string;
   price: number;
   currency: string;
-  stock_quantity: number | null;
+  in_stock: boolean | null;
   is_active: boolean;
   category_name?: string;
   created_at: string;
@@ -110,19 +110,23 @@ export function useProviderDetails(providerId: string | null, visibility: 'priva
     }
     setState(emptyProviderState(context, true));
     try {
-      const { data: providerData, error: providerError } = await supabase
-        .from(visibility === 'public' ? 'public_provider_catalog' : 'providers')
-        .select('*').eq('id', providerId).abortSignal(controller.signal).maybeSingle();
+      const { data: providerData, error: providerError } = await (visibility === 'public'
+        ? supabase.from('public_provider_catalog').select('*')
+          .eq('id', providerId).abortSignal(controller.signal).maybeSingle()
+        : supabase.from('providers').select('*')
+          .eq('id', providerId).abortSignal(controller.signal).maybeSingle());
       if (providerError) throw providerError;
       if (!current()) return;
       if (!providerData) {
         setState(emptyProviderState(context));
         return;
       }
-      const { data: servicesData, error: servicesError } = await supabase
-        .from(visibility === 'public' ? 'public_service_catalog' : 'services')
-        .select('id, name_en, name_ru, price, currency, is_active, category_id, created_at, duration_minutes, lead_time_hours')
-        .eq('provider_id', providerId).order('created_at', { ascending: false }).abortSignal(controller.signal);
+      const serviceColumns = 'id, name_en, name_ru, price, currency, is_active, category_id, created_at, duration_minutes, lead_time_hours';
+      const { data: servicesData, error: servicesError } = await (visibility === 'public'
+        ? supabase.from('public_service_catalog').select(serviceColumns)
+          .eq('provider_id', providerId).order('created_at', { ascending: false }).abortSignal(controller.signal)
+        : supabase.from('services').select(serviceColumns)
+          .eq('provider_id', providerId).order('created_at', { ascending: false }).abortSignal(controller.signal));
       if (servicesError) throw servicesError;
       if (!current()) return;
 
@@ -134,7 +138,7 @@ export function useProviderDetails(providerId: string | null, visibility: 'priva
       if (visibility === 'private') {
         if ('marketplace_vendor_id' in providerData && typeof providerData.marketplace_vendor_id === 'string') {
           const { data, error } = await supabase.from('marketplace_products')
-            .select('id, name_en, name_ru, price, currency, stock_quantity, is_active, created_at')
+            .select('id, name_en, name_ru, price, currency, in_stock, is_active, created_at')
             .eq('vendor_id', providerData.marketplace_vendor_id)
             .order('created_at', { ascending: false }).limit(50).abortSignal(controller.signal);
           if (error) throw error;

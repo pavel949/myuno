@@ -98,7 +98,7 @@ export function ProviderProductsTab({ products, providerId }: { products: Provid
               <TableRow>
                 <TableHead>{isRu ? 'Название' : 'Name'}</TableHead>
                 <TableHead>{isRu ? 'Цена' : 'Price'}</TableHead>
-                <TableHead>{isRu ? 'Остаток' : 'Stock'}</TableHead>
+                <TableHead>{isRu ? 'Наличие' : 'Availability'}</TableHead>
                 <TableHead>{isRu ? 'Статус' : 'Status'}</TableHead>
               </TableRow>
             </TableHeader>
@@ -107,7 +107,11 @@ export function ProviderProductsTab({ products, providerId }: { products: Provid
                 <TableRow key={p.id}>
                   <TableCell className="font-medium">{isRu ? p.name_ru : p.name_en}</TableCell>
                   <TableCell>{formatCurrency(p.price, p.currency)}</TableCell>
-                  <TableCell><Badge variant={p.stock_quantity == null ? 'secondary' : p.stock_quantity > 0 ? 'outline' : 'destructive'}>{p.stock_quantity ?? (isRu ? 'Не указан' : 'Not recorded')}</Badge></TableCell>
+                  <TableCell>
+                    <Badge variant={p.in_stock == null ? 'secondary' : p.in_stock ? 'outline' : 'destructive'}>
+                      {p.in_stock == null ? (isRu ? 'Не указано' : 'Not recorded') : p.in_stock ? (isRu ? 'В наличии' : 'In stock') : (isRu ? 'Нет в наличии' : 'Out of stock')}
+                    </Badge>
+                  </TableCell>
                   <TableCell><Badge variant={p.is_active ? 'default' : 'secondary'}>{p.is_active ? (isRu ? 'Активен' : 'Active') : (isRu ? 'Неактивен' : 'Inactive')}</Badge></TableCell>
                 </TableRow>
               ))}

@@ -27,16 +27,16 @@ const provider = (id: string) => ({id, name: id, marketplace_vendor_id: 'vendor-
 function normal(table: string, id: string) {
   if (table === 'providers' || table === 'public_provider_catalog') return Promise.resolve({data: provider(id), error: null});
   if (table === 'services' || table === 'public_service_catalog') return Promise.resolve({data: [{id:'service-' + id, name_en:id, name_ru:id, price:100, currency:'THB', is_active:true}], error:null});
-  if (table === 'marketplace_products') return Promise.resolve({data: [{id:'product', name_en:'Product', name_ru:'Товар', stock_quantity:7, price:30, currency:'THB'}], error:null});
+  if (table === 'marketplace_products') return Promise.resolve({data: [{id:'product', name_en:'Product', name_ru:'Товар', in_stock:true, price:30, currency:'THB'}], error:null});
   return Promise.resolve({data:[], error:null});
 }
 beforeEach(() => { mock.actor='admin-a'; mock.calls=[]; mock.resolve=normal; });
 
 describe('provider detail context and failure recovery', () => {
-  it('loads the recorded stock quantity instead of inventing zero', async () => {
+  it('loads the recorded stock status', async () => {
     const {result}=renderHook(() => useProviderDetails('a'));
     await waitFor(() => expect(result.current.isLoading).toBe(false));
-    expect(result.current.products[0].stock_quantity).toBe(7);
+    expect(result.current.products[0].in_stock).toBe(true);
     expect(result.current.error).toBeNull();
   });
   it('does not issue private reads without an actor', async () => {
