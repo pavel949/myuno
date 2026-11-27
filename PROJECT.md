@@ -1,7 +1,8 @@
 # PROJECT.md — myUNO
 ## Canonical Product & Engineering Constitution
 
-> **v3.2.1 · 18 Oct 2026 · production core: `myuno`**
+> **v3.3.0 · 27 Nov 2026 · production core: `myuno` (app package 3.55.5)**
+> Deployed identity is the commit/build emitted by `scripts/build-identity.mjs` in `/version.json`, not this header.
 > Canonical context for Codex, Lovable, other AI agents, engineers, product and operations.
 
 ## 00. How to use this document
@@ -19,13 +20,15 @@ It connects trusted property/service supply, local execution, distribution, cust
 **Living is an experience/surface category over canonical domains, not a separate domain model.**
 
 ## 02. What myUNO is not
-Not another OTA, classifieds site, generic marketplace, “contact us” services directory, mini-app collection, duplicate PMS/CRM/accounting stack, separate Layantara app, or AI demo inventing data. `myUNO-final` is an independently maintained Next.js application; this repository is the React/Vite myUNO App. Both must represent the same verified Layantara catalogue and tariffs. See [application identity and parity](docs/LAYANTARA_APPLICATION_PARITY.md). Older donor-only wording is superseded by the owner's 2026-10-21 decision. **One Operational Reality** is the product.
+Not another OTA, classifieds site, generic marketplace, “contact us” services directory, mini-app collection, duplicate PMS/CRM/accounting stack, separate Layantara app, or AI demo inventing data. `myUNO-final` is an independently maintained Next.js application; this repository is the React/Vite myUNO App. Both must represent the same verified Layantara catalogue and tariffs. See [application identity and parity](docs/LAYANTARA_APPLICATION_PARITY.md). Older donor-only wording is superseded by the owner's 2026-10-21 decision. Catalogue parity never makes both applications concurrent booking writers for the same nights. A repository name, route or database label never establishes which commit, data project or domain is deployed; always state repository, data project, SHA and publication status. **One Operational Reality** is the product.
 
 ## 03. Current strategic objective
 Production operational convergence:
 `Ignatev Estate → Layantara | Condominiums`.
 
 Immediate proof: run a real Layantara booking from quote through checkout and P&L using canonical systems, isolate Layantara/Condo teams, preserve founder consolidated oversight, and keep the architecture reusable.
+
+Until checkout acceptance passes, first revenue uses **assisted booking/enquiry**: provisional Bangkok civil-date quotes from configured tariffs, CRM-captured enquiry with search context, and human confirmation. It never claims a reservation, charge or instant confirmation.
 
 Priority: `correctness → security → operational completeness → usability → distribution → scale`.
 
@@ -173,6 +176,14 @@ Small reviewable tranches. Never combine auth cutover, schema redesign, money ch
 
 Never edit applied migrations; use forward migrations + security-preserving rollback. Test RLS as authenticated non-owner. UI filtering is not isolation. No production business writes for QA. Admin bulk mutations confirm every selected row before full success; listing activity never establishes sale status. Public inquiry and detail use the same stored tariff eligibility and cancellation description. Commercial forms preserve each stored amount column, billing unit, rental/sale currency and explicit offer mode; amounts never infer offer intent or convert between tariffs. Home rental discovery is a compact photo/title/area carousel linking to the canonical rental marketplace with selected-home context; detailed facts, prices and conditions belong in the marketplace and detail. Marketplace cards/detail/inquiry expose coexisting recorded rental periods together through one tariff selector; conflicting same-period sources require confirmation and disable automatic quotes. Owner metadata editing preserves valid zero dimensions. TypeScript strict. Restricted query keys include actor/company/scope/revision or are evicted. Test changed operational UI at 375/390/430 + desktop. Never fabricate successful transitions.
 
+Security rules proven by recent audits:
+- Direct CRM/lead/score/referral/activity writes bind actor columns to `auth.uid()`; client-supplied identity is ignored.
+- Self-service onboarding (e.g. `register-mc`) creates the company and membership only; operational roles such as `property_manager` require administrator approval.
+- Spreadsheet/CSV exports pass through `src/lib/export/csvSafe.ts` to neutralise formula injection.
+- Confidential document links are short-lived and signed at read time; long-lived URLs must not outlive membership.
+- Edge handlers minimise PII in logs, validate redirect origins for payment URLs and authorise caller/object before any service-role client.
+- Seeded test accounts never hold production admin roles with known credentials.
+
 ## 15. Definition of Done
 Build/UI success is insufficient. Done requires canonical-domain correctness, server auth, explicit states, mobile/RU/EN, tests, auditability, no duplicate truth, rollback evidence and safe operational acceptance where relevant.
 
@@ -190,6 +201,8 @@ If intended operators should manage rates/photos/descriptions/inventory/publicat
 Proven money/inventory bypasses block progression; unrelated broad security research does not automatically expand P0.
 
 After P0: Agent Workspace; Homes Rent/Buy; **Services Marketplace Activation** (real provider/vertical audit, remove fake fallbacks, admin editing, pricing, availability, commerce modes, provider→org mapping where required, request/booking, fulfilment, optional commercial bridge/settlement, Concierge fallback); Stay 360; Owner/Map/Notifications/Admin.
+
+**Status note (2026-11-27, evidence, not gate acceptance):** forward security migrations 0035–0043 (public read RPC grants, actor-bound inserts, exact-key guest flag reads, review privacy, slot limits, lead score/referral actor binding), admin consolidation with legacy redirects, Inbox exact-record handoffs, concierge CRM/WhatsApp routing (PR #340) and Design Bible v4 marketplace convergence have landed. Gate A (Final Order Mutation Security) and E3 remain NO-GO until a separate owner decision; the pointer stays at A.
 
 Stop for review after money, inventory, RLS, schema or enforcement changes.
 
