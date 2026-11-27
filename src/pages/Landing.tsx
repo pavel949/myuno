@@ -22,7 +22,7 @@ import { HomeAudienceGrid, HomeTrustBar } from '@/components/home/HomeAudienceGr
 import { HomeDiscoverySearch } from '@/components/home/HomeDiscoverySearch';
 import { HomeUrgentHelp } from '@/components/home/HomeUrgentHelp';
 import { RentalCommunities } from '@/components/property/RentalCommunities';
-import { HomeV2Paths, HomeV2Steps } from '@/components/home/HomeV2Sections';
+import { HomeIslandLife, HomeV2Paths, HomeV2Steps } from '@/components/home/HomeV2Sections';
 import { useFeatureFlag } from '@/hooks/useFeatureFlag';
 import { homeCopy as copy } from '@/content/home/cinematicHome';
 import hero from '@/assets/hero-phuket-coast-editorial.webp';
@@ -87,6 +87,7 @@ export default function Landing() {
       <div className="home-life-group">
         <HomeExperienceGallery />
         <HomeServiceGallery />
+        <HomeIslandLife />
       </div>
       {homeV2 && <HomeV2Steps />}
       <HomeLocationGallery />
