@@ -74,7 +74,11 @@ async def main():
     else:raise AssertionError('External request in state acceptance')
    await context.route('**/*',deny);await page.goto(f'{base}/fixture.html?lang=en&state={state}')
    if state=='loading':await expect(page.get_by_role('status')).to_contain_text('Loading communities')
-   elif state=='empty':await expect(page.locator('#rental-communities')).to_contain_text('This selection has no communities')
+   elif state=='empty':
+    communities=page.locator('#rental-communities')
+    await expect(communities).to_contain_text('There are no featured communities with short-stay listings yet')
+    await expect(communities.get_by_role('link',name='All vacation rentals')).to_be_visible()
+    await expect(communities.locator('.rental-community')).to_have_count(0)
    else:
     await expect(page.get_by_role('alert')).to_be_visible();await page.get_by_role('button',name='Try again',exact=True).click();await expect(page.locator('.rental-community')).to_have_count(1);await expect(page.get_by_role('alert')).to_have_count(0)
    assert await page.evaluate('document.documentElement.scrollWidth<=innerWidth')
