@@ -1,5 +1,8 @@
 # Roadmap
 
+- [x] Save Life OS continuation instructions for another AI (`docs/qa/LIFE_OS_AI_HANDOFF_2026_11_27.md`).
+- [ ] Open the Life OS documentation handoff PR (requires GitHub branch/PR creation).
+
 - [ ] AI-оценка новых лидов против идеального клиента + краткое резюме + флаг «стоит позвонить» (ждёт: описание идеального клиента)
 - [ ] Формы заявки в каталоге впечатлений и «Новостройки» с параметрами в CRM
 - [ ] Полная форма бронирования на странице аренды: даты, время, гости, статус в каталоге (high-risk: inventory/holds — нужен аудит и GO)
