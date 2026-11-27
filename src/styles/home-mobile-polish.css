@@ -506,20 +506,16 @@
   }
 }
 .cinematic-home.home-refined .home-locations .home-guide-card {
-  background: hsl(var(--card));
   color: hsl(var(--card-foreground));
-  border: 1px solid hsl(var(--border));
   border-radius: var(--radius);
 }
 .cinematic-home.home-refined .home-locations .home-guide-copy {
   display: grid;
   gap: var(--section-control-gap);
   align-content: start;
-  padding: var(--public-card-gap);
 }
 .cinematic-home.home-refined .home-locations .home-guide-card h3 {
   color: hsl(var(--card-foreground));
-  font-size: var(--type-h4-size);
 }
 .cinematic-home.home-refined .home-locations .home-guide-pin {
   display: block;
