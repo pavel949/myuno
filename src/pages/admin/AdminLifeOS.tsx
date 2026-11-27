@@ -15,7 +15,7 @@ import { PageShell } from '@/components/page/PageShell';
 import React, { useState } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Sparkles, Link2, Eye, ShieldCheck, History, Activity, Brain, Route } from 'lucide-react';
+import { Sparkles, Link2, Eye, ShieldCheck, History, Activity, Brain, Route, Network } from 'lucide-react';
 import { LifeOSSituationsTab } from '@/components/admin/lifeos/LifeOSSituationsTab';
 import { LifeOSMappingsTab } from '@/components/admin/lifeos/LifeOSMappingsTab';
 import { LifeOSResolverPreviewTab } from '@/components/admin/lifeos/LifeOSResolverPreviewTab';
@@ -25,13 +25,15 @@ import { LifeOSHealthTab } from '@/components/admin/lifeos/LifeOSHealthTab';
 import { ManualModeBadge } from '@/components/admin/lifeos/ManualModeBadge';
 import { LifeOSAIPanel } from '@/components/admin/lifeos/LifeOSAIPanel';
 import { LifeOSRoutesTab } from '@/components/admin/lifeos/LifeOSRoutesTab';
+import { LifeOSStructureTab } from '@/components/admin/lifeos/LifeOSStructureTab';
 
 export default function AdminLifeOS() {
   const { language } = useLanguage();
   const isRussian = language === 'ru';
-  const [activeTab, setActiveTab] = useState('mappings');
+  const [activeTab, setActiveTab] = useState('structure');
 
   const tabs = [
+    { id: 'structure', label: isRussian ? 'Структура' : 'Structure', icon: Network, description: isRussian ? 'Как на сайте' : 'As on site' },
     { 
       id: 'situations', 
       label: isRussian ? 'Ситуации' : 'Situations', 
@@ -119,6 +121,10 @@ export default function AdminLifeOS() {
             </TabsTrigger>
           ))}
         </TabsList>
+
+        <TabsContent value="structure" className="mt-4">
+          <LifeOSStructureTab />
+        </TabsContent>
 
         <TabsContent value="situations" className="mt-4">
           <LifeOSSituationsTab />
