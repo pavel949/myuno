@@ -341,6 +341,12 @@ export default function WelcomeLanding({ compact = false }: { compact?: boolean 
             </div>
           </LandingContainer>
           <HomeV2Paths />
+          <LandingContainer className="py-4">
+            <Link className="ds-focus inline-flex min-h-11 items-center gap-2 rounded-[var(--bible-radius-card)] border border-border bg-card px-4 text-card-foreground hover:border-primary" to={APP_ROUTES.EVENTS}>
+              {tx(language, { ru: 'Афиша Пхукета', en: 'Phuket event calendar', th: 'ปฏิทินกิจกรรมภูเก็ต' })}
+              <ArrowRight className="size-4" aria-hidden="true" />
+            </Link>
+          </LandingContainer>
           {visibleClusters.length > 0 && <LandingContainer className="space-y-4 py-6">
             <h2 className="font-display text-h3">{tx(language, { ru: 'По направлениям', en: 'Browse by topic', th: 'เลือกตามหัวข้อ' })}</h2>
             <ul className="grid grid-cols-2 gap-3 md:grid-cols-3">
