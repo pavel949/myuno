@@ -388,8 +388,11 @@ async def main():
             if state=='loading': await expect(page.locator('.home-properties [role=status]')).to_be_visible()
             assert await page.evaluate('document.documentElement.scrollWidth<=innerWidth')
             if state=='error':
-                await expect(page.get_by_role('alert')).to_have_count(5)
-                await page.get_by_role('button',name='Try again').first.click()
+                await expect(page.get_by_role('alert')).to_have_count(6)
+                communities = page.locator('#rental-communities')
+                await expect(communities.get_by_role('alert')).to_contain_text('Communities could not be loaded')
+                await expect(communities.get_by_role('button',name='Try again')).to_be_visible()
+                await page.locator('.home-properties').get_by_role('button',name='Try again').click()
                 assert await page.evaluate('window.fixtureRetries') == 1
                 assert 'No published' not in await page.locator('body').inner_text()
             if state=='empty':
