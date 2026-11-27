@@ -345,7 +345,7 @@ describe('public business entry', () => {
       APP_ROUTES.PROPERTY_BUY,
       APP_ROUTES.EXPERIENCES,
       APP_ROUTES.GOAL_SERVICES,
-      APP_ROUTES.DISCOVER_SITUATIONS,
+      APP_ROUTES.DISCOVER,
     ]);
     expect(PRIMARY_NAV.guest).toHaveLength(5);
     expect(PRIMARY_NAV.guest.some(item => item.path === APP_ROUTES.FOR_BUSINESS)).toBe(false);

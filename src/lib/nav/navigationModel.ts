@@ -58,7 +58,7 @@ export const GUEST_TOP_NAV: NavItem[] = [
   { path: APP_ROUTES.PROPERTY_BUY, icon: Building2, labelEn: 'Buy', labelRu: 'Покупка', labelTh: 'ซื้อ' },
   { path: APP_ROUTES.EXPERIENCES, icon: Sparkles, labelEn: 'Experiences', labelRu: 'Впечатления', labelTh: 'ประสบการณ์' },
   { path: APP_ROUTES.GOAL_SERVICES, icon: Wrench, labelEn: 'Services', labelRu: 'Сервисы', labelTh: 'บริการ' },
-  { path: APP_ROUTES.DISCOVER_SITUATIONS, icon: Compass, labelEn: 'Island life', labelRu: 'Жизнь на острове', labelTh: 'ชีวิตบนเกาะ' },
+  { path: APP_ROUTES.DISCOVER, exact: true, icon: Compass, labelEn: 'Island life', labelRu: 'Жизнь на острове', labelTh: 'ชีวิตบนเกาะ' },
 ];
 
 const matchesPath = (path: string, prefix: string) => path === prefix || path.startsWith(`${prefix}/`);
@@ -185,7 +185,6 @@ export function isBottomBarItemActive(item: NavItem, pathname: string): boolean 
   if (item.exact) return pathname === item.path;
   if (item.path === '/mc/modules' && pathname === APP_ROUTES.MC) return true;
   if (item.path === '/account' && ['/me/bookings', '/me/requests', '/me/services'].some(path => pathname === path || pathname.startsWith(path + '/'))) return false;
-  if (item.path === APP_ROUTES.GOAL_SERVICES && pathname === APP_ROUTES.DISCOVER) return true;
 
   const aliases = PATH_ALIASES[item.path];
   if (aliases) {
