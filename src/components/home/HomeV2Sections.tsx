@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { ArrowRight, BedDouble, Building2, Compass, HardHat, Handshake, Sparkles, Wrench } from 'lucide-react';
+import { ArrowRight, BedDouble, Building2, Compass, Sparkles, Wrench } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { pickLang, type LangValues } from '@/lib/i18n/pickLang';
@@ -10,14 +10,12 @@ import { Skeleton } from '@/components/ui/skeleton';
 
 type Path = { key: string; to: string; icon: LucideIcon; title: LangValues; text: LangValues };
 
-/** Six primary choices; navigation only, never evidence of supply or availability. */
+/** Four primary choices; navigation only, never evidence of supply or availability. */
 export const HOME_V2_PATHS: readonly Path[] = [
   { key: 'rent', to: R.PROPERTY_RENT, icon: BedDouble, title: { ru: 'Аренда', en: 'Rent', th: 'เช่า' }, text: { ru: 'Посуточно и помесячно', en: 'Nightly and monthly', th: 'รายวันและรายเดือน' } },
   { key: 'buy', to: R.PROPERTY_BUY, icon: Building2, title: { ru: 'Покупка', en: 'Buy', th: 'ซื้อ' }, text: { ru: 'Новостройки и вторичка', en: 'New builds and resale', th: 'บ้านพร้อมอยู่' } },
-  { key: 'offplan', to: R.OFFPLAN_SEARCH, icon: HardHat, title: { ru: 'Новостройки', en: 'New developments', th: 'โครงการใหม่' }, text: { ru: 'Проекты и условия', en: 'Projects and terms', th: 'โครงการและเงื่อนไข' } },
-  { key: 'experiences', to: R.EXPERIENCES, icon: Compass, title: { ru: 'Впечатления', en: 'Experiences', th: 'ประสบการณ์' }, text: { ru: 'Отдых на острове', en: 'Time on the island', th: 'กิจกรรมบนเกาะ' } },
-  { key: 'services', to: R.GOAL_SERVICES, icon: Wrench, title: { ru: 'Услуги', en: 'Services', th: 'บริการ' }, text: { ru: 'Помощь в быту', en: 'Everyday help', th: 'ความช่วยเหลือในชีวิตประจำวัน' } },
-  { key: 'partners', to: R.LIST_WITH_US, icon: Handshake, title: { ru: 'Партнёрам', en: 'Partners', th: 'พาร์ทเนอร์' }, text: { ru: 'Разместить объявление', en: 'Post a listing', th: 'ลงประกาศ' } },
+  { key: 'experiences', to: R.EXPERIENCES, icon: Compass, title: { ru: 'Впечатления', en: 'Experiences', th: 'ประสบการณ์' }, text: { ru: 'Экскурсии, яхты и активный отдых', en: 'Tours, yachts and outdoor activities', th: 'กิจกรรมบนเกาะ' } },
+  { key: 'services', to: R.GOAL_SERVICES, icon: Wrench, title: { ru: 'Услуги', en: 'Services', th: 'บริการ' }, text: { ru: 'Дом, транспорт, визы и другое', en: 'Home, transport, visas and more', th: 'ความช่วยเหลือในชีวิตประจำวัน' } },
 ];
 
 /** Island life panel: live active situations from Life OS; falls back to the navigator link only. */
@@ -46,7 +44,7 @@ export function HomeV2Paths() {
   const t = (v: LangValues) => pickLang(language, v);
   return <section className="home-container py-8" aria-labelledby="home-v2-paths-title">
     <h2 id="home-v2-paths-title" className="mb-4 !text-2xl md:!text-3xl">{t({ ru: 'С чего начать', en: 'Where to start', th: 'เริ่มต้นจากตรงไหน' })}</h2>
-      <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3">{HOME_V2_PATHS.map(p => { const Icon = p.icon; return <li key={p.key}>
+      <ul className="grid grid-cols-2 gap-3 lg:grid-cols-4">{HOME_V2_PATHS.map(p => { const Icon = p.icon; return <li key={p.key}>
         <Link className="ds-focus flex h-full min-h-24 flex-col justify-between gap-3 rounded-[var(--bible-radius-card)] border border-border bg-card p-4 text-foreground transition-colors hover:border-primary" to={p.to}>
           <Icon className="size-5 shrink-0 text-primary" aria-hidden="true" />
           <span className="min-w-0"><span className="block font-medium leading-snug">{t(p.title)}</span><span className="mt-1 block text-sm text-muted-foreground">{t(p.text)}</span></span>
