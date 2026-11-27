@@ -1,7 +1,7 @@
 import '@/styles/marketplace-unity.css';
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, Compass, ImageOff, MapPin, Flower2, PlaneLanding, CarFront, House, Sailboat } from 'lucide-react';
+import { ArrowRight, Compass, ImageOff, MapPin } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { pickLang, type LangValues } from '@/lib/i18n/pickLang';
 import { useExperiences } from '@/hooks/useExperiences';
@@ -146,15 +146,6 @@ export function HomeExperienceGallery() {
   </HomeGallery><nav className="home-container home-category-navigation" aria-label={title}><HomeDiscoveryPaths kind="experiences" /></nav></>;
 }
 
-function ServiceCategoryArt({ image, alt, categoryId, categoryPath }: { image: string; alt: string; categoryId: string; categoryPath: string }) {
-  const Icon = categoryId === 'flowers' ? Flower2 : categoryId === 'arrival' ? PlaneLanding : categoryId === 'vehicle' ? CarFront : categoryId === 'home' ? House : categoryPath === R.YACHTS ? Sailboat : Compass;
-  const photo = categoryId === 'flowers' || categoryPath === R.YACHTS;
-  const [failed, setFailed] = useState(false);
-  return <div className="home-service-category-art">
-    {photo && image && !failed ? <img src={image} alt={alt} width="320" height="200" loading="lazy" decoding="async" onError={() => setFailed(true)} /> : <span className="home-service-lucide-symbol"><Icon size={34} strokeWidth={1.7} aria-hidden="true" /></span>}
-  </div>;
-}
-
 export function HomeServiceGallery() {
   const { language } = useLanguage();
   const t = (value: LangValues) => pickLang(language, value);
@@ -170,16 +161,20 @@ export function HomeServiceGallery() {
     href={R.GOAL_SERVICES} linkLabel={t({ ru: 'Все услуги', en: 'All services', th: 'บริการทั้งหมด' })}
     state={!catalog.isLoading && !catalog.error && !categories.length ? <p className="home-catalog-state">{t({ ru: 'Подборка появится после публикации категорий. Полный каталог доступен по ссылке.', en: 'The preview will appear when categories are published. Explore the full catalogue using the link.', th: 'ตัวอย่างจะแสดงเมื่อเผยแพร่หมวดหมู่ ดูรายการทั้งหมดได้จากลิงก์' })}</p> : catalog.isLoading || catalog.error ? <CatalogState loading={catalog.isLoading} error={Boolean(catalog.error)} retry={catalog.refetch}
       empty={{ ru: 'Нет категорий для просмотра', en: 'No categories to explore', th: 'ยังไม่มีหมวดหมู่' }} /> : undefined}>
-      {categories.map(category => <article className={`home-service-category-card${category.path === R.FLOWERS || category.path === R.YACHTS ? ' home-service-category-card--photo' : ''}`} key={category.id}>
-        <Link to={category.path}>
-          <ServiceCategoryArt categoryId={category.id} categoryPath={category.path} image={category.image} alt={pickLang(language, { ru: category.labelRu, en: category.labelEn, th: category.labelTh })} />
-          <div className="home-service-category-copy">{(category.path === R.FLOWERS || category.path === R.YACHTS) && <p className="home-category-photo-note">{t({ ru: 'Иллюстративное фото. Условия в каталоге.', en: 'Illustrative photo. Offers in the catalogue.', th: 'ภาพประกอบ ดูข้อเสนอในหมวดหมู่' })}</p>}<h3>{pickLang(language, { ru: category.labelRu, en: category.labelEn, th: category.labelTh })}</h3><p>{t(category.benefit)}</p>
-            <span>{t({ ru: 'Открыть раздел', en: 'Explore category', th: 'ดูหมวดหมู่' })}<ArrowRight size={16} aria-hidden="true" /></span>
-          </div>
-        </Link>
-        {category.secondary && <Link className="home-service-secondary" to={category.secondary.path}>{pickLang(language, category.secondary.label)}<ArrowRight size={16} aria-hidden="true" /></Link>}
-      </article>)}
+      {categories.map(({ id, path, icon: Icon, labelRu, labelEn, labelTh }) => (
+        <article className="home-service-category-card" key={id}>
+          <Link to={path}>
+            <div className="home-service-category-art">
+              <span className="home-service-lucide-symbol"><Icon size={34} strokeWidth={1.7} aria-hidden="true" /></span>
+            </div>
+            <div className="home-service-category-copy">
+              <h3>{pickLang(language, { ru: labelRu, en: labelEn, th: labelTh || labelEn })}</h3>
+              <span>{t({ ru: 'Открыть раздел', en: 'Explore category', th: 'ดูหมวดหมู่' })}<ArrowRight size={16} aria-hidden="true" /></span>
+            </div>
+          </Link>
+        </article>
+      ))}
   </HomeGallery>
-    <nav className="home-container home-category-navigation" aria-label={title}><HomeDiscoveryPaths kind="services" /></nav>
+
   </>;
 }
