@@ -92,7 +92,7 @@ export default function Landing() {
       <HomeLocationGallery />
       <section id="home-partners" className="home-partners-group scroll-mt-24" aria-labelledby="home-partners-title">
         <div className="home-container home-group-heading">
-          <h2 id="home-partners-title">{t({ ru: 'Собственникам и партнёрам', en: 'For owners and partners', th: 'สำหรับเจ้าของและพาร์ทเนอร์' })}</h2>
+          <h2 id="home-partners-title">{t({ ru: 'Застройщикам, собственникам и поставщикам', en: 'For developers, property owners and providers', th: 'สำหรับผู้พัฒนา เจ้าของอสังหาริมทรัพย์ และผู้ให้บริการ' })}</h2>
         </div>
         <HomeAudienceGrid />
         <HomeTrustBar />
