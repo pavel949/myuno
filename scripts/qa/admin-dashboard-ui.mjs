@@ -32,6 +32,8 @@ return{...values,sourceUpdatedAt,sourceErrors,ordersCreatedBefore:'2026-10-19T00
   '@/hooks/useAdminDashboardEvidence': `import{useQuery}from'@tanstack/react-query';import{dashboardSnapshotPeriod,summarizeDashboardSnapshots}from'${sourceRoot}/src/lib/adminDashboardEvidence.ts';
 export const useAdminPlatformStatus=()=>{window.fixtureHookCalls.health++;return useQuery({queryKey:['admin-dashboard','health','synthetic-admin'],staleTime:Infinity,retry:false,queryFn:async()=>{window.fixtureAssertAdmin();window.fixtureReads.health++;await window.fixtureDelay();return[{key:'stripe_mode',status:'not_configured'},{key:'admin_emails',status:'configured'},{key:'admin_whatsapp',status:'configured'},{key:'reconciliation',status:'unknown'},{key:'verticals',status:'unknown'}]}})};
 export const useAdminDashboardSnapshots=days=>{window.fixtureHookCalls.snapshots++;const period=dashboardSnapshotPeriod(days);const query=useQuery({queryKey:['admin-dashboard','snapshots','synthetic-admin',days],staleTime:Infinity,retry:false,queryFn:async()=>{window.fixtureAssertAdmin();window.fixtureReads.snapshots++;await window.fixtureDelay();const rows=window.fixtureScenario==='no-snapshots'?[]:period.dates.map(date=>({date,gmv:120,platform_revenue:12,completed_bookings:2}));return summarizeDashboardSnapshots(rows,period.dates)}});return{...query,period,checkingAccess:false}};`,
+  '@/hooks/useAdminDashboardCases': `import{useQuery}from'@tanstack/react-query';
+export const useAdminDashboardCases=view=>{const query=useQuery({queryKey:['admin-dashboard','cases','synthetic-admin',view],staleTime:Infinity,retry:false,queryFn:async()=>{window.fixtureAssertAdmin();await window.fixtureDelay();return{items:[],unavailable:[]}}});return{...query,admitted:true,actorId:'synthetic-admin'}};`,
   '@/integrations/supabase/client': `throw Error('Production database transport forbidden in isolated dashboard fixture');`,
 };
 
@@ -58,10 +60,10 @@ const result = await build({
   } }],
 });
 const inputs = Object.keys(result.metafile.inputs).map(file => file.replaceAll('\\', '/'));
-for (const required of ['pages/admin/AdminDashboard.tsx', 'admin/dashboard/AdminWorkQueues.tsx', 'admin/dashboard/AdminOperationalAlerts.tsx', 'admin/dashboard/DashboardCount.tsx', 'admin/GoLiveChecklist.tsx', 'admin/dashboard/AdminRevenueBlock.tsx', 'admin/dashboard/AdminQuickActionsGrid.tsx', 'page/PageShell.tsx', 'lib/adminDashboardEvidence.ts']) {
+for (const required of ['pages/admin/AdminDashboard.tsx', 'admin/dashboard/AdminCaseList.tsx', 'admin/dashboard/AdminWorkQueues.tsx', 'admin/dashboard/AdminOperationalAlerts.tsx', 'admin/dashboard/DashboardCount.tsx', 'admin/GoLiveChecklist.tsx', 'admin/dashboard/AdminRevenueBlock.tsx', 'admin/dashboard/AdminQuickActionsGrid.tsx', 'page/PageShell.tsx', 'lib/adminDashboardEvidence.ts']) {
   if (!inputs.some(file => !file.startsWith('fixture:') && file.endsWith(required))) throw Error('Actual component missing: ' + required);
 }
-if (inputs.some(file => !file.startsWith('fixture:') && /integrations\/supabase\/client|hooks\/useAdmin(DashboardStats|DashboardEvidence|Analytics|Content)\.ts|contexts\/AuthContext/.test(file))) throw Error('Production data module included');
+if (inputs.some(file => !file.startsWith('fixture:') && /integrations\/supabase\/client|hooks\/useAdmin(DashboardStats|DashboardEvidence|DashboardCases|Analytics|Content)\.ts|contexts\/AuthContext/.test(file))) throw Error('Production data module included');
 await writeFile(path.join(output, 'bundle-inputs.json'), JSON.stringify({ inputs, boundaries: ['synthetic read hooks', 'role hook', 'staff overview', 'sidebar frame'], countKeys: keys }, null, 2));
 if (process.argv.includes('--bundle-only')) process.exit(0);
 const response = await fetch('http://localhost:8080/src/index.css?direct');
