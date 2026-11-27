@@ -481,3 +481,20 @@
   height: 100%;
   object-fit: contain;
 }
+
+.cinematic-home.home-refined .home-rail--loop .home-rail-viewport {
+  display: flex;
+  grid-template-columns: none;
+  gap: var(--public-card-gap);
+  overflow-x: auto;
+  scroll-behavior: auto;
+}
+.cinematic-home.home-refined .home-rail--loop .home-rail-viewport > * {
+  flex: 0 0 clamp(15rem, 29vw, 23rem);
+}
+.cinematic-home.home-refined .home-rail--running .home-rail-viewport {
+  scroll-snap-type: none;
+}
+.cinematic-home.home-refined .home-rail--loop .home-rail-controls:not([hidden]) {
+  display: flex;
+}
