@@ -27,16 +27,18 @@ import {
 import TaxonomyValueEditor from '@/components/admin/taxonomy/TaxonomyValueEditor';
 import TaxonomyBulkActions from '@/components/admin/taxonomy/TaxonomyBulkActions';
 import TaxonomySchemaEditor from '@/components/admin/taxonomy/TaxonomySchemaEditor';
+import TaxonomyCreateDialog from '@/components/admin/taxonomy/TaxonomyCreateDialog';
 
 export default function AdminTaxonomyManager() {
   const { language } = useLanguage();
   const t = (en: string, ru: string) => language === 'ru' ? ru : en;
   
-  const { definitions, groupedByVertical, isLoading } = useTaxonomyDefinitions();
+  const { definitions, groupedByVertical, isLoading, isError, refetch } = useTaxonomyDefinitions();
+  const [createOpen, setCreateOpen] = useState(false);
   
   const [selectedType, setSelectedType] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
-  const [activeTab, setActiveTab] = useState<'browse' | 'values'>('browse');
+  const [activeTab, setActiveTab] = useState('values');
 
   const selectedDefinition = definitions.find(d => d.type_key === selectedType);
 
@@ -57,6 +59,11 @@ export default function AdminTaxonomyManager() {
   const totalValues = definitions.reduce((sum, d) => sum + d.value_count, 0);
 
   const navigate = useNavigate();
+
+  if (isError) return <div role="alert" className="space-y-3 p-6">
+    <p>{t('Could not load reference lists. Their contents are unknown.', 'Не удалось загрузить справочники. Их содержимое неизвестно.')}</p>
+    <Button onClick={() => void refetch()}>{t('Retry', 'Повторить')}</Button>
+  </div>;
 
   return (
     <div className="p-6 space-y-6">
@@ -141,7 +148,7 @@ export default function AdminTaxonomyManager() {
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between">
               <CardTitle className="text-lg">{t('Taxonomy Types', 'Типы справочников')}</CardTitle>
-              <Button size="sm" variant="outline">
+              <Button size="sm" variant="outline" disabled={isLoading} onClick={() => setCreateOpen(true)}>
                 <Plus className="h-4 w-4 mr-1" />
                 {t('Add', 'Добавить')}
               </Button>
@@ -246,7 +253,7 @@ export default function AdminTaxonomyManager() {
           </CardHeader>
           <CardContent>
             {selectedType ? (
-              <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as any)}>
+              <Tabs value={activeTab} onValueChange={setActiveTab}>
                 <TabsList className="mb-4">
                   <TabsTrigger value="values">{t('Values', 'Значения')}</TabsTrigger>
                   <TabsTrigger value="settings">{t('Settings', 'Настройки')}</TabsTrigger>
@@ -272,6 +279,7 @@ export default function AdminTaxonomyManager() {
           </CardContent>
         </Card>
       </div>
+      {createOpen && <TaxonomyCreateDialog open={createOpen} onOpenChange={setCreateOpen} onCreated={key => { setSelectedType(key); setActiveTab('values'); }} />}
     </div>
   );
 }

@@ -23,20 +23,20 @@
   ],
   "families": {
     "Button": {
-      "directConsumerFiles": 918,
-      "sourceInstances": 3045
+      "directConsumerFiles": 920,
+      "sourceInstances": 3048
     },
     "Card": {
       "directConsumerFiles": 536,
       "sourceInstances": 1534
     },
     "Dialog": {
-      "directConsumerFiles": 163,
-      "sourceInstances": 206
+      "directConsumerFiles": 164,
+      "sourceInstances": 207
     },
     "Textarea": {
-      "directConsumerFiles": 190,
-      "sourceInstances": 296
+      "directConsumerFiles": 189,
+      "sourceInstances": 295
     },
     "PageContainer": {
       "directConsumerFiles": 173,
@@ -59,12 +59,12 @@
       "sourceInstances": 1573
     },
     "SelectTrigger": {
-      "directConsumerFiles": 233,
-      "sourceInstances": 462
+      "directConsumerFiles": 232,
+      "sourceInstances": 460
     },
     "Sheet": {
-      "directConsumerFiles": 75,
-      "sourceInstances": 78
+      "directConsumerFiles": 74,
+      "sourceInstances": 77
     },
     "Table": {
       "directConsumerFiles": 32,
@@ -1919,7 +1919,7 @@
     },
     {
       "file": "src/components/admin/finance/ManualPaymentForm.tsx",
-      "sha256": "89ba294d0792a63b70a649fc9cacf70d1eedca7eec73efaa4491d99cb926a13c",
+      "sha256": "3efbc4f3bc279b85c86cd7fd540a6301e6289cbecbd3a6b5e9c869b682a863e6",
       "directRouteDeclarations": [],
       "runtime": "NOTTESTED",
       "visual": "NOTTESTED",
@@ -1927,45 +1927,9 @@
         {
           "name": "Button",
           "source": "@/components/ui/button",
-          "instances": 2,
-          "lines": [
-            97,
-            190
-          ]
-        },
-        {
-          "name": "Input",
-          "source": "@/components/ui/input",
-          "instances": 3,
-          "lines": [
-            126,
-            154,
-            173
-          ]
-        },
-        {
-          "name": "SelectTrigger",
-          "source": "@/components/ui/select",
-          "instances": 2,
-          "lines": [
-            111,
-            139
-          ]
-        },
-        {
-          "name": "Sheet",
-          "source": "@/components/ui/sheet",
           "instances": 1,
           "lines": [
-            95
-          ]
-        },
-        {
-          "name": "Textarea",
-          "source": "@/components/ui/textarea",
-          "instances": 1,
-          "lines": [
-            182
+            12
           ]
         }
       ]
@@ -4325,7 +4289,7 @@
     },
     {
       "file": "src/components/admin/provider-detail/ProviderDataTabs.tsx",
-      "sha256": "33db6bab58e925d92844a5104ccf65c20f54ddf6a8aca7a64738656e5e3f0f50",
+      "sha256": "51237fca32c32107ac9f7844ae9c1802f787fa9b113cb3bc00cdd913743d7503",
       "directRouteDeclarations": [],
       "runtime": "NOTTESTED",
       "visual": "NOTTESTED",
@@ -4335,9 +4299,9 @@
           "source": "@/components/ui/button",
           "instances": 3,
           "lines": [
-            38,
-            86,
-            133
+            40,
+            88,
+            139
           ]
         },
         {
@@ -4345,10 +4309,10 @@
           "source": "@/components/ui/card",
           "instances": 4,
           "lines": [
-            32,
-            80,
-            127,
-            176
+            34,
+            82,
+            133,
+            182
           ]
         },
         {
@@ -4356,10 +4320,10 @@
           "source": "@/components/ui/table",
           "instances": 4,
           "lines": [
-            46,
-            94,
-            141,
-            185
+            48,
+            96,
+            147,
+            191
           ]
         }
       ]
@@ -4661,6 +4625,42 @@
           "lines": [
             180,
             218
+          ]
+        }
+      ]
+    },
+    {
+      "file": "src/components/admin/taxonomy/TaxonomyCreateDialog.tsx",
+      "sha256": "709a3b303d782020f3a1559f0681d350ce40f6f6b989cbe9fea834b9ffc8f724",
+      "directRouteDeclarations": [],
+      "runtime": "NOTTESTED",
+      "visual": "NOTTESTED",
+      "primitiveImports": [
+        {
+          "name": "Button",
+          "source": "@/components/ui/button",
+          "instances": 2,
+          "lines": [
+            65,
+            66
+          ]
+        },
+        {
+          "name": "Dialog",
+          "source": "@/components/ui/dialog",
+          "instances": 1,
+          "lines": [
+            44
+          ]
+        },
+        {
+          "name": "Input",
+          "source": "@/components/ui/input",
+          "instances": 3,
+          "lines": [
+            49,
+            52,
+            55
           ]
         }
       ]
@@ -24539,7 +24539,7 @@
     },
     {
       "file": "src/pages/admin/AdminProviderDetail.tsx",
-      "sha256": "5b9e2f79b1a6655fbff2814a2be91c8b64761a137be30d57555a7eeecc7f10d5",
+      "sha256": "b78af02dae112f32204681501782d53d45991fdb02cb7e71418810fb3093862c",
       "directRouteDeclarations": [
         {
           "id": "b06f1aea2a21a49c",
@@ -24551,6 +24551,14 @@
       "runtime": "NOTTESTED",
       "visual": "NOTTESTED",
       "primitiveImports": [
+        {
+          "name": "Button",
+          "source": "@/components/ui/button",
+          "instances": 1,
+          "lines": [
+            56
+          ]
+        },
         {
           "name": "Card",
           "source": "@/components/ui/card",
@@ -24564,7 +24572,7 @@
           "source": "@/components/page/PageShell",
           "instances": 1,
           "lines": [
-            64
+            65
           ]
         },
         {
@@ -24572,7 +24580,7 @@
           "source": "@/components/ui/tabs",
           "instances": 1,
           "lines": [
-            69
+            70
           ]
         }
       ]
@@ -25321,7 +25329,7 @@
     },
     {
       "file": "src/pages/admin/AdminTaxonomyManager.tsx",
-      "sha256": "05c742368c99226fab1ac2764f994410350b31e6323f2a31678e4ca45432722a",
+      "sha256": "8464818446eba1aa3227ec2af8f34513decfc2aead8bed333103203c53362cf9",
       "directRouteDeclarations": [],
       "runtime": "NOTTESTED",
       "visual": "NOTTESTED",
@@ -25329,11 +25337,12 @@
         {
           "name": "Button",
           "source": "@/components/ui/button",
-          "instances": 3,
+          "instances": 4,
           "lines": [
-            70,
-            74,
-            144
+            65,
+            77,
+            81,
+            151
           ]
         },
         {
@@ -25341,12 +25350,12 @@
           "source": "@/components/ui/card",
           "instances": 6,
           "lines": [
-            82,
-            95,
-            108,
-            121,
-            140,
-            224
+            89,
+            102,
+            115,
+            128,
+            147,
+            231
           ]
         },
         {
@@ -25354,7 +25363,7 @@
           "source": "@/components/ui/input",
           "instances": 1,
           "lines": [
-            151
+            158
           ]
         },
         {
@@ -25362,7 +25371,7 @@
           "source": "@/components/ui/tabs",
           "instances": 1,
           "lines": [
-            249
+            256
           ]
         }
       ]

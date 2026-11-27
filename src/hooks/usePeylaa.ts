@@ -11,6 +11,7 @@ import { useQuery, useMutation } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { recordAttribution } from '@/lib/newbuilds/attribution';
 import { logger } from '@/lib/logger';
+import { summarizeSalesUnitStatus } from '@/lib/real-estate/unitStatus';
 import type {
   PeylaaUnit,
   PeylaaLead,
@@ -65,7 +66,7 @@ function mapUnit(row: ProjectUnitRow): PeylaaUnit {
   const area = num(row.area_sqm);
   const price = num(row.price_thb) || num(row.price);
   const bedrooms = row.bedrooms ?? 1;
-  const status = (row.status ?? row.unit_status ?? 'available') as PeylaaUnit['status'];
+  const status = summarizeSalesUnitStatus(row);
   const floor = row.floor ?? row.floor_number ?? 1;
   return {
     id: row.id,

@@ -9,7 +9,9 @@ import { Plus, Star } from 'lucide-react';
 import { format } from 'date-fns';
 import type { ProviderService, ProviderProduct, ProviderContract, ProviderBooking } from '@/hooks/useProviderDetails';
 
-function formatCurrency(amount: number, currency = 'THB') {
+function formatCurrency(amount: number, currency?: string | null) {
+  if (typeof amount !== 'number' || !Number.isFinite(amount)) return '—';
+  if (!currency || !/^[A-Za-z]{3}$/.test(currency)) return `${new Intl.NumberFormat('en-US').format(amount)} —`;
   return new Intl.NumberFormat('en-US', { style: 'currency', currency, minimumFractionDigits: 0 }).format(amount);
 }
 
@@ -55,7 +57,7 @@ export function ProviderServicesTab({ services, providerId }: { services: Provid
               {services.map((s) => (
                 <TableRow key={s.id} className="cursor-pointer hover:bg-muted/50" onClick={() => navigate(`/admin/services?edit=${s.id}`)}>
                   <TableCell className="font-medium">{isRu ? s.name_ru : s.name_en}</TableCell>
-                  <TableCell>{s.price ? formatCurrency(s.price, s.currency) : '—'}</TableCell>
+                  <TableCell>{s.price != null ? formatCurrency(s.price, s.currency) : '—'}</TableCell>
                   <TableCell>
                     <Badge variant={s.is_active ? 'default' : 'secondary'}>{s.is_active ? (isRu ? 'Активна' : 'Active') : (isRu ? 'Неактивна' : 'Inactive')}</Badge>
                   </TableCell>
@@ -96,7 +98,7 @@ export function ProviderProductsTab({ products, providerId }: { products: Provid
               <TableRow>
                 <TableHead>{isRu ? 'Название' : 'Name'}</TableHead>
                 <TableHead>{isRu ? 'Цена' : 'Price'}</TableHead>
-                <TableHead>{isRu ? 'Остаток' : 'Stock'}</TableHead>
+                <TableHead>{isRu ? 'Наличие' : 'Availability'}</TableHead>
                 <TableHead>{isRu ? 'Статус' : 'Status'}</TableHead>
               </TableRow>
             </TableHeader>
@@ -105,7 +107,11 @@ export function ProviderProductsTab({ products, providerId }: { products: Provid
                 <TableRow key={p.id}>
                   <TableCell className="font-medium">{isRu ? p.name_ru : p.name_en}</TableCell>
                   <TableCell>{formatCurrency(p.price, p.currency)}</TableCell>
-                  <TableCell><Badge variant={p.stock_quantity > 0 ? 'outline' : 'destructive'}>{p.stock_quantity}</Badge></TableCell>
+                  <TableCell>
+                    <Badge variant={p.in_stock == null ? 'secondary' : p.in_stock ? 'outline' : 'destructive'}>
+                      {p.in_stock == null ? (isRu ? 'Не указано' : 'Not recorded') : p.in_stock ? (isRu ? 'В наличии' : 'In stock') : (isRu ? 'Нет в наличии' : 'Out of stock')}
+                    </Badge>
+                  </TableCell>
                   <TableCell><Badge variant={p.is_active ? 'default' : 'secondary'}>{p.is_active ? (isRu ? 'Активен' : 'Active') : (isRu ? 'Неактивен' : 'Inactive')}</Badge></TableCell>
                 </TableRow>
               ))}

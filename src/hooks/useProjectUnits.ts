@@ -1,4 +1,5 @@
 import { publicNewbuildUnit } from '@/lib/real-estate/publicNewbuildPresentation';
+import { resolveSalesUnitStatus } from '@/lib/real-estate/unitStatus';
 /**
  * useProjectUnits — reads units for a public project page.
  * Source: `project_units` (canonical operational table). Falls back to
@@ -64,7 +65,7 @@ function mapRow(u: ProjectUnitRow): ProjectUnit {
     area_sqm: Number(u.area_sqm ?? 0),
     bedrooms: u.bedrooms,
     bathrooms: u.bathrooms,
-    price: Number(u.price ?? 0),
+    price: u.price == null ? null : Number(u.price),
     price_per_sqm: u.price_per_sqm !== null ? Number(u.price_per_sqm) : null,
     currency: u.currency ?? null,
     floor_from: floor,
@@ -73,8 +74,8 @@ function mapRow(u: ProjectUnitRow): ProjectUnit {
     views: u.view_type ? [u.view_type] : null,
     features: null,
     total_units: 1,
-    available_units: u.unit_status === 'available' || u.status === 'available' ? 1 : 0,
-    status: u.unit_status ?? u.status ?? 'available',
+    available_units: resolveSalesUnitStatus(u) === 'available' ? 1 : 0,
+    status: resolveSalesUnitStatus(u),
   };
 }
 
