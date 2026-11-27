@@ -42,7 +42,7 @@ export default function TaxonomyCreateDialog({open, onOpenChange, onCreated}: Pr
     }finally{setSubmitting(false);}
   };
   return <Dialog open={open} onOpenChange={close}>
-    <DialogContent className="max-h-[90dvh] overflow-y-auto sm:max-w-lg">
+    <DialogContent>
       <DialogHeader><DialogTitle>{t('New reference list','Новый справочник')}</DialogTitle></DialogHeader>
       <form onSubmit={save} className="space-y-4">
         <div className="space-y-2"><Label htmlFor="taxonomy-new-code">{t('Code','Код')}</Label>

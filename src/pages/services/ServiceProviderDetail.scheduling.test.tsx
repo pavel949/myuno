@@ -22,7 +22,7 @@ vi.mock('@/lib/services/slots',async importOriginal=>{
 vi.mock('@/integrations/supabase/client',()=>({supabase:{from:(table:string)=>{
  fixture.tables.push(table);
  if(!['public_provider_catalog','public_service_catalog'].includes(table))throw new Error('Unexpected private read');
- let columns='';const q={select:(value:string)=>{columns=value;return q;},eq:()=>q,order:()=>q,
+ let columns='';const q={select:(value:string)=>{columns=value;return q;},eq:()=>q,order:()=>q,abortSignal:()=>q,
  maybeSingle:async()=>({data:fixture.error?null:{id:'synthetic-provider',name:'Synthetic provider',is_active:true,is_verified:true},error:fixture.error?{message:'Private diagnostic must not render'}:null}),
  then:(resolve:(value:unknown)=>unknown)=>Promise.resolve(resolve({data:[{
   id:'synthetic-service',name_en:'Synthetic repair',name_ru:'Ремонт',price:fixture.price,currency:fixture.currency,is_active:true,created_at:'2026-10-17',
