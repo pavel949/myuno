@@ -58,9 +58,9 @@ const show = () => render(<MemoryRouter initialEntries={[APP_ROUTES.HOME]}><Rout
 beforeEach(() => { state.language = 'en'; state.user = null; state.isLoading = false; state.social = {}; authenticatedIndex.mockClear(); });
 afterEach(cleanup);
 it.each([
- ['en', 'Main navigation', ['Explore', 'Trips', 'Services', 'Homes', 'Me']],
- ['ru', 'Основная навигация', ['Поиск', 'Поездки', 'Услуги', 'Купить', 'Профиль']],
- ['th', 'เมนูหลัก', ['สำรวจ', 'ทริป', 'บริการ', 'ซื้อบ้าน', 'ฉัน']],
+ ['en', 'Main navigation', ['Explore', 'Requests', 'Services', 'Homes', 'Me']],
+ ['ru', 'Основная навигация', ['Поиск', 'Заявки', 'Сервисы', 'Купить', 'Профиль']],
+ ['th', 'เมนูหลัก', ['สำรวจ', 'คำขอ', 'บริการ', 'ซื้อบ้าน', 'ฉัน']],
 ] as const)('mounts the real anonymous landing and all five public tabs in %s', (language, name, labels) => {
  expect(mountedAtHome).toBe(true);
  state.language = language;

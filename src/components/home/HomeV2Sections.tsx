@@ -13,7 +13,7 @@ export const HOME_V2_PATHS: readonly Path[] = [
   { key: 'buy', to: R.PROPERTY_BUY, icon: Building2, title: { ru: 'Покупка', en: 'Buy', th: 'ซื้อ' }, text: { ru: 'Готовое жильё', en: 'Ready homes', th: 'บ้านพร้อมอยู่' } },
   { key: 'offplan', to: R.OFFPLAN, icon: HardHat, title: { ru: 'Новостройки', en: 'New developments', th: 'โครงการใหม่' }, text: { ru: 'Проекты и условия', en: 'Projects and terms', th: 'โครงการและเงื่อนไข' } },
   { key: 'experiences', to: R.EXPERIENCES, icon: Compass, title: { ru: 'Впечатления', en: 'Experiences', th: 'ประสบการณ์' }, text: { ru: 'Отдых на острове', en: 'Time on the island', th: 'กิจกรรมบนเกาะ' } },
-  { key: 'services', to: R.GOAL_SERVICES, icon: Wrench, title: { ru: 'Услуги', en: 'Services', th: 'บริการ' }, text: { ru: 'Помощь в быту', en: 'Everyday help', th: 'ความช่วยเหลือในชีวิตประจำวัน' } },
+  { key: 'services', to: R.GOAL_SERVICES, icon: Wrench, title: { ru: 'Сервисы', en: 'Services', th: 'บริการ' }, text: { ru: 'Помощь в быту', en: 'Everyday help', th: 'ความช่วยเหลือในชีวิตประจำวัน' } },
   { key: 'areas', to: R.AREA_INDEX, icon: MapPin, title: { ru: 'Районы', en: 'Areas', th: 'ย่าน' }, text: { ru: 'Знакомство с районами', en: 'Area guides', th: 'คู่มือย่าน' } },
 ];
 

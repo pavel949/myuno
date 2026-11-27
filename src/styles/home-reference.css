@@ -472,3 +472,8 @@
   .cinematic-home.home-refined .home-hero-search .home-search-modes :is(button, a) { margin: 0 !important; border-radius: var(--bible-radius-control) !important; }
   .cinematic-home.home-refined .home-hero-search .home-search-duration button { flex: 1 1 0; }
 }
+
+/* Photo captions keep fixed light ink in both themes: the hero image does not change with the theme. */
+.cinematic-home.home-refined .home-hero-banner,
+.cinematic-home.home-refined .home-hero-banner .home-hero-copy h1,
+.cinematic-home.home-refined .home-hero-banner .home-hero-copy > p { color: hsl(var(--media-foreground)); }

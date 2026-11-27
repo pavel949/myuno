@@ -45,8 +45,8 @@ export type NavRoleKey =
 /** Public consumer tabs. Account and workspace authorization remains route-owned. */
 export const GUEST_NAV: NavItem[] = [
   { path: APP_ROUTES.HOME, icon: Compass, labelEn: 'Explore', labelRu: 'Поиск', labelTh: 'สำรวจ', exact: true },
-  { path: APP_ROUTES.BOOKINGS, icon: CalendarDays, labelEn: 'Trips', labelRu: 'Поездки', labelTh: 'ทริป' },
-  { path: APP_ROUTES.GOAL_SERVICES, icon: Wrench, labelEn: 'Services', labelRu: 'Услуги', labelTh: 'บริการ' },
+  { path: APP_ROUTES.BOOKINGS, icon: CalendarDays, labelEn: 'Requests', labelRu: 'Заявки', labelTh: 'คำขอ' },
+  { path: APP_ROUTES.GOAL_SERVICES, icon: Wrench, labelEn: 'Services', labelRu: 'Сервисы', labelTh: 'บริการ' },
   { path: APP_ROUTES.PROPERTY_BUY, icon: Building2, labelEn: 'Homes', labelRu: 'Купить', labelTh: 'ซื้อบ้าน' },
   { path: APP_ROUTES.ACCOUNT, icon: User, labelEn: 'Me', labelRu: 'Профиль', labelTh: 'ฉัน' },
 ];
