@@ -1,8 +1,12 @@
 import { cleanup, fireEvent, render as renderControls, screen, within } from '@testing-library/react';
+import type { ComponentProps } from 'react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { HomeDiscoverySearch } from '../HomeDiscoverySearch';
 const state = vi.hoisted(() => ({ navigate: vi.fn(), mobile: false, language: 'ru' }));
-vi.mock('react-router-dom', () => ({ useNavigate: () => state.navigate }));
+vi.mock('react-router-dom', () => ({
+  useNavigate: () => state.navigate,
+  Link: ({ to, ...props }: ComponentProps<'a'> & { to: string }) => <a {...props} href={to} />,
+}));
 vi.mock('@/contexts/LanguageContext', () => ({ useLanguage: () => ({ language: state.language }) }));
 vi.mock('@/hooks/use-mobile', () => ({ useIsMobile: () => state.mobile }));
 vi.mock('@/hooks/usePropertyQuickFilters', () => ({ usePropertyQuickFilters: () => ({ districts: [{ id: 'a', valueKey: 'layan', labelRu: 'Лаян', labelEn: 'Layan' }], isLoading: false }) }));
@@ -41,17 +45,11 @@ describe('Home discovery themed controls and catalogue handoff', () => {
   it.each([
     ['Experiences', '/experiences'],
     ['Services', '/discover/services'],
-  ])('opens %s with a query and no property restrictions from the homepage', (market, path) => {
+  ])('links directly to %s without passing rental criteria', (market, path) => {
     state.language = 'en';
     renderControls(<HomeDiscoverySearch allowActivities progressive initialParams={new URLSearchParams('mode=rent&guests=4&district=layan')} />);
-    fireEvent.click(screen.getByRole('button', { name: 'Experiences & services' }));
-    if (market === 'Services') choose('Choose a catalogue', market);
-    fireEvent.change(screen.getByRole('searchbox'), { target: { value: '  boat & tour  ' } });
-    fireEvent.submit(screen.getByRole('form', { name: 'Search myUNO' }));
-
-    const url = new URL(state.navigate.mock.calls[0][0], 'https://myuno.app');
-    expect(url.pathname).toBe(path);
-    expect(Object.fromEntries(url.searchParams)).toEqual({ q: 'boat & tour' });
+    const form = within(screen.getByRole('form', { name: 'Search myUNO' }));
+    expect(form.getByRole('link', { name: market })).toHaveAttribute('href', path);
   });
 
   it.each(['ru', 'en', 'th'])('keeps only primary criteria expanded initially in %s', language => {

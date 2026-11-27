@@ -65,6 +65,7 @@
   align-items: end;
   min-block-size: var(--bible-home-hero-mobile-height);
   padding: var(--layout-gutter);
+  padding-block-start: max(var(--layout-gutter), 4.5rem);
   overflow: hidden;
   border-radius: var(--bible-radius-media);
   background: hsl(var(--brand-navy));
@@ -98,6 +99,96 @@
   font-weight: 400;
   line-height: var(--type-h1-leading);
   text-wrap: balance;
+}
+
+.home-hero-copy {
+  min-inline-size: 0;
+}
+
+.home-hero-copy h1 {
+  margin: 0;
+}
+
+.home-hero-copy p {
+  max-inline-size: var(--public-width-reading);
+  margin-block: .5rem 0;
+}
+
+.home-hero-help {
+  position: absolute;
+  z-index: 2;
+  inset-block-start: var(--layout-gutter);
+  inset-inline-end: var(--layout-gutter);
+  display: inline-flex;
+  align-items: center;
+  gap: .5rem;
+  min-block-size: 44px;
+  max-inline-size: calc(100% - 2 * var(--layout-gutter));
+  padding: .5rem .875rem;
+  border: 1px solid hsl(var(--brand-navy) / .2);
+  border-radius: var(--bible-radius-card);
+  background: hsl(var(--brand-cream));
+  color: hsl(var(--brand-navy));
+  font-weight: 600;
+  text-align: start;
+}
+
+.home-hero-help svg {
+  flex: none;
+}
+
+.home-hero-help:hover {
+  text-decoration: underline;
+  text-underline-offset: .2em;
+}
+
+.home-hero-help:focus-visible {
+  outline: 2px solid hsl(var(--brand-cream));
+  outline-offset: 3px;
+}
+
+.home-hero-search .home-search-date-trigger[data-with-guests] {
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+
+.home-hero-search .home-search-modes[data-marketplaces] > a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-block-size: var(--touch-target);
+  padding-inline: var(--section-title-gap);
+  border: 1px solid hsl(var(--border));
+  text-align: center;
+  font-size: var(--home-ui-body-small);
+}
+
+@media (max-width: 767px) {
+  .cinematic-home.home-refined .home-hero-search .home-search[data-home-discovery-mode="rent"][data-home-filters-expanded="false"] {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    column-gap: .5rem;
+  }
+
+  .home-hero-search .home-search[data-home-discovery-mode="rent"][data-home-filters-expanded="false"] > * {
+    grid-column: 1 / -1;
+  }
+
+  .home-hero-search .home-search[data-home-discovery-mode="rent"][data-home-filters-expanded="false"] > .home-search-refine {
+    grid-column: 1;
+    align-self: center;
+  }
+
+  .home-hero-search .home-search[data-home-discovery-mode="rent"][data-home-filters-expanded="false"] > .home-search-submit {
+    grid-column: 2;
+    min-width: 0;
+    @apply px-3;
+    gap: .5rem;
+    white-space: normal;
+  }
+
+  .home-hero-search .home-search[data-home-filters-expanded="false"] > :is(.home-search-type, .home-search-bedrooms) {
+    display: none;
+  }
 }
 
 .home-hero-search {
@@ -155,17 +246,16 @@
       "area type budget bedrooms filters submit";
   }
 
-  .cinematic-home.home-refined .home-hero-search .home-search[data-home-discovery-mode="activities"] {
-    grid-template-areas:
-      "modes modes modes modes modes modes"
-      "type query query query query submit";
-  }
-
   .cinematic-home.home-refined .home-hero-search .home-search[data-home-discovery-mode] > * {
     min-inline-size: 0;
     margin: 0;
   }
 
+  .cinematic-home.home-refined .home-hero-search .home-search[data-home-discovery-mode] > .home-search-modes,
+  .cinematic-home.home-refined .home-hero-search .home-search[data-home-discovery-mode] > .home-search-duration {
+    align-self: stretch;
+    align-items: center;
+  }
   .cinematic-home.home-refined .home-hero-search .home-search[data-home-discovery-mode] > .home-search-modes { grid-area: modes; }
   .cinematic-home.home-refined .home-hero-search .home-search[data-home-discovery-mode] > .home-search-duration { grid-area: duration; }
   .cinematic-home.home-refined .home-hero-search .home-search[data-home-discovery-mode] > .home-search-location { grid-area: area; }
@@ -288,7 +378,7 @@
   color: hsl(var(--muted-foreground));
   opacity: 1;
 }
-.dark .cinematic-home.home-refined .home-reference-search .home-search-modes button,
+.dark .cinematic-home.home-refined .home-reference-search .home-search-modes :is(button, a),
 .dark .cinematic-home.home-refined .home-reference-search .home-search-duration button {
   border-color: hsl(var(--border));
   background: transparent;

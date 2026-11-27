@@ -6,7 +6,7 @@ const source = (path: string) => readFileSync(resolve(process.cwd(), path), 'utf
 it('keeps catalog header controls in normal flow below the single sticky consumer header', () => {
  const layout = source('src/components/layout/FeatureLayout.tsx');
  expect(layout).not.toContain('sticky top-[var(--consumer-header-height');
- expect(layout).toContain('<div className="relative">\n        <UnifiedHeader');
+ expect(layout).toMatch(/id=\{marketplaceIntro \? 'marketplace-controls' : undefined\}\s+tabIndex=\{marketplaceIntro \? -1 : undefined\}\s+className="relative scroll-mt-24"\s*>\s*<UnifiedHeader/);
 });
 it('hides only the global chat launcher while the consent banner is present', () => {
  expect(source('src/styles/consumer-system.css')).toContain('body:has([data-cookie-consent-banner]) [data-global-chat-launcher]{visibility:hidden;pointer-events:none}');

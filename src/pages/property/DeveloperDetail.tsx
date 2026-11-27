@@ -13,6 +13,19 @@ import { MyunoScoreWidget } from '@/components/invest/MyunoScoreWidget';
 import { OffplanProjectCard } from '@/components/property/OffplanProjectCard';
 import { SEOHead, createBreadcrumbSchema } from '@/components/seo';
 
+function catalogueDeliverySource(date: string | null, source: string | null) {
+  if (!date || !source || !/^\d{4}-\d{2}-\d{2}$/.test(date)) return null;
+  try {
+    const calendarDate = new Date(date + 'T00:00:00Z');
+    if (calendarDate.toISOString().slice(0, 10) !== date) return null;
+    const url = new URL(source);
+    if (!['http:', 'https:'].includes(url.protocol) || url.username || url.password) return null;
+    return { calendarDate, source: url.href };
+  } catch {
+    return null;
+  }
+}
+
 export default function DeveloperDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -71,7 +84,7 @@ export default function DeveloperDetail() {
   const seoTitle = `${name} · ${label('Developer', 'Застройщик', 'ผู้พัฒนา')} · Phuket`;
   const seoDescription = description
     || (isRu
-      ? `${name} — застройщик Пхукета. ${developer.projectsCompleted} проектов, ${developer.totalUnitsSold} юнитов продано.${developer.foundedYear ? ` Основано в ${developer.foundedYear}.` : ''}`
+      ? `${name} — застройщик Пхукета. ${developer.projectsCompleted} проектов, ${developer.totalUnitsSold} объектов продано.${developer.foundedYear ? ` Основано в ${developer.foundedYear}.` : ''}`
       : `${name} — Phuket developer. ${developer.projectsCompleted} projects, ${developer.totalUnitsSold} units sold.${developer.foundedYear ? ` Founded ${developer.foundedYear}.` : ''}`);
   const canonicalUrl = `https://www.myuno.app${APP_ROUTES.DEVELOPER_DETAIL(developer.id)}`;
   const orgSchema = {
@@ -91,6 +104,13 @@ export default function DeveloperDetail() {
   ]);
   const projectList = projects.data ?? [];
   const hasContact = Boolean(developer.website || developer.phone || developer.email);
+  const deliveryDates = projectList.flatMap(project => {
+    const evidence = catalogueDeliverySource(project.completionDate, project.sourceUrl);
+    return evidence ? [{ project, ...evidence }] : [];
+  }).sort((a, b) => b.calendarDate.getTime() - a.calendarDate.getTime());
+  const readableDate = new Intl.DateTimeFormat(isRu ? 'ru-RU' : language === 'th' ? 'th-TH' : 'en-GB', {
+    dateStyle: 'long', timeZone: 'UTC',
+  });
 
   return (
     <div className="mx-auto max-w-screen-xl space-y-6 px-[var(--page-padding-x)] pb-24 pt-6">
@@ -141,7 +161,7 @@ export default function DeveloperDetail() {
           </div>
         <dl className="grid grid-cols-3 gap-2 sm:gap-4">
           <div className="flex flex-col-reverse gap-1 border border-border p-2 sm:p-3">
-            <dt className="break-words text-sm text-muted-foreground">{label('Completed projects', 'Завершённые проекты', 'โครงการที่เสร็จแล้ว')}</dt>
+            <dt className="break-words text-sm text-muted-foreground">{label('Completed projects reported in profile', 'Завершено по данным профиля', 'โครงการที่ระบุว่าเสร็จแล้วในโปรไฟล์')}</dt>
             <dd className="font-semibold tabular-nums">{developer.projectsCompleted}</dd>
           </div>
           <div className="flex flex-col-reverse gap-1 border border-border p-2 sm:p-3">
@@ -206,6 +226,30 @@ export default function DeveloperDetail() {
           )}
         </section>}
       </div>
+      {!projects.isLoading && !projects.isError && deliveryDates.length > 0 && (
+        <section className="space-y-3 border border-border bg-card p-4 sm:p-6" aria-labelledby="developer-delivery">
+          <h2 id="developer-delivery" className="font-semibold">{label('Project delivery dates', 'Сроки сдачи проектов', 'กำหนดส่งมอบโครงการ')}</h2>
+          <p className="text-sm text-muted-foreground">{label('Dates as listed in the catalogue, with links to the source.', 'Даты из каталога. Источник указан рядом с каждой датой.', 'วันที่ตามแค็ตตาล็อกพร้อมลิงก์ไปยังแหล่งข้อมูล')}</p>
+          <ul className="divide-y divide-border">
+            {deliveryDates.map(({ project, calendarDate, source }) => (
+              <li key={project.id} className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 py-3">
+                <div className="min-w-0">
+                  <p className="break-words font-medium">{isRu ? project.nameRu || project.nameEn : project.nameEn || project.nameRu}</p>
+                  <p className="text-sm text-muted-foreground">
+                    {project.projectStatus === 'completed'
+                      ? label('Listed as completed', 'В каталоге отмечен как завершённый', 'ระบุว่าเสร็จแล้วในแค็ตตาล็อก')
+                      : label('Catalogue date', 'Дата по каталогу', 'วันที่ตามแค็ตตาล็อก')}
+                    {' · '}<time dateTime={project.completionDate ?? undefined}>{readableDate.format(calendarDate)}</time>
+                  </p>
+                </div>
+                <a href={source} target="_blank" rel="noopener noreferrer" className="ds-focus inline-flex min-h-11 items-center text-sm font-medium text-primary underline underline-offset-4">
+                  {label('Open source', 'Открыть источник', 'เปิดแหล่งข้อมูล')}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
       <section className="space-y-3" aria-labelledby="developer-projects" aria-busy={projects.isLoading}>
         <h2 id="developer-projects" className="font-semibold">
           {label('Published projects', 'Опубликованные проекты', 'โครงการที่เผยแพร่')}

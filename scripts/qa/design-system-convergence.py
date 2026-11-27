@@ -68,7 +68,8 @@ async def main():
       targets=[
        ('.home-reference-search .home-search-submit',1,'text'),
        ('.home-reference-search .home-search-refine',1,'text'),
-       ('.home-reference-search .home-search-modes button',3,'text'),
+       ('.home-reference-search .home-search-modes button',2,'text'),
+       ('.home-reference-search .home-search-modes a',2,'text'),
       ]
       if width<=820:
        targets.append(('.consumer-header .consumer-menu > svg',1,'icon'))
@@ -91,6 +92,7 @@ async def main():
         return {
           formCount: document.querySelectorAll('.home-hero-search form.home-search').length,
           modeButtons: form ? [...form.querySelectorAll('.home-search-modes button')].map(button => button.getAttribute('aria-pressed')) : [],
+          marketplaceLinks: form ? [...form.querySelectorAll('.home-search-modes a')].map(link => link.getAttribute('href')) : [],
           title: Boolean(heading?.textContent?.trim()),
           photoLoaded: Boolean(photo?.complete && photo.naturalWidth > 0),
           splitModeRow: Boolean(modes && duration && Math.abs(modes.top - duration.top) <= 2 && modes.right <= duration.left + 1),
@@ -98,7 +100,8 @@ async def main():
         };
       }
      """)
-     assert hero['formCount']==1 and hero['modeButtons']==['true','false','false'], {'searchModes':hero}
+     assert hero['formCount']==1 and hero['modeButtons']==['true','false'], {'searchModes':hero}
+     assert hero['marketplaceLinks']==['/experiences','/discover/services'], {'marketplaceLinks':hero}
      assert hero['title'] and hero['photoLoaded'], {'homepageHero':hero}
      if width>=1024:
       assert hero['splitModeRow'], {'searchGroupsOverlap':hero}

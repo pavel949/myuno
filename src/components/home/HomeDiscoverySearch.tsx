@@ -1,5 +1,5 @@
 import { useId, useState, type FormEvent } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { ArrowRight, Users } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { usePropertyFilterOptions } from '@/hooks/usePropertyFilterOptions';
@@ -9,15 +9,13 @@ import { pickLang, type LangValues } from '@/lib/i18n/pickLang';
 import { bangkokTodayISO, civilDateKey } from '@/lib/hotelDates';
 import { DEFAULT_HOME_SALE_MAX_PRICE, normalizePropertySearchQuery, propertySaleBudgetLabel, readPropertySearchQuery } from '@/lib/propertySearchQuery';
 import { HomeSearchDateRange } from './HomeSearchDateRange';
-import { buildExperienceSearchParams } from './HomeExperienceSearch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
 
-type SearchMode = 'all' | 'rent' | 'activities' | 'buy';
+type SearchMode = 'all' | 'rent' | 'buy';
 const modeLabels: Record<SearchMode, LangValues> = {
   all: { ru: 'Все объекты', en: 'All homes', th: 'ที่พักทั้งหมด' },
   rent: { ru: 'Аренда', en: 'Rent', th: 'เช่า' },
-  activities: { ru: 'Впечатления и услуги', en: 'Experiences & services', th: 'ประสบการณ์และบริการ' },
   buy: { ru: 'Покупка', en: 'Buy', th: 'ซื้อ' },
 };
 const saleBudgetOptions = [5_000_000, DEFAULT_HOME_SALE_MAX_PRICE, 15_000_000, 40_000_000];
@@ -33,9 +31,7 @@ export function HomeDiscoverySearch({ rentalOnly = false, hideModeSwitch = false
   const { propertyTypes, isLoading: typesLoading } = usePropertyFilterOptions();
   const navigate = useNavigate();
   const [mode, setMode] = useState<SearchMode>(rentalOnly ? 'rent' : catalogue && !initial.hasIntent ? 'all' : initial.mode);
-  const modes: SearchMode[] = catalogue ? ['all', 'rent', 'buy'] : allowActivities ? ['rent', 'activities', 'buy'] : ['rent', 'buy'];
-  const [activityMarket, setActivityMarket] = useState<'experiences' | 'services'>('experiences');
-  const [activityQuery, setActivityQuery] = useState('');
+  const modes: SearchMode[] = catalogue ? ['all', 'rent', 'buy'] : ['rent', 'buy'];
   const [district, setDistrict] = useState(initial.search.locations.join(','));
   const [propertyType, setPropertyType] = useState(initial.search.propertyTypes.join(','));
   const [checkIn, setCheckIn] = useState(initial.search.checkIn ? civilDateKey(initial.search.checkIn) : '');
@@ -67,12 +63,6 @@ export function HomeDiscoverySearch({ rentalOnly = false, hideModeSwitch = false
 
   function search(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (mode === 'activities') {
-      const params = buildExperienceSearchParams({ q: activityQuery, type: 'all', maxPrice: '' });
-      const target = activityMarket === 'services' ? APP_ROUTES.GOAL_SERVICES : APP_ROUTES.EXPERIENCES;
-      navigate(params.size ? target + '?' + params : target);
-      return;
-    }
     if (mode === 'rent' && ((!!checkIn !== !!checkOut) || (checkIn && (checkIn < today || checkOut <= checkIn)))) {
       setDateError(true);
       return;
@@ -109,39 +99,21 @@ export function HomeDiscoverySearch({ rentalOnly = false, hideModeSwitch = false
   }
 
   return (
-    <form className={`home-search${showGuestsInline ? ' home-search--homepage' : ''}${catalogue ? ' home-search--catalogue' : ''}`} data-home-discovery-mode={allowActivities ? mode : undefined} onSubmit={search} aria-label={allowActivities ? t({ ru: 'Поиск на myUNO', en: 'Search myUNO', th: 'ค้นหาใน myUNO' }) : t({ ru: 'Поиск жилья', en: 'Find a home', th: 'ค้นหาที่พัก' })}>
+    <form className={`home-search${showGuestsInline ? ' home-search--homepage' : ''}${catalogue ? ' home-search--catalogue' : ''}`} data-home-filters-expanded={showRefinements} data-home-discovery-mode={allowActivities ? mode : undefined} onSubmit={search} aria-label={allowActivities ? t({ ru: 'Поиск на myUNO', en: 'Search myUNO', th: 'ค้นหาใน myUNO' }) : t({ ru: 'Поиск жилья', en: 'Find a home', th: 'ค้นหาที่พัก' })}>
       {catalogue && <label className="home-search-query col-span-full" htmlFor={queryId}><span className="home-field-label">{t({ ru: 'Название объекта', en: 'Property name', th: 'ชื่อที่พัก' })}</span><input id={queryId} type="search" value={query} maxLength={120} onChange={event => setQuery(event.target.value)} placeholder={t({ ru: 'Необязательно', en: 'Optional', th: 'ไม่บังคับ' })} /></label>}
-      {!rentalOnly && !hideModeSwitch && <div className="home-search-modes" data-activities={allowActivities || undefined} role="group" aria-label={allowActivities ? t({ ru: 'Раздел поиска', en: 'What to search', th: 'ประเภทการค้นหา' }) : t({ ru: 'Аренда или покупка', en: 'Rent or buy', th: 'เช่าหรือซื้อ' })}>
+      {!rentalOnly && !hideModeSwitch && <div className="home-search-modes" data-marketplaces={allowActivities || undefined} role="group" aria-label={allowActivities ? t({ ru: 'Маркетплейсы myUNO', en: 'myUNO marketplaces', th: 'มาร์เก็ตเพลส myUNO' }) : t({ ru: 'Аренда или покупка', en: 'Rent or buy', th: 'เช่าหรือซื้อ' })}>
         {modes.map(value => (
           <button key={value} type="button" aria-pressed={mode === value} onClick={() => setMode(value)}>
             {t(modeLabels[value])}
           </button>
         ))}
+        {allowActivities && (
+          <>
+            <Link className="ds-focus" to={APP_ROUTES.EXPERIENCES}>{t({ ru: 'Впечатления', en: 'Experiences', th: 'ประสบการณ์' })}</Link>
+            <Link className="ds-focus" to={APP_ROUTES.GOAL_SERVICES}>{t({ ru: 'Услуги', en: 'Services', th: 'บริการ' })}</Link>
+          </>
+        )}
       </div>}
-      {mode === 'activities' ? (
-        <>
-          <div className="home-search-type">
-            <span className="home-field-label">{t({ ru: 'Каталог', en: 'Browse', th: 'เลือกดู' })}</span>
-            <Select value={activityMarket} onValueChange={value => setActivityMarket(value === 'services' ? 'services' : 'experiences')}>
-              <SelectTrigger className="home-search-select" aria-label={t({ ru: 'Выберите каталог', en: 'Choose a catalogue', th: 'เลือกแคตตาล็อก' })}><SelectValue /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="experiences">{t({ ru: 'Впечатления', en: 'Experiences', th: 'ประสบการณ์' })}</SelectItem>
-                <SelectItem value="services">{t({ ru: 'Услуги', en: 'Services', th: 'บริการ' })}</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          <label className="home-search-query" htmlFor={queryId}>
-            <span className="home-field-label">{t({ ru: 'Что ищете?', en: 'What are you looking for?', th: 'คุณกำลังมองหาอะไร?' })}</span>
-            <input id={queryId} className="ds-input" type="search" value={activityQuery} maxLength={120} onChange={event => setActivityQuery(event.target.value)} placeholder={t({ ru: 'Необязательно', en: 'Optional', th: 'ไม่บังคับ' })} />
-          </label>
-          <button type="submit" data-chat-occlusion-target className="home-search-submit">
-            {activityMarket === 'services'
-              ? t({ ru: 'Найти услуги', en: 'Find services', th: 'ค้นหาบริการ' })
-              : t({ ru: 'Найти впечатления', en: 'Find experiences', th: 'ค้นหาประสบการณ์' })}
-            <ArrowRight size={18} aria-hidden="true" />
-          </button>
-        </>
-      ) : <>
       {mode === 'rent' && (
         <div className="home-search-duration col-span-full flex flex-nowrap gap-1" role="group" aria-label={t({ ru: 'Срок аренды', en: 'Rental duration', th: 'ระยะเวลาเช่า' })}>
           {rentalDurations.map(value => <button className="min-h-11 border px-3 text-sm aria-pressed:bg-primary aria-pressed:text-primary-foreground" key={value} type="button" aria-pressed={tenancy === value} onClick={() => setTenancy(value)}>{value === 'short' ? t({ ru: 'Посуточно', en: 'Nightly', th: 'รายวัน' }) : value === 'medium' ? t({ ru: 'Помесячно', en: 'Monthly', th: 'รายเดือน' }) : t({ ru: 'На год', en: 'Yearly', th: 'รายปี' })}</button>)}
@@ -228,9 +200,9 @@ export function HomeDiscoverySearch({ rentalOnly = false, hideModeSwitch = false
       {allowActivities && refinements}
       <button type="submit" data-chat-occlusion-target className="home-search-submit">
         {allowActivities && mode === 'rent'
-          ? t({ ru: 'Найти жильё в аренду', en: 'Search stays', th: 'ค้นหาที่พักให้เช่า' })
+          ? t({ ru: 'Подобрать жильё', en: 'Search stays', th: 'ค้นหาที่พักให้เช่า' })
           : allowActivities && mode === 'buy'
-            ? t({ ru: 'Посмотреть жильё', en: 'See homes', th: 'ดูบ้านสำหรับขาย' })
+            ? t({ ru: 'Найти жильё для покупки', en: 'See homes', th: 'ดูบ้านสำหรับขาย' })
             : t({ ru: 'Найти жильё', en: 'Find a home', th: 'ค้นหาที่พัก' })}
         <ArrowRight size={18} aria-hidden="true" />
       </button>
@@ -252,13 +224,12 @@ export function HomeDiscoverySearch({ rentalOnly = false, hideModeSwitch = false
           )}
         </div>
       </details>}
-      {mode === 'rent' && dateError && <p role="alert" className="col-span-full text-sm text-destructive">{t({ ru: 'Выберите даты заезда и выезда. Выезд должен быть позже заезда.', en: 'Choose check-in and check-out dates. Check-out must be after check-in.', th: 'เลือกวันเช็กอินและเช็กเอาต์ โดยวันเช็กเอาต์ต้องอยู่หลังวันเช็กอิน' })}</p>}
+      {mode === 'rent' && dateError && <p role="alert" className="col-span-full text-sm text-destructive">{t({ ru: 'Выберите даты заезда и выезда. Выберите день выезда после дня заезда.', en: 'Choose check-in and check-out dates. Check-out must be after check-in.', th: 'เลือกวันเช็กอินและเช็กเอาต์ โดยวันเช็กเอาต์ต้องอยู่หลังวันเช็กอิน' })}</p>}
       {mode === 'rent' && guestError && (
         <p role="alert" className="col-span-full text-body-sm text-destructive">
-          {t({ ru: 'Укажите от 1 до 50 гостей или оставьте поле пустым.', en: 'Enter 1 to 50 guests or leave the field blank.', th: 'ระบุผู้เข้าพัก 1 ถึง 50 คน หรือเว้นว่างไว้' })}
+          {t({ ru: 'Введите число от 1 до 50. Можно оставить поле пустым.', en: 'Enter 1 to 50 guests or leave the field blank.', th: 'ระบุผู้เข้าพัก 1 ถึง 50 คน หรือเว้นว่างไว้' })}
         </p>
       )}
-      </>}
     </form>
   );
 }

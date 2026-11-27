@@ -23,6 +23,8 @@ vi.mock('@/components/home/HomeDiscoveryPreview', () => ({
 }));
 vi.mock('@/hooks/useProperties', () => ({ useProperties: () => ({ data: [], isLoading: false, isError: false }) }));
 
+vi.mock('@/hooks/usePropertyProjects', () => ({ usePublicPropertyProjects: () => ({ data: [], isLoading: false, isError: false }) }));
+
 // Navigation composition is covered by Landing.anonymous-home.test.tsx.
 vi.mock('@/components/nav/BottomBar', () => ({ BottomBar: () => null }));
 

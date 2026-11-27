@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { pickLang, type LangValues } from '@/lib/i18n/pickLang';
+import { APP_ROUTES as R, partnerOfferHref } from '@/lib/config/routes';
 import '@/styles/marketplace-unity.css';
 import coast from '@/assets/hero-phuket-coast-editorial.webp';
 import housing from '@/assets/solutions/property-tour.webp';
@@ -30,7 +31,32 @@ const entries: Record<MarketplaceKind, { image: string; title: LangValues; lead:
 
 type EntryAction = { label: LangValues; href: string };
 
-export function MarketplaceEntry({ kind, headingId, actions = [] }: {
+const offerProperty: EntryAction = {
+  href: R.OWNER_ONBOARDING,
+  label: { ru: 'Разместить жильё', en: 'List a property', th: 'ลงประกาศที่พัก' },
+};
+
+const marketplaceActions: Partial<Record<MarketplaceKind, EntryAction[]>> = {
+  rent: [
+    { href: '#rental-search', label: { ru: 'Подобрать жильё', en: 'Find a stay', th: 'ค้นหาที่พัก' } },
+    offerProperty,
+  ],
+  buy: [
+    { href: `${R.PROPERTY_SEARCH}?mode=buy`, label: { ru: 'Поиск и фильтры', en: 'Search and filter', th: 'ค้นหาและกรอง' } },
+    offerProperty,
+  ],
+  experiences: [
+    { href: '#marketplace-controls', label: { ru: 'Выбрать впечатление', en: 'Find experiences', th: 'ค้นหาประสบการณ์' } },
+    { href: partnerOfferHref('experiences'), label: { ru: 'Предложить впечатление', en: 'Offer an experience', th: 'เสนอกิจกรรม' } },
+  ],
+  services: [
+    { href: '#marketplace-controls', label: { ru: 'Найти услугу', en: 'Find a service', th: 'ค้นหาบริการ' } },
+    { href: partnerOfferHref('services'), label: { ru: 'Предложить услугу', en: 'Offer a service', th: 'เสนอบริการ' } },
+  ],
+};
+
+
+export function MarketplaceEntry({ kind, headingId, actions = marketplaceActions[kind] ?? [] }: {
   kind: MarketplaceKind;
   headingId?: string;
   actions?: EntryAction[];
