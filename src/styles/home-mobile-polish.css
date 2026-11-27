@@ -385,8 +385,6 @@
     font-size: var(--home-ui-caption-small);
     line-height: 1.3;
   }
-    display: none;
-  }
 
   /* District guides: clean editorial navigation instead of four identical fake photos. */
   .cinematic-home.home-refined .home-locations .home-rail-viewport {
