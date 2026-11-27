@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import { ArrowRight, Compass, ImageOff, MapPin } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { pickLang, type LangValues } from '@/lib/i18n/pickLang';
+import { useEvents } from '@/hooks/useEvents';
 import { useExperiences } from '@/hooks/useExperiences';
 import { complexMediaUrl } from '@/lib/real-estate/complexMedia';
 import { APP_ROUTES as R } from '@/lib/config/routes';
@@ -98,6 +99,47 @@ export function HomeLocationGallery() {
   </HomeGallery>;
 }
 
+function HomeWeekendEvents() {
+  const { language } = useLanguage();
+  const t = (value: LangValues) => pickLang(language, value);
+  const bangkokToday = new Intl.DateTimeFormat('sv-SE', { timeZone: 'Asia/Bangkok' }).format(new Date());
+  const start = new Date(`${bangkokToday}T00:00:00Z`);
+  const day = start.getUTCDay();
+  if (day !== 0) start.setUTCDate(start.getUTCDate() + 6 - day);
+  const end = new Date(start);
+  end.setUTCDate(end.getUTCDate() + (day === 0 ? 1 : 2));
+  const { events, isLoading } = useEvents({
+    fromDate: start.toISOString().slice(0, 10),
+    beforeDate: end.toISOString().slice(0, 10),
+    limit: 6,
+  });
+  if (isLoading || !events.length) return null;
+
+  const dateFormat = new Intl.DateTimeFormat(language === 'ru' ? 'ru-RU' : language === 'th' ? 'th-TH' : 'en-GB', {
+    day: 'numeric', month: 'short', timeZone: 'Asia/Bangkok',
+  });
+  return (
+    <HomeGallery id="home-weekend-events-title" className="home-catalog home-experiences"
+      title={t({ ru: 'На этих выходных', en: 'This weekend', th: 'สุดสัปดาห์นี้' })}
+      href={R.EVENTS} linkLabel={t({ ru: 'Вся афиша', en: 'Event calendar', th: 'ปฏิทินกิจกรรม' })}>
+      {events.map(event => {
+        const title = (language === 'ru' ? event.title_ru : event.title_en) || event.title_en || event.title_ru;
+        const image = [event.cover_image, ...event.images].map(complexMediaUrl).find(Boolean);
+        return <article className="home-catalog-card" key={event.id}>
+          <Link to={R.EVENT_DETAIL(event.id)}>
+            {image && <CatalogPhoto image={image} alt={title} />}
+            <div className="home-catalog-copy">
+              <h3>{title}</h3>
+              {event.event_date && <p><time dateTime={event.event_date}>{dateFormat.format(new Date(event.event_date))}</time>{event.event_time && ` · ${event.event_time.slice(0, 5)}`}</p>}
+              {(language === 'ru' ? event.location_ru || event.location_name : event.location_name) && <p>{language === 'ru' ? event.location_ru || event.location_name : event.location_name}</p>}
+            </div>
+          </Link>
+        </article>;
+      })}
+    </HomeGallery>
+  );
+}
+
 export function HomeExperienceGallery() {
   const { language } = useLanguage();
   const [failedMedia, setFailedMedia] = useState<Set<string>>(() => new Set());
@@ -141,7 +183,7 @@ export function HomeExperienceGallery() {
         </Link>
       </article>
     ))}
-  </HomeGallery><nav className="home-container home-category-navigation" aria-label={title}><HomeDiscoveryPaths kind="experiences" /></nav></>;
+  </HomeGallery><nav className="home-container home-category-navigation" aria-label={title}><HomeDiscoveryPaths kind="experiences" /></nav><HomeWeekendEvents /></>;
 }
 
 export function HomeServiceGallery() {
