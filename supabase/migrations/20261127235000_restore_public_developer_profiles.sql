@@ -44,3 +44,7 @@ WHERE d.is_active = true
         AND p.public_listing_enabled = true
     )
   );
+
+-- Owner-rights views must never provide a write path around base-table RLS.
+REVOKE INSERT, UPDATE, DELETE, TRUNCATE, REFERENCES, TRIGGER
+  ON public.developers_public FROM PUBLIC, anon, authenticated;
