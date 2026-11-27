@@ -19,6 +19,8 @@ export interface LifeSituation {
   title_ru: string;
   description_en: string | null;
   description_ru: string | null;
+  title_th?: string | null;
+  description_th?: string | null;
   icon: string;
   color: string;
   priority: number;
@@ -74,12 +76,15 @@ export function lifeOSRoleToScope(role: LifeOSRole): 'guest' | 'resident' | 'own
 export function useLifeSituations() {
   return useQuery({
     queryKey: ['life-situations'],
-    queryFn: async () => {
+    queryFn: async ({ signal }) => {
       const { data, error } = await supabase
         .from('life_situations')
         .select('*')
         .eq('is_active', true)
-        .order('priority', { ascending: true });
+        .order('priority', { ascending: true, nullsFirst: false })
+        .order('code')
+        .order('id')
+        .abortSignal(signal);
 
       if (error) throw error;
       return data as LifeSituation[];
@@ -283,13 +288,16 @@ export function useLifeScenarios(situationId: string | undefined) {
   return useQuery({
     queryKey: ['life-scenarios', situationId],
     enabled: Boolean(situationId),
-    queryFn: async () => {
+    queryFn: async ({ signal }) => {
       const { data, error } = await supabase
         .from('life_scenarios')
         .select('id, life_situation_id, code, title_en, title_ru, description_en, description_ru, icon, priority')
         .eq('life_situation_id', situationId as string)
         .eq('is_active', true)
-        .order('priority', { ascending: true });
+        .order('priority', { ascending: true, nullsFirst: false })
+        .order('code')
+        .order('id')
+        .abortSignal(signal);
       if (error) throw error;
       return (data ?? []) as LifeScenario[];
     },
@@ -302,13 +310,16 @@ export function useLifeTasks(scenarioId: string | undefined) {
   return useQuery({
     queryKey: ['life-tasks', scenarioId],
     enabled: Boolean(scenarioId),
-    queryFn: async () => {
+    queryFn: async ({ signal }) => {
       const { data, error } = await supabase
         .from('life_tasks')
         .select('id, life_scenario_id, code, title_en, title_ru, task_type, priority')
         .eq('life_scenario_id', scenarioId as string)
         .eq('is_active', true)
-        .order('priority', { ascending: true });
+        .order('priority', { ascending: true, nullsFirst: false })
+        .order('code')
+        .order('id')
+        .abortSignal(signal);
       if (error) throw error;
       return (data ?? []) as LifeTask[];
     },

@@ -1,8 +1,12 @@
 # Life OS continuation PR — start here
 
-This is a documentation-only handoff for another AI. Existing Life OS code is already on main; do not treat it as new implementation in this PR.
+This branch began as a handoff. It now contains the read-only implementation and review evidence for the next Life OS phase.
 
 Read `docs/qa/LIFE_OS_AI_HANDOFF_2026_11_27.md` on main for the full source-backed instructions, then PROJECT.md and AGENTS.md.
+
+## Work in this PR
+
+The Structure tab and public scenario reads are updated. See the [read-only catalogue audit and mapping review](./LIFE_OS_TASK_MAPPING_REVIEW_2026_11_27.md) for data evidence, candidate categories and the remaining activation decision.
 
 ## Work checklist
 - [ ] Audit backend situation/scenario/task/catalogue relationships and public/admin parity.

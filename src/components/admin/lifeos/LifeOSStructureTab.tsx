@@ -1,180 +1,156 @@
-/**
- * LifeOS Structure Tab (read-only)
- * Shows the full taxonomy as the public site renders it:
- * situation -> scenarios -> steps, plus linked catalogue counts and gaps.
- * No writes: data changes require separate owner approval.
- */
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
+import { AlertTriangle, ChevronDown, ChevronRight, ExternalLink } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { pickLang, type LangValues } from '@/lib/i18n/pickLang';
+import { buildSituationListUrl } from '@/lib/navigation/situationUrls';
+import { buildLifeOSStructure, lifeOSLabel, type LifeOSNode, type LifeOSScenarioNode, type LifeOSTaskNode } from '@/lib/lifeOsStructure';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Skeleton } from '@/components/ui/skeleton';
-import { ChevronDown, ChevronRight, ExternalLink, AlertTriangle } from 'lucide-react';
 
-interface Sit { id: string; code: string; title_en: string; title_ru: string; is_active: boolean; priority: number }
-interface Scen { id: string; life_situation_id: string; code: string; title_en: string; title_ru: string; is_active: boolean; priority: number | null }
-interface Task { id: string; life_scenario_id: string; title_en: string; title_ru: string; is_active: boolean; priority: number | null }
+const nodeColumns = 'id, code, title_en, title_ru, is_active, priority';
+type StructureTable = 'life_situations' | 'life_scenarios' | 'life_tasks' | 'catalog_life_map';
 
-async function fetchAll<T>(table: 'life_scenarios' | 'life_tasks', cols: string): Promise<T[]> {
-  const out: T[] = [];
-  for (let from = 0; ; from += 1000) {
-    const { data, error } = await supabase.from(table).select(cols).range(from, from + 999);
+async function readAll<T>(table: StructureTable, columns: string, signal: AbortSignal) {
+  const rows: T[] = [];
+  const pageSize = 1000;
+  for (let start = 0; ; start += pageSize) {
+    const { data, error } = await supabase.from(table).select(columns)
+      .order('id').range(start, start + pageSize - 1).abortSignal(signal);
     if (error) throw error;
-    out.push(...((data ?? []) as unknown as T[]));
-    if (!data || data.length < 1000) return out;
+    const page = (data ?? []) as unknown as T[];
+    rows.push(...page);
+    if (page.length < pageSize) return rows;
   }
 }
 
-async function fetchMapCounts(): Promise<Record<string, number>> {
+async function readStructure(signal: AbortSignal) {
+  const [situations, scenarios, tasks, mappings] = await Promise.all([
+    readAll<LifeOSNode>('life_situations', nodeColumns + ', title_th', signal),
+    readAll<LifeOSScenarioNode>('life_scenarios', nodeColumns + ', life_situation_id', signal),
+    readAll<LifeOSTaskNode>('life_tasks', nodeColumns + ', life_scenario_id', signal),
+    readAll<{ life_situation_id: string | null }>('catalog_life_map', 'life_situation_id', signal),
+  ]);
   const counts: Record<string, number> = {};
-  for (let from = 0; ; from += 1000) {
-    const { data, error } = await supabase.from('catalog_life_map').select('life_situation_id').range(from, from + 999);
-    if (error) throw error;
-    for (const r of data ?? []) {
-      const id = (r as { life_situation_id: string | null }).life_situation_id;
-      if (id) counts[id] = (counts[id] ?? 0) + 1;
-    }
-    if (!data || data.length < 1000) return counts;
+  for (const { life_situation_id: id } of mappings) {
+    if (id) counts[id] = (counts[id] ?? 0) + 1;
   }
+  return buildLifeOSStructure(situations, scenarios, tasks, counts);
 }
 
 export function LifeOSStructureTab() {
+  const { user, isLoading } = useAuth();
   const { language } = useLanguage();
-  const ru = language === 'ru';
-  const [q, setQ] = useState('');
+  if (isLoading) return <Skeleton className="h-64 w-full" />;
+  return user?.id ? <LifeOSStructure key={user.id} actorId={user.id} /> : (
+    <p role="status" className="text-sm text-muted-foreground">
+      {pickLang(language, { ru: 'Войдите, чтобы открыть структуру.', en: 'Sign in to view the structure.', th: 'เข้าสู่ระบบเพื่อดูโครงสร้าง' })}
+    </p>
+  );
+}
+
+function LifeOSStructure({ actorId }: { actorId: string }) {
+  const { language } = useLanguage();
+  const t = (copy: LangValues) => pickLang(language, copy);
+  const [search, setSearch] = useState('');
   const [gapsOnly, setGapsOnly] = useState(false);
   const [open, setOpen] = useState<Record<string, boolean>>({});
-
+  const needle = search.trim().toLocaleLowerCase();
+  const title = (row: LifeOSNode) => lifeOSLabel(row, language) ?? row.code;
   const query = useQuery({
-    queryKey: ['admin-lifeos-structure'],
-    queryFn: async () => {
-      const [s, sc, t, m] = await Promise.all([
-        supabase.from('life_situations').select('id, code, title_en, title_ru, is_active, priority').order('priority'),
-        fetchAll<Scen>('life_scenarios', 'id, life_situation_id, code, title_en, title_ru, is_active, priority'),
-        fetchAll<Task>('life_tasks', 'id, life_scenario_id, title_en, title_ru, is_active, priority'),
-        fetchMapCounts(),
-      ]);
-      if (s.error) throw s.error;
-      return { sits: (s.data ?? []) as Sit[], scens: sc, tasks: t, maps: m };
-    },
+    queryKey: ['admin-lifeos-structure', actorId],
+    queryFn: ({ signal }) => readStructure(signal),
+    gcTime: 0,
   });
 
-  const rows = useMemo(() => {
-    if (!query.data) return [];
-    const { sits, scens, tasks, maps } = query.data;
-    return sits.map((s) => {
-      const sc = scens.filter((x) => x.life_situation_id === s.id).sort((a, b) => (a.priority ?? 0) - (b.priority ?? 0));
-      const withTasks = sc.map((x) => ({ ...x, tasks: tasks.filter((t) => t.life_scenario_id === x.id) }));
-      const services = maps[s.id] ?? 0;
-      const gaps: string[] = [];
-      if (s.is_active && sc.length === 0) gaps.push(ru ? 'нет сценариев' : 'no scenarios');
-      if (s.is_active && services === 0) gaps.push(ru ? 'нет сервисов' : 'no services');
-      if (withTasks.some((x) => x.is_active && x.tasks.length === 0)) gaps.push(ru ? 'сценарий без шагов' : 'scenario without steps');
-      return { s, scens: withTasks, services, gaps };
-    });
-  }, [query.data, ru]);
-
-  const filtered = rows.filter((r) => {
-    if (gapsOnly && r.gaps.length === 0) return false;
-    const needle = q.trim().toLowerCase();
-    if (!needle) return true;
-    return [r.s.code, r.s.title_en, r.s.title_ru, ...r.scens.map((x) => x.title_en + ' ' + x.title_ru)]
-      .join(' ').toLowerCase().includes(needle);
-  });
-
-  const totals = {
-    sits: rows.filter((r) => r.s.is_active).length,
-    scens: rows.reduce((n, r) => n + r.scens.length, 0),
-    tasks: rows.reduce((n, r) => n + r.scens.reduce((m, x) => m + x.tasks.length, 0), 0),
-    gaps: rows.filter((r) => r.gaps.length > 0).length,
-  };
-
-  if (query.isLoading) return <Skeleton className="h-64 w-full" />;
+  if (query.isPending) return <Skeleton className="h-64 w-full" />;
   if (query.isError) {
-    return <p className="text-sm text-destructive">{ru ? 'Не удалось загрузить структуру. Повторите позже.' : 'Could not load the structure. Try again later.'}</p>;
+    return <div role="alert" className="space-y-2">
+      <p className="text-sm text-destructive">{t({ ru: 'Не удалось загрузить структуру.', en: 'Could not load the structure.', th: 'โหลดโครงสร้างไม่สำเร็จ' })}</p>
+      <Button variant="outline" onClick={() => void query.refetch()}>{t({ ru: 'Попробовать ещё раз', en: 'Try again', th: 'ลองอีกครั้ง' })}</Button>
+    </div>;
   }
 
-  return (
-    <div className="space-y-4">
-      <p className="text-sm text-muted-foreground">
-        {ru
-          ? 'Так структура отображается на сайте: ситуация → сценарии → шаги → сервисы. Только просмотр.'
-          : 'How the site shows it: situation → scenarios → steps → services. Read-only.'}
-      </p>
-      <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-        {[
-          [ru ? 'Активные ситуации' : 'Active situations', totals.sits],
-          [ru ? 'Сценарии' : 'Scenarios', totals.scens],
-          [ru ? 'Шаги' : 'Steps', totals.tasks],
-          [ru ? 'Ситуации с пробелами' : 'Situations with gaps', totals.gaps],
-        ].map(([l, v]) => (
-          <Card key={l as string}><CardContent className="p-3">
-            <div className="text-xs text-muted-foreground">{l}</div>
-            <div className="font-mono text-xl">{v}</div>
-          </CardContent></Card>
-        ))}
-      </div>
-      <div className="flex flex-wrap items-center gap-4">
-        <Input className="max-w-xs" value={q} onChange={(e) => setQ(e.target.value)} placeholder={ru ? 'Поиск' : 'Search'} aria-label={ru ? 'Поиск' : 'Search'} />
-        <div className="flex items-center gap-2">
-          <Switch id="gaps-only" checked={gapsOnly} onCheckedChange={setGapsOnly} />
-          <Label htmlFor="gaps-only">{ru ? 'Только с пробелами' : 'Gaps only'}</Label>
-        </div>
-      </div>
-      <div className="space-y-2">
-        {filtered.map(({ s, scens, services, gaps }) => {
-          const isOpen = open[s.id];
-          return (
-            <Card key={s.id}>
-              <CardContent className="p-3">
-                <button type="button" className="flex min-h-11 w-full items-center gap-2 text-left"
-                  onClick={() => setOpen((o) => ({ ...o, [s.id]: !o[s.id] }))} aria-expanded={isOpen}>
-                  {isOpen ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
-                  <span className="font-medium">{ru ? s.title_ru : s.title_en}</span>
-                  <span className="font-mono text-xs text-muted-foreground">{s.code}</span>
-                  {!s.is_active && <Badge variant="outline">{ru ? 'скрыта' : 'hidden'}</Badge>}
-                  <span className="ml-auto flex flex-wrap gap-1">
-                    <Badge variant="secondary">{scens.length} {ru ? 'сцен.' : 'scen.'}</Badge>
-                    <Badge variant="secondary">{services} {ru ? 'серв.' : 'serv.'}</Badge>
-                    {gaps.map((g) => (
-                      <Badge key={g} variant="destructive" className="gap-1"><AlertTriangle className="h-3 w-3" />{g}</Badge>
-                    ))}
-                  </span>
-                </button>
-                {isOpen && (
-                  <div className="mt-2 space-y-2 border-l border-border pl-4">
-                    <Link to={`/discover/${s.code}`} target="_blank" className="inline-flex items-center gap-1 text-xs text-primary underline">
-                      {ru ? 'Открыть на сайте' : 'Open on site'} <ExternalLink className="h-3 w-3" />
-                    </Link>
-                    {scens.length === 0 && <p className="text-sm text-muted-foreground">{ru ? 'Сценариев нет — на сайте показывается только заявка команде.' : 'No scenarios — site shows only the team request.'}</p>}
-                    {scens.map((x) => (
-                      <div key={x.id}>
-                        <div className="text-sm font-medium">
-                          {ru ? x.title_ru : x.title_en}
-                          {!x.is_active && <Badge variant="outline" className="ml-2">{ru ? 'скрыт' : 'hidden'}</Badge>}
-                        </div>
-                        <ul className="ml-4 list-disc text-sm text-muted-foreground">
-                          {x.tasks.length === 0 && <li>{ru ? 'Шагов нет' : 'No steps'}</li>}
-                          {x.tasks.map((t) => <li key={t.id}>{ru ? t.title_ru : t.title_en}</li>)}
-                        </ul>
-                      </div>
-                    ))}
-                    <p className="text-xs text-muted-foreground">
-                      {ru ? 'Шаги пока не привязаны к сервисам: ведут на заявку команде.' : 'Steps are not linked to services yet: they lead to a team request.'}
-                    </p>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          );
-        })}
+  const { rows, totals } = query.data;
+  const filtered = rows.filter(row => (!gapsOnly || row.gaps.length > 0) && row.searchText.includes(needle));
+  const stats = [
+    [t({ ru: 'Активные ситуации', en: 'Active situations', th: 'สถานการณ์ที่เปิดใช้งาน' }), totals.situations],
+    [t({ ru: 'Сценарии на сайте', en: 'Public scenarios', th: 'แผนบนเว็บไซต์' }), totals.scenarios],
+    [t({ ru: 'Шаги на сайте', en: 'Public steps', th: 'ขั้นตอนบนเว็บไซต์' }), totals.tasks],
+    [t({ ru: 'Ситуации с пробелами', en: 'Situations with gaps', th: 'สถานการณ์ที่ยังไม่ครบ' }), totals.gaps],
+  ] as const;
+  const hidden = t({ ru: 'Скрыто на сайте', en: 'Hidden on site', th: 'ซ่อนบนเว็บไซต์' });
+  const gapLabels = {
+    scenarios: t({ ru: 'Нет активных сценариев', en: 'No active scenarios', th: 'ไม่มีแผนที่เปิดใช้งาน' }),
+    tasks: t({ ru: 'Сценарий без активных шагов', en: 'Scenario without active steps', th: 'แผนไม่มีขั้นตอนที่เปิดใช้งาน' }),
+    mappings: t({ ru: 'Нет связей с каталогом', en: 'No catalogue links', th: 'ไม่มีการเชื่อมโยงกับแค็ตตาล็อก' }),
+  };
+  const searchLabel = t({ ru: 'Поиск по ситуациям, сценариям и шагам', en: 'Search situations, scenarios and steps', th: 'ค้นหาสถานการณ์ แผน และขั้นตอน' });
+
+  return <div className="space-y-4">
+    <p className="text-sm text-muted-foreground">{t({
+      ru: 'Связи с каталогом относятся ко всей ситуации. Они не подтверждают наличие предложений для конкретного шага.',
+      en: 'Catalogue links are for the whole situation. They do not confirm available offers for an individual step.',
+      th: 'การเชื่อมโยงแค็ตตาล็อกครอบคลุมทั้งสถานการณ์ จึงไม่ยืนยันว่ามีข้อเสนอสำหรับแต่ละขั้นตอน',
+    })}</p>
+    <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+      {stats.map(([label, count]) => <Card key={label}><CardContent className="p-3">
+        <div className="text-xs text-muted-foreground">{label}</div>
+        <div className="font-mono text-xl">{count}</div>
+      </CardContent></Card>)}
+    </div>
+    <div className="flex flex-wrap items-center gap-4">
+      <Input value={search} onChange={event => setSearch(event.target.value)} placeholder={searchLabel} aria-label={searchLabel} />
+      <div className="flex items-center gap-2">
+        <Switch id="gaps-only" checked={gapsOnly} onCheckedChange={setGapsOnly} />
+        <Label htmlFor="gaps-only">{t({ ru: 'Только с пробелами', en: 'Gaps only', th: 'แสดงเฉพาะที่ยังไม่ครบ' })}</Label>
       </div>
     </div>
-  );
+    {!filtered.length && <p role="status" className="text-sm text-muted-foreground">
+      {rows.length === 0
+        ? t({ ru: 'В структуре пока нет ситуаций.', en: 'There are no situations yet.', th: 'ยังไม่มีสถานการณ์ในโครงสร้าง' })
+        : t({ ru: 'По этим условиям ничего не найдено.', en: 'Nothing matched these filters.', th: 'ไม่พบผลลัพธ์ตามตัวกรอง' })}
+    </p>}
+    <div className="space-y-2">
+      {filtered.map(({ situation, publicActive, scenarios, activeScenarios, mappingCount, gaps }) => {
+        const isOpen = open[situation.id] ?? Boolean(needle);
+        return <Card key={situation.id}><CardContent className="p-3">
+          <button type="button" className="ds-focus flex min-h-11 w-full flex-wrap items-center gap-2 text-left"
+            onClick={() => setOpen(previous => ({ ...previous, [situation.id]: !isOpen }))} aria-expanded={isOpen}>
+            {isOpen ? <ChevronDown aria-hidden="true" className="size-4 shrink-0" /> : <ChevronRight aria-hidden="true" className="size-4 shrink-0" />}
+            <span className="min-w-0 break-words font-medium">{title(situation)}</span>
+            {!publicActive && <Badge variant="outline">{hidden}</Badge>}
+            <span className="flex flex-wrap gap-1">
+              <Badge variant="secondary">{activeScenarios.length} {t({ ru: 'сцен. на сайте', en: 'public scenarios', th: 'แผนบนเว็บไซต์' })}</Badge>
+              <Badge variant="secondary">{mappingCount} {t({ ru: 'зап. связей', en: 'catalogue link rows', th: 'รายการเชื่อมโยง' })}</Badge>
+              {gaps.map(gap => <Badge key={gap} variant="destructive" className="gap-1"><AlertTriangle aria-hidden="true" className="size-3" />{gapLabels[gap]}</Badge>)}
+            </span>
+          </button>
+          {isOpen && <div className="mt-2 space-y-2 border-l border-border pl-4">
+            {publicActive && <Link to={buildSituationListUrl(situation.code)} className="ds-focus inline-flex min-h-11 items-center gap-1 text-sm text-primary underline">
+              {t({ ru: 'Открыть на сайте', en: 'Open on site', th: 'เปิดบนเว็บไซต์' })} <ExternalLink aria-hidden="true" className="size-3" />
+            </Link>}
+            {!scenarios.length && <p className="text-sm text-muted-foreground">{t({ ru: 'Сценариев пока нет.', en: 'There are no scenarios yet.', th: 'ยังไม่มีแผน' })}</p>}
+            {scenarios.map(scenario => <div key={scenario.id}>
+              <div className="flex flex-wrap items-center gap-2 text-sm font-medium">
+                {title(scenario)}
+                {!scenario.publicActive && <Badge variant="outline">{hidden}</Badge>}
+              </div>
+              {scenario.tasks.length > 0 ? <ul className="ml-4 list-disc space-y-1 text-sm text-muted-foreground">
+                {scenario.tasks.map(task => <li key={task.id}>{title(task)} {!task.publicActive && <Badge variant="outline">{hidden}</Badge>}</li>)}
+              </ul> : <p className="text-sm text-muted-foreground">{t({ ru: 'Шагов пока нет.', en: 'There are no steps yet.', th: 'ยังไม่มีขั้นตอน' })}</p>}
+            </div>)}
+          </div>}
+        </CardContent></Card>;
+      })}
+    </div>
+  </div>;
 }
