@@ -184,6 +184,8 @@ Security rules proven by recent audits:
 - Edge handlers minimise PII in logs, validate redirect origins for payment URLs and authorise caller/object before any service-role client.
 - Seeded test accounts never hold production admin roles with known credentials.
 
+General consultation clients must not replay an uncertain write until the deployed writer has a verified idempotent receipt contract. Retain the pending intent and offer human reconciliation; definite validation rejection permits correction. Dedicated receipt-backed adapters opt in explicitly. Source: [intake containment](docs/qa/CONNECTED_INTAKE_CONTRACT_20261125.md).
+
 ## 15. Definition of Done
 Build/UI success is insufficient. Done requires canonical-domain correctness, server auth, explicit states, mobile/RU/EN, tests, auditability, no duplicate truth, rollback evidence and safe operational acceptance where relevant.
 
