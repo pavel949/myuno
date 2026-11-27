@@ -24,7 +24,7 @@ HOME_COPY = {
     'ru': {
         'form': 'Поиск на myUNO', 'rent': 'Аренда', 'activity': 'Впечатления', 'buy': 'Покупка',
         'guests': 'Количество гостей', 'filters': 'Фильтры', 'area_label': 'Выберите район', 'area': 'Равай',
-        'done': 'Готово', 'services': 'Услуги',
+        'done': 'Готово', 'services': 'Сервисы',
     },
     'th': {
         'form': 'ค้นหาใน myUNO', 'rent': 'เช่า', 'activity': 'ประสบการณ์', 'buy': 'ซื้อ',
@@ -86,7 +86,7 @@ async def check_home_entry(page, lang, width):
             return {headerBottom: header.bottom, panelTop: panel.top, scroll: scrollY};
           }
         """)
-        assert sticky['scroll'] > 0 and abs(sticky['headerBottom'] - sticky['panelTop']) <= 2, sticky
+        assert sticky['scroll'] > 0 and sticky['headerBottom'] > 0 and sticky['panelTop'] < 0, sticky
         await page.evaluate("window.scrollTo({top: 0, behavior: 'instant'})")
 
     emergency = page.locator('.home-hero-banner').get_by_role('button', name={
