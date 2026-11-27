@@ -385,8 +385,6 @@
     font-size: var(--home-ui-caption-small);
     line-height: 1.3;
   }
-  /* Category tiles already link to Flowers / Yachts. Remove redundant mobile links. */
-  .cinematic-home.home-refined .home-life-group:has(.home-service-category-card) .home-category-navigation {
     display: none;
   }
 
@@ -472,14 +470,14 @@
 .cinematic-home.home-refined .home-services .home-service-category-card {
   border-radius: var(--radius);
 }
-.cinematic-home.home-refined .home-experiences .home-catalog-photo {
+:is(.cinematic-home.home-refined .home-experiences .home-catalog-photo, .cinematic-home.home-refined .home-gallery .home-listing-photo, .cinematic-home.home-refined .home-gallery .premium-project-photo) {
   aspect-ratio: 3 / 2;
   height: auto;
   border-radius: var(--radius);
   overflow: hidden;
   background: hsl(var(--muted));
 }
-.cinematic-home.home-refined .home-experiences .home-catalog-photo img {
+:is(.cinematic-home.home-refined .home-experiences .home-catalog-photo, .cinematic-home.home-refined .home-gallery .home-listing-photo, .cinematic-home.home-refined .home-gallery .premium-project-photo) img {
   display: block;
   width: 100%;
   height: 100%;
