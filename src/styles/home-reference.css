@@ -453,7 +453,7 @@
 .cinematic-home.home-refined .home-hero-search .home-search-modes :is(button, a),
 .cinematic-home.home-refined .home-hero-search .home-search-duration button {
   display: inline-flex; align-items: center; justify-content: center; flex: 0 0 auto;
-  min-block-size: var(--touch-target); padding-inline: 1rem; margin: 0;
+  min-block-size: var(--touch-target); padding-inline: var(--section-title-gap); margin: 0;
   border: 1px solid hsl(var(--border)); border-radius: 0; font-size: var(--home-ui-body-small);
   background: hsl(var(--card)); color: hsl(var(--foreground));
 }
