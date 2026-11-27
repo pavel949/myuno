@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/contexts/AuthContext';
 import { untypedTables } from '@/lib/untypedTables';
+import { useAdminCheck } from '@/hooks/useAdmin';
 
 export interface Dispute {
   id: string;
@@ -75,18 +76,26 @@ export function useCreateDispute() {
   });
 }
 
-export function useAdminDisputes() {
-  return useQuery({
-    queryKey: ['admin-disputes'],
+export function useAdminDisputes(disputeId?: string) {
+  const { user } = useAuth();
+  const { isAdmin, isLoading: checkingAccess } = useAdminCheck();
+  const enabled = !!user && isAdmin && !checkingAccess;
+  const query = useQuery({
+    queryKey: ['admin-disputes', user?.id, disputeId],
+    enabled,
     queryFn: async () => {
-      const { data, error } = await untypedTables.disputes()
+      let request = untypedTables.disputes()
         .select('*')
         .order('created_at', { ascending: false })
         .limit(200);
+      if (disputeId) request = request.eq('id', disputeId);
+      const { data, error } = await request;
       if (error) throw error;
-      return (data || []) as Dispute[];
+      if (!data) throw new Error('Dispute response unavailable');
+      return data as Dispute[];
     },
   });
+  return { ...query, data: enabled && !query.isError ? query.data : undefined };
 }
 
 export function useResolveDispute() {
@@ -117,6 +126,8 @@ export function useResolveDispute() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-disputes'] });
+      queryClient.invalidateQueries({ queryKey: ['admin-dashboard'] });
+      queryClient.invalidateQueries({ queryKey: ['admin-dashboard-stats'] });
     },
   });
 }

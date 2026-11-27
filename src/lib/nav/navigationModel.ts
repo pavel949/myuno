@@ -447,7 +447,7 @@ const ADMIN_SIDEBAR_SOURCE: SidebarNavGroup[] = [
     labelEn: 'Customer requests', labelRu: 'Обращения клиентов',
     items: [
       { path: '/admin/consultations', labelEn: 'Consultations', labelRu: 'Консультации', icon: MessageCircle },
-      { path: '/admin/tickets', labelEn: 'Support tickets', labelRu: 'Тикеты', icon: MessageSquare },
+      { path: '/admin/tickets', labelEn: 'Support tickets', labelRu: 'Тикеты', labelTh: 'คำร้องฝ่ายสนับสนุน', icon: MessageSquare },
       { path: '/admin/disputes', labelEn: 'Disputes', labelRu: 'Споры', icon: AlertTriangle },
     ],
   },
@@ -517,7 +517,7 @@ const ADMIN_SIDEBAR_SOURCE: SidebarNavGroup[] = [
   {
     labelEn: 'Growth & analytics', labelRu: 'Рост и аналитика',
     items: [
-      { path: '/admin/analytics', labelEn: 'Analytics', labelRu: 'Аналитика', icon: BarChart3 },
+      { path: '/admin/analytics', labelEn: 'Analytics', labelRu: 'Аналитика', labelTh: 'การวิเคราะห์', icon: BarChart3 },
       { path: '/admin/lifecycle-messaging', labelEn: 'Lifecycle messaging', labelRu: 'Сообщения по этапам', icon: Radio },
     ],
   },

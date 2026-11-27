@@ -1,10 +1,11 @@
+import { csvCell } from '@/lib/export/csvSafe';
 import React, { useState } from 'react';
+import { useMCCNavigation } from '@/pages/admin/marketing/MarketingDashboard';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { BarChart3, ArrowRight, Download, FlaskConical, Loader2 } from 'lucide-react';
+import { BarChart3, ArrowRight, Download, Globe, Loader2 } from 'lucide-react';
 import { useLandingRegistry } from '@/hooks/useLandingRegistry';
 import { useFunnelDiagnostics } from '@/hooks/useMCCControlTower';
 import { cn } from '@/lib/utils';
@@ -13,21 +14,43 @@ const STAGE_LABELS: Record<string, { en: string; ru: string }> = {
   landing_view: { en: 'Views', ru: 'Просмотры' },
   primary_cta_click: { en: 'CTA Clicks', ru: 'Клики CTA' },
   intent_started: { en: 'Intents', ru: 'Интенты' },
-  first_service_completed: { en: 'Completed', ru: 'Завершено' },
+  first_service_completed: { en: 'Completion events', ru: 'События завершения' },
   second_service_started: { en: '2nd Action', ru: '2-е действие' },
 };
 
 export function MCCFunnelDiagnosticsTab() {
   const { language } = useLanguage();
   const isRu = language === 'ru';
+  const { navContext, navigateTo } = useMCCNavigation();
+  const appliedContext = React.useRef<string | null>(null);
   const [selectedLanding, setSelectedLanding] = useState<string>('');
   const [days, setDays] = useState<number>(7);
 
-  const { data: landings } = useLandingRegistry();
-  const { data: diagnostics, isLoading } = useFunnelDiagnostics(selectedLanding, days);
+  const { data: landings, isLoading: landingsLoading, isError: landingsError, refetch: refetchLandings } = useLandingRegistry();
+  React.useEffect(() => {
+    const id = navContext.landingId;
+    if (id && appliedContext.current !== id && landings?.some(landing => landing.landing_id === id)) {
+      appliedContext.current = id;
+      setSelectedLanding(id);
+    }
+  }, [navContext.landingId, landings]);
+  const { data: diagnostics, isLoading, isError, refetch } = useFunnelDiagnostics(selectedLanding, days);
 
   const counts = diagnostics?.counts || [];
   const maxCount = Math.max(...counts.map(c => c.count), 1);
+  const exportCSV = () => {
+    if (!diagnostics || isError) return;
+    const rows = [['stage', 'recorded_events'], ...counts.map(step => [step.stage, String(step.count)])];
+    const csv = '\uFEFF' + rows.map(row => row.map(csvCell).join(',')).join('\r\n');
+    const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8;' }));
+    const anchor = document.createElement('a');
+    anchor.href = url;
+    anchor.download = `myuno-events-${selectedLanding.replace(/[^a-z0-9_-]/gi, '_')}-${days}d.csv`;
+    document.body.appendChild(anchor);
+    anchor.click();
+    anchor.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  };
 
   return (
     <div className="space-y-6">
@@ -39,12 +62,15 @@ export function MCCFunnelDiagnosticsTab() {
             {isRu ? 'Диагностика воронки' : 'Funnel Diagnostics'}
           </h2>
           <p className="text-sm text-muted-foreground">
-            {isRu ? 'Анализ потерь по шагам для каждого лендинга' : 'Step-by-step drop-off analysis per landing'}
+            {isRu ? 'Зарегистрированные события по этапам выбранного лендинга' : 'Recorded events by stage for the selected landing'}
           </p>
         </div>
-        <div className="flex gap-2">
-          <Select value={selectedLanding} onValueChange={setSelectedLanding}>
-            <SelectTrigger className="w-[180px]">
+        <div className="flex flex-wrap gap-2">
+          <Select value={selectedLanding} onValueChange={value => {
+            setSelectedLanding(value);
+            navigateTo('funnel-diag', { landingId: value });
+          }}>
+            <SelectTrigger disabled={landingsLoading || landingsError} className="min-h-11 w-[180px]">
               <SelectValue placeholder={isRu ? 'Выберите лендинг' : 'Select landing'} />
             </SelectTrigger>
             <SelectContent>
@@ -56,7 +82,7 @@ export function MCCFunnelDiagnosticsTab() {
             </SelectContent>
           </Select>
           <Select value={String(days)} onValueChange={(v) => setDays(Number(v))}>
-            <SelectTrigger className="w-[100px]">
+            <SelectTrigger className="min-h-11 w-[100px]">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -69,6 +95,12 @@ export function MCCFunnelDiagnosticsTab() {
         </div>
       </div>
 
+      {landingsError && <div role="alert" className="border border-warning p-4">
+        {isRu ? 'Не удалось загрузить лендинги.' : 'Could not load landings.'}
+        <Button variant="outline" onClick={() => void refetchLandings()}>{isRu ? 'Повторить' : 'Retry'}</Button>
+      </div>}
+      {landingsLoading && <p role="status">{isRu ? 'Загрузка лендингов…' : 'Loading landings…'}</p>}
+      {!landingsLoading && !landingsError && landings?.length === 0 && <p role="status">{isRu ? 'Нет лендингов для анализа.' : 'No landings available for analysis.'}</p>}
       {!selectedLanding ? (
         <Card>
           <CardContent className="p-8 text-center">
@@ -78,7 +110,12 @@ export function MCCFunnelDiagnosticsTab() {
             </p>
           </CardContent>
         </Card>
-      ) : isLoading ? (
+      ) : isError ? (
+        <div role="alert" className="border border-warning p-4">
+          {isRu ? 'События недоступны. Это не означает отсутствие событий.' : 'Events are unavailable. This does not mean there are no events.'}
+          <Button variant="outline" onClick={() => void refetch()}>{isRu ? 'Повторить' : 'Retry'}</Button>
+        </div>
+      ) : isLoading || !diagnostics ? (
         <div className="flex items-center justify-center py-12">
           <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
         </div>
@@ -92,8 +129,6 @@ export function MCCFunnelDiagnosticsTab() {
             <CardContent>
               <div className="space-y-3">
                 {counts.map((step, idx) => {
-                  const prev = idx > 0 ? counts[idx - 1].count : step.count;
-                  const dropPct = prev > 0 ? ((1 - step.count / prev) * 100).toFixed(0) : '0';
                   const label = STAGE_LABELS[step.stage] || { en: step.stage, ru: step.stage };
                   const widthPct = maxCount > 0 ? (step.count / maxCount) * 100 : 0;
 
@@ -103,17 +138,12 @@ export function MCCFunnelDiagnosticsTab() {
                         <span className="text-sm font-medium">{isRu ? label.ru : label.en}</span>
                         <div className="flex items-center gap-2">
                           <span className="text-sm font-bold tabular-nums">{step.count}</span>
-                          {idx > 0 && Number(dropPct) > 0 && (
-                            <Badge variant={Number(dropPct) > 50 ? 'destructive' : 'secondary'} className="text-xs">
-                              -{dropPct}%
-                            </Badge>
-                          )}
                         </div>
                       </div>
                       <div className="h-8 bg-muted rounded-none overflow-hidden">
                         <div
-                          className="h-full bg-gradient-to-r from-primary to-chart-1 rounded-none flex items-center justify-end px-2 transition-all"
-                          style={{ width: `${Math.max(widthPct, 2)}%` }}
+                          className="h-full bg-primary flex items-center justify-end px-2 transition-all"
+                          style={{ width: `${widthPct}%` }}
                         >
                           {step.count > 0 && (
                             <span className="text-xs font-medium text-primary-foreground">{step.count}</span>
@@ -140,11 +170,11 @@ export function MCCFunnelDiagnosticsTab() {
 
           {/* Actions */}
           <div className="flex gap-2">
-            <Button variant="outline" size="sm">
-              <FlaskConical className="h-4 w-4 mr-2" />
-              {isRu ? 'Создать эксперимент' : 'Create Experiment'}
+            <Button variant="outline" size="sm" className="min-h-11" onClick={() => navigateTo('landings', { landingId: selectedLanding })}>
+              <Globe className="h-4 w-4 mr-2" />
+              {isRu ? 'Управление лендингами' : 'Manage landings'}
             </Button>
-            <Button variant="outline" size="sm">
+            <Button variant="outline" size="sm" className="min-h-11" onClick={exportCSV}>
               <Download className="h-4 w-4 mr-2" />
               {isRu ? 'Экспорт CSV' : 'Export CSV'}
             </Button>

@@ -16,6 +16,8 @@ import {
 import { format } from 'date-fns';
 
 import { toast } from 'sonner';
+import { useAuth } from '@/contexts/AuthContext';
+import { pickLang } from '@/lib/i18n/pickLang';
 interface AdminOrderDetailSheetProps {
   orderId: string | null;
   onClose: () => void;
@@ -38,13 +40,14 @@ const ORDER_TYPE_EMOJI: Record<string, string> = {
 type StatusAction = { labelKey: string; status: OrderStatus; icon: React.ElementType; variant: 'default' | 'outline' | 'destructive' };
 
 export function AdminOrderDetailSheet({ orderId, onClose, onStatusChanged }: AdminOrderDetailSheetProps) {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
+  const { user } = useAuth();
   const queryClient = useQueryClient();
   const [cancelReason, setCancelReason] = useState('');
   const [showCancelInput, setShowCancelInput] = useState(false);
 
-  const { data: order, isLoading } = useQuery({
-    queryKey: ['admin-order-detail', orderId],
+  const { data: cachedOrder, isLoading, isError, isFetching, refetch } = useQuery({
+    queryKey: ['admin-order-detail', orderId, user?.id],
     queryFn: async () => {
       if (!orderId) return null;
       const { data, error } = await supabase
@@ -56,8 +59,10 @@ export function AdminOrderDetailSheet({ orderId, onClose, onStatusChanged }: Adm
           order_addresses (id, address_type, address_text, notes)
         `)
         .eq('id', orderId)
-        .single();
+        .is('deleted_at', null)
+        .maybeSingle();
       if (error) throw error;
+      if (!data) return null;
 
       const { data: profile } = await supabase
         .from('profiles')
@@ -67,8 +72,9 @@ export function AdminOrderDetailSheet({ orderId, onClose, onStatusChanged }: Adm
 
       return { ...data, _profile: profile };
     },
-    enabled: !!orderId,
+    enabled: !!orderId && !!user,
   });
+  const order = user && !isError ? cachedOrder : null;
 
   const updateStatusMutation = useMutation({
     mutationFn: async ({ newStatus, reason }: { newStatus: OrderStatus; reason?: string }) => {
@@ -195,13 +201,18 @@ export function AdminOrderDetailSheet({ orderId, onClose, onStatusChanged }: Adm
         <SheetHeader>
           <SheetTitle className="flex items-center gap-2">
             {ORDER_TYPE_EMOJI[order?.order_type || ''] || '📦'}
-            {t('admin.orders.detail.order')} #{order?.order_number || order?.id?.slice(0, 8)}
+            {t('admin.orders.detail.order')} #{order?.order_number || order?.id?.slice(0, 8) || orderId?.slice(0, 8)}
           </SheetTitle>
           <SheetDescription>
             {order?.created_at && format(new Date(order.created_at), 'dd.MM.yyyy HH:mm')}
           </SheetDescription>
         </SheetHeader>
 
+        {isError && <div role="alert" className="mt-4 border border-warning p-4">
+          {pickLang(language, { en: 'Could not load the order. Retry the read.', ru: 'Не удалось загрузить заказ. Повторите загрузку.', th: 'โหลดคำสั่งซื้อไม่สำเร็จ โปรดลองอีกครั้ง' })}
+          <Button variant="outline" disabled={isFetching} onClick={() => void refetch()}>{pickLang(language, { en: 'Retry', ru: 'Повторить', th: 'ลองอีกครั้ง' })}</Button>
+        </div>}
+        {!isLoading && !isError && !order && <p role="status" className="mt-4">{pickLang(language, { en: 'Order not found or not accessible.', ru: 'Заказ не найден или недоступен.', th: 'ไม่พบคำสั่งซื้อหรือไม่มีสิทธิ์เข้าถึง' })}</p>}
         {isLoading ? (
           <div className="flex items-center justify-center py-12 text-muted-foreground">
             {t('admin.orders.detail.loading')}

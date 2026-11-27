@@ -70,6 +70,16 @@ describe('compact personal identity and actions', () => {
 });
 
 describe('personal and verified work navigation', () => {
+  it('defaults an active administrator to platform Today and preserves an explicit property workspace choice', () => {
+    state.availableRoles = ['user', 'admin', 'vendor']; state.activeRole = 'admin';
+    const { unmount } = render(<WorkspaceHomeBanner />, { wrapper });
+    expect(screen.getByRole('link', { name: 'Работа: Администрирование' })).toHaveAttribute('href', '/admin');
+    expect(screen.getByTestId('location')).toHaveTextContent('/');
+    fireEvent.click(screen.getByRole('link', { name: 'Управление объектами' }));
+    unmount();
+    render(<WorkspaceHomeBanner />, { wrapper });
+    expect(screen.getByRole('link', { name: 'Работа: Управление объектами' })).toHaveAttribute('href', '/mc');
+  });
   it.each(['guest', 'resident', 'loading', 'owner-loading'])('does not expose workspace links for %s', mode => {
     if (mode === 'guest') state.user = null;
     if (mode === 'resident') state.availableRoles = ['user', 'resident'];

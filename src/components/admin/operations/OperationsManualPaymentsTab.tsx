@@ -33,6 +33,8 @@ import { cn } from '@/lib/utils';
 import { useSearchParams } from 'react-router-dom';
 import { applyManualPaymentQueue, parseManualPaymentFilter, parseQueuePage, type ManualPaymentFilter } from '@/lib/adminDashboardQueues';
 import { pickLang } from '@/lib/i18n/pickLang';
+import { useAuth } from '@/contexts/AuthContext';
+import { useAdminCheck } from '@/hooks/useAdmin';
 
 type Status = 'awaiting_admin' | 'contacted' | 'paid' | 'confirmed' | 'rejected' | 'expired';
 
@@ -88,9 +90,25 @@ const REJECT_REASONS: { id: string; en: string; ru: string }[] = [
 
 export function OperationsManualPaymentsTab() {
   const { language } = useLanguage();
+  const { user } = useAuth();
+  const access = useAdminCheck();
+  if (access.isLoading) return <p role="status">{pickLang(language, { en: 'Checking administrator access…', ru: 'Проверка доступа администратора…', th: 'กำลังตรวจสอบสิทธิ์ผู้ดูแล…' })}</p>;
+  if (access.error) return <div role="alert">
+    {pickLang(language, { en: 'Administrator access could not be verified.', ru: 'Не удалось проверить доступ администратора.', th: 'ตรวจสอบสิทธิ์ผู้ดูแลไม่สำเร็จ' })}
+    <Button variant="outline" onClick={access.retry}>{pickLang(language, { en: 'Retry', ru: 'Повторить', th: 'ลองอีกครั้ง' })}</Button>
+  </div>;
+  if (!user || !access.isAdmin) return <p role="alert">{pickLang(language, { en: 'Administrator access is required.', ru: 'Требуется доступ администратора.', th: 'ต้องมีสิทธิ์ผู้ดูแลระบบ' })}</p>;
+  // Unmount all body-portaled dialogs on actor change or lost admission.
+  return <ManualPaymentWorkspace key={user.id} actorId={user.id} />;
+}
+
+function ManualPaymentWorkspace({ actorId }: { actorId: string }) {
+  const { language } = useLanguage();
   const isRu = language === 'ru';
   const qc = useQueryClient();
   const [params, setParams] = useSearchParams();
+  const requestedId = params.get('request_id');
+  const requestId = requestedId && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(requestedId) ? requestedId : null;
   const filter = parseManualPaymentFilter(params);
   const page = parseQueuePage(params, 'manual_page');
   const pageSize = 50;
@@ -98,10 +116,33 @@ export function OperationsManualPaymentsTab() {
   const setPage = (value: number) => setParams(previous => { const next = new URLSearchParams(previous); if (value===0) next.delete('manual_page'); else next.set('manual_page',String(value)); return next; });
   const [confirmTarget, setConfirmTarget] = useState<RequestRow | null>(null);
   const [rejectTarget, setRejectTarget] = useState<RequestRow | null>(null);
-  const [detailTarget, setDetailTarget] = useState<RequestRow | null>(null);
+  const detailQuery = useQuery({
+    queryKey: ['manual-payment-requests', actorId, 'detail', requestId],
+    enabled: !!requestId,
+    queryFn: async () => {
+      const { data, error } = await supabase.from('manual_payment_requests')
+        .select('id,order_id,status,amount_listing,currency_listing,amount_rub_estimate,amount_rub_actual,payment_method_actual,guest_name,guest_phone,guest_email,hold_expires_at,rejected_reason,proof_file_path,created_at,contacted_at,confirmed_at,metadata,orders(order_number,metadata)')
+        .eq('id', requestId!).maybeSingle();
+      if (error) throw error;
+      return data as unknown as RequestRow | null;
+    },
+    staleTime: 0,
+    refetchInterval: requestId ? 30_000 : false,
+  });
+  const detailTarget = requestId && !detailQuery.isError ? detailQuery.data : null;
+  const setDetailTarget = (row: RequestRow | null) => setParams(previous => {
+    const next = new URLSearchParams(previous);
+    if (row) next.set('request_id', row.id); else next.delete('request_id');
+    return next;
+  });
+  const refreshWork = () => {
+    void qc.invalidateQueries({ queryKey: ['manual-payment-requests'] });
+    void qc.invalidateQueries({ queryKey: ['admin-dashboard-stats'] });
+    void qc.invalidateQueries({ queryKey: ['admin-dashboard'] });
+  };
 
   const { data: result, isLoading, isFetching, error, refetch } = useQuery({
-    queryKey: ['manual-payment-requests', filter, page],
+    queryKey: ['manual-payment-requests', actorId, filter, page],
     queryFn: async () => {
       let q = supabase
         .from('manual_payment_requests')
@@ -136,7 +177,7 @@ export function OperationsManualPaymentsTab() {
       toast.error(isRu ? 'Не удалось обновить' : 'Update failed', { description: error.message });
     } else {
       toast.success(isRu ? 'Отмечено: связались' : 'Marked as contacted');
-      qc.invalidateQueries({ queryKey: ['manual-payment-requests'] });
+      refreshWork();
     }
   };
 
@@ -157,6 +198,13 @@ export function OperationsManualPaymentsTab() {
 
   return (
     <div className="space-y-4">
+      {requestedId && !requestId && <p role="alert">{pickLang(language, { en: 'Invalid payment request link.', ru: 'Некорректная ссылка на запрос оплаты.', th: 'ลิงก์คำขอชำระเงินไม่ถูกต้อง' })}</p>}
+      {requestId && detailQuery.isLoading && <p role="status">{pickLang(language, { en: 'Loading payment request…', ru: 'Загрузка запроса оплаты…', th: 'กำลังโหลดคำขอชำระเงิน…' })}</p>}
+      {requestId && detailQuery.isError && <div role="alert">
+        {pickLang(language, { en: 'Could not load this payment request.', ru: 'Не удалось загрузить этот запрос оплаты.', th: 'โหลดคำขอชำระเงินนี้ไม่สำเร็จ' })}
+        <Button variant="outline" disabled={detailQuery.isFetching} onClick={() => void detailQuery.refetch()}>{pickLang(language, { en: 'Retry', ru: 'Повторить', th: 'ลองอีกครั้ง' })}</Button>
+      </div>}
+      {requestId && !detailQuery.isLoading && !detailQuery.isError && detailQuery.data === null && <p role="status">{pickLang(language, { en: 'Payment request was not found or is not accessible.', ru: 'Запрос оплаты не найден или недоступен.', th: 'ไม่พบคำขอชำระเงินหรือไม่มีสิทธิ์เข้าถึง' })}</p>}
       <Tabs value={filter} onValueChange={(v) => setFilter(v as typeof filter)}>
         <TabsList className="flex flex-wrap h-auto gap-1">
           {STATUS_FILTERS.map((f) => {
@@ -357,7 +405,7 @@ export function OperationsManualPaymentsTab() {
           row={confirmTarget}
           isRu={isRu}
           onClose={() => setConfirmTarget(null)}
-          onDone={() => { setConfirmTarget(null); refetch(); }}
+          onDone={() => { setConfirmTarget(null); refreshWork(); }}
         />
       )}
       {rejectTarget && (
@@ -365,7 +413,7 @@ export function OperationsManualPaymentsTab() {
           row={rejectTarget}
           isRu={isRu}
           onClose={() => setRejectTarget(null)}
-          onDone={() => { setRejectTarget(null); refetch(); }}
+          onDone={() => { setRejectTarget(null); refreshWork(); }}
         />
       )}
     </div>

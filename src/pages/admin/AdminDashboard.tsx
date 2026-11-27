@@ -6,6 +6,7 @@ import { AdminOperationalAlerts } from '@/components/admin/dashboard/AdminOperat
 import { AdminRevenueBlock } from '@/components/admin/dashboard/AdminRevenueBlock';
 import { AdminQuickActionsGrid } from '@/components/admin/dashboard/AdminQuickActionsGrid';
 import { AdminWorkQueues } from '@/components/admin/dashboard/AdminWorkQueues';
+import { AdminCaseList } from '@/components/admin/dashboard/AdminCaseList';
 import { useDashboardClock } from '@/components/admin/dashboard/DashboardCount';
 import { useAdminDashboardStats } from '@/hooks/useAdminDashboardStats';
 import { useUserRoles } from '@/hooks/useUserRoles';
@@ -59,8 +60,13 @@ function AdminToday() {
     </div>
     {(hasUnavailable || refreshError) && !stats.isLoading && <p role="alert" className="border-l-2 border-warning bg-warning/5 p-3 text-sm">{l('Some sources are unavailable. Their counts are not shown as zero. Open the queue or refresh to check again.', 'Часть источников недоступна. Их счётчики не показаны нулём. Откройте очередь или обновите данные.', 'บางแหล่งข้อมูลไม่พร้อมใช้งาน จำนวนจะไม่แสดงเป็นศูนย์ เปิดคิวหรือรีเฟรชเพื่อตรวจสอบอีกครั้ง')}</p>}
     <div className="grid min-w-0 gap-4 [grid-template-areas:'decisions'_'queues'_'status'] xl:grid-cols-[minmax(0,2fr)_minmax(280px,1fr)] xl:[grid-template-areas:'decisions_status'_'queues_queues']">
-      <div className="min-w-0 [grid-area:decisions]"><AdminOperationalAlerts search={search} /></div>
-      <div className="min-w-0 [grid-area:queues]"><AdminWorkQueues data={data} loading={stats.isLoading} search={search} /></div>
+      <div className="min-w-0 space-y-4 [grid-area:decisions]">
+        <AdminCaseList />
+        <AdminOperationalAlerts search={search} />
+      </div>
+      <div className="min-w-0 [grid-area:queues]">
+        <AdminWorkQueues data={data} loading={stats.isLoading} search={search} />
+      </div>
       <aside className="min-w-0 space-y-4 [grid-area:status]" aria-label={l('Platform status and quick actions', 'Состояние платформы и быстрые действия', 'สถานะแพลตฟอร์มและการดำเนินการด่วน')}>
         <GoLiveChecklist />
         <AdminQuickActionsGrid />

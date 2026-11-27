@@ -12,11 +12,15 @@ import {
 } from '@/components/ui/dialog';
 import { AlertTriangle, RefreshCw } from 'lucide-react';
 import { toast } from 'sonner';
+import { useSearchParams } from 'react-router-dom';
 
 export default function AdminDisputes() {
   const { language } = useLanguage();
   const isRu = language === 'ru';
-  const { data: disputes, isLoading, refetch } = useAdminDisputes();
+  const [params, setParams] = useSearchParams();
+  const requestedId = params.get('dispute_id');
+  const disputeId = requestedId && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(requestedId) ? requestedId : undefined;
+  const { data: disputes, isLoading, isError, refetch } = useAdminDisputes(disputeId);
   const resolveMutation = useResolveDispute();
   const [resolveModal, setResolveModal] = useState<{ id: string; action: string } | null>(null);
   const [resolution, setResolution] = useState('');
@@ -71,7 +75,19 @@ export default function AdminDisputes() {
         </Button>
       </div>
 
-      <Tabs defaultValue="open">
+      {isLoading && <p role="status">{isRu ? 'Загрузка споров…' : 'Loading disputes…'}</p>}
+      {isError && <div role="alert">{isRu ? 'Не удалось загрузить споры.' : 'Disputes could not be loaded.'}<Button variant="outline" onClick={() => void refetch()}>{isRu ? 'Повторить' : 'Retry'}</Button></div>}
+      {requestedId && !disputeId && <p role="alert">{isRu ? 'Некорректная ссылка на спор.' : 'Invalid dispute link.'}</p>}
+      {requestedId && <Button variant="outline" onClick={() => setParams(previous => { const next = new URLSearchParams(previous); next.delete('dispute_id'); return next; })}>{isRu ? 'Все споры' : 'All disputes'}</Button>}
+      {disputeId && !isLoading && !isError && disputes?.length === 0 && <p role="status">{isRu ? 'Спор не найден или недоступен.' : 'Dispute was not found or is not accessible.'}</p>}
+      {disputeId && disputes?.map(dispute => <section key={dispute.id} aria-label={isRu ? 'Выбранный спор' : 'Selected dispute'} className="space-y-3">
+        <DisputeCard dispute={dispute} showActions={dispute.status === 'open'} onAction={handleAction} />
+        {dispute.status === 'under_review' && <div className="flex gap-2">
+          <Button onClick={() => handleAction(dispute.id, 'resolved')}>{isRu ? 'Решить' : 'Resolve'}</Button>
+          <Button variant="outline" onClick={() => handleAction(dispute.id, 'rejected')}>{isRu ? 'Отклонить' : 'Reject'}</Button>
+        </div>}
+      </section>)}
+      {!requestedId && !isLoading && !isError && <Tabs defaultValue="open">
         <TabsList>
           <TabsTrigger value="open">
             {isRu ? 'Открытые' : 'Open'} ({statusFilter('open').length})
@@ -116,7 +132,7 @@ export default function AdminDisputes() {
             <DisputeCard key={d.id} dispute={d} />
           ))}
         </TabsContent>
-      </Tabs>
+      </Tabs>}
 
       {/* Resolve Modal */}
       <Dialog open={!!resolveModal} onOpenChange={() => setResolveModal(null)}>

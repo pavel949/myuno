@@ -19,6 +19,8 @@ for (const asset of ['yachts/catamaran-53-1.webp', 'catalog/flowers/pink-garden-
 }
 await rm(path.join(output, 'results.json'), { force: true });
 const virtual = {
+  // This matrix covers the classic home. Never read production flags in a synthetic fixture.
+  '@/hooks/useFeatureFlag': `export const useFeatureFlag=(key,fallback)=>{if(key!=='home_v2'||fallback!==false)throw Error('Unexpected fixture feature flag');return false;};`,
   '@/hooks/usePlatformSocialLinks': `export const usePlatformSocialLinks=()=>({data:{}});`,
   'home-fixture': `
     const params=new URLSearchParams(location.search);export const lang=params.get('lang')||'en';export const state=params.get('state')||'data';

@@ -28,10 +28,18 @@ async def bounds(page, *, fills_work_area):
             const r=e.getBoundingClientRect();return {tag:e.tagName,text:(e.textContent||e.getAttribute('aria-label')||'').trim().slice(0,100),left:r.left,right:r.right,width:r.width};
         }).filter(r=>r.left<ar.left-1||r.right>ar.right+1||r.width<0);
         const frame=area.firstElementChild,fr=frame.getBoundingClientRect();
-        return{viewport:innerWidth,documentWidth:document.documentElement.scrollWidth,area:{left:ar.left,right:ar.right,width:ar.width},frame:{left:fr.left,right:fr.right,width:fr.width},bad};
+        const overflowingAreas=[...area.querySelectorAll('[class*="grid-area:decisions"],[class*="grid-area:queues"]')].flatMap(parent=>{
+            const pr=parent.getBoundingClientRect();
+            return [...parent.children].filter(visible).map(child=>{
+                const cr=child.getBoundingClientRect();
+                return{area:parent.className,top:cr.top,bottom:cr.bottom,parentTop:pr.top,parentBottom:pr.bottom};
+            }).filter(rect=>rect.top<rect.parentTop-1||rect.bottom>rect.parentBottom+1);
+        });
+        return{viewport:innerWidth,documentWidth:document.documentElement.scrollWidth,area:{left:ar.left,right:ar.right,width:ar.width},frame:{left:fr.left,right:fr.right,width:fr.width},bad,overflowingAreas};
     }""")
     assert geometry['documentWidth'] <= geometry['viewport'], geometry
     assert not geometry['bad'], geometry
+    assert not geometry['overflowingAreas'], geometry
     # Actual PageShell fills the work area after the explicitly synthetic rail.
     if fills_work_area:
         assert abs(geometry['frame']['width'] - geometry['area']['width']) <= 1, geometry

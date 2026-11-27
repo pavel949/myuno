@@ -7,7 +7,8 @@ import { OperationsBookingsTab } from './OperationsBookingsTab';
 
 const state = vi.hoisted(() => ({error:false, many:false, noCount:false, reads:[] as {column:string;value:unknown}[]}));
 vi.mock('@/contexts/LanguageContext', () => ({useLanguage:()=>({language:'en',t:(key:string)=>key})}));
-vi.mock('./AdminOrderDetailSheet', () => ({AdminOrderDetailSheet:()=>null}));
+vi.mock('@/contexts/AuthContext', () => ({useAuth:()=>({user:{id:'synthetic-admin'}})}));
+vi.mock('./AdminOrderDetailSheet', () => ({AdminOrderDetailSheet:({orderId,onClose}:{orderId:string;onClose:()=>void})=>orderId ? <section aria-label="Selected order"><p>{orderId}</p><button onClick={onClose}>Close selected order</button></section> : null}));
 vi.mock('@/integrations/supabase/client', () => ({supabase:{from:(table:string)=>{
   let rows = table==='profiles' ? [] : [
     {id:'older',order_number:'Older order',status:'pending',created_at:'2026-10-18T00:00:00.000Z',deleted_at:null,order_items:[],order_participants:[]},
@@ -30,12 +31,19 @@ function Boundary() {
   const location=useLocation(),navigate=useNavigate();
   return <><output data-testid="location">{location.search}</output><button onClick={()=>navigate(-1)}>Back fixture</button><button onClick={()=>navigate(1)}>Forward fixture</button></>;
 }
-function setup() {
+function setup(entry = '/admin/operations?tab=bookings&status=pending&created_before=2026-10-19T00%3A00%3A00.000Z&source=dashboard') {
   state.reads=[];
-  render(<QueryClientProvider client={new QueryClient({defaultOptions:{queries:{retry:false,gcTime:0}}})}><MemoryRouter initialEntries={['/admin/operations?tab=bookings&status=pending&created_before=2026-10-19T00%3A00%3A00.000Z&source=dashboard']} future={{v7_startTransition:true,v7_relativeSplatPath:true}}><OperationsBookingsTab/><Boundary/></MemoryRouter></QueryClientProvider>);
+  render(<QueryClientProvider client={new QueryClient({defaultOptions:{queries:{retry:false,gcTime:0}}})}><MemoryRouter initialEntries={[entry]} future={{v7_startTransition:true,v7_relativeSplatPath:true}}><OperationsBookingsTab/><Boundary/></MemoryRouter></QueryClientProvider>);
 }
 afterEach(()=>{cleanup();state.error=false;state.many=false;state.noCount=false;});
 describe('actual operations order queue URL',()=>{
+  it('opens an exact order outside the current page and preserves list context when closed', async()=>{
+    setup('/admin/operations?tab=bookings&status=pending&source=ticket&order_id=22222222-2222-4222-8222-222222222222');
+    expect(screen.getByRole('region',{name:'Selected order'})).toHaveTextContent('22222222-2222-4222-8222-222222222222');
+    fireEvent.click(screen.getByRole('button',{name:'Close selected order'}));
+    expect(screen.getByTestId('location')).toHaveTextContent('?tab=bookings&status=pending&source=ticket');
+    expect(screen.queryByRole('region',{name:'Selected order'})).not.toBeInTheDocument();
+  });
   it('opens exact nondeleted pending cutoff records and restores filters through reset and history',async()=>{
     setup();
     expect(await within(await screen.findByRole('table')).findByText('Older order')).toBeInTheDocument();

@@ -53,7 +53,7 @@ export function WorkspaceHomeBanner() {
   }
   if (!user || contextLoading || ownerTypeLoading || links.length === 0) return null;
 
-  const activeDestination = { vendor: APP_ROUTES.VENDOR, uno_team: APP_ROUTES.TEAM, investor: APP_ROUTES.INVEST_DASHBOARD }[activeRole];
+  const activeDestination = { admin: APP_ROUTES.ADMIN, vendor: APP_ROUTES.VENDOR, uno_team: APP_ROUTES.TEAM, investor: APP_ROUTES.INVEST_DASHBOARD }[activeRole];
   const selected = links.find(link => link.to === remembered) ?? links.find(link => link.to === activeDestination) ?? links[0];
   const remember = (to: string) => {
     setChoice({ key: storageKey, to });

@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -39,15 +40,15 @@ const recommendationConfig = {
     textColor: 'text-success',
     bgColor: 'bg-success/10',
     icon: TrendingUp,
-    labelEn: 'Ready to scale',
-    labelRu: 'Готов к масштабированию',
+    labelEn: 'Consider expansion',
+    labelRu: 'Рассмотреть расширение',
   },
 };
 
 export function AIROIReport() {
   const { language } = useLanguage();
   const isRussian = language === 'ru';
-  const { data: report, isLoading } = useROIReport();
+  const { data: report, isLoading, isError, refetch } = useROIReport();
   
   if (isLoading) {
     return (
@@ -63,6 +64,10 @@ export function AIROIReport() {
     );
   }
   
+  if (isError) return <Card><CardContent className="space-y-3 p-4" role="alert">
+    <p>{isRussian ? 'Не удалось загрузить отчёт качества AI.' : 'Could not load the AI quality report.'}</p>
+    <Button variant="outline" className="min-h-11" onClick={() => refetch()}>{isRussian ? 'Повторить' : 'Retry'}</Button>
+  </CardContent></Card>;
   if (!report) return null;
   
   const config = recommendationConfig[report.recommendation];
@@ -74,7 +79,7 @@ export function AIROIReport() {
         <div className="flex items-center justify-between">
           <CardTitle className="flex items-center gap-2 text-base">
             <FileText className="w-5 h-5" />
-            {isRussian ? '14-дневный отчёт ROI' : '14-Day ROI Report'}
+            {isRussian ? 'Качество AI-анализа за 14 дней' : 'AI analysis quality over 14 days'}
           </CardTitle>
           <Badge variant="outline" className="text-xs">
             {report.period}
@@ -86,6 +91,7 @@ export function AIROIReport() {
         {/* Summary */}
         <div className="p-4 rounded-none bg-muted/50">
           <p className="text-sm leading-relaxed">{report.summary}</p>
+          <p className="mt-2 text-xs text-muted-foreground">{isRussian ? 'Показатели относятся к загруженным записям анализа; объявления могут повторяться. Доля подтверждений рассчитана по решениям администраторов.' : 'Metrics describe loaded analysis records; listings may repeat. The acknowledgement share uses recorded admin decisions.'}</p>
         </div>
         
         {/* Key Metrics */}
@@ -93,7 +99,7 @@ export function AIROIReport() {
           <div className="text-center p-3 rounded-none bg-muted/30">
             <div className="text-2xl font-bold">{report.metrics.listingsAnalyzed}</div>
             <div className="text-xs text-muted-foreground">
-              {isRussian ? 'Проанализировано' : 'Analyzed'}
+              {isRussian ? 'Записей анализа' : 'Analysis records'}
             </div>
           </div>
           <div className="text-center p-3 rounded-none bg-muted/30">
@@ -107,15 +113,15 @@ export function AIROIReport() {
           <div className="text-center p-3 rounded-none bg-muted/30">
             <div className="text-2xl font-bold">{report.metrics.suspiciousDetected}</div>
             <div className="text-xs text-muted-foreground">
-              {isRussian ? 'Подозрительных' : 'Suspicious'}
+              {isRussian ? 'Отмечено анализов' : 'Flagged analyses'}
             </div>
           </div>
           <div className="text-center p-3 rounded-none bg-muted/30">
             <div className="text-2xl font-bold">
-              {report.metrics.aiAccuracyProxy ?? '—'}%
+              {report.metrics.aiAccuracyProxy == null ? '—' : `${report.metrics.aiAccuracyProxy}%`}
             </div>
             <div className="text-xs text-muted-foreground">
-              {isRussian ? 'Точность AI' : 'AI Accuracy'}
+              {isRussian ? 'Доля подтверждений' : 'Acknowledgement share'}
             </div>
           </div>
         </div>
@@ -185,15 +191,15 @@ export function AIROIReport() {
         </div>
         
         {/* Actions */}
-        <div className="flex gap-2 pt-2">
-          <Button variant="outline" size="sm" className="flex-1">
+        <div className="flex flex-wrap gap-2 pt-2">
+          <Button variant="outline" size="sm" className="min-h-11 flex-1 basis-48" onClick={() => window.print()}>
             <Download className="w-4 h-4 mr-2" />
-            {isRussian ? 'Экспорт PDF' : 'Export PDF'}
+            {isRussian ? 'Печать страницы' : 'Print page'}
           </Button>
-          <Button variant="outline" size="sm" className="flex-1">
+          <Button asChild variant="outline" size="sm" className="min-h-11 flex-1 basis-48"><Link to="/admin/catalog">
             <Target className="w-4 h-4 mr-2" />
-            {isRussian ? 'Детальный анализ' : 'Detailed Analysis'}
-          </Button>
+            {isRussian ? 'Открыть каталог' : 'Open catalogue'}
+          </Link></Button>
         </div>
       </CardContent>
     </Card>

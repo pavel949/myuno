@@ -29,7 +29,7 @@ export function AdminOperationalAlerts({ search = '' }: { search?: string }) {
   const samePending = data?.pendingOrders != null && data.pendingOrders === data.pendingOrders24h;
   const active = matching.filter(item => (data?.[item.key] == null || data[item.key] !== 0) && !(item.key === 'pendingOrders' && samePending));
   const shown = active.slice(0, 3);
-  return <Surface variant="card" padding="md" className="h-full min-w-0">
+  return <Surface variant="card" padding="md" className="min-w-0">
     <h2 className="text-xl font-semibold">{label('Needs a decision', 'Требует решения', 'รายการที่ต้องตัดสินใจ')}</h2>
     <p className="mt-1 text-sm text-muted-foreground">{label('Review exceptions, then continue with the work queues.', 'Сначала исключения, затем текущая работа.', 'ตรวจสอบข้อยกเว้น แล้วดำเนินงานในคิวต่อ')}</p>
     <div className="mt-4 divide-y border-y" aria-busy={isLoading}>

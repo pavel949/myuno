@@ -182,11 +182,9 @@ export function MCCMagnetsTab() {
                     <Users className="h-3 w-3" /> {isRu ? 'Лиды' : 'Leads'}
                   </Button>
                   {m.asset_url && (
-                    <a href={m.asset_url} target="_blank" rel="noreferrer">
-                      <Button size="sm" variant="ghost" className="h-7 px-2 text-xs gap-1">
+                      <Button asChild size="sm" variant="ghost" className="min-h-11 px-2 text-xs gap-1"><a href={m.asset_url} target="_blank" rel="noreferrer">
                         <ExternalLink className="h-3 w-3" /> PDF
-                      </Button>
-                    </a>
+                    </a></Button>
                   )}
                   <Button size="sm" variant="ghost"
                     className="h-7 px-2 text-xs gap-1 text-destructive hover:text-destructive"

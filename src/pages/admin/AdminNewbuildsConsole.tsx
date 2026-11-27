@@ -33,8 +33,8 @@ export default function AdminNewbuildsConsole() {
           <p className="text-muted-foreground">Управление застройщиками, проектами, документами и лидами.</p>
         </div>
         <div className="flex gap-2 flex-wrap">
-          <Link to="/admin/developers"><Button variant="outline"><Plus className="w-4 h-4 mr-1" /> Застройщик</Button></Link>
-          <Link to="/admin/projects"><Button><Plus className="w-4 h-4 mr-1" /> Проект</Button></Link>
+          <Button asChild variant="outline"><Link to="/admin/developers"><Plus className="w-4 h-4 mr-1" /> Застройщик</Link></Button>
+          <Button asChild><Link to="/admin/projects"><Plus className="w-4 h-4 mr-1" /> Проект</Link></Button>
         </div>
       </div>
 
