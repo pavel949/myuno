@@ -17,7 +17,7 @@ import { OffplanBuyerEnquiry } from '@/components/newbuilds/OffplanBuyerEnquiry'
  */
 
 import { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { Link, useParams, useNavigate } from 'react-router-dom';
 import { Building2, MapPin, CheckCircle2, MessageCircle, ExternalLink, FileSearch, FileText, Download } from 'lucide-react';
 import { BackButton } from '@/components/uno/BackButton';
 import { APP_ROUTES } from '@/lib/config/routes';
@@ -442,6 +442,18 @@ export default function OffplanDetail() {
             )}
           </TabsContent>
         </Tabs>
+        <nav className="mt-6 flex flex-wrap gap-4" aria-label={pickLang(language, { ru: 'Предложения в комплексе', en: 'Listings in this complex', th: 'ประกาศในโครงการนี้' })}>
+          <Button asChild variant="outline">
+            <Link to={`${APP_ROUTES.COMPLEX_DETAIL(project.id)}?mode=buy`} state={publicJourneyState(journeyLocation)}>
+              {pickLang(language, { ru: 'Квартиры и дома на продажу', en: 'Homes for sale', th: 'ที่พักสำหรับขาย' })}
+            </Link>
+          </Button>
+          <Button asChild variant="outline">
+            <Link to={`${APP_ROUTES.COMPLEX_DETAIL(project.id)}?mode=rent`} state={publicJourneyState(journeyLocation)}>
+              {pickLang(language, { ru: 'Квартиры и дома в аренду', en: 'Homes to rent', th: 'ที่พักให้เช่า' })}
+            </Link>
+          </Button>
+        </nav>
       </div>
 
       {/* Lead Form — Sheet on mobile, Dialog on desktop */}
