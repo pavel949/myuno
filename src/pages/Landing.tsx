@@ -78,6 +78,10 @@ export default function Landing() {
           <ArrowRight className="size-4 shrink-0" aria-hidden="true" />
         </Link>
       </div>}
+      <nav className="home-container home-category-navigation" aria-label={t({ ru: 'Вид myUNO', en: 'myUNO view', th: 'มุมมอง myUNO' })}>
+        <span aria-current="page">{t({ ru: 'Главная', en: 'Home', th: 'หน้าหลัก' })}</span>
+        <Link className="home-text-link ds-focus min-h-11" to={R.ECOSYSTEM}>{t({ ru: 'Все разделы', en: 'All sections', th: 'ทุกหมวดหมู่' })}<ArrowRight size={16} aria-hidden="true" /></Link>
+      </nav>
       <HomeV2Paths />
       <HomeHousingPreview />
       <div className="home-life-group">
