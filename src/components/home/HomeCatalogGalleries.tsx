@@ -7,7 +7,6 @@ import { pickLang, type LangValues } from '@/lib/i18n/pickLang';
 import { useExperiences } from '@/hooks/useExperiences';
 import { complexMediaUrl } from '@/lib/real-estate/complexMedia';
 import { APP_ROUTES as R } from '@/lib/config/routes';
-import { homeAreaCover } from './homeAreaCovers';
 import { HomeGallery } from './HomeGallery';
 import { useCatalogFromDB } from '@/lib/catalog/useCatalogFromDB';
 import { homeServiceCategories } from './homeServiceCategories';
@@ -92,11 +91,10 @@ export function HomeLocationGallery() {
   return <HomeGallery id="home-locations-title" className="home-locations" title={t({ ru: 'Районы Пхукета', en: 'Phuket areas', th: 'ย่านในภูเก็ต' })}
     description={t({ ru: 'Сначала познакомьтесь с районом, затем выбирайте жильё.', en: 'Get to know an area before choosing a home.', th: 'ทำความรู้จักย่านก่อนเลือกที่พัก' })}
     href={R.AREA_INDEX} linkLabel={t({ ru: 'Все районы', en: 'All areas', th: 'ทุกย่าน' })}>
-    {AREA_GUIDES.map(area => { const cover = homeAreaCover(area.slug); return <article className="home-guide-card" key={area.slug}><Link className="home-area-guide-link" to={R.AREA_DETAIL(area.slug)}>
-      <div className="home-area-cover"><img src={cover.src} alt={t(area.name)} width="640" height="360" loading="lazy" decoding="async" />{cover.kind === 'illustration' && <span className="home-area-cover-label">{t({ ru: 'Иллюстрация', en: 'Illustration', th: 'ภาพประกอบ' })}</span>}</div>
-      <div className="home-guide-copy"><MapPin className="home-guide-pin" size={22} aria-hidden="true" /><h3>{t(area.name)}</h3><p>{t({ ru: 'Знакомство с районом', en: 'Explore the area guide', th: 'ทำความรู้จักย่าน' })}</p>
+    {AREA_GUIDES.map(area => <article className="home-guide-card" key={area.slug}><Link className="home-area-guide-link" to={R.AREA_DETAIL(area.slug)}>
+      <div className="home-guide-copy"><MapPin className="home-guide-pin" size={22} aria-hidden="true" /><h3>{t(area.name)}</h3>
       <span>{t({ ru: 'О районе', en: 'Area guide', th: 'คู่มือย่าน' })}<ArrowRight size={16} aria-hidden="true" /></span></div>
-    </Link></article>; })}
+    </Link></article>)}
   </HomeGallery>;
 }
 
@@ -115,7 +113,7 @@ export function HomeExperienceGallery() {
     return image ? [{ item, image }] : [];
   }).slice(0, 12);
   const title = t({
-    ru: 'За пределами дома',
+    ru: 'Впечатления на Пхукете',
     en: 'More of the island',
     th: 'สัมผัสประสบการณ์บนเกาะ',
   });
@@ -153,7 +151,7 @@ export function HomeServiceGallery() {
   // The shared catalog's static fallback is useful for app navigation, but is
   // not evidence of a live category. Keep loading/error/empty explicit here.
   const categories = catalog.isFromDB ? homeServiceCategories(catalog.categories) : [];
-  const title = t({ ru: 'Услуги для жизни и отдыха', en: 'Services for life and leisure', th: 'บริการสำหรับชีวิตและการพักผ่อน' });
+  const title = t({ ru: 'Услуги на Пхукете', en: 'Services for life and leisure', th: 'บริการสำหรับชีวิตและการพักผ่อน' });
   // Static taxonomy fallback is never promoted to published supply.
 
   return <><HomeGallery id="home-services-title" className="home-services marketplace-home-categories" title={title}
