@@ -152,9 +152,9 @@ export default function AdminNewbuilds() {
           <p className="text-sm text-muted-foreground">{isRu ? 'Проекты, застройщики, показатели и заявки' : 'Projects, developers, indicators and leads'}</p>
         </div>
         <div className="flex flex-wrap gap-2">
-          <Link to="/admin/projects"><Button variant="outline">{isRu ? 'Все проекты' : 'All projects'}</Button></Link>
-          <Link to="/admin/developers"><Button variant="outline">{isRu ? 'Застройщики' : 'Developers'}</Button></Link>
-          <Link to="/admin/nb-leads"><Button variant="outline">{isRu ? 'Заявки' : 'Leads'}</Button></Link>
+          <Button asChild variant="outline" className="min-h-11"><Link to="/admin/projects">{isRu ? 'Все проекты' : 'All projects'}</Link></Button>
+          <Button asChild variant="outline" className="min-h-11"><Link to="/admin/developers">{isRu ? 'Застройщики' : 'Developers'}</Link></Button>
+          <Button asChild variant="outline" className="min-h-11"><Link to="/admin/nb-leads">{isRu ? 'Заявки' : 'Leads'}</Link></Button>
         </div>
       </div>
 

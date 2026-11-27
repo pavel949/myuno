@@ -409,7 +409,7 @@ export default function PartnerApplicationsAdmin() {
                         </span>
                       </div>
                     </div>
-                    <Button variant="ghost" size="icon" className="shrink-0" aria-label={language === 'ru' ? 'Просмотр' : 'View'}>
+                    <Button variant="ghost" size="icon" className="shrink-0" aria-label={language === 'ru' ? 'Просмотр' : 'View'} onClick={event => { event.stopPropagation(); setSelectedApp(app); setIsDetailOpen(true); }}>
                       <Eye className="w-4 h-4" />
                     </Button>
                   </div>

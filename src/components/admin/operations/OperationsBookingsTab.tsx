@@ -16,6 +16,7 @@ import { AdminOrderDetailSheet } from './AdminOrderDetailSheet';
 import { useSearchParams } from 'react-router-dom';
 import { applyOrderQueue, parseOrderQueue, parseQueuePage } from '@/lib/adminDashboardQueues';
 import { pickLang } from '@/lib/i18n/pickLang';
+import { useAuth } from '@/contexts/AuthContext';
 
 const orderStatusCards = [
   { status: 'pending', icon: AlertCircle, color: 'text-warning' },
@@ -25,6 +26,11 @@ const orderStatusCards = [
 ] as const;
 
 export function OperationsBookingsTab() {
+  const { user } = useAuth();
+  return user ? <OperationsOrderWorkspace key={user.id} actorId={user.id} /> : null;
+}
+
+function OperationsOrderWorkspace({ actorId }: { actorId: string }) {
   const { t, language } = useLanguage();
   const [params, setParams] = useSearchParams();
   const queue = parseOrderQueue(params);
@@ -49,10 +55,16 @@ export function OperationsBookingsTab() {
     if (key !== 'order_page') next.delete('order_page');
     return next;
   });
-  const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
+  const requestedOrderId = params.get('order_id');
+  const selectedOrderId = requestedOrderId && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(requestedOrderId) ? requestedOrderId : null;
+  const setSelectedOrderId = (orderId: string | null) => setParams(previous => {
+    const next = new URLSearchParams(previous);
+    if (orderId) next.set('order_id', orderId); else next.delete('order_id');
+    return next;
+  });
 
   const { data: result, isLoading, error, isFetching, refetch } = useQuery({
-    queryKey: ['admin-orders', statusFilter, queue.createdBefore, page],
+    queryKey: ['admin-orders', statusFilter, queue.createdBefore, page, actorId],
     queryFn: async () => {
       let query = supabase
         .from('orders')
@@ -77,7 +89,7 @@ export function OperationsBookingsTab() {
   // Fetch profiles for customer names
   const customerIds = [...new Set(orders?.map((o) => o.customer_user_id) || [])];
   const { data: profiles } = useQuery({
-    queryKey: ['admin-order-profiles', customerIds],
+    queryKey: ['admin-order-profiles', customerIds, actorId],
     queryFn: async () => {
       if (!customerIds.length) return [];
       const { data } = await supabase
@@ -92,7 +104,7 @@ export function OperationsBookingsTab() {
   const profileMap = new Map(profiles?.map((p) => [p.id, p]) || []);
 
   const statusCounts = useQuery({
-    queryKey: ['admin-order-status-counts', queue.createdBefore],
+    queryKey: ['admin-order-status-counts', queue.createdBefore, actorId],
     queryFn: async () => Promise.all(orderStatusCards.map(async ({ status }) => {
       const response = await applyOrderQueue(
         supabase.from('orders').select('id', { count: 'exact', head: true }),
@@ -138,6 +150,7 @@ export function OperationsBookingsTab() {
 
   return (
     <div className="space-y-4">
+      {requestedOrderId && !selectedOrderId && <p role="alert">{pickLang(language, { en: 'Invalid order link.', ru: 'Некорректная ссылка на заказ.', th: 'ลิงก์คำสั่งซื้อไม่ถูกต้อง' })}</p>}
       {error && <div role="alert" className="border border-destructive p-4">
         {pickLang(language, { en: 'Could not load orders. Counts and results are unavailable.', ru: 'Не удалось загрузить заказы. Счётчики и результаты недоступны.', th: 'โหลดคำสั่งซื้อไม่สำเร็จ จำนวนและผลลัพธ์ไม่พร้อมใช้งาน' })}
         <Button variant="outline" disabled={isFetching} onClick={() => { void refetch(); void statusCounts.refetch(); }}>{pickLang(language, { en: 'Retry', ru: 'Повторить', th: 'ลองอีกครั้ง' })}</Button>
@@ -356,12 +369,15 @@ export function OperationsBookingsTab() {
 
       {/* Order Detail Sheet */}
       <AdminOrderDetailSheet
+        key={selectedOrderId ?? 'no-order'}
         orderId={selectedOrderId}
         onClose={() => setSelectedOrderId(null)}
         onStatusChanged={() => {
           void refetch();
           void queryClient.invalidateQueries({ queryKey: ['admin-order-status-counts'] });
           void queryClient.invalidateQueries({ queryKey: ['operations-overview'] });
+          void queryClient.invalidateQueries({ queryKey: ['admin-dashboard-stats'] });
+          void queryClient.invalidateQueries({ queryKey: ['admin-dashboard'] });
         }}
       />
     </div>

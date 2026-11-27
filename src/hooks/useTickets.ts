@@ -215,8 +215,8 @@ const queryClient = useQueryClient();
 export function useTicketDetail(ticketId: string | undefined) {
   const { user } = useAuth();
   
-  return useQuery({
-    queryKey: ['ticket-detail', ticketId],
+  const query = useQuery({
+    queryKey: ['ticket-detail', ticketId, user?.id],
     queryFn: async () => {
       if (!ticketId) return null;
 
@@ -224,20 +224,22 @@ export function useTicketDetail(ticketId: string | undefined) {
         .from('support_tickets')
         .select('*')
         .eq('id', ticketId)
-        .single();
+        .maybeSingle();
 
       if (error) throw error;
-      return data as unknown as SupportTicket;
+      return data ? data as unknown as SupportTicket : null;
     },
     enabled: !!ticketId && !!user,
     ...CACHE_PROFILES.DYNAMIC,
   });
+  return { ...query, data: user && !query.isError ? query.data : undefined };
 }
 
 // Hook for ticket messages with caching
 export function useTicketMessages(ticketId: string | undefined) {
-  return useQuery({
-    queryKey: ['ticket-messages', ticketId],
+  const { user } = useAuth();
+  const query = useQuery({
+    queryKey: ['ticket-messages', ticketId, user?.id],
     queryFn: async () => {
       if (!ticketId) return [];
 
@@ -248,9 +250,11 @@ export function useTicketMessages(ticketId: string | undefined) {
         .order('created_at', { ascending: true });
 
       if (error) throw error;
-      return (data as unknown as TicketMessage[]) || [];
+      if (!data) throw new Error('Support conversation unavailable');
+      return data as unknown as TicketMessage[];
     },
-    enabled: !!ticketId,
+    enabled: !!ticketId && !!user,
     ...CACHE_PROFILES.REALTIME,
   });
+  return { ...query, data: user && !query.isError ? query.data : undefined };
 }

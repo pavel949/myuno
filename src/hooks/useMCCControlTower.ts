@@ -1,76 +1,57 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useMemo } from 'react';
+import { useAuth } from '@/contexts/AuthContext';
+import { useAdminCheck } from '@/hooks/useAdmin';
+import { bangkokTodayISO } from '@/lib/hotelDates';
+
+const RECORDED_STAGES = ['landing_view', 'primary_cta_click', 'intent_started', 'first_service_completed', 'second_service_started'] as const;
+type LandingEventScope = { kind: 'platform' } | { kind: 'landing'; landingId: string };
+
+/** One read model for recorded events; event payloads never establish financial truth. */
+export async function readRecordedLandingEvents(scope: LandingEventScope, since: string, through: string) {
+  if (scope.kind !== 'platform' && scope.kind !== 'landing') throw new Error('Invalid event scope');
+  if (scope.kind === 'landing' && !scope.landingId.trim()) throw new Error('Landing scope is required');
+  const count = async (stage?: string) => {
+    let request = supabase.from('mcc_landing_events').select('id', { count: 'exact', head: true })
+      .gte('created_at', since).lte('created_at', through);
+    if (scope.kind === 'landing') request = request.eq('landing_id', scope.landingId);
+    if (stage) request = request.eq('event_name', stage);
+    const response = await request;
+    if (response.error) throw response.error;
+    if (response.count === null || !Number.isSafeInteger(response.count) || response.count < 0) throw new Error('Event count unavailable');
+    return response.count;
+  };
+  const [totalEvents, ...values] = await Promise.all([count(), ...RECORDED_STAGES.map(stage => count(stage))]);
+  return { counts: RECORDED_STAGES.map((stage, index) => ({ stage, count: values[index] })), totalEvents, from: since, through };
+}
 
 // ── Pulse KPIs ──
 export function usePulseKPIs(period: 'today' | '7d' | 'mtd' = '7d') {
-  return useQuery({
-    queryKey: ['mcc-pulse-kpis', period],
+  const { user } = useAuth();
+  const { isAdmin, isLoading: checkingAccess } = useAdminCheck();
+  const enabled = !!user && isAdmin && !checkingAccess;
+  const query = useQuery({
+    queryKey: ['mcc-pulse-kpis', period, user?.id],
+    enabled,
     queryFn: async () => {
       const now = new Date();
-      let since: string;
-      if (period === 'today') {
-        since = new Date(now.getFullYear(), now.getMonth(), now.getDate()).toISOString();
-      } else if (period === '7d') {
-        since = new Date(now.getTime() - 7 * 86400000).toISOString();
-      } else {
-        since = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
-      }
-
-      // Events for funnel
-      const { data: events } = await supabase
-        .from('mcc_landing_events')
-        .select('event_name, landing_id, vertical, payload, created_at')
-        .gte('created_at', since);
-
-      // User states
-      const { data: states } = await supabase
-        .from('mcc_user_states')
-        .select('state, source_landing');
-
-      // Bookings for revenue
-      const { data: bookings } = await supabase
-        .from('bookings')
-        .select('total_amount, currency, created_at')
-        .gte('created_at', since);
-
-      const evts = events || [];
-      const views = evts.filter(e => e.event_name === 'landing_view').length;
-      const ctaClicks = evts.filter(e => e.event_name === 'primary_cta_click').length;
-      const intents = evts.filter(e => e.event_name === 'intent_started').length;
-      const completed = evts.filter(e => e.event_name === 'first_service_completed').length;
-      const secondAction = evts.filter(e => e.event_name === 'second_service_started').length;
-
-      const revenue = (bookings || []).reduce((s, b) => s + (b.total_amount || 0), 0);
-      const conversionPct = views > 0 ? (completed / views) * 100 : 0;
-      const ctaRate = views > 0 ? (ctaClicks / views) * 100 : 0;
-      const secondActionRate = completed > 0 ? (secondAction / completed) * 100 : 0;
-
-      const stateDistribution: Record<string, number> = {};
-      (states || []).forEach((s) => {
-        stateDistribution[s.state] = (stateDistribution[s.state] || 0) + 1;
-      });
-      const activeUsers = (states || []).filter((s) => 
-        !['dormant', 'churned', 'anonymous'].includes(s.state)
-      ).length;
-
+      const today = bangkokTodayISO(now);
+      const since = period === '7d' ? new Date(now.getTime() - 7 * 86400000).toISOString()
+        : new Date(`${period === 'mtd' ? `${today.slice(0, 8)}01` : today}T00:00:00+07:00`).toISOString();
+      const evidence = await readRecordedLandingEvents({ kind: 'platform' }, since, now.toISOString());
+      const [views, ctaClicks, intents, completed, secondAction] = evidence.counts.map(item => item.count);
       return {
-        traffic: views,
-        ctaClicks,
-        intents,
-        completed,
-        secondAction,
-        revenue,
-        conversionPct,
-        ctaRate,
-        secondActionRate,
-        activeUsers,
-        totalUsers: (states || []).length,
-        stateDistribution,
+        ...evidence, traffic: views, ctaClicks, intents, completed, secondAction,
+        // Compatibility fields stay unknown: event counters do not establish
+        // revenue, unique-user cohorts or conversion/financial ratios.
+        revenue: null, conversionPct: null, ctaRate: null, secondActionRate: null,
+        activeUsers: null, totalUsers: null, stateDistribution: null,
       };
     },
-    refetchInterval: 60_000,
+    refetchInterval: enabled ? 60_000 : false,
   });
+  return { ...query, data: enabled && !query.isError ? query.data : undefined };
 }
 
 // ── Landing Funnel Board ──
@@ -213,11 +194,14 @@ export function useStateTransitions(days: number = 7) {
 
 // ── User Timeline ──
 export function useUserTimeline(userId: string) {
-  return useQuery({
-    queryKey: ['mcc-user-timeline', userId],
-    enabled: !!userId,
+  const { user } = useAuth();
+  const { isAdmin, isLoading: checkingAccess } = useAdminCheck();
+  const enabled = !!user && isAdmin && !checkingAccess && !!userId;
+  const query = useQuery({
+    queryKey: ['mcc-user-timeline', userId, user?.id],
+    enabled,
     queryFn: async () => {
-      const [{ data: events }, { data: states }, { data: profile }] = await Promise.all([
+      const [events, states, profile] = await Promise.all([
         supabase
           .from('mcc_landing_events')
           .select('*')
@@ -228,16 +212,21 @@ export function useUserTimeline(userId: string) {
           .from('mcc_user_states')
           .select('*')
           .eq('user_id', userId)
-          .single(),
+          .maybeSingle(),
         supabase
           .from('profiles')
           .select('id, full_name, email, phone, avatar_url')
           .eq('id', userId)
-          .single(),
+          .maybeSingle(),
       ]);
-      return { events: events || [], state: states, profile: profile };
+      if (events.error) throw events.error;
+      if (states.error) throw states.error;
+      if (profile.error) throw profile.error;
+      if (!events.data) throw new Error('Timeline events unavailable');
+      return { events: events.data, state: states.data, profile: profile.data };
     },
   });
+  return { ...query, data: enabled && !query.isError ? query.data : undefined };
 }
 
 // Campaign Rules hooks removed — mcc_campaign_rules table dropped 2026-06-06.
@@ -278,23 +267,16 @@ export function useChurnRiskUsers() {
 
 // ── Funnel Diagnostics ──
 export function useFunnelDiagnostics(landingId: string, days: number = 7) {
-  return useQuery({
-    queryKey: ['mcc-funnel-diagnostics', landingId, days],
-    enabled: !!landingId,
+  const { user } = useAuth();
+  const { isAdmin, isLoading: checkingAccess } = useAdminCheck();
+  const enabled = !!user && isAdmin && !checkingAccess && !!landingId;
+  const query = useQuery({
+    queryKey: ['mcc-funnel-diagnostics', landingId, days, user?.id],
+    enabled,
     queryFn: async () => {
       const since = new Date(Date.now() - days * 86400000).toISOString();
-      const { data, error } = await supabase
-        .from('mcc_landing_events')
-        .select('event_name, payload, created_at')
-        .eq('landing_id', landingId)
-        .gte('created_at', since);
-      if (error) throw error;
-
-      const events = data || [];
-      const stages = ['landing_view', 'primary_cta_click', 'intent_started', 'first_service_completed', 'second_service_started'];
-      const counts = stages.map(s => ({ stage: s, count: events.filter(e => e.event_name === s).length }));
-
-      return { counts, totalEvents: events.length };
+      return readRecordedLandingEvents({ kind: 'landing', landingId }, since, new Date().toISOString());
     },
   });
+  return { ...query, data: enabled && !query.isError ? query.data : undefined };
 }

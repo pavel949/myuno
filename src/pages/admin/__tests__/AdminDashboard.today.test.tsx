@@ -17,6 +17,7 @@ vi.mock('@tanstack/react-query', async original => ({ ...await original<typeof i
 vi.mock('@/components/admin/AdminStaffOverview', () => ({ AdminStaffOverview: () => <p>Existing staff workspace</p> }));
 vi.mock('@/components/admin/GoLiveChecklist', () => ({ GoLiveChecklist: () => <section>Platform status fixture boundary</section> }));
 vi.mock('@/components/admin/dashboard/AdminRevenueBlock', () => ({ AdminRevenueBlock: () => <section>Period analytics fixture boundary</section> }));
+vi.mock('@/components/admin/dashboard/AdminCaseList', () => ({ AdminCaseList: () => <section>Live case preview boundary</section> }));
 vi.mock('@/hooks/useHapticFeedback', () => ({ triggerHaptic: vi.fn() }));
 vi.mock('@/hooks/useSoundEffects', () => ({ playSound: vi.fn(), isTypingKey: () => false }));
 

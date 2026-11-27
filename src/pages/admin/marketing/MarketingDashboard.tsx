@@ -1,9 +1,9 @@
 import React, { createContext, useContext, useCallback } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   Activity,
-  GitBranch,
   BarChart3,
   Globe,
   UserCog,
@@ -15,7 +15,6 @@ import {
 import { MCCMagnetsTab } from '@/components/admin/marketing/MCCMagnetsTab';
 import { MCCLandingBuilderTab } from '@/components/admin/marketing/MCCLandingBuilderTab';
 import { MCCControlTowerTab } from '@/components/admin/marketing/MCCControlTowerTab';
-import { MCCFunnelsTab } from '@/components/admin/marketing/MCCFunnelsTab';
 import { MCCAnalyticsTab } from '@/components/admin/marketing/MCCAnalyticsTab';
 import { MCCLandingControlTab } from '@/components/admin/marketing/MCCLandingControlTab';
 import { MCCUserStatesTab } from '@/components/admin/marketing/MCCUserStatesTab';
@@ -40,23 +39,46 @@ export function useMCCNavigation() {
 export default function MarketingDashboard() {
   const { language } = useLanguage();
   const isRu = language === 'ru';
-  const [activeTab, setActiveTab] = React.useState('control-tower');
-  const [navContext, setNavContext] = React.useState<Record<string, string>>({});
+  const [params, setParams] = useSearchParams();
+  const validTabs = ['control-tower', 'landings', 'builder', 'magnets', 'states', 'funnel-diag', 'timeline', 'analytics'];
+  // The old builder placeholder converges on the existing recorded-event diagnostics.
+  const requestedTab = params.get('marketing_tab') === 'funnels' ? 'funnel-diag' : params.get('marketing_tab');
+  const activeTab = requestedTab && validTabs.includes(requestedTab) ? requestedTab : 'control-tower';
+  const setActiveTab = useCallback((value: string) => setParams(previous => {
+    const next = new URLSearchParams(previous);
+    const tab = value === 'funnels' ? 'funnel-diag' : value;
+    if (!['control-tower', 'landings', 'builder', 'magnets', 'states', 'funnel-diag', 'timeline', 'analytics'].includes(tab)) return next;
+    next.set('tab', 'marketing');
+    if (tab === 'control-tower') next.delete('marketing_tab'); else next.set('marketing_tab', tab);
+    return next;
+  }), [setParams]);
+  const navContext: Record<string, string> = {};
+  for (const key of ['landingId', 'userId']) {
+    const value = params.get(`marketing_${key}`);
+    if (value) navContext[key] = value;
+  }
 
   const navigateTo = useCallback((tab: string, context?: Record<string, string>) => {
-    if (context) setNavContext(context);
-    setActiveTab(tab);
-  }, []);
+    if (!['control-tower', 'landings', 'builder', 'magnets', 'states', 'funnel-diag', 'timeline', 'analytics'].includes(tab)) return;
+    setParams(previous => {
+      const next = new URLSearchParams(previous);
+      next.set('tab', 'marketing');
+      next.set('marketing_tab', tab);
+      if (context) for (const key of ['landingId', 'userId']) {
+        if (context[key]) next.set(`marketing_${key}`, context[key]); else next.delete(`marketing_${key}`);
+      }
+      return next;
+    });
+  }, [setParams]);
 
   const tabs = [
-    { id: 'control-tower', label: 'Control Tower', icon: Activity },
+    { id: 'control-tower', label: isRu ? 'Обзор' : 'Overview', icon: Activity },
     { id: 'landings', label: isRu ? 'Лендинги' : 'Landings', icon: Globe },
     { id: 'builder', label: isRu ? 'Конструктор' : 'Builder', icon: LayoutTemplate },
     { id: 'magnets', label: isRu ? 'Магниты' : 'Magnets', icon: Magnet },
     { id: 'states', label: isRu ? 'Состояния' : 'States', icon: UserCog },
     { id: 'funnel-diag', label: isRu ? 'Воронка' : 'Funnel Diag', icon: Search },
     { id: 'timeline', label: isRu ? 'Таймлайн' : 'Timeline', icon: User },
-    { id: 'funnels', label: isRu ? 'Воронки' : 'Funnels', icon: GitBranch },
     { id: 'analytics', label: isRu ? 'Аналитика' : 'Analytics', icon: BarChart3 },
   ];
 
@@ -80,10 +102,10 @@ export default function MarketingDashboard() {
               <TabsTrigger
                 key={tab.id}
                 value={tab.id}
-                className="gap-1.5 data-[state=active]:bg-background text-xs"
+                className="min-h-11 h-auto gap-1.5 whitespace-normal data-[state=active]:bg-background text-xs"
               >
                 <tab.icon className="h-3.5 w-3.5" />
-                <span className="hidden sm:inline">{tab.label}</span>
+                <span>{tab.label}</span>
               </TabsTrigger>
             ))}
           </TabsList>
@@ -95,7 +117,6 @@ export default function MarketingDashboard() {
           <TabsContent value="states" className="mt-4"><MCCUserStatesTab /></TabsContent>
           <TabsContent value="funnel-diag" className="mt-4"><MCCFunnelDiagnosticsTab /></TabsContent>
           <TabsContent value="timeline" className="mt-4"><MCCUserTimelineTab /></TabsContent>
-          <TabsContent value="funnels" className="mt-4"><MCCFunnelsTab /></TabsContent>
           <TabsContent value="analytics" className="mt-4"><MCCAnalyticsTab /></TabsContent>
         </Tabs>
       </div>

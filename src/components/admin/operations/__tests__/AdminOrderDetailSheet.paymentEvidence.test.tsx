@@ -31,6 +31,7 @@ vi.mock('@tanstack/react-query', () => ({
 vi.mock('@/integrations/supabase/client', () => ({
   supabase: { from: () => { throw new Error('This presentation test must not access Supabase'); } },
 }));
+vi.mock('@/contexts/AuthContext', () => ({ useAuth: () => ({ user: { id: 'synthetic-admin' } }) }));
 vi.mock('sonner', () => ({ toast: vi.fn() }));
 
 beforeEach(() => {

@@ -1,342 +1,75 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { pickLang } from '@/lib/i18n/pickLang';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import {
-  Activity, TrendingUp, TrendingDown, DollarSign, Users, Eye,
-  MousePointerClick, Target, ArrowRight, AlertTriangle, AlertCircle,
-  Info, Sparkles, Check, X, ChevronRight, Loader2
-} from 'lucide-react';
+import { usePulseKPIs } from '@/hooks/useMCCControlTower';
+import { useLandingRegistry } from '@/hooks/useLandingRegistry';
 import { useMCCNavigation } from '@/pages/admin/marketing/MarketingDashboard';
-import {
-  usePulseKPIs,
-  useLandingFunnelBoard,
-  useMCCAlerts,
-} from '@/hooks/useMCCControlTower';
-import { cn } from '@/lib/utils';
 
 type Period = 'today' | '7d' | 'mtd';
 
-const STATE_LABELS: Record<string, { en: string; ru: string }> = {
-  anonymous: { en: 'Anonymous', ru: 'Анонимный' },
-  identified: { en: 'Identified', ru: 'Идентифицирован' },
-  first_action: { en: 'First Action', ru: 'Первое действие' },
-  returning: { en: 'Returning', ru: 'Возвращающийся' },
-  multi_vertical: { en: 'Multi-Vertical', ru: 'Мульти-вертикаль' },
-  expat_candidate: { en: 'Expat', ru: 'Экспат' },
-  investor_candidate: { en: 'Investor', ru: 'Инвестор' },
-  dormant: { en: 'Dormant', ru: 'Спящий' },
-  churned: { en: 'Churned', ru: 'Отток' },
-};
-
+/** Recorded-event overview. Commercial and accounting evidence stays in Finance. */
 export function MCCControlTowerTab() {
   const { language } = useLanguage();
-  const isRu = language === 'ru';
+  const l = (en: string, ru: string, th: string) => pickLang(language, { en, ru, th });
   const { navigateTo } = useMCCNavigation();
   const [period, setPeriod] = useState<Period>('7d');
-
-  const { data: pulse, isLoading: pulseLoading } = usePulseKPIs(period);
-  const { data: funnel, isLoading: funnelLoading } = useLandingFunnelBoard(period);
-  const alerts = useMCCAlerts();
-
-  const isLoading = pulseLoading || funnelLoading;
-
-  const formatCurrency = (v: number) => {
-    if (v >= 1000000) return `฿${(v / 1000000).toFixed(1)}M`;
-    if (v >= 1000) return `฿${(v / 1000).toFixed(0)}K`;
-    return `฿${v.toFixed(0)}`;
-  };
-
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center py-12">
-        <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+  const pulse = usePulseKPIs(period);
+  const registry = useLandingRegistry();
+  const landings = registry.isError ? undefined : registry.data;
+  const metrics = [
+    { key: 'traffic', label: l('View events', 'События просмотра', 'เหตุการณ์เข้าชม') },
+    { key: 'ctaClicks', label: l('CTA click events', 'Клики по основному действию', 'เหตุการณ์คลิก CTA') },
+    { key: 'intents', label: l('Intent events', 'События начала обращения', 'เหตุการณ์เริ่มคำขอ') },
+    { key: 'completed', label: l('Completion events', 'События завершения', 'เหตุการณ์เสร็จสิ้น') },
+    { key: 'secondAction', label: l('Repeat action events', 'Повторные действия', 'เหตุการณ์ทำรายการซ้ำ') },
+  ] as const;
+  const stamp = (value: string) => new Intl.DateTimeFormat(language, { timeZone: 'Asia/Bangkok', dateStyle: 'short', timeStyle: 'short' }).format(new Date(value));
+  return <section className="min-w-0 space-y-4">
+    <div className="flex flex-wrap items-start justify-between gap-3">
+      <div>
+        <h2 className="font-display text-h3">{l('Marketing events', 'Маркетинговые события', 'เหตุการณ์การตลาด')}</h2>
+        <p className="mt-1 text-sm text-muted-foreground">{l('Exact counts of recorded events. Events do not establish unique users, payments or revenue.', 'Точные счётчики зарегистрированных событий. События не подтверждают уникальных пользователей, оплаты или выручку.', 'จำนวนเหตุการณ์ที่บันทึกไว้ ไม่ใช่หลักฐานของผู้ใช้ที่ไม่ซ้ำ การชำระเงิน หรือรายได้')}</p>
       </div>
-    );
-  }
-
-  return (
-    <div className="space-y-6">
-      {/* Header + Period selector */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-lg font-semibold flex items-center gap-2">
-            <Activity className="h-5 w-5 text-primary" />
-            {isRu ? 'Control Tower' : 'Control Tower'}
-          </h2>
-          <p className="text-sm text-muted-foreground">
-            {isRu ? 'Все ключевые метрики в одном экране' : 'All key metrics in one screen'}
-          </p>
-        </div>
-        <Select value={period} onValueChange={(v) => setPeriod(v as Period)}>
-          <SelectTrigger className="w-[120px]">
-            <SelectValue />
-          </SelectTrigger>
+      <div className="flex flex-wrap gap-2">
+        <Select value={period} onValueChange={value => setPeriod(value as Period)}>
+          <SelectTrigger className="min-h-11 w-40" aria-label={l('Event period', 'Период событий', 'ช่วงเวลาเหตุการณ์')}><SelectValue /></SelectTrigger>
           <SelectContent>
-            <SelectItem value="today">{isRu ? 'Сегодня' : 'Today'}</SelectItem>
-            <SelectItem value="7d">{isRu ? '7 дней' : '7 days'}</SelectItem>
-            <SelectItem value="mtd">{isRu ? 'Месяц' : 'MTD'}</SelectItem>
+            <SelectItem value="today">{l('Today', 'Сегодня', 'วันนี้')}</SelectItem>
+            <SelectItem value="7d">{l('Last 7 days', 'Последние 7 дней', '7 วันที่ผ่านมา')}</SelectItem>
+            <SelectItem value="mtd">{l('This month', 'Текущий месяц', 'เดือนนี้')}</SelectItem>
           </SelectContent>
         </Select>
-      </div>
-
-      {/* ══ PULSE BAR ══ */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-        <PulseCard
-          title={isRu ? 'Трафик' : 'Traffic'}
-          value={pulse?.traffic ?? 0}
-          icon={Eye}
-          color="bg-info"
-          threshold={pulse?.traffic && pulse.traffic >= 100 ? 'green' : pulse?.traffic && pulse.traffic >= 50 ? 'yellow' : 'red'}
-        />
-        <PulseCard
-          title={isRu ? 'Выручка' : 'Revenue'}
-          value={formatCurrency(pulse?.revenue ?? 0)}
-          icon={DollarSign}
-          color="bg-success"
-          threshold={pulse?.revenue && pulse.revenue >= 10000 ? 'green' : pulse?.revenue && pulse.revenue >= 5000 ? 'yellow' : 'red'}
-        />
-        <PulseCard
-          title={isRu ? 'Конверсия' : 'Conversion'}
-          value={`${(pulse?.conversionPct ?? 0).toFixed(1)}%`}
-          icon={Target}
-          color="bg-primary"
-          threshold={pulse?.conversionPct && pulse.conversionPct >= 8 ? 'green' : pulse?.conversionPct && pulse.conversionPct >= 5 ? 'yellow' : 'red'}
-        />
-        <PulseCard
-          title={isRu ? 'Актив. пользователи' : 'Active Users'}
-          value={pulse?.activeUsers ?? 0}
-          icon={Users}
-          color="bg-chart-1"
-        />
-      </div>
-
-      {/* ══ ALERTS STRIP ══ */}
-      {alerts.length > 0 && (
-        <div className="space-y-2">
-          {alerts.map((alert) => (
-            <div
-              key={alert.id}
-              className={cn(
-                'flex items-center gap-3 p-3 rounded-none text-sm',
-                alert.severity === 'critical' && 'bg-destructive/10 border border-destructive/30',
-                alert.severity === 'warning' && 'bg-warning/10 border border-warning/30',
-                alert.severity === 'info' && 'bg-info/10 border border-info/30',
-              )}
-            >
-              {alert.severity === 'critical' ? (
-                <AlertCircle className="h-4 w-4 text-destructive shrink-0" />
-              ) : alert.severity === 'warning' ? (
-                <AlertTriangle className="h-4 w-4 text-warning shrink-0" />
-              ) : (
-                <Info className="h-4 w-4 text-info shrink-0" />
-              )}
-              <div className="flex-1 min-w-0">
-                <span className="font-medium">{alert.title}</span>
-                <span className="text-muted-foreground ml-2">{alert.description}</span>
-              </div>
-              {alert.action && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="shrink-0 h-7 text-xs"
-                  onClick={() => {
-                    if (alert.landing_id) navigateTo('funnel-diag', { landingId: alert.landing_id });
-                    else navigateTo('states');
-                  }}
-                >
-                  {alert.action}
-                </Button>
-              )}
-            </div>
-          ))}
-        </div>
-      )}
-
-      {/* ══ FUNNEL BOARD ══ */}
-      <Card>
-        <CardHeader className="pb-2">
-          <CardTitle className="text-base">{isRu ? 'Воронка по лендингам' : 'Landing Funnel Board'}</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead className="bg-muted/50">
-                <tr>
-                  <th className="text-left p-2 font-medium">{isRu ? 'Лендинг' : 'Landing'}</th>
-                  <th className="text-right p-2 font-medium">{isRu ? 'Просмотры' : 'Views'}</th>
-                  <th className="text-right p-2 font-medium">CTA</th>
-                  <th className="text-right p-2 font-medium">{isRu ? 'Интенты' : 'Intents'}</th>
-                  <th className="text-right p-2 font-medium">{isRu ? 'Заверш.' : 'Done'}</th>
-                  <th className="text-right p-2 font-medium">{isRu ? '2-е действ.' : '2nd Act'}</th>
-                  <th className="text-right p-2 font-medium">{isRu ? 'Выручка' : 'Revenue'}</th>
-                  <th className="text-right p-2 font-medium">Conv%</th>
-                </tr>
-              </thead>
-              <tbody>
-                {(funnel || []).map((row) => {
-                  const conv = row.views > 0 ? ((row.completed / row.views) * 100).toFixed(1) : '0';
-                  return (
-                    <tr key={row.landing_id} className="border-t hover:bg-muted/30 cursor-pointer" onClick={() => navigateTo('landings', { landingId: row.landing_id })}>
-                      <td className="p-2">
-                        <div className="flex items-center gap-2">
-                          <div className={cn('w-2 h-2 rounded-full', row.is_active ? 'bg-success' : 'bg-muted-foreground')} />
-                          <span className="font-medium">{isRu ? row.name_ru : row.name_en}</span>
-                        </div>
-                      </td>
-                      <td className="p-2 text-right tabular-nums">{row.views}</td>
-                      <td className="p-2 text-right tabular-nums">{row.clicks}</td>
-                      <td className="p-2 text-right tabular-nums">{row.intents}</td>
-                      <td className="p-2 text-right tabular-nums">{row.completed}</td>
-                      <td className="p-2 text-right tabular-nums">{row.secondAction}</td>
-                      <td className="p-2 text-right tabular-nums">{formatCurrency(row.revenue)}</td>
-                      <td className="p-2 text-right">
-                        <Badge variant={Number(conv) >= 8 ? 'default' : Number(conv) >= 5 ? 'secondary' : 'destructive'} className="text-xs">
-                          {conv}%
-                        </Badge>
-                      </td>
-                    </tr>
-                  );
-                })}
-                {(!funnel || funnel.length === 0) && (
-                  <tr>
-                    <td colSpan={8} className="p-4 text-center text-muted-foreground">
-                      {isRu ? 'Нет данных. Начните отправлять события.' : 'No data. Start sending events.'}
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* ══ BELOW THE FOLD: STATE MAP + AI + DROP-OFF ══ */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* State Map */}
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-base">{isRu ? 'Карта состояний' : 'State Map'}</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-2">
-            {Object.entries(pulse?.stateDistribution || {}).sort((a, b) => b[1] - a[1]).map(([state, count]) => {
-              const maxCount = Math.max(...Object.values(pulse?.stateDistribution || { x: 1 }));
-              const pct = maxCount > 0 ? (count / maxCount) * 100 : 0;
-              const label = STATE_LABELS[state] || { en: state, ru: state };
-              return (
-                <div key={state} className="flex items-center gap-3">
-                  <div className="w-28 text-sm text-muted-foreground truncate">{isRu ? label.ru : label.en}</div>
-                  <div className="flex-1 h-6 bg-muted rounded-none overflow-hidden">
-                    <div
-                      className="h-full bg-primary/60 rounded-none flex items-center justify-end px-2"
-                      style={{ width: `${Math.max(pct, 5)}%` }}
-                    >
-                      <span className="text-xs font-medium text-primary-foreground">{count}</span>
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
-            {Object.keys(pulse?.stateDistribution || {}).length === 0 && (
-              <p className="text-sm text-muted-foreground text-center py-4">
-                {isRu ? 'Нет данных по состояниям' : 'No state data yet'}
-              </p>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Drop-off Radar */}
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-base">{isRu ? 'Drop-off Radar' : 'Drop-off Radar'}</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-2">
-            {(funnel || []).filter(l => l.views > 0).map((l) => {
-              const dropOff = l.intents > 0 ? ((1 - l.completed / l.intents) * 100).toFixed(0) : '0';
-              const isHigh = Number(dropOff) > 50;
-              return (
-                <div key={l.landing_id} className="flex items-center justify-between py-1.5 border-b border-border/50 last:border-0">
-                  <span className="text-sm">{isRu ? l.name_ru : l.name_en}</span>
-                  <div className="flex items-center gap-2 text-sm">
-                    <span className="text-muted-foreground">{l.intents} → {l.completed}</span>
-                    <Badge variant={isHigh ? 'destructive' : 'secondary'} className="text-xs">
-                      {dropOff}% {isRu ? 'потерь' : 'drop'}
-                    </Badge>
-                  </div>
-                </div>
-              );
-            })}
-            {(!funnel || funnel.filter(l => l.views > 0).length === 0) && (
-              <p className="text-sm text-muted-foreground text-center py-4">
-                {isRu ? 'Нет данных' : 'No data'}
-              </p>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Mini Funnel Numbers */}
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-base">{isRu ? 'Общая воронка' : 'Overall Funnel'}</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex items-center gap-2 overflow-x-auto py-2">
-              {[
-                { label: isRu ? 'Просмотры' : 'Views', value: pulse?.traffic ?? 0 },
-                { label: 'CTA', value: pulse?.ctaClicks ?? 0 },
-                { label: isRu ? 'Интенты' : 'Intents', value: pulse?.intents ?? 0 },
-                { label: isRu ? 'Заверш.' : 'Done', value: pulse?.completed ?? 0 },
-                { label: '2nd', value: pulse?.secondAction ?? 0 },
-              ].map((step, idx, arr) => (
-                <React.Fragment key={step.label}>
-                  <div className="text-center px-3 py-2 rounded-none bg-muted/50 min-w-[70px]">
-                    <p className="text-xs text-muted-foreground">{step.label}</p>
-                    <p className="text-lg font-bold">{step.value}</p>
-                  </div>
-                  {idx < arr.length - 1 && <ArrowRight className="h-4 w-4 text-muted-foreground shrink-0" />}
-                </React.Fragment>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
+        <Button variant="outline" className="min-h-11" disabled={pulse.isFetching || registry.isFetching} onClick={() => { void pulse.refetch(); void registry.refetch(); }}>{l('Refresh', 'Обновить', 'รีเฟรช')}</Button>
       </div>
     </div>
-  );
-}
-
-// ── PulseCard sub-component ──
-function PulseCard({
-  title, value, icon: Icon, color, threshold
-}: {
-  title: string;
-  value: string | number;
-  icon: React.ElementType;
-  color: string;
-  threshold?: 'green' | 'yellow' | 'red';
-}) {
-  return (
-    <Card className="relative overflow-hidden">
-      <CardContent className="p-4">
-        <div className="flex items-start justify-between">
-          <div>
-            <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">{title}</p>
-            <p className="text-2xl font-bold">{value}</p>
-          </div>
-          <div className={cn('p-2 rounded-none', color)}>
-            <Icon className="h-5 w-5 text-white" />
-          </div>
-        </div>
-        {threshold && (
-          <div className={cn(
-            'absolute bottom-0 left-0 right-0 h-1',
-            threshold === 'green' && 'bg-success',
-            threshold === 'yellow' && 'bg-warning',
-            threshold === 'red' && 'bg-destructive',
-          )} />
-        )}
+    {pulse.isLoading && <p role="status">{l('Loading event counts…', 'Загрузка счётчиков событий…', 'กำลังโหลดจำนวนเหตุการณ์…')}</p>}
+    {pulse.isError && <div role="alert" className="border border-warning p-3">{l('Event counts are unavailable. Retry the read.', 'Счётчики событий недоступны. Повторите загрузку.', 'จำนวนเหตุการณ์ไม่พร้อมใช้งาน โปรดลองอีกครั้ง')}</div>}
+    <div className="grid min-w-0 gap-3 sm:grid-cols-2 xl:grid-cols-5">
+      {metrics.map(metric => <Card key={metric.key}><CardContent className="min-w-0 p-4">
+        <p className="text-sm text-muted-foreground">{metric.label}</p>
+        <p className="mt-2 break-words font-mono text-2xl">{typeof pulse.data?.[metric.key] === 'number' ? pulse.data[metric.key].toLocaleString(language) : '—'}</p>
+      </CardContent></Card>)}
+    </div>
+    {pulse.data?.from && <p className="text-xs text-muted-foreground">{stamp(pulse.data.from)} – {stamp(pulse.data.through)} · {l('Phuket time', 'Время Пхукета', 'เวลาภูเก็ต')}</p>}
+    <Card>
+      <CardHeader><CardTitle className="text-lg">{l('Landing registry', 'Реестр лендингов', 'ทะเบียนหน้าแลนดิ้ง')}</CardTitle></CardHeader>
+      <CardContent>
+        {registry.isLoading && <p role="status">{l('Loading landings…', 'Загрузка лендингов…', 'กำลังโหลดหน้าแลนดิ้ง…')}</p>}
+        {registry.isError && <p role="alert">{l('Landing registry could not be loaded.', 'Не удалось загрузить реестр лендингов.', 'โหลดทะเบียนหน้าแลนดิ้งไม่สำเร็จ')}</p>}
+        {!registry.isLoading && !registry.isError && landings?.length === 0 && <p role="status">{l('No registered landings.', 'В реестре нет лендингов.', 'ยังไม่มีหน้าแลนดิ้งในทะเบียน')}</p>}
+        <ul className="divide-y divide-border">{landings?.map(landing => <li key={landing.landing_id} className="flex min-w-0 flex-wrap items-center gap-3 py-3">
+          <div className="min-w-0 flex-1 basis-40"><p className="break-words font-medium">{language === 'ru' ? landing.name_ru || landing.name_en || landing.landing_id : landing.name_en || landing.landing_id}</p><p className="break-words font-mono text-xs text-muted-foreground">{landing.landing_id}</p></div>
+          <Button variant="outline" className="min-h-11" onClick={() => navigateTo('funnel-diag', { landingId: landing.landing_id })}>{l('View events', 'Посмотреть события', 'ดูเหตุการณ์')}</Button>
+        </li>)}</ul>
       </CardContent>
     </Card>
-  );
+    <div className="flex flex-wrap gap-3">
+      <Button asChild variant="outline" className="min-h-11"><Link to="/admin/analytics?tab=acquisition">{l('Recorded channel metrics', 'Показатели каналов привлечения', 'ตัวชี้วัดช่องทางที่บันทึกไว้')}</Link></Button>
+      <Button asChild variant="outline" className="min-h-11"><Link to="/admin/finance">{l('Payments and payouts', 'Платежи и выплаты', 'การชำระเงินและการจ่ายเงิน')}</Link></Button>
+    </div>
+  </section>;
 }

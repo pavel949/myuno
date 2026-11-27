@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 
 import { PageContainer } from '@/components/uno/PageContainer';
@@ -27,12 +27,20 @@ import {
 } from 'lucide-react';
 import { format, formatDistanceToNow } from 'date-fns';
 import { ru } from 'date-fns/locale';
-import { supabase } from '@/integrations/supabase/client';
 import { useAdminTickets } from '@/hooks/useAdminTickets';
+import { useTicketDetail, useTicketMessages } from '@/hooks/useTickets';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { useCityCurrency } from '@/hooks/useCityCurrency';
-import type { SupportTicket, TicketMessage, TicketStatus, TicketPriority, ResolutionType } from '@/hooks/useTickets';
+import type { TicketStatus, TicketPriority, ResolutionType } from '@/hooks/useTickets';
 
 export default function AdminTicketDetail() {
+  const { ticketId } = useParams<{ ticketId: string }>();
+  return <AdminTicketWorkspace key={ticketId ?? 'missing-ticket'} />;
+}
+
+function AdminTicketWorkspace() {
+  const { language } = useLanguage();
+  const isRu = language === 'ru';
   const { ticketId } = useParams<{ ticketId: string }>();
   const navigate = useNavigate();
   const { symbol: curSym } = useCityCurrency();
@@ -41,47 +49,16 @@ export default function AdminTicketDetail() {
     updatePriority, 
     resolveTicket, 
     addAdminMessage, 
-    getTicketMessages 
   } = useAdminTickets();
 
-  const [ticket, setTicket] = useState<SupportTicket | null>(null);
-  const [messages, setMessages] = useState<TicketMessage[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const { data: ticket, isLoading, isError: ticketError, refetch: fetchTicket } = useTicketDetail(ticketId);
+  const { data: messages = [], isError: messagesError, refetch: fetchMessages } = useTicketMessages(ticketId);
   const [showResolveDialog, setShowResolveDialog] = useState(false);
 
   // Resolution form state
   const [resolutionType, setResolutionType] = useState<ResolutionType>('no_refund');
   const [resolution, setResolution] = useState('');
   const [refundAmount, setRefundAmount] = useState('');
-
-  const fetchTicket = async () => {
-    if (!ticketId) return;
-
-    const { data, error } = await supabase
-      .from('support_tickets')
-      .select('*')
-      .eq('id', ticketId)
-      .single();
-
-    if (!error && data) {
-      setTicket(data as unknown as SupportTicket);
-    }
-  };
-
-  const fetchMessages = async () => {
-    if (!ticketId) return;
-    const data = await getTicketMessages(ticketId);
-    setMessages(data);
-  };
-
-  useEffect(() => {
-    const loadData = async () => {
-      setIsLoading(true);
-      await Promise.all([fetchTicket(), fetchMessages()]);
-      setIsLoading(false);
-    };
-    loadData();
-  }, [ticketId]);
 
   const handleStatusChange = async (status: TicketStatus) => {
     if (!ticketId) return;
@@ -98,12 +75,13 @@ export default function AdminTicketDetail() {
   const handleResolve = async () => {
     if (!ticketId || !resolution.trim()) return;
     
-    await resolveTicket(
+    const succeeded = await resolveTicket(
       ticketId,
       resolutionType,
       resolution,
       refundAmount ? parseFloat(refundAmount) : undefined
     );
+    if (!succeeded) return;
     
     setShowResolveDialog(false);
     await fetchTicket();
@@ -139,11 +117,17 @@ export default function AdminTicketDetail() {
     );
   }
 
+  if (ticketError) return <PageContainer>
+    <PageHeader title={isRu ? 'Не удалось загрузить обращение' : 'Could not load support request'} showBack />
+    <p role="alert">{isRu ? 'Проверьте соединение и повторите загрузку.' : 'Check your connection and retry the read.'}</p>
+    <Button variant="outline" onClick={() => void fetchTicket()}>{isRu ? 'Повторить' : 'Retry'}</Button>
+  </PageContainer>;
+
   if (!ticket) {
     return (
       <>
         <PageContainer>
-          <PageHeader title="Тикет не найден" showBack />
+          <PageHeader title={isRu ? 'Обращение не найдено или недоступно' : 'Support request not found or not accessible'} showBack />
         </PageContainer>
       </>
     );
@@ -309,7 +293,7 @@ export default function AdminTicketDetail() {
                 {ticket.order_id && (
                   <div className="flex items-center gap-2 text-sm">
                     <Package className="w-4 h-4 text-muted-foreground" />
-                    <Button variant="link" className="p-0 h-auto" onClick={() => navigate(`/admin/orders/${ticket.order_id}`)}>
+                    <Button variant="link" className="p-0 h-auto" onClick={() => navigate(`/admin/operations?tab=bookings&order_id=${encodeURIComponent(ticket.order_id!)}`)}>
                       Заказ #{ticket.order_id.slice(0, 8)}
                     </Button>
                   </div>
@@ -373,6 +357,10 @@ export default function AdminTicketDetail() {
 
           {/* Right Column - Messages */}
           <div className="lg:col-span-2">
+            {messagesError && <div role="alert" className="mb-3 border border-warning p-3">
+              {isRu ? 'Не удалось загрузить переписку.' : 'Could not load the conversation.'}
+              <Button variant="outline" onClick={() => void fetchMessages()}>{isRu ? 'Повторить' : 'Retry'}</Button>
+            </div>}
             <Card className="h-[600px] flex flex-col">
               <CardHeader className="pb-2">
                 <CardTitle className="text-base">Переписка</CardTitle>

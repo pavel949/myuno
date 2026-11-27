@@ -6,28 +6,31 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Search, Users, Phone, Mail, Calendar, TrendingUp, MoreHorizontal } from 'lucide-react';
+import { Search, Users, Phone, Mail, Calendar, CheckCircle2, MoreHorizontal } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { format } from 'date-fns';
-
-const statusColors: Record<string, string> = {
-  new: 'bg-info/20 text-info',
-  contacted: 'bg-warning/20 text-warning',
-  qualified: 'bg-success/20 text-success',
-  converted: 'bg-accent-purple/20 text-accent-purple',
-  lost: 'bg-destructive/20 text-destructive',
-};
+import { useAuth } from '@/contexts/AuthContext';
+import { VendorProspectDetail } from '@/components/admin/prospects/VendorProspectDetail';
+import { statusConfig, type VendorProspect } from '@/hooks/useVendorAcquisition';
 
 export function OperationsLeadsTab() {
   const { language } = useLanguage();
   const isRussian = language === 'ru';
+  const statusLabel = (status: string | null) => {
+    const config = status ? statusConfig[status] : undefined;
+    if (config?.label) return isRussian ? config.labelRu : config.label;
+    return `${isRussian ? 'Неизвестно' : 'Unknown'}${status ? ` (${status})` : ''}`;
+  };
+  const { user } = useAuth();
+  const [selectedId, setSelectedId] = useState<{ actorId: string; id: string } | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
 
   // Fetch leads from vendor_prospects or a leads table
-  const { data: leads, isLoading } = useQuery({
-    queryKey: ['admin-leads', statusFilter],
+  const { data: cachedLeads, isLoading, isError, error, refetch } = useQuery({
+    queryKey: ['vendor-prospects', 'operations-preview', user?.id, statusFilter],
+    enabled: !!user,
     queryFn: async () => {
       let query = supabase
         .from('vendor_prospects')
@@ -41,15 +44,19 @@ export function OperationsLeadsTab() {
       
       const { data, error } = await query;
       if (error) throw error;
+      if (!data) throw new Error('Prospect response unavailable');
       return data;
     }
   });
+  const leads = user && !isError ? cachedLeads : undefined;
+  const available = !isLoading && !isError && !!leads;
+  const selectedProspect = selectedId?.actorId === user?.id ? leads?.find(lead => lead.id === selectedId?.id) : undefined;
 
   const stats = {
-    new: leads?.filter(l => l.status === 'new' || !l.status).length || 0,
-    contacted: leads?.filter(l => l.status === 'contacted').length || 0,
-    qualified: leads?.filter(l => l.status === 'qualified').length || 0,
-    converted: leads?.filter(l => l.status === 'converted').length || 0,
+    new: available ? leads.filter(l => l.status === 'new').length : '—',
+    contacted: available ? leads.filter(l => l.status === 'contacted').length : '—',
+    meeting: available ? leads.filter(l => l.status === 'meeting').length : '—',
+    won: available ? leads.filter(l => l.status === 'won').length : '—',
   };
 
   const filteredLeads = leads?.filter(l => {
@@ -65,6 +72,11 @@ export function OperationsLeadsTab() {
 
   return (
     <div className="space-y-4">
+      <p className="text-sm text-muted-foreground">{isRussian ? 'Показатели текущей выборки — до 100 записей, с выбранным статусом.' : 'Counts for the loaded selection: up to 100 records with the selected status.'}</p>
+      {error && <div role="alert" className="border border-warning p-4">
+        {isRussian ? 'Не удалось загрузить кандидатов в партнёры.' : 'Could not load partner prospects.'}
+        <Button variant="outline" onClick={() => void refetch()}>{isRussian ? 'Повторить' : 'Retry'}</Button>
+      </div>}
       {/* Stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <Card>
@@ -72,7 +84,7 @@ export function OperationsLeadsTab() {
             <Users className="h-8 w-8 text-info" />
             <div>
               <p className="text-2xl font-bold">{stats.new}</p>
-              <p className="text-sm text-muted-foreground">{isRussian ? 'Новые' : 'New'}</p>
+              <p className="text-sm text-muted-foreground">{statusLabel('new')}</p>
             </div>
           </CardContent>
         </Card>
@@ -81,25 +93,25 @@ export function OperationsLeadsTab() {
             <Phone className="h-8 w-8 text-warning" />
             <div>
               <p className="text-2xl font-bold">{stats.contacted}</p>
-              <p className="text-sm text-muted-foreground">{isRussian ? 'Связались' : 'Contacted'}</p>
+              <p className="text-sm text-muted-foreground">{statusLabel('contacted')}</p>
             </div>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="p-4 flex items-center gap-3">
-            <TrendingUp className="h-8 w-8 text-success" />
+            <Calendar className="h-8 w-8 text-primary" />
             <div>
-              <p className="text-2xl font-bold">{stats.qualified}</p>
-              <p className="text-sm text-muted-foreground">{isRussian ? 'Квалифицированы' : 'Qualified'}</p>
+              <p className="text-2xl font-bold">{stats.meeting}</p>
+              <p className="text-sm text-muted-foreground">{statusLabel('meeting')}</p>
             </div>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="p-4 flex items-center gap-3">
-            <Calendar className="h-8 w-8 text-accent-purple" />
+            <CheckCircle2 className="h-8 w-8 text-success" />
             <div>
-              <p className="text-2xl font-bold">{stats.converted}</p>
-              <p className="text-sm text-muted-foreground">{isRussian ? 'Конвертировано' : 'Converted'}</p>
+              <p className="text-2xl font-bold">{stats.won}</p>
+              <p className="text-sm text-muted-foreground">{statusLabel('won')}</p>
             </div>
           </CardContent>
         </Card>
@@ -110,7 +122,7 @@ export function OperationsLeadsTab() {
         <CardHeader className="pb-3">
           <CardTitle className="flex items-center gap-2">
             <Users className="h-5 w-5" />
-            {isRussian ? 'Лиды' : 'Leads'}
+            {isRussian ? 'Кандидаты в партнёры' : 'Partner prospects'}
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -130,11 +142,7 @@ export function OperationsLeadsTab() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">{isRussian ? 'Все' : 'All'}</SelectItem>
-                <SelectItem value="new">{isRussian ? 'Новые' : 'New'}</SelectItem>
-                <SelectItem value="contacted">{isRussian ? 'Связались' : 'Contacted'}</SelectItem>
-                <SelectItem value="qualified">{isRussian ? 'Квалифицированы' : 'Qualified'}</SelectItem>
-                <SelectItem value="converted">{isRussian ? 'Конвертировано' : 'Converted'}</SelectItem>
-                <SelectItem value="lost">{isRussian ? 'Потеряны' : 'Lost'}</SelectItem>
+                {Object.keys(statusConfig).map(status => <SelectItem key={status} value={status}>{statusLabel(status)}</SelectItem>)}
               </SelectContent>
             </Select>
           </div>
@@ -183,21 +191,21 @@ export function OperationsLeadsTab() {
                         <Badge variant="outline">{lead.category || '—'}</Badge>
                       </TableCell>
                       <TableCell>
-                        <Badge className={statusColors[lead.status || 'new'] || 'bg-muted'}>
-                          {lead.status || 'new'}
+                        <Badge variant="outline">
+                          {statusLabel(lead.status)}
                         </Badge>
                       </TableCell>
                       <TableCell className="text-sm text-muted-foreground">
                         {lead.created_at ? format(new Date(lead.created_at), 'dd.MM.yyyy') : '—'}
                       </TableCell>
                       <TableCell>
-                        <Button variant="ghost" size="icon" className="h-8 w-8 min-h-[44px] min-w-[44px]" aria-label={isRussian ? 'Действия' : 'Actions'}>
+                        <Button variant="ghost" size="icon" className="h-8 w-8 min-h-[44px] min-w-[44px]" aria-label={isRussian ? 'Открыть кандидата' : 'Open prospect'} onClick={() => { if (user) setSelectedId({ actorId: user.id, id: lead.id }); }}>
                           <MoreHorizontal className="h-4 w-4" />
                         </Button>
                       </TableCell>
                     </TableRow>
                   ))}
-                  {(!filteredLeads || filteredLeads.length === 0) && (
+                  {!error && (!filteredLeads || filteredLeads.length === 0) && (
                     <TableRow>
                       <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
                         {isRussian ? 'Лиды не найдены' : 'No leads found'}
@@ -210,6 +218,7 @@ export function OperationsLeadsTab() {
           )}
         </CardContent>
       </Card>
+      {selectedProspect && <VendorProspectDetail key={`${user?.id}:${selectedProspect.id}`} prospect={selectedProspect as unknown as VendorProspect} open onClose={() => setSelectedId(null)} />}
     </div>
   );
 }

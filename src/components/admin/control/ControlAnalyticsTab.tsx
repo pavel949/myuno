@@ -1,72 +1,18 @@
-import React from 'react';
+import { Link } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { BarChart3, Users, TrendingUp, Calendar } from 'lucide-react';
-import { useQuery } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
+import { pickLang } from '@/lib/i18n/pickLang';
+import { AdminRevenueBlock } from '@/components/admin/dashboard/AdminRevenueBlock';
+import { Button } from '@/components/ui/button';
 
 export function ControlAnalyticsTab() {
-  const { t } = useLanguage();
-
-  const { data: stats } = useQuery({
-    queryKey: ['admin-analytics-overview'],
-    queryFn: async () => {
-      const [profilesRes, providersRes, ordersRes, bookingsRes] = await Promise.all([
-        supabase.from('profiles').select('id', { count: 'exact', head: true }),
-        supabase.from('providers').select('id', { count: 'exact', head: true }),
-        supabase.from('orders').select('id', { count: 'exact', head: true }),
-        supabase.from('bookings').select('id', { count: 'exact', head: true }),
-      ]);
-
-      return {
-        users: profilesRes.count || 0,
-        providers: providersRes.count || 0,
-        orders: ordersRes.count || 0,
-        bookings: bookingsRes.count || 0,
-      };
-    }
-  });
-
-  const kpis = [
-    { label: t('admin.finance.analytics.users'), value: stats?.users || 0, icon: Users, color: 'text-info' },
-    { label: t('admin.finance.analytics.providers'), value: stats?.providers || 0, icon: TrendingUp, color: 'text-success' },
-    { label: t('admin.finance.analytics.orders'), value: stats?.orders || 0, icon: Calendar, color: 'text-accent-purple' },
-    { label: t('admin.finance.analytics.bookings'), value: stats?.bookings || 0, icon: BarChart3, color: 'text-warning' },
-  ];
-
-  return (
-    <div className="space-y-4">
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        {kpis.map((kpi) => (
-          <Card key={kpi.label}>
-            <CardContent className="p-4">
-              <div className="flex items-center gap-3">
-                <div className={`h-10 w-10 rounded-none bg-muted flex items-center justify-center`}>
-                  <kpi.icon className={`h-5 w-5 ${kpi.color}`} />
-                </div>
-                <div>
-                  <p className="text-2xl font-bold">{kpi.value.toLocaleString()}</p>
-                  <p className="text-sm text-muted-foreground">{kpi.label}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <BarChart3 className="h-5 w-5" />
-            {t('admin.finance.analytics.title')}
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="text-center py-8 text-muted-foreground">
-            {t('admin.finance.analytics.detailed')}
-          </div>
-        </CardContent>
-      </Card>
+  const { language } = useLanguage();
+  // Reuse the admitted snapshot evidence instead of maintaining parallel totals.
+  return <section className="min-w-0 space-y-4">
+    <AdminRevenueBlock />
+    <div className="flex flex-wrap gap-3">
+      <Button asChild variant="outline" className="min-h-11"><Link to="/admin/analytics?tab=visits">{pickLang(language, { en: 'Visits and activity', ru: 'Посещения и активность', th: 'การเข้าชมและกิจกรรม' })}</Link></Button>
+      <Button asChild variant="outline" className="min-h-11"><Link to="/admin/analytics?tab=acquisition">{pickLang(language, { en: 'Recorded acquisition metrics', ru: 'Показатели привлечения', th: 'ตัวชี้วัดการหาลูกค้าที่บันทึกไว้' })}</Link></Button>
+      <Button asChild variant="outline" className="min-h-11"><Link to="/admin/analytics?tab=revenue">{pickLang(language, { en: 'Commercial indicators', ru: 'Коммерческие показатели', th: 'ตัวชี้วัดเชิงพาณิชย์' })}</Link></Button>
     </div>
-  );
+  </section>;
 }

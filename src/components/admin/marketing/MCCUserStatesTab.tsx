@@ -31,11 +31,11 @@ export function MCCUserStatesTab() {
   const { language } = useLanguage();
   const isRu = language === 'ru';
   const { navigateTo } = useMCCNavigation();
-  const { data, isLoading } = useUserStateDistribution();
-  const { data: transitions } = useStateTransitions(7);
-  const { data: churnUsers } = useChurnRiskUsers();
+  const { data, isLoading, isError, refetch } = useUserStateDistribution();
+  const { data: transitions, isLoading: transitionsLoading, isError: transitionsError, refetch: retryTransitions } = useStateTransitions(7);
+  const { data: churnUsers, isLoading: churnLoading, isError: churnError, refetch: retryChurn } = useChurnRiskUsers();
 
-  if (isLoading) {
+  if (isLoading || transitionsLoading || churnLoading) {
     return (
       <div className="flex items-center justify-center py-12">
         <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
@@ -43,6 +43,10 @@ export function MCCUserStatesTab() {
     );
   }
 
+  if (isError || transitionsError || churnError) return <div role="alert" className="space-y-3">
+    <p>{isRu ? 'Не удалось загрузить часть данных активности пользователей.' : 'Some recorded user activity could not be loaded.'}</p>
+    <Button variant="outline" onClick={() => { if (isError) void refetch(); if (transitionsError) void retryTransitions(); if (churnError) void retryChurn(); }}>{isRu ? 'Повторить' : 'Retry'}</Button>
+  </div>;
   const distribution = data?.distribution || {};
   const byLanding = data?.byLanding || {};
   const total = data?.total || 0;
@@ -64,7 +68,7 @@ export function MCCUserStatesTab() {
           {isRu ? 'Состояния пользователей' : 'User States'}
         </h2>
         <p className="text-sm text-muted-foreground">
-          {isRu ? 'Распределение по поведенческим состояниям (derived)' : 'Behavioral state distribution (event-derived)'}
+          {isRu ? 'Снимок загруженных состояний. Счётчики и доли относятся к загруженным записям; переходы показывают последние 500 записей за 7 дней.' : 'Loaded state snapshot. Counts and percentages refer to loaded records; transitions show the latest 500 records over 7 days.'}
         </p>
       </div>
 
@@ -79,8 +83,6 @@ export function MCCUserStatesTab() {
           return (
             <Card
               key={state}
-              className="cursor-pointer hover:ring-1 hover:ring-primary/30 transition-all"
-              onClick={() => navigateTo('campaign-rules', { targetState: state })}
             >
               <CardContent className="p-3 text-center space-y-1">
                 <div className={`w-10 h-10 rounded-none mx-auto flex items-center justify-center ${config.color}`}>

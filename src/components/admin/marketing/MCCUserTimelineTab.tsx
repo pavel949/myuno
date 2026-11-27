@@ -27,7 +27,7 @@ const EVENT_ICONS: Record<string, React.ElementType> = {
 export function MCCUserTimelineTab() {
   const { language } = useLanguage();
   const isRu = language === 'ru';
-  const { navContext } = useMCCNavigation();
+  const { navContext, navigateTo } = useMCCNavigation();
   const [searchId, setSearchId] = useState('');
   const [activeUserId, setActiveUserId] = useState('');
 
@@ -39,10 +39,16 @@ export function MCCUserTimelineTab() {
     }
   }, [navContext.userId]);
 
-  const { data, isLoading } = useUserTimeline(activeUserId);
+  const { data, isLoading, isError, refetch } = useUserTimeline(activeUserId);
 
   const handleSearch = () => {
-    if (searchId.trim()) setActiveUserId(searchId.trim());
+    const value = searchId.trim();
+    if (!value) return;
+    setActiveUserId(value);
+    // Preserve valid record navigation without putting free-form contact text in URLs.
+    if (/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(value)) {
+      navigateTo('timeline', { userId: value });
+    }
   };
 
   return (
@@ -54,7 +60,7 @@ export function MCCUserTimelineTab() {
           {isRu ? 'Таймлайн пользователя' : 'User Timeline'}
         </h2>
         <p className="text-sm text-muted-foreground">
-          {isRu ? 'Полная история событий для конкретного пользователя' : 'Complete event history for a specific user'}
+          {isRu ? 'Последние зарегистрированные события пользователя, до 100 записей' : 'Latest recorded user events, up to 100 records'}
         </p>
       </div>
 
@@ -84,7 +90,12 @@ export function MCCUserTimelineTab() {
             </p>
           </CardContent>
         </Card>
-      ) : isLoading ? (
+      ) : isError ? (
+        <div role="alert" className="border border-warning p-4">
+          {isRu ? 'Не удалось загрузить историю пользователя.' : 'Could not load user history.'}
+          <Button variant="outline" onClick={() => void refetch()}>{isRu ? 'Повторить' : 'Retry'}</Button>
+        </div>
+      ) : isLoading || !data ? (
         <div className="flex items-center justify-center py-12">
           <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
         </div>
@@ -99,7 +110,7 @@ export function MCCUserTimelineTab() {
                 </div>
                 <div className="flex-1 space-y-1 min-w-0">
                   <h3 className="font-medium">
-                    {data?.profile?.full_name || (isRu ? 'Неизвестный пользователь' : 'Unknown User')}
+                    {data?.profile?.full_name || (isRu ? 'Имя недоступно' : 'Name unavailable')}
                   </h3>
                   <div className="flex flex-wrap gap-2 text-xs text-muted-foreground">
                     {data?.profile?.email && <span>{data.profile.email}</span>}
@@ -121,19 +132,13 @@ export function MCCUserTimelineTab() {
                     )}
                   </div>
                 </div>
-                <div className="flex gap-2 shrink-0">
-                  <Button variant="outline" size="sm" className="h-8 text-xs">
-                    <Tag className="h-3 w-3 mr-1" />
-                    {isRu ? 'Тег' : 'Tag'}
+                <div className="flex flex-wrap gap-2">
+                  <Button variant="outline" size="sm" className="min-h-11" onClick={() => navigateTo('states', { userId: activeUserId })}>
+                    {isRu ? 'Состояния клиентов' : 'Customer states'}
                   </Button>
-                  <Button variant="outline" size="sm" className="h-8 text-xs">
-                    <MessageSquare className="h-3 w-3 mr-1" />
-                    {isRu ? 'Сообщение' : 'Message'}
-                  </Button>
-                  <Button variant="outline" size="sm" className="h-8 text-xs text-destructive">
-                    <Flag className="h-3 w-3 mr-1" />
-                    {isRu ? 'Флаг' : 'Flag'}
-                  </Button>
+                  {data.profile?.email && <Button asChild variant="outline" size="sm" className="min-h-11">
+                    <a href={`mailto:${encodeURIComponent(data.profile.email)}`}><MessageSquare className="mr-1 h-3 w-3" />{isRu ? 'Написать email' : 'Compose email'}</a>
+                  </Button>}
                 </div>
               </div>
             </CardContent>

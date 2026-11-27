@@ -1,5 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
+import { useAdminCheck } from '@/hooks/useAdmin';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // PHASE J: AI SIGNAL METRICS
@@ -332,25 +334,31 @@ export interface ROIReport {
 }
 
 export function useROIReport() {
-  return useQuery({
-    queryKey: ['ai-roi-report'],
+  const { user } = useAuth();
+  const { isAdmin, isLoading: checkingAccess } = useAdminCheck();
+  const admitted = !!user && isAdmin && !checkingAccess;
+  const query = useQuery({
+    queryKey: ['ai-roi-report', user?.id],
+    enabled: admitted,
     queryFn: async (): Promise<ROIReport> => {
       const startDate = new Date();
       startDate.setDate(startDate.getDate() - 14);
       
-      const { data: artifacts } = await supabase
+      const { data: artifacts, error } = await supabase
         .from('ai_artifacts')
         .select('*')
         .eq('artifact_type', 'quality_analysis')
         .gte('created_at', startDate.toISOString());
+      if (error) throw error;
+      if (!artifacts) throw new Error('AI quality records unavailable');
       
       const totalAnalyzed = artifacts?.length || 0;
       
       if (totalAnalyzed === 0) {
         return {
           period: '14 days',
-          summary: 'AI quality analysis has been deployed but no listings have been analyzed yet. The system is ready and waiting for data.',
-          strengths: ['Infrastructure is live and ready', 'No errors or failures detected'],
+          summary: 'No quality-analysis records were found for the last 14 days.',
+          strengths: [],
           weaknesses: ['No real data to evaluate AI performance yet'],
           recommendation: 'KEEP',
           nextSteps: [
@@ -388,23 +396,23 @@ export function useROIReport() {
       const weaknesses: string[] = [];
       
       if (avgScore !== null && avgScore >= 70) {
-        strengths.push('Catalog quality is above average');
+        strengths.push('Average recorded quality score is at least 70/100');
       }
       if (accuracyProxy !== null && accuracyProxy >= 70) {
-        strengths.push('AI recommendations are mostly accepted by admins');
+        strengths.push('At least 70% of recorded acknowledge/dismiss decisions are acknowledgements');
       }
       if (suspicious > 0) {
-        strengths.push(`AI detected ${suspicious} suspicious listings that may have been missed manually`);
+        strengths.push(`${suspicious} analysis records have a suspicious verdict`);
       }
       
       if (reviewRate < 50) {
-        weaknesses.push('Admin review rate is low - AI insights are not being utilized');
+        weaknesses.push('Fewer than 50% of loaded analysis records are marked reviewed');
       }
       if (accuracyProxy !== null && accuracyProxy < 50) {
-        weaknesses.push('High dismiss rate suggests AI needs tuning');
+        weaknesses.push('More than half of recorded acknowledge/dismiss decisions are dismissals');
       }
       if (avgScore !== null && avgScore < 50) {
-        weaknesses.push('Overall catalog quality needs improvement');
+        weaknesses.push('Average recorded quality score is below 50/100');
       }
       
       let recommendation: 'KEEP' | 'ADJUST' | 'SCALE' = 'KEEP';
@@ -422,8 +430,8 @@ export function useROIReport() {
       
       return {
         period: '14 days',
-        summary: `AI analyzed ${totalAnalyzed} listings with an average quality score of ${avgScore ?? 'N/A'}/100. ${reviewed} were reviewed by admins (${Math.round(reviewRate)}%). ${suspicious} suspicious listings were flagged.`,
-        strengths: strengths.length > 0 ? strengths : ['System is operational'],
+        summary: `Loaded ${totalAnalyzed} analysis records with an average quality score of ${avgScore ?? 'N/A'}/100. ${reviewed} are marked reviewed (${Math.round(reviewRate)}%). ${suspicious} records have a suspicious verdict.`,
+        strengths,
         weaknesses: weaknesses.length > 0 ? weaknesses : ['More data needed for full evaluation'],
         recommendation,
         nextSteps,
@@ -438,4 +446,5 @@ export function useROIReport() {
     },
     staleTime: 30 * 60 * 1000, // 30 minutes
   });
+  return { ...query, data: admitted && !query.isError ? query.data : undefined };
 }
