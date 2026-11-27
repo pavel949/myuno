@@ -13,10 +13,10 @@ type Path = { key: string; to: string; icon: LucideIcon; title: LangValues; text
 /** Six primary choices; navigation only, never evidence of supply or availability. */
 export const HOME_V2_PATHS: readonly Path[] = [
   { key: 'rent', to: R.PROPERTY_RENT, icon: BedDouble, title: { ru: 'Аренда', en: 'Rent', th: 'เช่า' }, text: { ru: 'Посуточно и помесячно', en: 'Nightly and monthly', th: 'รายวันและรายเดือน' } },
-  { key: 'buy', to: R.PROPERTY_BUY, icon: Building2, title: { ru: 'Покупка', en: 'Buy', th: 'ซื้อ' }, text: { ru: 'Готовое жильё', en: 'Ready homes', th: 'บ้านพร้อมอยู่' } },
-  { key: 'offplan', to: R.OFFPLAN, icon: HardHat, title: { ru: 'Новостройки', en: 'New developments', th: 'โครงการใหม่' }, text: { ru: 'Проекты и условия', en: 'Projects and terms', th: 'โครงการและเงื่อนไข' } },
+  { key: 'buy', to: R.PROPERTY_BUY, icon: Building2, title: { ru: 'Покупка', en: 'Buy', th: 'ซื้อ' }, text: { ru: 'Новостройки и вторичка', en: 'New builds and resale', th: 'บ้านพร้อมอยู่' } },
+  { key: 'offplan', to: R.OFFPLAN_SEARCH, icon: HardHat, title: { ru: 'Новостройки', en: 'New developments', th: 'โครงการใหม่' }, text: { ru: 'Проекты и условия', en: 'Projects and terms', th: 'โครงการและเงื่อนไข' } },
   { key: 'experiences', to: R.EXPERIENCES, icon: Compass, title: { ru: 'Впечатления', en: 'Experiences', th: 'ประสบการณ์' }, text: { ru: 'Отдых на острове', en: 'Time on the island', th: 'กิจกรรมบนเกาะ' } },
-  { key: 'services', to: R.GOAL_SERVICES, icon: Wrench, title: { ru: 'Сервисы', en: 'Services', th: 'บริการ' }, text: { ru: 'Помощь в быту', en: 'Everyday help', th: 'ความช่วยเหลือในชีวิตประจำวัน' } },
+  { key: 'services', to: R.GOAL_SERVICES, icon: Wrench, title: { ru: 'Услуги', en: 'Services', th: 'บริการ' }, text: { ru: 'Помощь в быту', en: 'Everyday help', th: 'ความช่วยเหลือในชีวิตประจำวัน' } },
   { key: 'partners', to: R.LIST_WITH_US, icon: Handshake, title: { ru: 'Партнёрам', en: 'Partners', th: 'พาร์ทเนอร์' }, text: { ru: 'Разместить объявление', en: 'Post a listing', th: 'ลงประกาศ' } },
 ];
 
