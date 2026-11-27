@@ -6323,7 +6323,7 @@
     },
     {
       "file": "src/components/home/HomeDiscoverySearch.tsx",
-      "sha256": "1dc050f49ff2341f00d8bce10419d8aee5139f2505dee891d821b281956c4ace",
+      "sha256": "5cd502a01ef5dc941e6df0ad0e3d61b0e8bd03f1369ece56d856238de85eda06",
       "directRouteDeclarations": [],
       "runtime": "NOTTESTED",
       "visual": "NOTTESTED",
