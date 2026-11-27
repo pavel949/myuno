@@ -1,3 +1,4 @@
+import { HomeDiscoveryPaths } from '@/components/home/HomeDiscoveryPaths';
 /** Cinematic public front door. Existing authenticated workspace stays in HomeRouter. */
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
@@ -79,6 +80,7 @@ export default function Landing() {
       </div>}
       {!homeV2 && <div className="home-container"><a className="home-text-link ds-focus min-h-11" href="#home-partners">{t({ ru: 'Разместить жильё, услугу или впечатление', en: 'List a property, service or experience', th: 'ลงประกาศที่พัก บริการ หรือกิจกรรม' })}<ArrowRight size={16} aria-hidden="true" /></a><RentalCommunities /></div>}
       {homeV2 && <HomeV2Paths />}
+      <nav className="home-container home-category-navigation" aria-label={t({ ru: 'Недвижимость', en: 'Property', th: 'อสังหาริมทรัพย์' })}><HomeDiscoveryPaths kind="homes" /></nav>
       <HomeHousingPreview />
       <HomeSalePreview />
       <HomeNewbuildsPreview />
