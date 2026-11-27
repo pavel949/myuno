@@ -125,7 +125,7 @@ export function ConsumerHeader({ overlay = false, onSearch, headerActions }: { o
                 )}
                 <nav aria-label={t('Меню', 'Menu', 'เมนู')}>
                   <section className="consumer-task-section" aria-labelledby="consumer-homes-heading">
-                    <h2 id="consumer-homes-heading">{t('Найти недвижимость', 'Find a home', 'ค้นหาที่พัก')}</h2>
+                    <h2 id="consumer-homes-heading">{t('Жильё', 'Find a home', 'ค้นหาที่พัก')}</h2>
                     <Link
                       to={R.PROPERTY_RENT}
                       onPointerEnter={() => prefetchRoute(R.PROPERTY_RENT)}
@@ -137,8 +137,8 @@ export function ConsumerHeader({ overlay = false, onSearch, headerActions }: { o
                       <Building2 aria-hidden="true" /><span>{t('Жильё', 'Stays', 'ที่พัก')}</span><ChevronRight aria-hidden="true" />
                     </Link>
                     <div className="consumer-task-options">
-                      <Link to={`${R.PROPERTY_SEARCH}?mode=rent&tenancy=short`} onClick={() => setOpen(false)}>{t('На время поездки', 'For a holiday', 'สำหรับวันหยุด')}</Link>
-                      <Link to={`${R.PROPERTY_SEARCH}?mode=rent&tenancy=long`} onClick={() => setOpen(false)}>{t('Жить надолго', 'For a longer stay', 'พักระยะยาว')}</Link>
+                      <Link to={`${R.PROPERTY_SEARCH}?mode=rent&tenancy=short`} onClick={() => setOpen(false)}>{t('Посуточно', 'For a holiday', 'สำหรับวันหยุด')}</Link>
+                      <Link to={`${R.PROPERTY_SEARCH}?mode=rent&tenancy=long`} onClick={() => setOpen(false)}>{t('На длительный срок', 'For a longer stay', 'พักระยะยาว')}</Link>
                       <Link to={`${R.PROPERTY_SEARCH}?mode=rent&tenancy=medium`} onClick={() => setOpen(false)}>{t('На несколько месяцев', 'For a few months', 'พักหลายเดือน')}</Link>
                       <Link
                         to={R.PROPERTY_BUY}
@@ -147,12 +147,12 @@ export function ConsumerHeader({ overlay = false, onSearch, headerActions }: { o
                         onClick={() => setOpen(false)}
                         aria-current={activeMenuPath === R.PROPERTY_BUY ? 'page' : undefined}
                       >
-                        {t('Купить недвижимость', 'Buy a home', 'ซื้อที่อยู่อาศัย')}
+                        {t('Купить жильё', 'Buy a home', 'ซื้อที่อยู่อาศัย')}
                       </Link>
                     </div>
                   </section>
                   <section className="consumer-task-section" aria-labelledby="consumer-life-heading">
-                    <h2 id="consumer-life-heading">{t('Отдыхать и решать дела', 'Enjoy your stay', 'พักผ่อนและใช้ชีวิต')}</h2>
+                    <h2 id="consumer-life-heading">{t('Отдых и услуги', 'Enjoy your stay', 'พักผ่อนและใช้ชีวิต')}</h2>
                     {links.filter(l => l.to !== R.PROPERTY_RENT && l.to !== R.PROPERTY_BUY).map(({ to, label, Icon }) => (
                       <Link
                         key={to}
@@ -174,23 +174,23 @@ export function ConsumerHeader({ overlay = false, onSearch, headerActions }: { o
                       className="consumer-task-row"
                       aria-current={activeMenuPath === R.EXPERIENCES ? 'page' : undefined}
                     >
-                      <Compass aria-hidden="true" /><span>{t('Впечатления', 'Experiences', 'ประสบการณ์')}</span><ChevronRight aria-hidden="true" />
+                      <Compass aria-hidden="true" /><span>{t('Экскурсии и досуг', 'Experiences', 'ประสบการณ์')}</span><ChevronRight aria-hidden="true" />
                     </Link>
                   </section>
                   <section className="consumer-task-section" aria-labelledby="consumer-personal-heading">
-                    <h2 id="consumer-personal-heading">{t('Мои дела', 'Your plans', 'แผนของคุณ')}</h2>
+                    <h2 id="consumer-personal-heading">{t('Личный кабинет', 'Your plans', 'แผนของคุณ')}</h2>
                     <Link to={R.BOOKINGS} onClick={() => setOpen(false)} className="consumer-task-row" aria-current={pathname === R.BOOKINGS || pathname.startsWith(`${R.BOOKINGS}/`) ? 'page' : undefined}><CalendarDays aria-hidden="true" /><span>{t('Заявки и бронирования', 'Requests and bookings', 'คำขอและการจอง')}</span><ChevronRight aria-hidden="true" /></Link>
                     <Link to="/cart" onClick={() => setOpen(false)} className="consumer-task-row" aria-current={pathname === '/cart' ? 'page' : undefined}><ShoppingBag aria-hidden="true" /><span>{t('Корзина', 'Cart', 'ตะกร้า')}</span><ChevronRight aria-hidden="true" /></Link>
                     {!user && <Link to={signInPath} onClick={() => setOpen(false)} className="consumer-task-row"><LogIn aria-hidden="true" /><span>{t('Войти', 'Sign in', 'เข้าสู่ระบบ')}</span><ChevronRight aria-hidden="true" /></Link>}
                   </section>
-                  <Link to={R.SUPPORT} onClick={() => setOpen(false)} className="consumer-task-row"><HelpCircle aria-hidden="true" /><span>{t('Помощь myUNO', 'myUNO help', 'ความช่วยเหลือ myUNO')}</span><ChevronRight aria-hidden="true" /></Link>
+                  <Link to={R.SUPPORT} onClick={() => setOpen(false)} className="consumer-task-row"><HelpCircle aria-hidden="true" /><span>{t('Помощь', 'myUNO help', 'ความช่วยเหลือ myUNO')}</span><ChevronRight aria-hidden="true" /></Link>
                   <details className="consumer-task-partners">
                     <summary>{t('Собственникам и партнёрам', 'For owners and partners', 'สำหรับเจ้าของและพาร์ทเนอร์')}<ChevronRight aria-hidden="true" /></summary>
                     {partnerLinks.map(link => <Link key={link.to} to={link.to} onClick={() => setOpen(false)} className="consumer-task-row">{link.label}</Link>)}
                   </details>
                 </nav>
                 <div className="consumer-task-preferences">
-                  <p>{t('Настройте под себя', 'Make yourself at home', 'ตั้งค่าตามที่คุณต้องการ')}</p>
+                  <p>{t('Язык, валюта и оформление', 'Make yourself at home', 'ตั้งค่าตามที่คุณต้องการ')}</p>
                   <GlobalPreferencesControls />
                 </div>
               </div>

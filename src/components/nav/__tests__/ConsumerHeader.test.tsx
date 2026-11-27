@@ -13,10 +13,10 @@ vi.mock('@/components/layout/UserAvatarMenu', () => ({ UserAvatarMenu: () => nul
 vi.mock('@/hooks/useFeedbackSettings', () => ({ getFeedbackSettings: () => ({}) }));
 afterEach(() => { cleanup(); locale.language = 'ru'; prefetch.mockClear(); });
 it.each([
- ['/experiences', 'Услуги', 'Впечатления'],
- ['/experiences/synthetic-tour', 'Услуги', 'Впечатления'],
+ ['/experiences', 'Услуги', 'Экскурсии и досуг'],
+ ['/experiences/synthetic-tour', 'Услуги', 'Экскурсии и досуг'],
  ['/transport/transfer', 'Услуги', 'Услуги'],
- ['/property/search?mode=buy', 'Купить', 'Купить недвижимость'],
+ ['/property/search?mode=buy', 'Купить', 'Купить жильё'],
  ['/property/search?mode=rent', 'Жильё', 'Жильё'],
 ])('identifies one destination in desktop and mobile menus for %s', (path, desktopLabel, mobileLabel) => {
  render(<MemoryRouter initialEntries={[path]}><ConsumerHeader /></MemoryRouter>);

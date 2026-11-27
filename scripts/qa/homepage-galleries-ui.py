@@ -22,9 +22,9 @@ HOME_COPY = {
         'done': 'Done', 'market': 'Choose a catalogue', 'services': 'Services', 'activity_query': 'What are you looking for?',
     },
     'ru': {
-        'form': 'Поиск на myUNO', 'rent': 'Аренда', 'activity': 'Впечатления и услуги', 'buy': 'Покупка',
+        'form': 'Поиск на myUNO', 'rent': 'Аренда', 'activity': 'Экскурсии и услуги', 'buy': 'Покупка',
         'guests': 'Количество гостей', 'filters': 'Фильтры', 'area_label': 'Выберите район', 'area': 'Равай',
-        'done': 'Готово', 'market': 'Выберите каталог', 'services': 'Услуги', 'activity_query': 'Что ищете?',
+        'done': 'Готово', 'market': 'Раздел каталога', 'services': 'Услуги', 'activity_query': 'Что ищете?',
     },
     'th': {
         'form': 'ค้นหาใน myUNO', 'rent': 'เช่า', 'activity': 'ประสบการณ์และบริการ', 'buy': 'ซื้อ',
@@ -87,6 +87,37 @@ async def check_home_entry(page, lang, width):
         """)
         assert sticky['scroll'] > 0 and abs(sticky['headerBottom'] - sticky['panelTop']) <= 2, sticky
         await page.evaluate("window.scrollTo({top: 0, behavior: 'instant'})")
+
+    emergency = page.locator('.home-hero-banner').get_by_role('button', name={
+        'ru': 'Срочная помощь', 'en': 'Urgent help', 'th': 'ความช่วยเหลือฉุกเฉิน',
+    }[lang], exact=True)
+    await expect(emergency).to_be_visible()
+    await expect(emergency).to_be_in_viewport(ratio=1)
+    assert (await emergency.bounding_box())['height'] >= 44
+    contrast = await emergency.evaluate('''button => {
+        const style = getComputedStyle(button)
+        const luminance = color => color.match(/[0-9.]+/g).slice(0, 3).reduce((sum, channel, index) => {
+            const value = Number(channel) / 255
+            return sum + [0.2126, 0.7152, 0.0722][index] *
+                (value <= 0.04045 ? value / 12.92 : ((value + 0.055) / 1.055) ** 2.4)
+        }, 0)
+        const levels = [luminance(style.color), luminance(style.backgroundColor)].sort((a, b) => a - b)
+        return (levels[1] + 0.05) / (levels[0] + 0.05)
+    }''')
+    assert contrast >= 4.5, f'Urgent help contrast: {contrast}'
+    await page.evaluate('document.fonts.ready')
+    await page.locator('.home-hero-banner-photo').evaluate('image => image.decode()')
+    await page.screenshot(path=str(OUTPUT / f"{lang}-{page.viewport_size['width']}-hero.png"))
+
+    await emergency.press('Enter')
+    emergency_dialog = page.get_by_role('dialog')
+    await expect(emergency_dialog).to_be_visible()
+    assert await emergency_dialog.locator('a[href^="tel:"]').evaluate_all(
+        '(links) => links.map(link => link.getAttribute("href"))'
+    ) == ['tel:1669', 'tel:191', 'tel:1155']
+    await emergency_dialog.get_by_role('button', name={'ru': 'Закрыть', 'en': 'Close', 'th': 'ปิด'}[lang]).press('Escape')
+    await expect(emergency_dialog).to_have_count(0)
+    await expect(emergency).to_be_focused()
 
     await filters.press('Enter')
     await expect(search.locator('.home-search-refine')).to_have_attribute('aria-expanded', 'true')

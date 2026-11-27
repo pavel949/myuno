@@ -65,6 +65,7 @@
   align-items: end;
   min-block-size: var(--bible-home-hero-mobile-height);
   padding: var(--layout-gutter);
+  padding-block-start: max(var(--layout-gutter), 4.5rem);
   overflow: hidden;
   border-radius: var(--bible-radius-media);
   background: hsl(var(--brand-navy));
@@ -98,6 +99,52 @@
   font-weight: 400;
   line-height: var(--type-h1-leading);
   text-wrap: balance;
+}
+
+.home-hero-copy {
+  min-inline-size: 0;
+}
+
+.home-hero-copy h1 {
+  margin: 0;
+}
+
+.home-hero-copy p {
+  max-inline-size: var(--public-width-reading);
+  margin-block: .5rem 0;
+}
+
+.home-hero-help {
+  position: absolute;
+  z-index: 2;
+  inset-block-start: var(--layout-gutter);
+  inset-inline-end: var(--layout-gutter);
+  display: inline-flex;
+  align-items: center;
+  gap: .5rem;
+  min-block-size: 44px;
+  max-inline-size: calc(100% - 2 * var(--layout-gutter));
+  padding: .5rem .875rem;
+  border: 1px solid hsl(var(--brand-navy) / .2);
+  border-radius: var(--bible-radius-card);
+  background: hsl(var(--brand-cream));
+  color: hsl(var(--brand-navy));
+  font-weight: 600;
+  text-align: start;
+}
+
+.home-hero-help svg {
+  flex: none;
+}
+
+.home-hero-help:hover {
+  text-decoration: underline;
+  text-underline-offset: .2em;
+}
+
+.home-hero-help:focus-visible {
+  outline: 2px solid hsl(var(--brand-cream));
+  outline-offset: 3px;
 }
 
 .home-hero-search {

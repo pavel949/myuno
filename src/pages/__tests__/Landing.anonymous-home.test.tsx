@@ -101,7 +101,7 @@ it('uses one choice layer, groups property before island services and keeps cons
  expect(main.textContent!.indexOf('Published housing')).toBeLessThan(main.textContent!.indexOf('Published sale homes'));
  expect(main.textContent!.indexOf('Published new developments')).toBeLessThan(main.textContent!.indexOf('Service categories'));
  expect(main.textContent!.indexOf('Published new developments')).toBeLessThan(main.textContent!.indexOf('Published experiences'));
- const partners = screen.getByRole('region', { name: 'Grow your property and services with myUNO' });
+ const partners = screen.getByRole('region', { name: 'For owners and partners' });
  expect(within(partners).queryByText('I need a home or service')).toBeNull();
  expect(within(partners).getByRole('link', { name: /I own property/ })).toHaveAttribute('href', '/for-owners');
  expect(document.querySelector('.home-owner-prompt')).toBeNull();

@@ -19,6 +19,7 @@ import { HomeHousingPreview, HomeNewbuildsPreview, HomeSalePreview } from '@/com
 import { HomeExperienceGallery, HomeLocationGallery, HomeServiceGallery } from '@/components/home/HomeCatalogGalleries';
 import { HomeAudienceGrid, HomeTrustBar } from '@/components/home/HomeAudienceGrid';
 import { HomeDiscoverySearch } from '@/components/home/HomeDiscoverySearch';
+import { HomeUrgentHelp } from '@/components/home/HomeUrgentHelp';
 import { homeCopy as copy } from '@/content/home/cinematicHome';
 import hero from '@/assets/hero-phuket-coast-editorial.webp';
 import '@/styles/cinematic-home.css';
@@ -34,20 +35,21 @@ export default function Landing() {
   const { language } = useLanguage();
   const t = (v: LangValues) => pickLang(language, v);
   const [requestOpen, setRequestOpen] = useState(false);
-  const [requestSubject, setRequestSubject] = useState<string | undefined>();
 
   return (
     <div className="cinematic-home premium-home home-refined" data-testid="cinematic-home" data-home-visual="mobile-grid-20261122">
-      <SEOHead title={t({ ru: 'Ваш дом и жизнь на Пхукете — myUNO', en: 'Your home and life in Phuket — myUNO', th: 'บ้านและชีวิตของคุณในภูเก็ต — myUNO' })} description={t(copy.lead)} />
+      <SEOHead title={t({ ru: 'Жильё и услуги на Пхукете — myUNO', en: 'Your home and life in Phuket — myUNO', th: 'บ้านและชีวิตของคุณในภูเก็ต — myUNO' })} description={t(copy.lead)} />
       <a href="#home-main" className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[170] focus:bg-background focus:px-4 focus:py-3 focus:text-foreground focus:ring-2 focus:ring-ring" onClick={(event) => { event.preventDefault(); document.getElementById('home-main')?.focus(); }}>{t({ ru: 'Перейти к содержимому', en: 'Skip to content', th: 'ข้ามไปยังเนื้อหา' })}</a>
       <ConsumerTopBar />
       <main id="home-main" tabIndex={-1} className="outline-none">
       <section className="home-hero-section home-container" aria-labelledby="home-title">
         <div className="home-hero-banner">
           <img className="home-hero-banner-photo" src={hero} alt="" loading="eager" width="1672" height="941" />
-          <h1 id="home-title">
-            {t({ ru: 'На Пхукете всё ближе.', en: 'Phuket, better connected.', th: 'เชื่อมต่อทุกอย่างในภูเก็ต' })}
-          </h1>
+          <div className="home-hero-copy">
+            <h1 id="home-title">{t(copy.heroTitle)}</h1>
+            <p>{t(copy.heroSubtitle)}</p>
+          </div>
+          <HomeUrgentHelp />
         </div>
       </section>
       <div className="home-hero-search home-container">
@@ -64,7 +66,7 @@ export default function Landing() {
         >
           <Building2 className="size-5 shrink-0" aria-hidden="true" />
           <span className="flex-1">
-            {t({ ru: 'Жильё на продажу', en: 'Homes for sale', th: 'บ้านสำหรับขาย' })}
+            {t({ ru: 'Купить жильё', en: 'Homes for sale', th: 'บ้านสำหรับขาย' })}
             <small className="block">{propertySaleBudgetLabel(DEFAULT_HOME_SALE_MAX_PRICE, language)}</small>
           </span>
           <ArrowRight className="size-4 shrink-0" aria-hidden="true" />
@@ -80,13 +82,12 @@ export default function Landing() {
       <HomeLocationGallery />
       <section className="home-partners-group" aria-labelledby="home-partners-title">
         <div className="home-container home-group-heading">
-          <p className="home-group-eyebrow">{t({ ru: 'Собственникам и партнёрам', en: 'For owners and partners', th: 'สำหรับเจ้าของและพาร์ทเนอร์' })}</p>
-          <h2 id="home-partners-title">{t({ ru: 'Развивайте недвижимость и сервисы вместе с myUNO', en: 'Grow your property and services with myUNO', th: 'เติบโตไปกับ myUNO' })}</h2>
+          <h2 id="home-partners-title">{t({ ru: 'Собственникам и партнёрам', en: 'For owners and partners', th: 'สำหรับเจ้าของและพาร์ทเนอร์' })}</h2>
         </div>
         <HomeAudienceGrid />
         <HomeTrustBar />
       </section>
-      <section className="home-closing home-container"><div><h2>{t(copy.closing)}</h2><p>{t({ ru: 'Не нашли подходящий вариант? Расскажите о планах и задайте вопрос команде.', en: 'Still looking? Tell the team about your plans and what you need.', th: 'ยังไม่พบที่พักที่เหมาะสม บอกแผนและคำถามของคุณกับทีมงาน' })}</p></div><button type="button" className="home-text-link" onClick={() => { setRequestSubject(undefined); setRequestOpen(true); }}>{t(copy.contact)}<ArrowRight size={18} aria-hidden="true" /></button></section>
+      <section className="home-closing home-container"><div><h2>{t(copy.closing)}</h2><p>{t({ ru: 'Расскажите, что вы ищете. Команда myUNO подскажет, с чего начать.', en: 'Still looking? Tell the team about your plans and what you need.', th: 'ยังไม่พบที่พักที่เหมาะสม บอกแผนและคำถามของคุณกับทีมงาน' })}</p></div><button type="button" className="home-text-link" onClick={() => setRequestOpen(true)}>{t(copy.contact)}<ArrowRight size={18} aria-hidden="true" /></button></section>
       </main>
       <footer className="myuno-public-footer">
         <div className="home-footer home-container">
@@ -100,7 +101,7 @@ export default function Landing() {
         </div>
       </footer>
       <BottomBar role={publicNavigationRole} aria-label={t({ ru: 'Основная навигация', en: 'Main navigation', th: 'เมนูหลัก' })} />
-      <ConciergeHelpSheet open={requestOpen} onOpenChange={setRequestOpen} topic="property" initialSubject={requestSubject} />
+      <ConciergeHelpSheet open={requestOpen} onOpenChange={setRequestOpen} topic="property" />
     </div>
   );
 }

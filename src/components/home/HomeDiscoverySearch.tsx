@@ -17,7 +17,7 @@ type SearchMode = 'all' | 'rent' | 'activities' | 'buy';
 const modeLabels: Record<SearchMode, LangValues> = {
   all: { ru: 'Все объекты', en: 'All homes', th: 'ที่พักทั้งหมด' },
   rent: { ru: 'Аренда', en: 'Rent', th: 'เช่า' },
-  activities: { ru: 'Впечатления и услуги', en: 'Experiences & services', th: 'ประสบการณ์และบริการ' },
+  activities: { ru: 'Экскурсии и услуги', en: 'Experiences & services', th: 'ประสบการณ์และบริการ' },
   buy: { ru: 'Покупка', en: 'Buy', th: 'ซื้อ' },
 };
 const saleBudgetOptions = [5_000_000, DEFAULT_HOME_SALE_MAX_PRICE, 15_000_000, 40_000_000];
@@ -111,7 +111,7 @@ export function HomeDiscoverySearch({ rentalOnly = false, hideModeSwitch = false
   return (
     <form className={`home-search${showGuestsInline ? ' home-search--homepage' : ''}${catalogue ? ' home-search--catalogue' : ''}`} data-home-discovery-mode={allowActivities ? mode : undefined} onSubmit={search} aria-label={allowActivities ? t({ ru: 'Поиск на myUNO', en: 'Search myUNO', th: 'ค้นหาใน myUNO' }) : t({ ru: 'Поиск жилья', en: 'Find a home', th: 'ค้นหาที่พัก' })}>
       {catalogue && <label className="home-search-query col-span-full" htmlFor={queryId}><span className="home-field-label">{t({ ru: 'Название объекта', en: 'Property name', th: 'ชื่อที่พัก' })}</span><input id={queryId} type="search" value={query} maxLength={120} onChange={event => setQuery(event.target.value)} placeholder={t({ ru: 'Необязательно', en: 'Optional', th: 'ไม่บังคับ' })} /></label>}
-      {!rentalOnly && !hideModeSwitch && <div className="home-search-modes" data-activities={allowActivities || undefined} role="group" aria-label={allowActivities ? t({ ru: 'Раздел поиска', en: 'What to search', th: 'ประเภทการค้นหา' }) : t({ ru: 'Аренда или покупка', en: 'Rent or buy', th: 'เช่าหรือซื้อ' })}>
+      {!rentalOnly && !hideModeSwitch && <div className="home-search-modes" data-activities={allowActivities || undefined} role="group" aria-label={allowActivities ? t({ ru: 'Что вы ищете', en: 'What to search', th: 'ประเภทการค้นหา' }) : t({ ru: 'Аренда или покупка', en: 'Rent or buy', th: 'เช่าหรือซื้อ' })}>
         {modes.map(value => (
           <button key={value} type="button" aria-pressed={mode === value} onClick={() => setMode(value)}>
             {t(modeLabels[value])}
@@ -121,11 +121,11 @@ export function HomeDiscoverySearch({ rentalOnly = false, hideModeSwitch = false
       {mode === 'activities' ? (
         <>
           <div className="home-search-type">
-            <span className="home-field-label">{t({ ru: 'Каталог', en: 'Browse', th: 'เลือกดู' })}</span>
+            <span className="home-field-label">{t({ ru: 'Раздел', en: 'Browse', th: 'เลือกดู' })}</span>
             <Select value={activityMarket} onValueChange={value => setActivityMarket(value === 'services' ? 'services' : 'experiences')}>
-              <SelectTrigger className="home-search-select" aria-label={t({ ru: 'Выберите каталог', en: 'Choose a catalogue', th: 'เลือกแคตตาล็อก' })}><SelectValue /></SelectTrigger>
+              <SelectTrigger className="home-search-select" aria-label={t({ ru: 'Раздел каталога', en: 'Choose a catalogue', th: 'เลือกแคตตาล็อก' })}><SelectValue /></SelectTrigger>
               <SelectContent>
-                <SelectItem value="experiences">{t({ ru: 'Впечатления', en: 'Experiences', th: 'ประสบการณ์' })}</SelectItem>
+                <SelectItem value="experiences">{t({ ru: 'Экскурсии и досуг', en: 'Experiences', th: 'ประสบการณ์' })}</SelectItem>
                 <SelectItem value="services">{t({ ru: 'Услуги', en: 'Services', th: 'บริการ' })}</SelectItem>
               </SelectContent>
             </Select>
@@ -137,7 +137,7 @@ export function HomeDiscoverySearch({ rentalOnly = false, hideModeSwitch = false
           <button type="submit" data-chat-occlusion-target className="home-search-submit">
             {activityMarket === 'services'
               ? t({ ru: 'Найти услуги', en: 'Find services', th: 'ค้นหาบริการ' })
-              : t({ ru: 'Найти впечатления', en: 'Find experiences', th: 'ค้นหาประสบการณ์' })}
+              : t({ ru: 'Смотреть экскурсии и досуг', en: 'Find experiences', th: 'ค้นหาประสบการณ์' })}
             <ArrowRight size={18} aria-hidden="true" />
           </button>
         </>
@@ -228,9 +228,9 @@ export function HomeDiscoverySearch({ rentalOnly = false, hideModeSwitch = false
       {allowActivities && refinements}
       <button type="submit" data-chat-occlusion-target className="home-search-submit">
         {allowActivities && mode === 'rent'
-          ? t({ ru: 'Найти жильё в аренду', en: 'Search stays', th: 'ค้นหาที่พักให้เช่า' })
+          ? t({ ru: 'Подобрать жильё', en: 'Search stays', th: 'ค้นหาที่พักให้เช่า' })
           : allowActivities && mode === 'buy'
-            ? t({ ru: 'Посмотреть жильё', en: 'See homes', th: 'ดูบ้านสำหรับขาย' })
+            ? t({ ru: 'Найти жильё для покупки', en: 'See homes', th: 'ดูบ้านสำหรับขาย' })
             : t({ ru: 'Найти жильё', en: 'Find a home', th: 'ค้นหาที่พัก' })}
         <ArrowRight size={18} aria-hidden="true" />
       </button>
@@ -252,10 +252,10 @@ export function HomeDiscoverySearch({ rentalOnly = false, hideModeSwitch = false
           )}
         </div>
       </details>}
-      {mode === 'rent' && dateError && <p role="alert" className="col-span-full text-sm text-destructive">{t({ ru: 'Выберите даты заезда и выезда. Выезд должен быть позже заезда.', en: 'Choose check-in and check-out dates. Check-out must be after check-in.', th: 'เลือกวันเช็กอินและเช็กเอาต์ โดยวันเช็กเอาต์ต้องอยู่หลังวันเช็กอิน' })}</p>}
+      {mode === 'rent' && dateError && <p role="alert" className="col-span-full text-sm text-destructive">{t({ ru: 'Выберите даты заезда и выезда. Выберите день выезда после дня заезда.', en: 'Choose check-in and check-out dates. Check-out must be after check-in.', th: 'เลือกวันเช็กอินและเช็กเอาต์ โดยวันเช็กเอาต์ต้องอยู่หลังวันเช็กอิน' })}</p>}
       {mode === 'rent' && guestError && (
         <p role="alert" className="col-span-full text-body-sm text-destructive">
-          {t({ ru: 'Укажите от 1 до 50 гостей или оставьте поле пустым.', en: 'Enter 1 to 50 guests or leave the field blank.', th: 'ระบุผู้เข้าพัก 1 ถึง 50 คน หรือเว้นว่างไว้' })}
+          {t({ ru: 'Введите число от 1 до 50. Можно оставить поле пустым.', en: 'Enter 1 to 50 guests or leave the field blank.', th: 'ระบุผู้เข้าพัก 1 ถึง 50 คน หรือเว้นว่างไว้' })}
         </p>
       )}
       </>}
