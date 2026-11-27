@@ -1,7 +1,19 @@
-import { Navigate, useParams } from 'react-router-dom';
+import { Navigate, useLocation, useParams } from 'react-router-dom';
+import { APP_ROUTES } from '@/lib/config/routes';
 
-/** Keep existing booking links, but all experience requests now go to myUNO. */
+/** Keep legacy booking links pointed at the existing experience request flow. */
 export default function ExperienceBooking() {
   const { id } = useParams<{ id: string }>();
-  return <Navigate replace to={id ? `/experiences/${encodeURIComponent(id)}?inquiry=1` : '/experiences'} />;
+  const location = useLocation();
+  if (!id) return <Navigate replace to={APP_ROUTES.EXPERIENCES} />;
+
+  const search = new URLSearchParams(location.search);
+  search.set('inquiry', '1');
+  return (
+    <Navigate
+      replace
+      to={{ pathname: `${APP_ROUTES.EXPERIENCES}/${encodeURIComponent(id)}`, search: search.toString() }}
+      state={location.state}
+    />
+  );
 }
