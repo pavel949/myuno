@@ -9,6 +9,6 @@ export function HomeGallery({ id, title, description, href, linkLabel, children,
 }) {
   return <section className={`home-gallery home-container ds-section-surface--public ${className}`} aria-labelledby={id}>
     <SectionHeader title={title} subtitle={description} headingId={id} action={{ label: linkLabel, to: href }} size="lg" density="public" className="home-gallery-heading ds-section-header-with-content" />
-    {state ?? <HorizontalRail label={title}>{children}</HorizontalRail>}
+    {state ?? <HorizontalRail label={title} autoLoop={id !== "home-locations-title"}>{children}</HorizontalRail>}
   </section>;
 }
