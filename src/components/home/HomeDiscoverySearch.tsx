@@ -109,7 +109,7 @@ export function HomeDiscoverySearch({ rentalOnly = false, hideModeSwitch = false
   }
 
   return (
-    <form className={`home-search${showGuestsInline ? ' home-search--homepage' : ''}${catalogue ? ' home-search--catalogue' : ''}`} data-home-discovery-mode={allowActivities ? mode : undefined} onSubmit={search} aria-label={allowActivities ? t({ ru: 'Поиск на myUNO', en: 'Search myUNO', th: 'ค้นหาใน myUNO' }) : t({ ru: 'Поиск жилья', en: 'Find a home', th: 'ค้นหาที่พัก' })}>
+    <form className={`home-search${showGuestsInline ? ' home-search--homepage' : ''}${catalogue ? ' home-search--catalogue' : ''}`} data-home-filters-expanded={showRefinements} data-home-discovery-mode={allowActivities ? mode : undefined} onSubmit={search} aria-label={allowActivities ? t({ ru: 'Поиск на myUNO', en: 'Search myUNO', th: 'ค้นหาใน myUNO' }) : t({ ru: 'Поиск жилья', en: 'Find a home', th: 'ค้นหาที่พัก' })}>
       {catalogue && <label className="home-search-query col-span-full" htmlFor={queryId}><span className="home-field-label">{t({ ru: 'Название объекта', en: 'Property name', th: 'ชื่อที่พัก' })}</span><input id={queryId} type="search" value={query} maxLength={120} onChange={event => setQuery(event.target.value)} placeholder={t({ ru: 'Необязательно', en: 'Optional', th: 'ไม่บังคับ' })} /></label>}
       {!rentalOnly && !hideModeSwitch && <div className="home-search-modes" data-activities={allowActivities || undefined} role="group" aria-label={allowActivities ? t({ ru: 'Что вы ищете', en: 'What to search', th: 'ประเภทการค้นหา' }) : t({ ru: 'Аренда или покупка', en: 'Rent or buy', th: 'เช่าหรือซื้อ' })}>
         {modes.map(value => (

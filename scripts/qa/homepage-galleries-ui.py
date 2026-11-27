@@ -93,6 +93,15 @@ async def check_home_entry(page, lang, width):
     }[lang], exact=True)
     await expect(emergency).to_be_visible()
     await expect(emergency).to_be_in_viewport(ratio=1)
+    if width < 768:
+        await page.set_viewport_size({'width': width, 'height': 780})
+        submit = search.locator('.home-search-submit')
+        await expect(submit).to_be_in_viewport(ratio=1)
+        assert await submit.evaluate('''button => {
+            const rect = button.getBoundingClientRect()
+            return button.contains(document.elementFromPoint(rect.x + rect.width / 2, rect.bottom - 2))
+        }'''), 'Sticky navigation covers the search button'
+        await page.set_viewport_size({'width': width, 'height': 900})
     assert (await emergency.bounding_box())['height'] >= 44
     contrast = await emergency.evaluate('''button => {
         const style = getComputedStyle(button)
@@ -121,6 +130,8 @@ async def check_home_entry(page, lang, width):
 
     await filters.press('Enter')
     await expect(search.locator('.home-search-refine')).to_have_attribute('aria-expanded', 'true')
+    await expect(search.locator('.home-search-type')).to_be_visible()
+    await expect(search.locator('.home-search-bedrooms')).to_be_visible()
     area = search.get_by_role('combobox', name=copy['area_label'], exact=True)
     await area.press('Enter')
     await page.get_by_role('option', name=copy['area'], exact=True).click()

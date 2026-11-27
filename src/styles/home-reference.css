@@ -147,6 +147,12 @@
   outline-offset: 3px;
 }
 
+@media (max-width: 767px) {
+  .home-hero-search .home-search[data-home-filters-expanded="false"] > :is(.home-search-type, .home-search-bedrooms) {
+    display: none;
+  }
+}
+
 .home-hero-search {
   position: relative;
   z-index: 10;
