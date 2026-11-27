@@ -186,5 +186,9 @@ verify_jwt = false
 # Machine-only admission is handled by the worker's dedicated secret check.
 verify_jwt = false
 
+# Application admits only the dedicated scheduler secret before privileged work.
+[functions.dispatch-concierge-notifications]
+verify_jwt = false
+
 [functions.handle-email-events]
 verify_jwt = false

@@ -46,6 +46,9 @@ async def main():
                 url='http://localhost:8080/fixture?lang='+lang+'&theme='+appearance+'&entry='+quote(entry,safe='')
                 await page.goto(url,wait_until='networkidle')
                 assert not errors, errors
+                for choice in await page.locator('.marketplace-choice').all():
+                    geometry=await choice.evaluate("""el=>{const a=el.querySelector('.marketplace-choice-art').getBoundingClientRect();return{display:getComputedStyle(el).display,width:a.width,height:a.height,cardHeight:el.getBoundingClientRect().height}}""")
+                    assert geometry['display']=='grid' and abs(geometry['width']-44)<=1 and abs(geometry['height']-44)<=1 and geometry['cardHeight']>=128,geometry
                 assert await page.evaluate('document.documentElement.scrollWidth<=innerWidth'), (lang,width,'initial overflow')
                 requests_name={'ru':'Мои заявки','en':'My requests','th':'คำขอของฉัน'}[lang]
                 requests_link=page.get_by_role('link',name=requests_name,exact=True)

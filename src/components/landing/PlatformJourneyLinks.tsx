@@ -1,7 +1,7 @@
-import { Link } from 'react-router-dom';
-import { ArrowUpRight, Building2, CalendarDays, Compass, House, KeyRound, ShoppingBag } from 'lucide-react';
+import { Building2, CalendarDays, Compass, House, KeyRound, ShoppingBag } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { APP_ROUTES } from '@/lib/config/routes';
+import { MarketplaceDiscoveryMenu } from '@/components/services/MarketplaceDiscoveryMenu';
 import { pickLang } from '@/lib/i18n/pickLang';
 
 type Journey = 'property' | 'services' | 'experiences';
@@ -19,16 +19,11 @@ export function PlatformJourneyLinks({ journey }: { journey: Journey }) {
   const { language } = useLanguage();
   const t = (ru: string, en: string, th: string) => pickLang(language, { ru, en, th });
   const selected = journey === 'property' ? ITEMS.slice(0, 4) : ITEMS.slice(4);
-  return <nav aria-label={t('Выберите направление', 'Choose your journey', 'เลือกบริการ')} className="space-y-3">
-    <div className="flex items-baseline justify-between gap-3">
-      <h2 className="font-display text-h3">{t('С чего начнём?', 'Where shall we start?', 'เริ่มจากตรงไหนดี')}</h2>
-      <Link to={APP_ROUTES.DISCOVER} className="text-sm font-medium text-primary underline-offset-4 hover:underline">{t('Все возможности', 'All possibilities', 'ดูทั้งหมด')}</Link>
-    </div>
-    <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-      {selected.map(item => <Link key={item.id} to={item.href} className="group flex min-h-32 flex-col justify-between border border-border bg-card p-[var(--card-padding)] transition-colors hover:border-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
-        <span className="flex items-center justify-between gap-2"><item.icon className="size-5 text-primary" aria-hidden="true"/><ArrowUpRight className="size-4 text-muted-foreground group-hover:text-primary" aria-hidden="true"/></span>
-        <span className="mt-4 space-y-1"><span className="block font-display text-lg font-semibold text-foreground">{t(item.ru, item.en, item.th)}</span><span className="block text-sm text-muted-foreground">{t(item.subRu, item.subEn, item.subTh)}</span></span>
-      </Link>)}
-    </div>
-  </nav>;
+  return <nav aria-label={t('Выберите направление', 'Choose your journey', 'เลือกบริการ')}><MarketplaceDiscoveryMenu
+    title={t('С чего начнём?', 'Where shall we start?', 'เริ่มจากตรงไหนดี')}
+    allHref={APP_ROUTES.DISCOVER}
+    allLabel={t('Все возможности', 'All possibilities', 'ดูทั้งหมด')}
+    items={selected.map(item => ({ id: item.id, href: item.href, icon: item.icon,
+      label: t(item.ru, item.en, item.th), description: t(item.subRu, item.subEn, item.subTh) }))}
+  /></nav>;
 }
