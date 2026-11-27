@@ -78,7 +78,7 @@ export default function Landing() {
           <ArrowRight className="size-4 shrink-0" aria-hidden="true" />
         </Link>
       </div>}
-      {!homeV2 && <div className="home-container"><a className="home-text-link ds-focus min-h-11" href="#home-partners">{t({ ru: 'Разместить жильё, услугу или впечатление', en: 'List a property, service or experience', th: 'ลงประกาศที่พัก บริการ หรือกิจกรรม' })}<ArrowRight size={16} aria-hidden="true" /></a><RentalCommunities /></div>}
+      {!homeV2 && <div className="home-container"><a className="home-text-link ds-focus min-h-11" href="#home-partners">{t({ ru: 'Разместить жильё, услугу или впечатление', en: 'List a property, service or experience', th: 'ลงประกาศที่พัก บริการ หรือกิจกรรม' })}<ArrowRight size={16} aria-hidden="true" /></a><RentalCommunities carousel /></div>}
       {homeV2 && <HomeV2Paths />}
       <nav className="home-container home-category-navigation" aria-label={t({ ru: 'Недвижимость', en: 'Property', th: 'อสังหาริมทรัพย์' })}><HomeDiscoveryPaths kind="homes" /></nav>
       <HomeHousingPreview />
