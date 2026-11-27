@@ -18,6 +18,7 @@ export function HomeDiscoveryPaths({ kind }: { kind: 'homes' | 'experiences' | '
     { to: R.LEGAL, label: { ru: 'Юридические услуги', en: 'Legal services', th: 'บริการด้านกฎหมาย' } },
     { to: R.PETS, label: { ru: 'Услуги для животных', en: 'Pet services', th: 'บริการสัตว์เลี้ยง' } },
   ] : [
+    { to: R.EVENTS, label: { ru: 'Вся афиша', en: 'Event calendar', th: 'ปฏิทินกิจกรรม' } },
     { to: R.YACHTS, label: { ru: 'Яхты и морские прогулки', en: 'Yachts and boat trips', th: 'เรือยอชต์และทริปทางทะเล' } },
     { to: `${R.EXPERIENCES}?type=tour`, label: { ru: 'Экскурсии', en: 'Tours', th: 'ทัวร์' } },
     { to: `${R.EXPERIENCES}?type=activity`, label: { ru: 'Активный отдых', en: 'Activities', th: 'กิจกรรม' } },
