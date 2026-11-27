@@ -123,10 +123,9 @@ export function HomeExperienceGallery() {
     <>
       <CatalogState loading={isLoading} error={Boolean(error)} retry={refetch}
         empty={{ ru: 'Нет фотографий для этой подборки. Выберите формат отдыха в каталоге.', en: 'No photo preview to show. Choose an activity in the catalogue.', th: 'ยังไม่มีภาพตัวอย่าง เลือกกิจกรรมในรายการ' }} />
-      {!isLoading && !error && <HomeDiscoveryPaths kind="experiences" />}
     </>
   ) : undefined;
-  return <HomeGallery id="home-experiences-title" className="home-catalog home-experiences" title={title}
+  return <><HomeGallery id="home-experiences-title" className="home-catalog home-experiences" title={title}
     description={t({ ru: 'Идеи для прогулок и отдыха на острове.', en: 'Explore activities around the island.', th: 'กิจกรรมและไอเดียสำหรับพักผ่อนบนเกาะ' })}
     href={R.EXPERIENCES} linkLabel={t({ ru: 'Все впечатления', en: 'All experiences', th: 'ประสบการณ์ทั้งหมด' })} state={state}>
     {preview.map(({ item, image }) => (
@@ -144,7 +143,7 @@ export function HomeExperienceGallery() {
         </Link>
       </article>
     ))}
-  </HomeGallery>;
+  </HomeGallery><nav className="home-container home-category-navigation" aria-label={title}><HomeDiscoveryPaths kind="experiences" /></nav></>;
 }
 
 function ServiceCategoryArt({ image, alt, categoryId, categoryPath }: { image: string; alt: string; categoryId: string; categoryPath: string }) {
@@ -168,7 +167,7 @@ export function HomeServiceGallery() {
 
   return <><HomeGallery id="home-services-title" className="home-services marketplace-home-categories" title={title}
     description={t({ ru: 'Выберите задачу — подробности и условия внутри.', en: 'Choose what you need, then check details and terms.', th: 'เลือกสิ่งที่ต้องการ แล้วดูรายละเอียดและเงื่อนไข' })}
-    href={R.GOAL_SERVICES} linkLabel={t({ ru: 'Все категории', en: 'All categories', th: 'ทุกหมวดหมู่' })}
+    href={R.GOAL_SERVICES} linkLabel={t({ ru: 'Все услуги', en: 'All services', th: 'บริการทั้งหมด' })}
     state={!catalog.isLoading && !catalog.error && !categories.length ? <p className="home-catalog-state">{t({ ru: 'Подборка появится после публикации категорий. Полный каталог доступен по ссылке.', en: 'The preview will appear when categories are published. Explore the full catalogue using the link.', th: 'ตัวอย่างจะแสดงเมื่อเผยแพร่หมวดหมู่ ดูรายการทั้งหมดได้จากลิงก์' })}</p> : catalog.isLoading || catalog.error ? <CatalogState loading={catalog.isLoading} error={Boolean(catalog.error)} retry={catalog.refetch}
       empty={{ ru: 'Нет категорий для просмотра', en: 'No categories to explore', th: 'ยังไม่มีหมวดหมู่' }} /> : undefined}>
       {categories.map(category => <article className={`home-service-category-card${category.path === R.FLOWERS || category.path === R.YACHTS ? ' home-service-category-card--photo' : ''}`} key={category.id}>
@@ -181,9 +180,6 @@ export function HomeServiceGallery() {
         {category.secondary && <Link className="home-service-secondary" to={category.secondary.path}>{pickLang(language, category.secondary.label)}<ArrowRight size={16} aria-hidden="true" /></Link>}
       </article>)}
   </HomeGallery>
-    <nav className="home-container home-category-navigation" aria-label={t({ ru: 'Каталоги цветов и яхт', en: 'Flower and yacht catalogues', th: 'หมวดหมู่ดอกไม้และเรือยอชต์' })}>
-      <Link className="home-text-link" to={R.FLOWERS}>{t({ ru: 'Каталог цветов', en: 'Flower catalogue', th: 'หมวดหมู่ดอกไม้' })}<ArrowRight size={16} aria-hidden="true" /></Link>
-      <Link className="home-text-link" to={R.YACHTS}>{t({ ru: 'Каталог яхт', en: 'Yacht catalogue', th: 'หมวดหมู่เรือยอชต์' })}<ArrowRight size={16} aria-hidden="true" /></Link>
-    </nav>
+    <nav className="home-container home-category-navigation" aria-label={title}><HomeDiscoveryPaths kind="services" /></nav>
   </>;
 }
