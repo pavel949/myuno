@@ -123,3 +123,12 @@ Merged-source production build completed successfully: 7,242 modules, Vite 8m36s
 Navigation is merged with the current public Life OS routes and labels. Both source registers were regenerated from those exact merged files, preserving SOURCE_ONLY_NOTTESTED. The classic homepage gallery fixture explicitly stubs only home_v2=false and retains production-client rejection and network denial. Its Russian search-label assertion follows the current canonical copy. The new Life OS structure search uses shared flex sizing instead of a local max-width override.
 
 Validation: 136 targeted navigation, Today and personal-home tests; 36 source-audit tests; route/adoption freshness checks; design audit 3806 findings, zero new or structural, 475 resolved baseline entries. Six local Edge classic-home smoke cases passed for EN/RU/TH at 375 and 1440 px, including native catalogue clicks and no runtime errors. CI acceptance remains tied to the final PR head; no production deployment or business-record mutation is claimed.
+
+
+### Follow-up: current public navigation fixtures
+
+CI verify on 834ec90 passed. Connected-source verification also passed types, full unit/PostgreSQL tests, focused timezone checks, production build, lint, compact-home smoke and both admin dashboard matrices (60 isolated-state cases and 18 actual-shell cases). Its remaining layout failure used the retired Trips labels; public browser shards additionally exposed the old header labels/partner count, missing scenario-hook fixture exports and a sticky-search assertion explicitly removed by main's current CSS.
+
+Fixtures now use current Requests labels while retaining the exact /bookings target, Island life with the exact /discover/situations target and all six partner entries including /list-with-us. Scenario reads remain synthetic; scenarioSlug comes from the canonical source. The current home contract checks document-flow search and pinned header geometry rather than reverting main's visual change. Network/client denial, matrix cardinalities, pointer/focus/overflow checks and timeouts are retained. Windows fixture import paths are normalized.
+
+Local validation: 12 Edge cases for Life OS service destinations and current header navigation, plus six fresh-style homepage cases, passed for EN/RU/TH at 375/1440 px with native clicks and no runtime errors. Full final-head CI remains required. No production business records were mutated; production deployment is not claimed by this report.

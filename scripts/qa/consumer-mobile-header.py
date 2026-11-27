@@ -34,7 +34,7 @@ async def main():
      assert row['headerBox']['height']<=73,row['headerBox']
      public_label={'ru':'Открыть меню','en':'Open menu','th':'เปิดเมนู'}[lang]
      account_label={'ru':'Меню аккаунта','en':'Account menu','th':'เมนูบัญชี'}[lang]
-     service={'ru':'Услуги','en':'Services','th':'บริการ'}[lang]
+     island_life={'ru':'Жизнь на острове','en':'Island life','th':'ชีวิตบนเกาะ'}[lang]
      cart={'ru':'Корзина','en':'Cart','th':'ตะกร้า'}[lang]
      assert sorted(t['name'] for t in row['triggers'])==sorted([public_label]+([account_label] if auth=='yes' else [])),row['triggers']
      brand=await header.get_by_role('link',name='myUNO',exact=True).bounding_box()
@@ -57,7 +57,7 @@ async def main():
       owner={'ru':'Кабинет собственника','en':'Owner portal','th':'พอร์ทัลเจ้าของ'}[lang]
       await expect(menu.get_by_role('menuitem',name=settings,exact=True)).to_be_visible()
       await expect(menu.get_by_text(owner,exact=True)).to_be_visible()
-      await expect(menu.get_by_role('menuitem',name=service,exact=True)).to_have_count(0)
+      await expect(menu.get_by_role('menuitem',name=island_life,exact=True)).to_have_count(0)
       await expect(menu.get_by_role('menuitem',name=cart,exact=True)).to_have_count(0)
       await page.screenshot(path=str(OUT/f'{prefix}-account-open.png'))
       await page.keyboard.press('Escape');await expect(menu).not_to_be_visible();await expect(account).to_be_focused()
@@ -87,15 +87,17 @@ async def main():
        await page.go_back(wait_until='domcontentloaded');await expect(trigger).to_be_visible()
        row['crowdedAccount']={'height':height,'settingsBeforeScroll':True,'logoutReachable':True,'explicitClose':True}
      await trigger.click();await expect(surface).to_be_visible();await expect(page.get_by_role('menu')).not_to_be_visible()
-     await expect(surface.get_by_role('link',name=service,exact=True)).to_be_visible()
+     await expect(surface.get_by_role('link',name=island_life,exact=True)).to_be_visible()
+     await expect(surface.get_by_role('link',name=island_life,exact=True)).to_have_attribute('href','/discover/situations')
      await expect(surface.get_by_role('link',name=cart,exact=True)).to_be_visible()
      prefs=surface.get_by_test_id('global-preferences-controls');await expect(prefs).to_be_visible();assert await prefs.locator('button').count()==3
      holiday=surface.locator('a[href="/property/search?mode=rent&tenancy=short"]');await expect(holiday).to_be_visible()
      await expect(surface.locator('a[href="/property/buy"]')).to_be_visible()
      partners=surface.locator('details.consumer-task-partners');await expect(partners).not_to_have_attribute('open','')
      await partners.locator('summary').focus();await page.keyboard.press('Enter');await expect(partners).to_have_attribute('open','')
-     assert await partners.locator('a').count()==5
+     assert await partners.locator('a').count()==6
      await expect(partners.locator('a[href="/for-owners"]')).to_be_visible()
+     await expect(partners.locator('a[href="/list-with-us"]')).to_be_visible()
      await page.keyboard.press('Enter');await expect(partners).not_to_have_attribute('open','')
      close=surface.get_by_role('button',name={'ru':'Закрыть меню','en':'Close menu','th':'ปิดเมนู'}[lang],exact=True)
      body=surface.locator('.consumer-task-menu-body');await body.evaluate('(e)=>e.scrollTop=e.scrollHeight')

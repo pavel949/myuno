@@ -10,7 +10,7 @@ import { mkdir, writeFile, readFile } from 'node:fs/promises';
 import { existsSync, statSync } from 'node:fs';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
-const root = process.cwd();
+const root = process.cwd().replaceAll('\\', '/');
 const output = process.env.SERVICES_DISCOVERY_OUTPUT || '/tmp/browser/services-discovery-isolated';
 await mkdir(output, { recursive: true });
 const lifeId = slug => { const h=createHash('md5').update('service:'+slug).digest('hex'); return [h.slice(0,8),h.slice(8,12),h.slice(12,16),h.slice(16,20),h.slice(20)].join('-'); };
@@ -25,7 +25,7 @@ const virtual = {
   '@/components/seo': `export const SEOHead=()=>null;`,
   '@/components/crosssell/CrossSellSection': `export const CrossSellSection=()=>null;`,
   '@/components/map/UnifiedCatalogMap': `export const UnifiedCatalogMap=()=>null;`,
-  '@/hooks/useLifeOS': `export const useLifeSituations=()=>({data:[{id:'synthetic-arrival',code:'arrival',title_en:'Arrival',title_ru:'Приезд',is_active:true}]});export const useResolveLifeOSContext=()=>({data:${JSON.stringify(['transfer','yacht','unknown-service'].map(slug=>({entity_type:'service',entity_id:lifeId(slug),title:slug,title_localized:slug,price:null})))}});`,
+  '@/hooks/useLifeOS': `export {scenarioSlug} from '${root}/src/hooks/useLifeOS.ts';export const useLifeScenarios=()=>({data:[],isLoading:false,isError:false});export const useLifeSituations=()=>({data:[{id:'synthetic-arrival',code:'arrival',title_en:'Arrival',title_ru:'Приезд',is_active:true}]});export const useResolveLifeOSContext=()=>({data:${JSON.stringify(['transfer','yacht','unknown-service'].map(slug=>({entity_type:'service',entity_id:lifeId(slug),title:slug,title_localized:slug,price:null})))}});`,
   '@/hooks/useUserPersonas': `export const useUserPersonas=()=>({effectivePersonas:[]});`,
   '@/hooks/useSituationServiceCounts': `export const useSituationServiceCounts=()=>({data:{}});`,
   './useSituationTracking': `export const useSituationTracking=()=>({containerRef:{current:null},onSituationClick:()=>{}});`,

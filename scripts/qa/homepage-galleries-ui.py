@@ -79,14 +79,19 @@ async def check_home_entry(page, lang, width):
         bottoms = [control['bottom'] for control in geometry['controls']]
         assert max(bottoms) - min(bottoms) <= 2, geometry
         await panel.evaluate("(el) => window.scrollTo({top: scrollY + el.getBoundingClientRect().top + 200, behavior: 'instant'})")
-        sticky = await page.evaluate("""
+        scrolled = await page.evaluate("""
           () => {
             const header = document.querySelector('.consumer-header').getBoundingClientRect();
-            const panel = document.querySelector('.home-hero-search').getBoundingClientRect();
-            return {headerBottom: header.bottom, panelTop: panel.top, scroll: scrollY};
+            const search = document.querySelector('.home-hero-search');
+            const panel = search.getBoundingClientRect();
+            return {headerTop: header.top, headerBottom: header.bottom, headerHeight: header.height,
+              panelTop: panel.top, panelPosition: getComputedStyle(search).position, scroll: scrollY};
           }
         """)
-        assert sticky['scroll'] > 0 and abs(sticky['headerBottom'] - sticky['panelTop']) <= 2, sticky
+        # Current homepage search stays in document flow; only the header remains pinned.
+        assert scrolled['scroll'] > 0 and abs(scrolled['panelTop'] + 200) <= 2, scrolled
+        assert scrolled['panelPosition'] in ('relative', 'static'), scrolled
+        assert abs(scrolled['headerTop']) <= 1 and abs(scrolled['headerBottom'] - scrolled['headerHeight']) <= 1, scrolled
         await page.evaluate("window.scrollTo({top: 0, behavior: 'instant'})")
 
     emergency = page.locator('.home-hero-banner').get_by_role('button', name={
