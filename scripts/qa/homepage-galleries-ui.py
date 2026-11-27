@@ -97,10 +97,12 @@ async def check_home_entry(page, lang, width):
         await page.set_viewport_size({'width': width, 'height': 780})
         submit = search.locator('.home-search-submit')
         await expect(submit).to_be_in_viewport(ratio=1)
-        assert await submit.evaluate('''button => {
+        hit = await submit.evaluate('''button => {
             const rect = button.getBoundingClientRect()
-            return button.contains(document.elementFromPoint(rect.x + rect.width / 2, rect.bottom - 2))
-        }'''), 'Sticky navigation covers the search button'
+            const hit = document.elementFromPoint(rect.x + rect.width / 2, rect.bottom - 2)
+            return { visible: button.contains(hit), bottom: rect.bottom, coveringClass: hit?.className }
+        }''')
+        assert hit['visible'], f'Sticky navigation covers the search button: {lang}, {width}, {hit}'
         await page.set_viewport_size({'width': width, 'height': 900})
     assert (await emergency.bounding_box())['height'] >= 44
     contrast = await emergency.evaluate('''button => {
