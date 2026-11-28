@@ -12,11 +12,33 @@ export function showcaseImage(property: Property): string | null {
 }
 export function selectHomeShowcase(properties: Property[], limit = 6): Property[] {
   const seen = new Set<string>();
-  return properties.filter(property => {
+  const eligible = properties.filter(property => {
     if (!property.id || seen.has(property.id) || !(property.title_ru?.trim() || property.title_en?.trim()) || !showcaseImage(property)) return false;
     seen.add(property.id);
     return true;
-  }).sort((a, b) => Number(!hasClearShowcaseRate(a)) - Number(!hasClearShowcaseRate(b))).slice(0, limit);
+  }).sort((a, b) => Number(!hasClearShowcaseRate(a)) - Number(!hasClearShowcaseRate(b)));
+
+  // Balance only stored public candidates. A project with many units should not
+  // occupy the entire preview before another eligible project is represented.
+  // Unlinked homes remain independent; never infer a complex from its name/area.
+  const grouped = new Map<string, Property[]>();
+  for (const property of eligible) {
+    const projectId = property.project_id || property.complex_id;
+    const key = projectId ? `project:${projectId}` : `home:${property.id}`;
+    const group = grouped.get(key);
+    if (group) group.push(property);
+    else grouped.set(key, [property]);
+  }
+  const selection: Property[] = [];
+  const max = Math.max(0, Math.floor(limit));
+  for (let index = 0; selection.length < Math.min(max, eligible.length); index += 1) {
+    for (const group of grouped.values()) {
+      const property = group[index];
+      if (property) selection.push(property);
+      if (selection.length >= max) break;
+    }
+  }
+  return selection;
 }
 
 /** The current public list does not guarantee tenancy_modes. Unknown stays unpriced. */

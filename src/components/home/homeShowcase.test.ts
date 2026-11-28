@@ -28,3 +28,26 @@ it('prefers clear recorded tariffs without excluding or mutating other homes', (
   expect(input.map(p => p.id)).toEqual(['equal', 'unknown', 'clear', 'next']);
   expect(selectHomeShowcase([equal], 3)).toEqual([equal]);
 });
+
+it('represents different stored projects before repeating units from one resort', () => {
+  const input = [
+    property('a1', { project_id: 'resort-a' }), property('a2', { project_id: 'resort-a' }),
+    property('a3', { project_id: 'resort-a' }), property('a4', { project_id: 'resort-a' }),
+    property('b1', { project_id: 'resort-b' }), property('c1', { complex_id: 'resort-c' }),
+  ];
+  expect(selectHomeShowcase(input, 4).map(p => p.id)).toEqual(['a1', 'b1', 'c1', 'a2']);
+  expect(input.map(p => p.id)).toEqual(['a1', 'a2', 'a3', 'a4', 'b1', 'c1']);
+});
+
+it('uses project and complex links consistently while keeping unlinked homes independent', () => {
+  expect(selectHomeShowcase([
+    property('a1', { project_id: 'a' }), property('a2', { complex_id: 'a' }),
+    property('standalone-1'), property('standalone-2'),
+  ], 3).map(p => p.id)).toEqual(['a1', 'standalone-1', 'standalone-2']);
+});
+
+it('fills a small single-project catalogue without fabricated alternatives and handles zero limits', () => {
+  const input = [property('a1', { project_id: 'a' }), property('a2', { project_id: 'a' })];
+  expect(selectHomeShowcase(input, 6)).toEqual(input);
+  expect(selectHomeShowcase(input, 0)).toEqual([]);
+});
