@@ -1,0 +1,16 @@
+# #347 public catalogue and object-listing security — review-only
+
+Baseline d151a23cf0526d6ae9183f2a7cc2f34ec8e6f25d. Supersedes the conflicting registered-number proposals #344/#345; do not apply both. Main already uses 0042 for enforce_mc_slot_limit_and_close_public_listing, while #344 uses 0042 for a different migration and #345 is stacked on #344. This package is outside automatic migration paths. Generate fresh migration identifiers only after review and release approval.
+
+## Current verified metadata, 25 November
+- gyms and legal_services have the broad true SELECT policies alongside the approved-or-own policies. Anonymous SELECT privilege exists. 10/18 gyms and 2/14 legal services are approved+active; 3 and 7 respectively are active but unapproved. Do not auto-approve them to retain catalogue volume.
+- 12 broad storage SELECT policies were observed on public buckets: nine use name IS NOT NULL and three bucket-only. intake-uploads and property-care have no matching SELECT/ALL policy in the observed live metadata; this patch deliberately leaves them unchanged. Public bucket classification itself is a separate data review; no files listed/read.
+- Existing actor_has_active_platform_admin() is callable by authenticated; storage.objects.owner_id is text. Do not grant global private reads to generic uno_team.
+
+## Changes
+catalogue-forward.sql removes two known permissive policies, preserves approved/own reads and existing gym admin policy, and adds a checked active-admin read for legal moderation. Does not expand employment rights or alter write policies. storage-forward.sql replaces 12 exact broad SELECT policies with owner/active-admin API reads. Existing insert/update/delete and unrelated/private bucket policies remain untouched. A public file URL is a separate Storage service behavior; native SQL fixture verifies listing/RLS, not HTTP/CDN behavior.
+
+## Acceptance and rollback
+Two separate transactions, each preflight-guarded. Run the native PostgreSQL regression fixture with the existing CI and verify real policies/permissions after any approved activation. Test approved vs inactive/unapproved catalogue, actual moderation roles, owner upload/upsert/delete, assigned staff and service-role workflows, actual public URLs, existing public/private media mapping. Before catalogue activation decide explicitly whether the ten currently active unapproved entries should remain hidden or be reviewed and approved through the normal workflow. Existing broad legal UPDATE for uno_team and other admin/RLS boundaries belong to #339 and must be reviewed separately. No blanket access grant or business data mutation.
+
+The old draft rollback reintroduced anonymous exposure. Do not use it. Pre-commit failure rolls back automatically; after commit retain the tightened policy and repair any legitimate broken reader with a separately scoped, actor-bound policy. No automatic broad-access rollback; use approved corrective forward SQL only. Current candidate is NO-GO for production until exact CI, isolated real Storage/PostgREST and role acceptance, content decision, migration review, and separate activation approval. No locally executed tests are claimed. No production change.
